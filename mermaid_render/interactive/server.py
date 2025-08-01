@@ -1,0 +1,416 @@
+"""
+Web server for the interactive diagram builder.
+
+This module provides the FastAPI-based web server with WebSocket support
+for real-time collaboration and live updates.
+"""
+
+import json
+import logging
+import uuid
+from pathlib import Path
+from typing import Dict, Optional
+
+import uvicorn
+from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+
+from ..core import MermaidRenderer
+from .builder import DiagramBuilder, DiagramType, ElementType, Position, Size
+from .validation import LiveValidator
+from .websocket_handler import DiagramSession, WebSocketHandler
+
+
+class InteractiveServer:
+    """
+    Interactive diagram builder server.
+
+    Provides a web-based interface for building Mermaid diagrams
+    with real-time collaboration and live preview capabilities.
+    """
+
+    def __init__(
+        self,
+        host: str = "localhost",
+        port: int = 8080,
+        static_dir: Optional[Path] = None,
+        templates_dir: Optional[Path] = None,
+        enable_collaboration: bool = True,
+    ):
+        """
+        Initialize interactive server.
+
+        Args:
+            host: Server host
+            port: Server port
+            static_dir: Directory for static files
+            templates_dir: Directory for templates
+            enable_collaboration: Whether to enable collaboration features
+        """
+        self.host = host
+        self.port = port
+        self.enable_collaboration = enable_collaboration
+
+        # Setup directories
+        self.static_dir = static_dir or Path(__file__).parent / "static"
+        self.templates_dir = templates_dir or Path(__file__).parent / "templates"
+
+        # Create FastAPI app
+        self.app = self._create_app()
+
+        # WebSocket handler for real-time updates
+        self.websocket_handler = WebSocketHandler()
+
+        # Active diagram sessions
+        self.sessions: Dict[str, DiagramSession] = {}
+
+        # Renderer for preview generation
+        self.renderer = MermaidRenderer()
+
+        # Validator for live validation
+        self.validator = LiveValidator()
+
+        # Setup logging
+        self.logger = logging.getLogger(__name__)
+
+    def _create_app(self) -> FastAPI:
+        """Create and configure FastAPI application."""
+        app = FastAPI(
+            title="Mermaid Interactive Builder",
+            description="Interactive web-based Mermaid diagram builder",
+            version="1.0.0",
+        )
+
+        # Setup static files
+        if self.static_dir.exists():
+            app.mount(
+                "/static", StaticFiles(directory=str(self.static_dir)), name="static"
+            )
+
+        # Setup templates
+        templates = Jinja2Templates(directory=str(self.templates_dir))
+
+        # Routes
+        @app.get("/", response_class=HTMLResponse)
+        async def index(request: Request):
+            """Main builder interface."""
+            return templates.TemplateResponse("index.html", {"request": request})
+
+        @app.get("/builder/{diagram_type}", response_class=HTMLResponse)
+        async def builder(request: Request, diagram_type: str):
+            """Diagram builder for specific type."""
+            try:
+                DiagramType(diagram_type)
+            except ValueError:
+                raise HTTPException(status_code=400, detail="Invalid diagram type")
+
+            return templates.TemplateResponse(
+                "builder.html",
+                {
+                    "request": request,
+                    "diagram_type": diagram_type,
+                },
+            )
+
+        @app.post("/api/sessions")
+        async def create_session(diagram_type: str = "flowchart"):
+            """Create new diagram session."""
+            try:
+                session_id = str(uuid.uuid4())
+                builder = DiagramBuilder(DiagramType(diagram_type))
+                session = DiagramSession(session_id, builder)
+
+                self.sessions[session_id] = session
+
+                return {
+                    "session_id": session_id,
+                    "diagram_type": diagram_type,
+                    "created_at": session.created_at.isoformat(),
+                }
+            except ValueError:
+                raise HTTPException(status_code=400, detail="Invalid diagram type")
+
+        @app.get("/api/sessions/{session_id}")
+        async def get_session(session_id: str):
+            """Get session information."""
+            if session_id not in self.sessions:
+                raise HTTPException(status_code=404, detail="Session not found")
+
+            session = self.sessions[session_id]
+            return {
+                "session_id": session_id,
+                "diagram_type": session.builder.diagram_type.value,
+                "elements": session.builder.to_dict()["elements"],
+                "connections": session.builder.to_dict()["connections"],
+                "metadata": session.builder.metadata,
+            }
+
+        @app.post("/api/sessions/{session_id}/elements")
+        async def add_element(session_id: str, element_data: dict):
+            """Add element to diagram."""
+            if session_id not in self.sessions:
+                raise HTTPException(status_code=404, detail="Session not found")
+
+            session = self.sessions[session_id]
+
+            try:
+                element = session.builder.add_element(
+                    element_type=ElementType(element_data["element_type"]),
+                    label=element_data["label"],
+                    position=Position.from_dict(element_data["position"]),
+                    size=Size.from_dict(
+                        element_data.get("size", {"width": 120, "height": 60})
+                    ),
+                    properties=element_data.get("properties", {}),
+                    style=element_data.get("style", {}),
+                )
+
+                # Broadcast update to connected clients
+                if self.enable_collaboration:
+                    await self.websocket_handler.broadcast_to_session(
+                        session_id,
+                        {
+                            "type": "element_added",
+                            "element": element.to_dict(),
+                        },
+                    )
+
+                return element.to_dict()
+
+            except Exception as e:
+                raise HTTPException(status_code=400, detail=str(e))
+
+        @app.put("/api/sessions/{session_id}/elements/{element_id}")
+        async def update_element(session_id: str, element_id: str, element_data: dict):
+            """Update element in diagram."""
+            if session_id not in self.sessions:
+                raise HTTPException(status_code=404, detail="Session not found")
+
+            session = self.sessions[session_id]
+
+            # Extract update parameters
+            update_params = {}
+            if "label" in element_data:
+                update_params["label"] = element_data["label"]
+            if "position" in element_data:
+                update_params["position"] = Position.from_dict(element_data["position"])
+            if "size" in element_data:
+                update_params["size"] = Size.from_dict(element_data["size"])
+            if "properties" in element_data:
+                update_params["properties"] = element_data["properties"]
+            if "style" in element_data:
+                update_params["style"] = element_data["style"]
+
+            success = session.builder.update_element(element_id, **update_params)
+
+            if not success:
+                raise HTTPException(status_code=404, detail="Element not found")
+
+            # Broadcast update to connected clients
+            if self.enable_collaboration:
+                await self.websocket_handler.broadcast_to_session(
+                    session_id,
+                    {
+                        "type": "element_updated",
+                        "element_id": element_id,
+                        "updates": element_data,
+                    },
+                )
+
+            return {"success": True}
+
+        @app.delete("/api/sessions/{session_id}/elements/{element_id}")
+        async def remove_element(session_id: str, element_id: str):
+            """Remove element from diagram."""
+            if session_id not in self.sessions:
+                raise HTTPException(status_code=404, detail="Session not found")
+
+            session = self.sessions[session_id]
+            success = session.builder.remove_element(element_id)
+
+            if not success:
+                raise HTTPException(status_code=404, detail="Element not found")
+
+            # Broadcast update to connected clients
+            if self.enable_collaboration:
+                await self.websocket_handler.broadcast_to_session(
+                    session_id,
+                    {
+                        "type": "element_removed",
+                        "element_id": element_id,
+                    },
+                )
+
+            return {"success": True}
+
+        @app.post("/api/sessions/{session_id}/connections")
+        async def add_connection(session_id: str, connection_data: dict):
+            """Add connection to diagram."""
+            if session_id not in self.sessions:
+                raise HTTPException(status_code=404, detail="Session not found")
+
+            session = self.sessions[session_id]
+
+            connection = session.builder.add_connection(
+                source_id=connection_data["source_id"],
+                target_id=connection_data["target_id"],
+                label=connection_data.get("label", ""),
+                connection_type=connection_data.get("connection_type", "default"),
+                style=connection_data.get("style", {}),
+                properties=connection_data.get("properties", {}),
+            )
+
+            if not connection:
+                raise HTTPException(status_code=400, detail="Invalid connection")
+
+            # Broadcast update to connected clients
+            if self.enable_collaboration:
+                await self.websocket_handler.broadcast_to_session(
+                    session_id,
+                    {
+                        "type": "connection_added",
+                        "connection": connection.to_dict(),
+                    },
+                )
+
+            return connection.to_dict()
+
+        @app.get("/api/sessions/{session_id}/code")
+        async def get_mermaid_code(session_id: str):
+            """Get generated Mermaid code for session."""
+            if session_id not in self.sessions:
+                raise HTTPException(status_code=404, detail="Session not found")
+
+            session = self.sessions[session_id]
+
+            try:
+                code = session.builder.generate_mermaid_code()
+                validation_result = self.validator.validate(code)
+
+                return {
+                    "code": code,
+                    "validation": {
+                        "is_valid": validation_result.is_valid,
+                        "errors": validation_result.errors,
+                        "warnings": validation_result.warnings,
+                    },
+                }
+            except Exception as e:
+                return {
+                    "code": "",
+                    "validation": {
+                        "is_valid": False,
+                        "errors": [str(e)],
+                        "warnings": [],
+                    },
+                }
+
+        @app.get("/api/sessions/{session_id}/preview")
+        async def get_preview(session_id: str, format: str = "svg"):
+            """Get rendered preview of diagram."""
+            if session_id not in self.sessions:
+                raise HTTPException(status_code=404, detail="Session not found")
+
+            session = self.sessions[session_id]
+
+            try:
+                code = session.builder.generate_mermaid_code()
+                rendered_content = self.renderer.render_raw(code, format)
+
+                return {
+                    "format": format,
+                    "content": rendered_content,
+                    "generated_at": session.updated_at.isoformat(),
+                }
+            except Exception as e:
+                raise HTTPException(
+                    status_code=500, detail=f"Rendering failed: {str(e)}"
+                )
+
+        # WebSocket endpoint for real-time updates
+        @app.websocket("/ws/{session_id}")
+        async def websocket_endpoint(websocket: WebSocket, session_id: str):
+            """WebSocket endpoint for real-time collaboration."""
+            if not self.enable_collaboration:
+                await websocket.close(code=1000, reason="Collaboration disabled")
+                return
+
+            await self.websocket_handler.connect(websocket, session_id)
+
+            try:
+                while True:
+                    data = await websocket.receive_text()
+                    message = json.loads(data)
+
+                    # Handle different message types
+                    await self.websocket_handler.handle_message(session_id, message)
+
+            except WebSocketDisconnect:
+                self.websocket_handler.disconnect(websocket, session_id)
+
+        return app
+
+    def run(self, **kwargs) -> None:
+        """Run the server."""
+        uvicorn.run(self.app, host=self.host, port=self.port, **kwargs)
+
+
+def create_app(
+    static_dir: Optional[Path] = None,
+    templates_dir: Optional[Path] = None,
+    enable_collaboration: bool = True,
+) -> FastAPI:
+    """
+    Create FastAPI application for interactive builder.
+
+    Args:
+        static_dir: Directory for static files
+        templates_dir: Directory for templates
+        enable_collaboration: Whether to enable collaboration
+
+    Returns:
+        Configured FastAPI application
+    """
+    server = InteractiveServer(
+        static_dir=static_dir,
+        templates_dir=templates_dir,
+        enable_collaboration=enable_collaboration,
+    )
+    return server.app
+
+
+def start_server(
+    host: str = "localhost",
+    port: int = 8080,
+    static_dir: Optional[Path] = None,
+    templates_dir: Optional[Path] = None,
+    enable_collaboration: bool = True,
+    **kwargs,
+) -> None:
+    """
+    Start the interactive diagram builder server.
+
+    Args:
+        host: Server host
+        port: Server port
+        static_dir: Directory for static files
+        templates_dir: Directory for templates
+        enable_collaboration: Whether to enable collaboration
+        **kwargs: Additional uvicorn options
+
+    Example:
+        >>> from mermaid_render.interactive import start_server
+        >>> start_server(host="0.0.0.0", port=8080)
+        >>> # Access at http://localhost:8080
+    """
+    server = InteractiveServer(
+        host=host,
+        port=port,
+        static_dir=static_dir,
+        templates_dir=templates_dir,
+        enable_collaboration=enable_collaboration,
+    )
+
+    server.run(**kwargs)

@@ -1,0 +1,197 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+        exclude:
+          # Reduce matrix size for faster CI
+          - os: windows-latest
+            python-version: "3.9"
+          - os: macos-latest
+            python-version: "3.9"
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install UV
+      uses: astral-sh/setup-uv@v2
+      with:
+        enable-cache: true
+
+    - name: Install dependencies
+      run: |
+        uv sync --all-extras
+
+    - name: Run tests
+      run: |
+        uv run pytest --cov=mermaid_render --cov-report=xml --cov-report=term
+
+    - name: Upload coverage to Codecov
+      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+
+    - name: Install UV
+      uses: astral-sh/setup-uv@v2
+      with:
+        enable-cache: true
+
+    - name: Install dependencies
+      run: |
+        uv sync --group dev
+
+    - name: Run black
+      run: |
+        uv run black --check mermaid_render tests
+
+    - name: Run ruff
+      run: |
+        uv run ruff check mermaid_render tests
+
+    - name: Run mypy
+      run: |
+        uv run mypy mermaid_render
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+
+    - name: Install UV
+      uses: astral-sh/setup-uv@v2
+
+    - name: Install dependencies
+      run: |
+        uv sync --group dev
+
+    - name: Run safety check
+      run: |
+        uv run pip install safety
+        uv run safety check
+
+    - name: Run bandit security check
+      run: |
+        uv run pip install bandit
+        uv run bandit -r mermaid_render/
+
+  build:
+    runs-on: ubuntu-latest
+    needs: [test, lint, security]
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+
+    - name: Install UV
+      uses: astral-sh/setup-uv@v2
+
+    - name: Install build dependencies
+      run: |
+        uv tool install build
+
+    - name: Build package
+      run: |
+        uv tool run build
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: dist
+        path: dist/
+
+  integration-test:
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+
+    - name: Download build artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: dist
+        path: dist/
+
+    - name: Install package from wheel
+      run: |
+        pip install dist/*.whl
+
+    - name: Test installation
+      run: |
+        python -c "import mermaid_render; print(f'Successfully imported version {mermaid_render.__version__}')"
+
+    - name: Run demo
+      run: |
+        python demo.py
+
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+
+    - name: Install UV
+      uses: astral-sh/setup-uv@v2
+
+    - name: Install dependencies
+      run: |
+        uv sync --group docs
+
+    - name: Build documentation
+      run: |
+        # Create basic docs structure if it doesn't exist
+        if [ ! -d "docs" ]; then
+          mkdir docs
+          echo "# Mermaid Render Documentation" > docs/index.md
+        fi
+        echo "Documentation build placeholder - implement when docs are set up"
+
+    - name: Upload docs artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: docs
+        path: docs/

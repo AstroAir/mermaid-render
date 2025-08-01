@@ -1,0 +1,8 @@
+# Core dependencies for Mermaid Render
+# Install with: pip install -r requirements.txt
+
+mermaid-py>=0.8.0
+requests>=2.25.0
+typing-extensions>=4.0.0; python_version<"3.10"
+jinja2>=3.0.0
+jsonschema>=4.0.0

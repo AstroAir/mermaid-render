@@ -1,0 +1,45 @@
+# Development dependencies for Mermaid Render
+# Install with: pip install -r requirements-dev.txt
+
+# Include core dependencies
+-r requirements.txt
+
+# Testing
+pytest>=7.0.0
+pytest-cov>=4.0.0
+pytest-xdist>=3.0.0
+pytest-mock>=3.10.0
+coverage[toml]>=7.0.0
+
+# Code quality
+black>=23.0.0
+ruff>=0.1.0
+mypy>=1.0.0
+types-requests>=2.25.0
+types-setuptools>=68.0.0
+
+# Development tools
+pre-commit>=3.0.0
+build>=0.10.0
+twine>=4.0.0
+
+# Security
+safety>=2.0.0
+bandit>=1.7.0
+
+# Optional features for development
+redis>=4.0.0
+diskcache>=5.6.0
+fastapi>=0.100.0
+uvicorn[standard]>=0.20.0
+websockets>=11.0.0
+python-multipart>=0.0.6
+cairosvg>=2.7.0
+reportlab>=4.0.0
+
+# Documentation
+sphinx>=5.0.0
+sphinx-rtd-theme>=1.0.0
+sphinx-autodoc-typehints>=1.24.0
+myst-parser>=2.0.0
+sphinx-copybutton>=0.5.0
