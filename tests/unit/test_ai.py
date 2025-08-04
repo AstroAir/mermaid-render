@@ -104,7 +104,7 @@ class TestNLProcessor:
     def test_calculate_complexity(self):
         """Test complexity calculation."""
         processor = NLProcessor()
-        
+
         simple_text = "Create a simple flowchart"
         complex_text = "Create a comprehensive flowchart with multiple decision points, error handling, authentication, database interactions, and user interface components"
 
@@ -140,8 +140,8 @@ class TestDiagramGenerator:
     def test_init_default(self):
         """Test diagram generator initialization with defaults."""
         with patch('mermaid_render.ai.diagram_generator.OpenAIProvider') as mock_provider, \
-             patch('mermaid_render.ai.diagram_generator.NLProcessor') as mock_processor:
-            
+                patch('mermaid_render.ai.diagram_generator.NLProcessor') as mock_processor:
+
             generator = DiagramGenerator()
 
             assert generator.ai_provider is not None
@@ -154,7 +154,8 @@ class TestDiagramGenerator:
         mock_provider = Mock()
         mock_processor = Mock()
 
-        generator = DiagramGenerator(ai_provider=mock_provider, nl_processor=mock_processor)
+        generator = DiagramGenerator(
+            ai_provider=mock_provider, nl_processor=mock_processor)
 
         assert generator.ai_provider is mock_provider
         assert generator.nl_processor is mock_processor
@@ -182,7 +183,8 @@ class TestDiagramGenerator:
         # Mock AI generation
         mock_provider.generate_text.return_value = "flowchart TD\n    A --> B"
 
-        generator = DiagramGenerator(ai_provider=mock_provider, nl_processor=mock_processor)
+        generator = DiagramGenerator(
+            ai_provider=mock_provider, nl_processor=mock_processor)
 
         result = generator.from_text("Create a simple flowchart")
 
@@ -197,7 +199,7 @@ class TestDiagramGenerator:
         """Test diagram generation with custom config."""
         mock_provider = Mock()
         mock_processor = Mock()
-        
+
         # Create proper mock structure
         mock_intent = Mock()
         mock_intent.intent = "create"
@@ -214,9 +216,11 @@ class TestDiagramGenerator:
 
         mock_provider.generate_text.return_value = "sequenceDiagram\n    A->>B: Message"
 
-        generator = DiagramGenerator(ai_provider=mock_provider, nl_processor=mock_processor)
-        config = GenerationConfig(diagram_type=AIdiagramType.SEQUENCE, include_styling=True)
-        
+        generator = DiagramGenerator(
+            ai_provider=mock_provider, nl_processor=mock_processor)
+        config = GenerationConfig(
+            diagram_type=AIdiagramType.SEQUENCE, include_styling=True)
+
         result = generator.from_text("Create a sequence diagram", config)
 
         assert result.diagram_type == AIdiagramType.SEQUENCE
@@ -243,7 +247,8 @@ class TestDiagramGenerator:
 
         mock_provider.generate_text.return_value = "pie title Data\n    \"A\" : 30\n    \"B\" : 70"
 
-        generator = DiagramGenerator(ai_provider=mock_provider, nl_processor=mock_processor)
+        generator = DiagramGenerator(
+            ai_provider=mock_provider, nl_processor=mock_processor)
         data = {"A": 30, "B": 70}
 
         result = generator.from_data(data, "json")
@@ -264,9 +269,11 @@ class TestDiagramGenerator:
         mock_response.text = improved_code
         mock_provider.generate_text.return_value = mock_response
 
-        generator = DiagramGenerator(ai_provider=mock_provider, nl_processor=mock_processor)
+        generator = DiagramGenerator(
+            ai_provider=mock_provider, nl_processor=mock_processor)
 
-        result = generator.improve_diagram(original_code, "Add styling and better labels")
+        result = generator.improve_diagram(
+            original_code, "Add styling and better labels")
 
         assert isinstance(result, GenerationResult)
         # The result might be post-processed, so just check that it contains the key elements
@@ -279,9 +286,10 @@ class TestDiagramGenerator:
         mock_provider = Mock()
         mock_processor = Mock()
 
-        generator = DiagramGenerator(ai_provider=mock_provider, nl_processor=mock_processor)
+        generator = DiagramGenerator(
+            ai_provider=mock_provider, nl_processor=mock_processor)
         diagram_code = "flowchart TD\n    A --> B"
-        
+
         suggestions = generator.get_suggestions(diagram_code)
 
         assert isinstance(suggestions, list)
@@ -309,7 +317,8 @@ class TestDiagramGenerator:
         # Mock AI provider failure
         mock_provider.generate_text.side_effect = Exception("API Error")
 
-        generator = DiagramGenerator(ai_provider=mock_provider, nl_processor=mock_processor)
+        generator = DiagramGenerator(
+            ai_provider=mock_provider, nl_processor=mock_processor)
 
         with pytest.raises(Exception, match="API Error"):
             generator.from_text("Create a flowchart")
@@ -319,7 +328,8 @@ class TestDiagramGenerator:
         mock_provider = Mock()
         mock_processor = Mock()
 
-        generator = DiagramGenerator(ai_provider=mock_provider, nl_processor=mock_processor)
+        generator = DiagramGenerator(
+            ai_provider=mock_provider, nl_processor=mock_processor)
 
         # Test flowchart detection
         mock_intent = Mock()
@@ -393,7 +403,7 @@ class TestDiagramAnalyzer:
     def test_assess_quality(self):
         """Test quality assessment."""
         analyzer = DiagramAnalyzer()
-        
+
         # Well-formatted diagram
         good_code = """flowchart TD
             A[Start] --> B[Process]
@@ -494,7 +504,8 @@ class TestSuggestionEngine:
         assert isinstance(layout_suggestions, list)
         assert isinstance(style_suggestions, list)
         # All suggestions should be of the requested type
-        assert all(s.suggestion_type == SuggestionType.LAYOUT for s in layout_suggestions)
+        assert all(s.suggestion_type ==
+                   SuggestionType.LAYOUT for s in layout_suggestions)
         assert all(s.suggestion_type == SuggestionType.STYLE for s in style_suggestions)
 
     def test_get_suggestions_by_priority(self):
@@ -526,7 +537,8 @@ class TestSuggestionEngine:
 
         # Should suggest styling or comments
         suggestion_texts = [s.description for s in suggestions]
-        assert any("styling" in text.lower() or "comment" in text.lower() for text in suggestion_texts)
+        assert any("styling" in text.lower() or "comment" in text.lower()
+                   for text in suggestion_texts)
 
     def test_suggest_styling(self):
         """Test styling suggestions."""
@@ -556,7 +568,8 @@ class TestSuggestionEngine:
 
         # Should suggest layout improvements (direction specification)
         suggestion_texts = [s.description for s in suggestions]
-        assert any("direction" in text.lower() or "layout" in text.lower() for text in suggestion_texts)
+        assert any("direction" in text.lower() or "layout" in text.lower()
+                   for text in suggestion_texts)
 
 
 class TestAIProviders:
@@ -652,9 +665,11 @@ class TestAIUtilities:
 
         mock_optimizer = Mock()
         mock_layout_result = Mock()
-        mock_layout_result.to_dict.return_value = {"optimized_diagram": "layout optimized"}
+        mock_layout_result.to_dict.return_value = {
+            "optimized_diagram": "layout optimized"}
         mock_style_result = Mock()
-        mock_style_result.to_dict.return_value = {"optimized_diagram": "style optimized"}
+        mock_style_result.to_dict.return_value = {
+            "optimized_diagram": "style optimized"}
 
         mock_optimizer.optimize_layout.return_value = mock_layout_result
         mock_optimizer.optimize_style.return_value = mock_style_result

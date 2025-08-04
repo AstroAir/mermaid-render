@@ -2,6 +2,14 @@
 Pytest configuration and fixtures for the Mermaid Render test suite.
 """
 
+from mermaid_render import (
+    ConfigManager,
+    FlowchartDiagram,
+    MermaidConfig,
+    MermaidRenderer,
+    SequenceDiagram,
+    ThemeManager,
+)
 import tempfile
 from pathlib import Path
 from typing import Any, Dict
@@ -9,6 +17,8 @@ from typing import Any, Dict
 import pytest
 
 # Register test categories as markers
+
+
 def pytest_configure(config):
     """Configure pytest with custom markers."""
     config.addinivalue_line("markers", "unit: Unit tests")
@@ -22,15 +32,6 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "export: Export functionality tests")
     config.addinivalue_line("markers", "remote: Remote rendering tests")
     config.addinivalue_line("markers", "performance: Performance tests")
-
-from mermaid_render import (
-    ConfigManager,
-    FlowchartDiagram,
-    MermaidConfig,
-    MermaidRenderer,
-    SequenceDiagram,
-    ThemeManager,
-)
 
 
 @pytest.fixture

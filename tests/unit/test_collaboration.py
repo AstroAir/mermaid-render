@@ -54,8 +54,9 @@ class TestCollaborator:
 
     def test_collaborator_permissions(self):
         """Test collaborator permission levels."""
-        permissions = [Permission.OWNER, Permission.EDITOR, Permission.VIEWER, Permission.COMMENTER]
-        
+        permissions = [Permission.OWNER, Permission.EDITOR,
+                       Permission.VIEWER, Permission.COMMENTER]
+
         for perm in permissions:
             collaborator = Collaborator(
                 user_id="user123",
@@ -97,7 +98,7 @@ class TestCollaborativeSession:
         """Test basic session creation."""
         session_id = str(uuid.uuid4())
         now = datetime.now()
-        
+
         session = CollaborativeSession(
             session_id=session_id,
             diagram_id="diagram123",
@@ -471,7 +472,7 @@ class TestMergeResolver:
         resolver = MergeResolver()
 
         base_diagram = {"elements": {}}
-        
+
         source_changes = [
             Change(
                 change_type=ChangeType.ADD,
@@ -480,7 +481,7 @@ class TestMergeResolver:
                 new_value={"label": "Source Node"},
             )
         ]
-        
+
         target_changes = [
             Change(
                 change_type=ChangeType.ADD,
@@ -529,9 +530,12 @@ class TestActivityLogger:
         """Test getting activities for a specific user."""
         logger = ActivityLogger()
 
-        logger.log_activity(ActivityType.COLLABORATOR_JOINED, "user1", "User 1", "session1", {})
-        logger.log_activity(ActivityType.ELEMENT_MODIFIED, "user1", "User 1", "session1", {})
-        logger.log_activity(ActivityType.COLLABORATOR_JOINED, "user2", "User 2", "session1", {})
+        logger.log_activity(ActivityType.COLLABORATOR_JOINED,
+                            "user1", "User 1", "session1", {})
+        logger.log_activity(ActivityType.ELEMENT_MODIFIED,
+                            "user1", "User 1", "session1", {})
+        logger.log_activity(ActivityType.COLLABORATOR_JOINED,
+                            "user2", "User 2", "session1", {})
 
         user1_activities = logger.get_activities_by_user("user1")
         assert len(user1_activities) == 2
@@ -543,11 +547,15 @@ class TestActivityLogger:
         """Test getting activities by type."""
         logger = ActivityLogger()
 
-        logger.log_activity(ActivityType.COLLABORATOR_JOINED, "user1", "User 1", "session1", {})
-        logger.log_activity(ActivityType.COLLABORATOR_JOINED, "user2", "User 2", "session1", {})
-        logger.log_activity(ActivityType.ELEMENT_MODIFIED, "user1", "User 1", "session1", {})
+        logger.log_activity(ActivityType.COLLABORATOR_JOINED,
+                            "user1", "User 1", "session1", {})
+        logger.log_activity(ActivityType.COLLABORATOR_JOINED,
+                            "user2", "User 2", "session1", {})
+        logger.log_activity(ActivityType.ELEMENT_MODIFIED,
+                            "user1", "User 1", "session1", {})
 
-        join_activities = logger.get_activities_by_type(ActivityType.COLLABORATOR_JOINED)
+        join_activities = logger.get_activities_by_type(
+            ActivityType.COLLABORATOR_JOINED)
         assert len(join_activities) == 2
 
         edit_activities = logger.get_activities_by_type(ActivityType.ELEMENT_MODIFIED)
@@ -607,7 +615,8 @@ class TestCommentSystem:
         comment_system = CommentSystem()
 
         comment_system.add_comment("user1", "User 1", "Comment on node1", "node1")
-        comment_system.add_comment("user2", "User 2", "Another comment on node1", "node1")
+        comment_system.add_comment(
+            "user2", "User 2", "Another comment on node1", "node1")
         comment_system.add_comment("user3", "User 3", "Comment on node2", "node2")
 
         node1_comments = comment_system.get_comments_for_element("node1")

@@ -170,7 +170,8 @@ class PDFRenderer:
 
     def get_supported_themes(self) -> list[str]:
         """Get list of supported themes."""
-        return self.svg_renderer.get_supported_themes()
+        themes = self.svg_renderer.get_supported_themes()
+        return list(themes.keys()) if isinstance(themes, dict) else themes
 
     def validate_theme(self, theme: str) -> bool:
         """Validate if theme is supported."""

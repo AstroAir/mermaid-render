@@ -164,7 +164,8 @@ class TestTemplateManager:
     def test_list_templates(self):
         """Test listing all templates."""
         with tempfile.TemporaryDirectory() as temp_dir:
-            manager = TemplateManager(templates_dir=Path(temp_dir), auto_load_builtin=False)
+            manager = TemplateManager(templates_dir=Path(
+                temp_dir), auto_load_builtin=False)
 
             # Create multiple templates
             template1 = manager.create_template(
@@ -534,7 +535,8 @@ class TestTemplateUtilities:
                 result = generate_from_template("test_template", {"param": "value"})
 
                 assert result == "flowchart TD\n    Start --> End"
-                mock_manager.generate.assert_called_once_with("test_template", {"param": "value"}, True)
+                mock_manager.generate.assert_called_once_with(
+                    "test_template", {"param": "value"}, True)
 
     def test_list_available_templates_function(self):
         """Test list_available_templates utility function."""

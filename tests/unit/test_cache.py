@@ -1204,8 +1204,10 @@ class TestCacheIntegration:
         stats = manager.get_statistics()
         assert stats["entry_count"] == 3
         # Size should be at least the content size (may include overhead)
-        min_expected_size = len(small_content) + len(medium_content) + len(large_content)
-        assert stats["size_bytes"] >= min_expected_size * 0.8  # Allow for some compression
+        min_expected_size = len(small_content) + \
+            len(medium_content) + len(large_content)
+        assert stats["size_bytes"] >= min_expected_size * \
+            0.8  # Allow for some compression
 
     def test_cache_ttl_inheritance(self):
         """Test TTL inheritance from manager defaults."""

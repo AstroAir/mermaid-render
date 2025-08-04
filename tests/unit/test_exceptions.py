@@ -178,7 +178,8 @@ class TestUnsupportedFormatError:
     def test_unsupported_format_error_with_supported_formats(self):
         """Test unsupported format error with supported formats list."""
         supported = ["svg", "png", "pdf"]
-        error = UnsupportedFormatError("Format not supported", supported_formats=supported)
+        error = UnsupportedFormatError(
+            "Format not supported", supported_formats=supported)
 
         assert error.supported_formats == supported
         assert "svg" in str(error)

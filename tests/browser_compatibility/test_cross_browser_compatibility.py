@@ -4,6 +4,9 @@ Cross-browser compatibility test suite for SVG rendering.
 Generates test SVGs and provides guidance for browser testing.
 """
 
+import requests
+from unittest.mock import patch, Mock
+from mermaid_render.renderers.svg_renderer import SVGRenderer
 import sys
 import os
 import tempfile
@@ -11,20 +14,17 @@ import json
 from pathlib import Path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))
 
-from mermaid_render.renderers.svg_renderer import SVGRenderer
-from unittest.mock import patch, Mock
-import requests
 
 def create_test_svgs():
     """Create a comprehensive set of test SVGs for browser testing."""
     print("Creating test SVGs for cross-browser compatibility testing...")
-    
+
     # Create test output directory
     test_dir = Path("browser_test_svgs")
     test_dir.mkdir(exist_ok=True)
-    
+
     renderer = SVGRenderer(use_local=False)
-    
+
     # Sample SVG content for different scenarios
     test_svgs = {
         'basic_flowchart': '''<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200">
@@ -39,7 +39,7 @@ def create_test_svgs():
         </marker>
     </defs>
 </svg>''',
-        
+
         'complex_shapes': '''<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
     <circle cx="100" cy="100" r="40" fill="#ffeb3b" stroke="#f57f17" stroke-width="2"/>
     <ellipse cx="200" cy="100" rx="50" ry="30" fill="#4caf50" stroke="#2e7d32" stroke-width="2"/>
@@ -47,7 +47,7 @@ def create_test_svgs():
     <path d="M50 200 Q 100 150 150 200 T 250 200" stroke="#9c27b0" stroke-width="3" fill="none"/>
     <text x="200" y="250" text-anchor="middle" font-family="Arial" font-size="16" fill="#333">Complex Shapes Test</text>
 </svg>''',
-        
+
         'gradients_and_patterns': '''<svg xmlns="http://www.w3.org/2000/svg" width="350" height="250" viewBox="0 0 350 250">
     <defs>
         <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -68,7 +68,7 @@ def create_test_svgs():
     <rect x="100" y="150" width="150" height="50" fill="url(#pattern1)" stroke="#333" stroke-width="1"/>
     <text x="175" y="230" text-anchor="middle" font-family="Arial" font-size="14" fill="#333">Gradients &amp; Patterns</text>
 </svg>''',
-        
+
         'text_and_fonts': '''<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
     <text x="200" y="50" text-anchor="middle" font-family="Arial" font-size="18" font-weight="bold" fill="#333">Font Test</text>
     <text x="50" y="100" font-family="Arial" font-size="14" fill="#666">Regular Arial Text</text>
@@ -78,7 +78,7 @@ def create_test_svgs():
     <text x="50" y="220" font-family="Arial" font-size="16" font-weight="bold" fill="#333">Bold Text</text>
     <text x="200" y="270" text-anchor="middle" font-family="Arial" font-size="10" fill="#999">Small Text (10px)</text>
 </svg>''',
-        
+
         'animations': '''<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200">
     <circle cx="150" cy="100" r="20" fill="#2196f3">
         <animate attributeName="r" values="20;30;20" dur="2s" repeatCount="indefinite"/>
@@ -90,22 +90,23 @@ def create_test_svgs():
     <text x="150" y="50" text-anchor="middle" font-family="Arial" font-size="14" fill="#333">Animation Test</text>
 </svg>'''
     }
-    
+
     # Generate test files
     test_results = []
     for name, svg_content in test_svgs.items():
         file_path = test_dir / f"{name}.svg"
         with open(file_path, 'w', encoding='utf-8') as f:
             f.write(svg_content)
-        
+
         test_results.append({
             'name': name,
             'file': str(file_path),
             'description': get_test_description(name)
         })
         print(f"✓ Created {name}.svg")
-    
+
     return test_results
+
 
 def get_test_description(test_name):
     """Get description for each test case."""
@@ -118,10 +119,11 @@ def get_test_description(test_name):
     }
     return descriptions.get(test_name, 'Test case')
 
+
 def create_browser_test_html():
     """Create an HTML file for browser testing."""
     print("\nCreating browser test HTML...")
-    
+
     test_dir = Path("browser_test_svgs")
     html_content = '''<!DOCTYPE html>
 <html lang="en">
@@ -299,18 +301,19 @@ def create_browser_test_html():
     </script>
 </body>
 </html>'''
-    
+
     html_path = test_dir / "browser_test.html"
     with open(html_path, 'w', encoding='utf-8') as f:
         f.write(html_content)
-    
+
     print(f"✓ Created browser test HTML: {html_path}")
     return html_path
+
 
 def create_compatibility_report():
     """Create a compatibility testing guide."""
     print("\nCreating compatibility testing guide...")
-    
+
     guide_content = '''# Cross-Browser SVG Compatibility Testing Guide
 
 ## Overview
@@ -438,27 +441,28 @@ When reporting compatibility issues, include:
 4. Keep SVG markup clean and valid
 5. Optimize for performance on mobile devices
 '''
-    
+
     guide_path = Path("browser_test_svgs") / "COMPATIBILITY_GUIDE.md"
     with open(guide_path, 'w', encoding='utf-8') as f:
         f.write(guide_content)
-    
+
     print(f"✓ Created compatibility guide: {guide_path}")
     return guide_path
+
 
 if __name__ == "__main__":
     print("Setting up cross-browser compatibility testing...")
     print("=" * 60)
-    
+
     # Create test SVGs
     test_results = create_test_svgs()
-    
+
     # Create browser test HTML
     html_path = create_browser_test_html()
-    
+
     # Create compatibility guide
     guide_path = create_compatibility_report()
-    
+
     print("\n" + "=" * 60)
     print("🎉 Cross-browser compatibility test suite created!")
     print(f"\nTest files created in: browser_test_svgs/")

@@ -28,7 +28,7 @@ class TestBasicWorkflows:
         diagram.add_node("start", "Start", shape="circle")
         diagram.add_node("process", "Process Data")
         diagram.add_node("end", "End", shape="circle")
-        
+
         diagram.add_edge("start", "process")
         diagram.add_edge("process", "end")
 
@@ -85,7 +85,7 @@ class TestBasicWorkflows:
         diagram = ClassDiagram()
         diagram.add_class("User", ["name: str", "email: str"], ["login()", "logout()"])
         diagram.add_class("Admin", ["permissions: list"], ["manage_users()"])
-        
+
         diagram.add_relationship("Admin", "User", "inheritance")
 
         # Generate and verify code
@@ -127,7 +127,7 @@ class TestBasicWorkflows:
         diagram.add_edge("A", "B")
 
         renderer = MermaidRenderer()
-        
+
         with tempfile.TemporaryDirectory() as temp_dir:
             output_path = Path(temp_dir) / "test_diagram.svg"
 
@@ -150,9 +150,9 @@ class TestErrorHandlingWorkflows:
         """Test validation error handling."""
         # Create invalid diagram (empty)
         diagram = FlowchartDiagram()
-        
+
         renderer = MermaidRenderer()
-        
+
         # Should handle empty diagram gracefully
         mermaid_code = diagram.to_mermaid()
         assert isinstance(mermaid_code, str)
@@ -161,7 +161,7 @@ class TestErrorHandlingWorkflows:
         """Test rendering failure handling."""
         diagram = FlowchartDiagram()
         diagram.add_node("A", "Node A")
-        
+
         renderer = MermaidRenderer()
 
         with patch('mermaid_render.core.md.Mermaid') as mock_mermaid:
@@ -174,9 +174,9 @@ class TestErrorHandlingWorkflows:
         """Test unsupported format handling."""
         diagram = FlowchartDiagram()
         diagram.add_node("A", "Node A")
-        
+
         renderer = MermaidRenderer()
-        
+
         # Test with unsupported format
         with pytest.raises(Exception):  # Should raise some kind of error
             renderer.render(diagram, format="unsupported_format")
@@ -185,7 +185,7 @@ class TestErrorHandlingWorkflows:
         """Test file permission error handling."""
         diagram = FlowchartDiagram()
         diagram.add_node("A", "Node A")
-        
+
         renderer = MermaidRenderer()
 
         with patch('mermaid_render.core.md.Mermaid') as mock_mermaid:
@@ -204,7 +204,7 @@ class TestComplexWorkflows:
     def test_multi_diagram_batch_processing(self):
         """Test processing multiple diagrams."""
         diagrams = []
-        
+
         # Create multiple diagrams
         for i in range(3):
             diagram = FlowchartDiagram()
@@ -215,7 +215,7 @@ class TestComplexWorkflows:
 
         renderer = MermaidRenderer()
         results = []
-        
+
         with patch('mermaid_render.core.md.Mermaid') as mock_mermaid:
             mock_objects = []
             for i in range(3):
@@ -228,7 +228,7 @@ class TestComplexWorkflows:
                 result = renderer.render(diagram, format="svg")
                 results.append(result)
                 assert result == f"<svg>diagram {i}</svg>"
-        
+
         assert len(results) == 3
         assert mock_mermaid.call_count == 3
 
@@ -237,9 +237,9 @@ class TestComplexWorkflows:
         # Create initial diagram
         diagram = FlowchartDiagram()
         diagram.add_node("A", "Initial Node")
-        
+
         renderer = MermaidRenderer()
-        
+
         with patch('mermaid_render.core.md.Mermaid') as mock_mermaid:
             # First call
             mock_obj1 = Mock()
@@ -262,7 +262,7 @@ class TestComplexWorkflows:
             # Re-render
             result2 = renderer.render(diagram, format="svg")
             assert result2 == "<svg>modified</svg>"
-            
+
             assert mock_mermaid.call_count == 2
 
     def test_different_format_workflow(self):
@@ -273,13 +273,13 @@ class TestComplexWorkflows:
         diagram.add_edge("A", "B")
 
         renderer = MermaidRenderer()
-        
+
         formats_and_results = [
             ("svg", "<svg>svg content</svg>"),
             ("png", b"PNG binary data"),
             ("pdf", b"PDF binary data"),
         ]
-        
+
         with patch('mermaid_render.core.md.Mermaid') as mock_mermaid:
             for format_type, expected_result in formats_and_results:
                 if format_type == "svg":  # Only SVG is currently supported
@@ -298,11 +298,11 @@ class TestComplexWorkflows:
         """Test rendering with different themes."""
         diagram = FlowchartDiagram()
         diagram.add_node("A", "Node A")
-        
+
         renderer = MermaidRenderer()
-        
+
         themes = ["default", "dark", "forest"]
-        
+
         with patch('mermaid_render.core.md.Mermaid') as mock_mermaid:
             mock_objects = []
             for theme in themes:
@@ -323,7 +323,7 @@ class TestPerformanceWorkflows:
         """Test handling of large diagrams."""
         # Create a large flowchart
         diagram = FlowchartDiagram()
-        
+
         # Add many nodes
         for i in range(50):
             diagram.add_node(f"node_{i}", f"Node {i}")
@@ -333,7 +333,7 @@ class TestPerformanceWorkflows:
         # Generate code
         mermaid_code = diagram.to_mermaid()
         assert len(mermaid_code) > 1000  # Should be substantial
-        
+
         # Render
         renderer = MermaidRenderer()
         with patch('mermaid_render.core.md.Mermaid') as mock_mermaid:
@@ -353,7 +353,7 @@ class TestPerformanceWorkflows:
             diagrams.append(diagram)
 
         renderer = MermaidRenderer()
-        
+
         with patch('mermaid_render.core.md.Mermaid') as mock_mermaid:
             mock_objects = []
             for i in range(5):
@@ -378,7 +378,7 @@ class TestRegressionWorkflows:
     def test_empty_diagram_handling(self):
         """Test handling of empty diagrams."""
         diagram = FlowchartDiagram()
-        
+
         # Should not crash
         mermaid_code = diagram.to_mermaid()
         assert isinstance(mermaid_code, str)
@@ -387,10 +387,10 @@ class TestRegressionWorkflows:
         """Test handling of special characters in diagrams."""
         diagram = FlowchartDiagram()
         diagram.add_node("special", "Node with \"quotes\" & symbols")
-        
+
         mermaid_code = diagram.to_mermaid()
         assert "quotes" in mermaid_code
-        
+
         renderer = MermaidRenderer()
         with patch('mermaid_render.core.md.Mermaid') as mock_mermaid:
             mock_obj = Mock()
@@ -404,11 +404,11 @@ class TestRegressionWorkflows:
         """Test handling of Unicode content."""
         diagram = FlowchartDiagram()
         diagram.add_node("unicode", "Node with 中文 and émojis 🚀")
-        
+
         mermaid_code = diagram.to_mermaid()
         assert "中文" in mermaid_code
         assert "🚀" in mermaid_code
-        
+
         renderer = MermaidRenderer()
         with patch('mermaid_render.core.md.Mermaid') as mock_mermaid:
             mock_obj = Mock()
