@@ -61,8 +61,20 @@ from .optimization import (
 from .providers import (
     AIProvider,
     AnthropicProvider,
+    AuthenticationError,
+    CustomProvider,
+    CustomProviderConfig,
+    GenerationResponse,
     LocalModelProvider,
+    ModelNotFoundError,
     OpenAIProvider,
+    OpenRouterProvider,
+    ProviderConfig,
+    ProviderError,
+    ProviderFactory,
+    ProviderManager,
+    RateLimitError,
+    create_default_provider_manager,
 )
 from .suggestions import (
     Suggestion,
@@ -74,11 +86,20 @@ from .suggestions import (
 # Convenience functions
 from .utils import (
     analyze_diagram,
+    batch_generate_diagrams,
     classify_intent,
+    compare_provider_performance,
+    create_custom_provider_config,
+    create_openrouter_provider,
+    create_provider_from_config,
+    export_provider_config,
     extract_entities,
     generate_from_text,
+    generate_with_multiple_providers,
     get_suggestions,
     optimize_diagram,
+    setup_multi_provider_generation,
+    validate_diagram_with_ai,
 )
 
 __all__ = [
@@ -111,7 +132,21 @@ __all__ = [
     "AIProvider",
     "OpenAIProvider",
     "AnthropicProvider",
+    "OpenRouterProvider",
     "LocalModelProvider",
+    "CustomProvider",
+    # Provider configuration and management
+    "ProviderConfig",
+    "CustomProviderConfig",
+    "ProviderFactory",
+    "ProviderManager",
+    "GenerationResponse",
+    "create_default_provider_manager",
+    # Provider exceptions
+    "ProviderError",
+    "AuthenticationError",
+    "RateLimitError",
+    "ModelNotFoundError",
     # Utilities
     "generate_from_text",
     "optimize_diagram",
@@ -119,4 +154,14 @@ __all__ = [
     "get_suggestions",
     "extract_entities",
     "classify_intent",
+    # Enhanced utilities
+    "batch_generate_diagrams",
+    "compare_provider_performance",
+    "create_custom_provider_config",
+    "create_openrouter_provider",
+    "create_provider_from_config",
+    "export_provider_config",
+    "generate_with_multiple_providers",
+    "setup_multi_provider_generation",
+    "validate_diagram_with_ai",
 ]

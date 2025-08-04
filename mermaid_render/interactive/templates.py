@@ -1,7 +1,7 @@
 """Interactive templates for quick diagram creation."""
 
 from dataclasses import dataclass
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 
 @dataclass
@@ -23,7 +23,7 @@ class TemplateLibrary:
     def __init__(self):
         self.templates = self._load_default_templates()
 
-    def get_template(self, template_id: str) -> InteractiveTemplate:
+    def get_template(self, template_id: str) -> Optional[InteractiveTemplate]:
         return self.templates.get(template_id)
 
     def list_templates(self) -> List[InteractiveTemplate]:

@@ -282,3 +282,106 @@ flowchart TD
         # Might generate warnings about empty lines
         # The exact behavior depends on implementation
         assert isinstance(result.warnings, list)
+
+    def test_validate_complex_valid_diagram(self):
+        """Test validation of complex but valid diagram."""
+        validator = MermaidValidator()
+
+        complex_diagram = """
+        flowchart TB
+            subgraph "User Interface"
+                A[Login Page]
+                B[Dashboard]
+                C[Settings]
+            end
+
+            subgraph "Backend Services"
+                D[Authentication Service]
+                E[User Service]
+                F[Database]
+            end
+
+            A --> D
+            D --> E
+            E --> F
+            D -->|Success| B
+            B --> C
+            C --> E
+        """
+
+        result = validator.validate(complex_diagram)
+        assert result.is_valid is True
+        assert len(result.errors) == 0
+
+    def test_validate_special_characters(self):
+        """Test validation with special characters in labels."""
+        validator = MermaidValidator()
+
+        special_chars = """
+        flowchart TD
+            A["Node with 'quotes' and symbols: @#$%"]
+            B["Unicode: 中文 🚀"]
+            A --> B
+        """
+
+        result = validator.validate(special_chars)
+        assert result.is_valid is True
+
+    def test_validate_multiple_diagram_types(self):
+        """Test validation of different diagram types."""
+        validator = MermaidValidator()
+
+        diagram_types = [
+            "flowchart TD\n    A --> B",
+            "sequenceDiagram\n    A->>B: Message",
+            "classDiagram\n    class A",
+            "stateDiagram-v2\n    [*] --> A",
+            "erDiagram\n    CUSTOMER ||--o{ ORDER : places",
+            "journey\n    title My Journey\n    section Go to work\n      Make tea: 5: Me",
+            "gantt\n    title A Gantt Diagram\n    section Section\n    A task: 2014-01-01, 30d",
+            "pie title Pie Chart\n    \"Dogs\" : 386\n    \"Cats\" : 85",
+        ]
+
+        for diagram in diagram_types:
+            result = validator.validate(diagram)
+            # Most should be valid, but some might not be fully supported
+            assert isinstance(result, ValidationResult)
+
+    def test_validate_edge_cases(self):
+        """Test validation of edge cases."""
+        validator = MermaidValidator()
+
+        edge_cases = [
+            "flowchart",  # Missing direction
+            "flowchart TD\n",  # Only header
+            "flowchart TD\n    ",  # Header with whitespace
+            "flowchart TD\n    A",  # Single node
+            "flowchart TD\n    A --> A",  # Self-reference
+        ]
+
+        for case in edge_cases:
+            result = validator.validate(case)
+            assert isinstance(result, ValidationResult)
+            # Some might be valid, some invalid, but should not crash
+
+    def test_validate_performance_large_diagram(self):
+        """Test validation performance with large diagrams."""
+        validator = MermaidValidator()
+
+        # Create a large diagram
+        lines = ["flowchart TD"]
+        for i in range(200):
+            lines.append(f"    N{i}[Node {i}]")
+            if i > 0:
+                lines.append(f"    N{i-1} --> N{i}")
+
+        large_diagram = "\n".join(lines)
+
+        import time
+        start_time = time.time()
+        result = validator.validate(large_diagram)
+        end_time = time.time()
+
+        # Should complete within reasonable time (less than 2 seconds)
+        assert (end_time - start_time) < 2.0
+        assert isinstance(result, ValidationResult)

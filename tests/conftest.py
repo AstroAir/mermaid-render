@@ -8,6 +8,21 @@ from typing import Any, Dict
 
 import pytest
 
+# Register test categories as markers
+def pytest_configure(config):
+    """Configure pytest with custom markers."""
+    config.addinivalue_line("markers", "unit: Unit tests")
+    config.addinivalue_line("markers", "integration: Integration tests")
+    config.addinivalue_line("markers", "slow: Slow tests")
+    config.addinivalue_line("markers", "network: Tests requiring network access")
+    config.addinivalue_line("markers", "svg: SVG rendering tests")
+    config.addinivalue_line("markers", "browser: Browser compatibility tests")
+    config.addinivalue_line("markers", "error_handling: Error handling tests")
+    config.addinivalue_line("markers", "theme: Theme support tests")
+    config.addinivalue_line("markers", "export: Export functionality tests")
+    config.addinivalue_line("markers", "remote: Remote rendering tests")
+    config.addinivalue_line("markers", "performance: Performance tests")
+
 from mermaid_render import (
     ConfigManager,
     FlowchartDiagram,

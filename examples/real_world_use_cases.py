@@ -47,8 +47,8 @@ def software_architecture_documentation(output_dir: Path):
     system_overview.add_node("cart", "Cart Service", shape="rectangle")
     system_overview.add_node("order", "Order Service", shape="rectangle")
     system_overview.add_node("payment", "Payment Service", shape="rectangle")
-    system_overview.add_node("db", "Database Cluster", shape="cylinder")
-    system_overview.add_node("cache", "Redis Cache", shape="cylinder")
+    system_overview.add_node("db", "Database Cluster", shape="cylindrical")
+    system_overview.add_node("cache", "Redis Cache", shape="cylindrical")
     system_overview.add_node("queue", "Message Queue", shape="rectangle")
     
     # Add connections
@@ -209,8 +209,8 @@ def api_documentation_example(output_dir: Path):
     auth_seq.add_message("api", "auth", "validate_credentials()")
     auth_seq.add_message("auth", "db", "SELECT user WHERE email = ?")
     auth_seq.add_message("db", "auth", "user_data", message_type="return")
-    auth_seq.add_message("auth", "auth", "verify_password()", message_type="self")
-    auth_seq.add_message("auth", "auth", "generate_jwt_token()", message_type="self")
+    auth_seq.add_message("auth", "auth", "verify_password()", message_type="sync")
+    auth_seq.add_message("auth", "auth", "generate_jwt_token()", message_type="sync")
     auth_seq.add_message("auth", "api", "jwt_token", message_type="return")
     auth_seq.add_message("api", "client", "200 OK + JWT", message_type="return")
     
@@ -285,15 +285,30 @@ def business_process_modeling(output_dir: Path):
     # 2. Customer Journey Map
     journey = UserJourneyDiagram(title="E-commerce Customer Journey")
     
-    # Add journey stages
-    journey.add_step("Awareness", "Customer discovers brand", 3, ["Social Media", "Search", "Referral"])
-    journey.add_step("Interest", "Browses products", 4, ["Website", "Reviews", "Comparison"])
-    journey.add_step("Consideration", "Evaluates options", 3, ["Product Details", "Pricing", "Support"])
-    journey.add_step("Purchase", "Makes first purchase", 5, ["Checkout", "Payment", "Confirmation"])
-    journey.add_step("Delivery", "Receives product", 4, ["Shipping", "Tracking", "Unboxing"])
-    journey.add_step("Experience", "Uses product", 5, ["Quality", "Performance", "Satisfaction"])
-    journey.add_step("Support", "Contacts support", 2, ["Help Center", "Chat", "Email"])
-    journey.add_step("Loyalty", "Becomes repeat customer", 5, ["Rewards", "Recommendations", "Reviews"])
+    # Add journey sections and tasks
+    journey.add_section("Awareness")
+    journey.add_task("Customer discovers brand", ["Social Media", "Search", "Referral"], 3)
+
+    journey.add_section("Interest")
+    journey.add_task("Browses products", ["Website", "Reviews", "Comparison"], 4)
+
+    journey.add_section("Consideration")
+    journey.add_task("Evaluates options", ["Product Details", "Pricing", "Support"], 3)
+
+    journey.add_section("Purchase")
+    journey.add_task("Makes first purchase", ["Checkout", "Payment", "Confirmation"], 5)
+
+    journey.add_section("Delivery")
+    journey.add_task("Receives product", ["Shipping", "Tracking", "Unboxing"], 4)
+
+    journey.add_section("Experience")
+    journey.add_task("Uses product", ["Quality", "Performance", "Satisfaction"], 5)
+
+    journey.add_section("Support")
+    journey.add_task("Contacts support", ["Help Center", "Chat", "Email"], 2)
+
+    journey.add_section("Loyalty")
+    journey.add_task("Becomes repeat customer", ["Rewards", "Recommendations", "Reviews"], 5)
     
     # Save customer journey
     journey_path = output_dir / "customer_journey.svg"
@@ -306,7 +321,7 @@ def database_design_example(output_dir: Path):
     print("Database design example...")
     
     # Create comprehensive ER diagram for e-commerce
-    er = ERDiagram(title="E-commerce Database Schema")
+    er = ERDiagram()  # ER diagrams don't support titles in Mermaid
     
     # Add entities with detailed attributes
     er.add_entity("User", {
@@ -399,15 +414,15 @@ def database_design_example(output_dir: Path):
     })
     
     # Add relationships
-    er.add_relationship("User", "Address", "one-to-many", "has")
-    er.add_relationship("User", "Order", "one-to-many", "places")
-    er.add_relationship("Category", "Category", "one-to-many", "parent_child")
-    er.add_relationship("Category", "Product", "one-to-many", "contains")
-    er.add_relationship("Product", "OrderItem", "one-to-many", "included_in")
-    er.add_relationship("Order", "OrderItem", "one-to-many", "contains")
-    er.add_relationship("Order", "Payment", "one-to-many", "paid_by")
-    er.add_relationship("Address", "Order", "one-to-many", "billing_address")
-    er.add_relationship("Address", "Order", "one-to-many", "shipping_address")
+    er.add_relationship("User", "Address", "||--o{")
+    er.add_relationship("User", "Order", "||--o{")
+    er.add_relationship("Category", "Category", "||--o{")
+    er.add_relationship("Category", "Product", "||--o{")
+    er.add_relationship("Product", "OrderItem", "||--o{")
+    er.add_relationship("Order", "OrderItem", "||--o{")
+    er.add_relationship("Order", "Payment", "||--o{")
+    er.add_relationship("Address", "Order", "||--o{")
+    er.add_relationship("Address", "Order", "||--o{")
     
     # Save ER diagram
     renderer = MermaidRenderer()

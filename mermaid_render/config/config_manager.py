@@ -213,6 +213,13 @@ class ConfigManager:
         if not isinstance(height, int) or height <= 0:
             raise ConfigurationError("default_height must be a positive integer")
 
+        # Validate max dimensions explicitly before comparison
+        if not isinstance(max_width, int) or max_width <= 0:
+            raise ConfigurationError("max_width must be a positive integer")
+
+        if not isinstance(max_height, int) or max_height <= 0:
+            raise ConfigurationError("max_height must be a positive integer")
+
         if width > max_width or height > max_height:
             raise ConfigurationError("Default dimensions exceed maximum allowed")
 
@@ -276,7 +283,7 @@ class ConfigManager:
         if key in ["timeout", "cache_ttl"]:
             return float(value)
 
-        if key in ["retries", "max_cache_size", "default_width", "default_height"]:
+        if key in ["retries", "max_cache_size", "default_width", "default_height", "max_width", "max_height"]:
             return int(value)
 
         # String values (default)

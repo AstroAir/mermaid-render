@@ -1,0 +1,35 @@
+{
+  "security": {
+    "ignore-cvs": [
+      {
+        "id": "CVE-2023-XXXXX",
+        "reason": "False positive - not applicable to our use case",
+        "expires": "2025-12-31"
+      }
+    ],
+    "ignore-vulnerabilities": [
+      {
+        "vulnerability_id": "VULN-ID-XXXXX",
+        "reason": "Mitigated by our usage pattern",
+        "expires": "2025-12-31"
+      }
+    ],
+    "continue-on-vulnerability-error": false,
+    "audit-and-monitor": true,
+    "policy-file-version": "1.0"
+  },
+  "alert": {
+    "ignore-unpinned-requirements": false,
+    "ignore-environment-requirements": false
+  },
+  "report": {
+    "only-report": false,
+    "output": "json",
+    "save-json": "safety-report.json"
+  },
+  "scan": {
+    "system": false,
+    "cache": true,
+    "disable-optional-telemetry": true
+  }
+}

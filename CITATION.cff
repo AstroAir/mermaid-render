@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "Mermaid Render"
+abstract: "A comprehensive, production-ready Python library for generating Mermaid diagrams with clean APIs, validation, and multiple output formats."
+authors:
+  - family-names: "Mermaid Render Team"
+    email: "contact@mermaid-render.dev"
+version: 1.0.0
+date-released: "2024-08-01"
+license: MIT
+repository-code: "https://github.com/mermaid-render/mermaid-render"
+keywords:
+  - mermaid
+  - diagrams
+  - visualization
+  - flowchart
+  - sequence-diagram
+  - class-diagram
+  - python

@@ -5,7 +5,7 @@ This module provides various utility functions for diagram manipulation,
 file operations, and common tasks.
 """
 
-from .export import export_multiple_formats, export_to_file
+from .export import batch_export, export_multiple_formats, export_to_file
 from .helpers import (
     detect_diagram_type,
     ensure_directory,
@@ -18,6 +18,7 @@ from .validation import validate_mermaid_syntax
 __all__ = [
     "export_to_file",
     "export_multiple_formats",
+    "batch_export",
     "validate_mermaid_syntax",
     "get_supported_formats",
     "get_available_themes",

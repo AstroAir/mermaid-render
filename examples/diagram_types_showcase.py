@@ -60,7 +60,7 @@ def er_diagram_example(output_dir: Path):
     """Create an ER diagram for an e-commerce database."""
     print("Creating ER diagram example...")
     
-    er = ERDiagram(title="E-commerce Database Schema")
+    er = ERDiagram()  # ER diagrams don't support titles in Mermaid
     
     # Add entities
     er.add_entity("User", {
@@ -103,10 +103,10 @@ def er_diagram_example(output_dir: Path):
     })
     
     # Add relationships
-    er.add_relationship("User", "Order", "one-to-many", "places")
-    er.add_relationship("Order", "OrderItem", "one-to-many", "contains")
-    er.add_relationship("Product", "OrderItem", "one-to-many", "included_in")
-    er.add_relationship("Category", "Product", "one-to-many", "categorizes")
+    er.add_relationship("User", "Order", "||--o{")
+    er.add_relationship("Order", "OrderItem", "||--o{")
+    er.add_relationship("Product", "OrderItem", "||--o{")
+    er.add_relationship("Category", "Product", "||--o{")
     
     # Render and save
     renderer = MermaidRenderer()
@@ -121,13 +121,24 @@ def user_journey_example(output_dir: Path):
     
     journey = UserJourneyDiagram(title="Online Shopping User Journey")
     
-    # Add journey steps
-    journey.add_step("Discovery", "User discovers product", 3, ["Browsing", "Search"])
-    journey.add_step("Research", "User researches product", 4, ["Reviews", "Comparison"])
-    journey.add_step("Decision", "User decides to purchase", 5, ["Add to Cart"])
-    journey.add_step("Checkout", "User completes purchase", 2, ["Payment", "Shipping"])
-    journey.add_step("Delivery", "User receives product", 5, ["Tracking", "Unboxing"])
-    journey.add_step("Support", "User contacts support", 1, ["Help", "Returns"])
+    # Add journey sections and tasks
+    journey.add_section("Discovery")
+    journey.add_task("User discovers product", ["Browsing", "Search"], 3)
+
+    journey.add_section("Research")
+    journey.add_task("User researches product", ["Reviews", "Comparison"], 4)
+
+    journey.add_section("Decision")
+    journey.add_task("User decides to purchase", ["Add to Cart"], 5)
+
+    journey.add_section("Checkout")
+    journey.add_task("User completes purchase", ["Payment", "Shipping"], 2)
+
+    journey.add_section("Delivery")
+    journey.add_task("User receives product", ["Tracking", "Unboxing"], 5)
+
+    journey.add_section("Support")
+    journey.add_task("User contacts support", ["Help", "Returns"], 1)
     
     # Render and save
     renderer = MermaidRenderer()
@@ -144,23 +155,23 @@ def gantt_diagram_example(output_dir: Path):
     
     # Add sections and tasks
     gantt.add_section("Planning")
-    gantt.add_task("Requirements", "2024-01-01", "2024-01-15", "done")
-    gantt.add_task("Design", "2024-01-10", "2024-01-25", "done")
-    gantt.add_task("Architecture", "2024-01-20", "2024-02-05", "active")
-    
+    gantt.add_task("Requirements", "2024-01-01", "15d", "done")
+    gantt.add_task("Design", "2024-01-10", "15d", "done")
+    gantt.add_task("Architecture", "2024-01-20", "16d", "active")
+
     gantt.add_section("Development")
-    gantt.add_task("Backend API", "2024-02-01", "2024-03-15", "")
-    gantt.add_task("Frontend UI", "2024-02-15", "2024-03-30", "")
-    gantt.add_task("Database", "2024-02-01", "2024-02-20", "")
-    
+    gantt.add_task("Backend API", "2024-02-01", "43d", "")
+    gantt.add_task("Frontend UI", "2024-02-15", "43d", "")
+    gantt.add_task("Database", "2024-02-01", "19d", "")
+
     gantt.add_section("Testing")
-    gantt.add_task("Unit Tests", "2024-03-01", "2024-03-20", "")
-    gantt.add_task("Integration Tests", "2024-03-15", "2024-04-05", "")
-    gantt.add_task("User Testing", "2024-03-25", "2024-04-10", "")
-    
+    gantt.add_task("Unit Tests", "2024-03-01", "19d", "")
+    gantt.add_task("Integration Tests", "2024-03-15", "21d", "")
+    gantt.add_task("User Testing", "2024-03-25", "16d", "")
+
     gantt.add_section("Deployment")
-    gantt.add_task("Staging Deploy", "2024-04-01", "2024-04-05", "")
-    gantt.add_task("Production Deploy", "2024-04-08", "2024-04-12", "")
+    gantt.add_task("Staging Deploy", "2024-04-01", "4d", "")
+    gantt.add_task("Production Deploy", "2024-04-08", "4d", "")
     
     # Render and save
     renderer = MermaidRenderer()
@@ -175,13 +186,13 @@ def pie_chart_example(output_dir: Path):
     
     pie = PieChartDiagram(title="Technology Stack Distribution")
     
-    # Add data segments
-    pie.add_segment("Python", 35.5)
-    pie.add_segment("JavaScript", 28.2)
-    pie.add_segment("TypeScript", 15.8)
-    pie.add_segment("Java", 12.1)
-    pie.add_segment("Go", 5.4)
-    pie.add_segment("Rust", 3.0)
+    # Add data slices
+    pie.add_slice("Python", 35.5)
+    pie.add_slice("JavaScript", 28.2)
+    pie.add_slice("TypeScript", 15.8)
+    pie.add_slice("Java", 12.1)
+    pie.add_slice("Go", 5.4)
+    pie.add_slice("Rust", 3.0)
     
     # Render and save
     renderer = MermaidRenderer()
@@ -197,22 +208,22 @@ def git_graph_example(output_dir: Path):
     git = GitGraphDiagram(title="Feature Development Git Flow")
     
     # Add commits and branches
-    git.add_commit("main", "Initial commit")
-    git.add_commit("main", "Add basic structure")
-    
-    git.create_branch("feature/auth", "main")
-    git.add_commit("feature/auth", "Add authentication")
-    git.add_commit("feature/auth", "Add user management")
-    
-    git.create_branch("feature/api", "main")
-    git.add_commit("feature/api", "Add REST API")
-    git.add_commit("feature/api", "Add validation")
-    
-    git.merge_branch("feature/auth", "main", "Merge auth feature")
-    git.add_commit("main", "Update documentation")
-    git.merge_branch("feature/api", "main", "Merge API feature")
-    
-    git.add_commit("main", "Release v1.0.0")
+    git.add_commit("Initial commit", "main")
+    git.add_commit("Add basic structure", "main")
+
+    git.add_branch("feature/auth")
+    git.add_commit("Add authentication", "feature/auth")
+    git.add_commit("Add user management", "feature/auth")
+
+    git.add_branch("feature/api")
+    git.add_commit("Add REST API", "feature/api")
+    git.add_commit("Add validation", "feature/api")
+
+    git.add_merge("feature/auth", "main")
+    git.add_commit("Update documentation", "main")
+    git.add_merge("feature/api", "main")
+
+    git.add_commit("Release v1.0.0", "main")
     
     # Render and save
     renderer = MermaidRenderer()
@@ -225,34 +236,33 @@ def mindmap_example(output_dir: Path):
     """Create a mindmap for project planning."""
     print("Creating mindmap example...")
     
-    mindmap = MindmapDiagram(title="Project Planning Mindmap")
-    
-    # Add root and branches
-    root = mindmap.add_root("Web Application")
-    
-    # Frontend branch
-    frontend = mindmap.add_child(root, "Frontend")
-    mindmap.add_child(frontend, "React")
-    mindmap.add_child(frontend, "TypeScript")
-    mindmap.add_child(frontend, "Tailwind CSS")
-    
-    # Backend branch
-    backend = mindmap.add_child(root, "Backend")
-    mindmap.add_child(backend, "Python")
-    mindmap.add_child(backend, "FastAPI")
-    mindmap.add_child(backend, "PostgreSQL")
-    
-    # DevOps branch
-    devops = mindmap.add_child(root, "DevOps")
-    mindmap.add_child(devops, "Docker")
-    mindmap.add_child(devops, "Kubernetes")
-    mindmap.add_child(devops, "CI/CD")
-    
-    # Testing branch
-    testing = mindmap.add_child(root, "Testing")
-    mindmap.add_child(testing, "Unit Tests")
-    mindmap.add_child(testing, "Integration Tests")
-    mindmap.add_child(testing, "E2E Tests")
+    mindmap = MindmapDiagram(title="Project Planning Mindmap", root_text="Web Application")
+
+    # Add main branches
+    mindmap.add_node("root", "frontend", "Frontend")
+    mindmap.add_node("root", "backend", "Backend")
+    mindmap.add_node("root", "devops", "DevOps")
+    mindmap.add_node("root", "testing", "Testing")
+
+    # Frontend technologies
+    mindmap.add_node("frontend", "react", "React")
+    mindmap.add_node("frontend", "typescript", "TypeScript")
+    mindmap.add_node("frontend", "tailwind", "Tailwind CSS")
+
+    # Backend technologies
+    mindmap.add_node("backend", "python", "Python")
+    mindmap.add_node("backend", "fastapi", "FastAPI")
+    mindmap.add_node("backend", "postgresql", "PostgreSQL")
+
+    # DevOps tools
+    mindmap.add_node("devops", "docker", "Docker")
+    mindmap.add_node("devops", "kubernetes", "Kubernetes")
+    mindmap.add_node("devops", "cicd", "CI/CD")
+
+    # Testing types
+    mindmap.add_node("testing", "unit", "Unit Tests")
+    mindmap.add_node("testing", "integration", "Integration Tests")
+    mindmap.add_node("testing", "e2e", "E2E Tests")
     
     # Render and save
     renderer = MermaidRenderer()

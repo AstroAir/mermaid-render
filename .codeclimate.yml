@@ -1,0 +1,221 @@
+# Code Climate configuration for Mermaid Render
+# See: https://docs.codeclimate.com/docs/configuring-your-repository
+
+version: "2"
+
+# Exclude patterns
+exclude_patterns:
+  - "tests/"
+  - "docs/"
+  - "examples/"
+  - "scripts/"
+  - "venv/"
+  - "build/"
+  - "dist/"
+  - "*.egg-info/"
+  - "__pycache__/"
+  - ".pytest_cache/"
+  - ".mypy_cache/"
+  - "htmlcov/"
+  - "*.pyc"
+  - "*.pyo"
+  - "*.pyd"
+  - ".git/"
+  - ".github/"
+  - "node_modules/"
+
+# Plugins to enable
+plugins:
+  # Python analysis
+  bandit:
+    enabled: true
+    config:
+      python_version: 3
+  
+  pep8:
+    enabled: true
+    config:
+      python_version: 3
+  
+  radon:
+    enabled: true
+    config:
+      python_version: 3
+      threshold: "C"
+  
+  # Security analysis
+  sonar-python:
+    enabled: true
+    config:
+      python_version: 3
+  
+  # Duplication detection
+  duplication:
+    enabled: true
+    config:
+      languages:
+        - python
+      count_threshold: 3
+      mass_threshold: 50
+
+# Checks configuration
+checks:
+  # Argument count
+  argument-count:
+    config:
+      threshold: 8
+  
+  # Complex logic
+  complex-logic:
+    config:
+      threshold: 4
+  
+  # File lines
+  file-lines:
+    config:
+      threshold: 500
+  
+  # Method complexity
+  method-complexity:
+    config:
+      threshold: 10
+  
+  # Method count
+  method-count:
+    config:
+      threshold: 25
+  
+  # Method lines
+  method-lines:
+    config:
+      threshold: 50
+  
+  # Nested control flow
+  nested-control-flow:
+    config:
+      threshold: 4
+  
+  # Return statements
+  return-statements:
+    config:
+      threshold: 4
+  
+  # Similar code
+  similar-code:
+    config:
+      threshold: 50
+  
+  # Identical code
+  identical-code:
+    config:
+      threshold: 25
+
+# Prepare configuration
+prepare:
+  fetch:
+    - url: "https://raw.githubusercontent.com/PyCQA/pylint/main/pylintrc"
+      path: ".pylintrc"
+
+# Build configuration
+build:
+  nodes:
+    analysis:
+      environment:
+        python_version: "3.11"
+      dependencies:
+        pre:
+          - pip install --upgrade pip
+          - pip install -r requirements-dev.txt
+      tests:
+        override:
+          - python -m pytest tests/ --cov=mermaid_render --cov-report=xml
+          - python -m bandit -r mermaid_render/ -f json -o bandit-report.json
+          - python -m safety check --json --output safety-report.json
+
+# Ratings configuration
+ratings:
+  paths:
+    - "mermaid_render/**"
+  
+  # Thresholds for ratings
+  thresholds:
+    # A: 4.0 and above
+    # B: 3.0 to 3.9
+    # C: 2.0 to 2.9
+    # D: 1.0 to 1.9
+    # F: Below 1.0
+    maintainability:
+      A: 4.0
+      B: 3.0
+      C: 2.0
+      D: 1.0
+    
+    test_coverage:
+      A: 90
+      B: 80
+      C: 70
+      D: 60
+    
+    complexity:
+      A: 5
+      B: 10
+      C: 15
+      D: 20
+    
+    duplication:
+      A: 3
+      B: 5
+      C: 10
+      D: 15
+
+# Engine configuration
+engines:
+  # Python-specific engines
+  bandit:
+    enabled: true
+    exclude_fingerprints:
+      - "hardcoded_password_string"  # We handle secrets properly
+    
+  pep8:
+    enabled: true
+    checks:
+      E501:
+        enabled: false  # Line length handled by black
+      W503:
+        enabled: false  # Line break before binary operator
+    
+  radon:
+    enabled: true
+    config:
+      threshold: "C"
+      no_assert: true
+      show_closures: true
+      min: "A"
+      max: "F"
+  
+  # Duplication engine
+  duplication:
+    enabled: true
+    config:
+      languages:
+        python:
+          mass_threshold: 50
+          count_threshold: 3
+          python_version: 3
+
+# Transformations
+transformations:
+  # Remove test files from analysis
+  - type: "exclude"
+    patterns:
+      - "test_*.py"
+      - "*_test.py"
+      - "tests/**"
+  
+  # Remove generated files
+  - type: "exclude"
+    patterns:
+      - "**/__pycache__/**"
+      - "**/*.pyc"
+      - "**/*.pyo"
+      - "**/*.pyd"

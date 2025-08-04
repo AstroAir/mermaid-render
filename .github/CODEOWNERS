@@ -1,0 +1,36 @@
+# This file defines who should review which parts of the codebase
+# For more info: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owners for everything
+* @mermaid-render/core-team
+
+# Core modules
+/mermaid_render/core.py @mermaid-render/core-maintainers
+/mermaid_render/exceptions.py @mermaid-render/core-maintainers
+
+# Diagram models
+/mermaid_render/models/ @mermaid-render/diagram-experts
+
+# Renderers
+/mermaid_render/renderers/ @mermaid-render/rendering-experts
+
+# Configuration
+/mermaid_render/config/ @mermaid-render/core-maintainers
+
+# AI features
+/mermaid_render/ai/ @mermaid-render/ai-team
+
+# Interactive features
+/mermaid_render/interactive/ @mermaid-render/interactive-team
+
+# Tests
+/tests/ @mermaid-render/qa-team
+
+# Documentation
+/docs/ @mermaid-render/docs-team
+
+# Examples
+/examples/ @mermaid-render/docs-team
+
+# CI/CD
+/.github/workflows/ @mermaid-render/devops-team

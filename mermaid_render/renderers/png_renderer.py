@@ -67,9 +67,10 @@ class PNGRenderer:
             RenderingError: If rendering fails
             NetworkError: If network request fails
         """
+        url: Optional[str] = None  # ensure always bound for exception handling
         try:
             # Prepare the configuration
-            mermaid_config = {}
+            mermaid_config: Dict[str, Any] = {}
             if theme:
                 mermaid_config["theme"] = theme
             if config:

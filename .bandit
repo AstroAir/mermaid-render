@@ -1,0 +1,142 @@
+# Bandit security configuration for Mermaid Render
+# See: https://bandit.readthedocs.io/en/latest/config.html
+
+[bandit]
+# Directories to exclude from scanning
+exclude_dirs = [
+    "tests",
+    "docs",
+    "examples",
+    "venv",
+    "build",
+    "dist",
+    ".git",
+    "__pycache__",
+    ".pytest_cache",
+    ".mypy_cache",
+    "htmlcov"
+]
+
+# Test IDs to skip
+skips = [
+    "B101",  # assert_used - We use asserts in tests and validation
+    "B601",  # paramiko_calls - Not using paramiko
+    "B602",  # subprocess_popen_with_shell_equals_true - We control shell usage
+    "B603",  # subprocess_without_shell_equals_true - We control subprocess usage
+    "B607",  # start_process_with_partial_path - We use full paths
+]
+
+# Test IDs to include (empty means include all except skipped)
+tests = []
+
+# Confidence levels to report
+# LOW, MEDIUM, HIGH
+confidence = ["HIGH", "MEDIUM"]
+
+# Severity levels to report
+# LOW, MEDIUM, HIGH
+severity = ["HIGH", "MEDIUM"]
+
+# Output format
+# json, csv, txt, xml, yaml
+format = "json"
+
+# Output file (optional)
+output_file = "bandit-report.json"
+
+# Recursive scan
+recursive = true
+
+# Aggregate output by vulnerability type
+aggregate = "vuln"
+
+# Number of lines of code context to include
+context_lines = 3
+
+# Plugin blacklist (plugins to disable)
+blacklist = []
+
+# Plugin whitelist (plugins to enable, empty means all)
+whitelist = []
+
+# Custom test definitions
+[bandit.assert_used]
+# Allow asserts in specific contexts
+skips = ["**/tests/**", "**/test_*.py"]
+
+[bandit.hardcoded_password_string]
+# Patterns that look like passwords but aren't
+word_list = [
+    "password",
+    "pass",
+    "passwd",
+    "pwd",
+    "secret",
+    "token",
+    "key",
+    "api_key",
+    "apikey"
+]
+
+[bandit.hardcoded_password_funcarg]
+# Function arguments that might contain passwords
+word_list = [
+    "password",
+    "pass",
+    "passwd",
+    "pwd",
+    "secret",
+    "token",
+    "key",
+    "api_key",
+    "apikey"
+]
+
+[bandit.hardcoded_password_default]
+# Default values that might be passwords
+word_list = [
+    "password",
+    "pass",
+    "passwd",
+    "pwd",
+    "secret",
+    "token",
+    "key",
+    "api_key",
+    "apikey"
+]
+
+[bandit.shell_injection]
+# Shell injection detection
+shell_injection = [
+    "subprocess",
+    "os.system",
+    "os.popen",
+    "commands"
+]
+
+[bandit.sql_injection]
+# SQL injection patterns (if we add database features)
+sql_statements = [
+    "select",
+    "insert",
+    "update",
+    "delete",
+    "drop",
+    "create",
+    "alter"
+]
+
+# Custom rules for our specific use cases
+[bandit.mermaid_render_custom]
+# Allow certain patterns that are safe in our context
+safe_patterns = [
+    # Mermaid diagram code is user input but processed safely
+    "mermaid_code",
+    "diagram_code",
+    # Configuration files are trusted
+    "config_file",
+    "theme_file",
+    # Template files are trusted
+    "template_file"
+]

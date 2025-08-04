@@ -7,24 +7,25 @@ diagram generation, code analysis, optimization, and intelligent suggestions.
 """
 
 from pathlib import Path
+
 from mermaid_render import (
-    MermaidRenderer,
     FlowchartDiagram,
+    MermaidRenderer,
     SequenceDiagram,
 )
 
 # AI features (optional imports with fallbacks)
 try:
     from mermaid_render.ai import (
+        DiagramAnalyzer,
         DiagramGenerator,
         DiagramOptimizer,
-        DiagramAnalyzer,
-        SuggestionEngine,
         NLProcessor,
-        generate_from_text,
-        optimize_diagram,
+        SuggestionEngine,
         analyze_diagram,
+        generate_from_text,
         get_suggestions,
+        optimize_diagram,
     )
 
     AI_AVAILABLE = True
@@ -103,7 +104,7 @@ def code_analysis_generation_example(output_dir: Path):
 class UserService:
     def __init__(self, database):
         self.db = database
-    
+
     def create_user(self, email, password):
         user = User(email, password)
         self.db.save(user)

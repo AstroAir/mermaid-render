@@ -669,6 +669,9 @@ class MermaidRenderer:
             if not format:
                 format = self.config.get("default_format", "svg")
 
+        # Ensure format is not None at this point
+        assert format is not None, "Format should not be None after inference"
+
         # Render the diagram
         content = self.render(diagram, format, **options)
 

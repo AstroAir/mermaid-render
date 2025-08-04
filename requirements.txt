@@ -1,8 +1,25 @@
 # Core dependencies for Mermaid Render
 # Install with: pip install -r requirements.txt
+# For development dependencies, use: pip install -r requirements-dev.txt
+# For full installation with all features: pip install -e .[all]
 
+# Core Mermaid and rendering dependencies
 mermaid-py>=0.8.0
 requests>=2.25.0
 typing-extensions>=4.0.0; python_version<"3.10"
+
+# Template and validation dependencies
 jinja2>=3.0.0
 jsonschema>=4.0.0
+
+# AI and API dependencies (core features)
+openai>=1.98.0
+anthropic>=0.60.0
+
+# Interactive and web dependencies
+ipython>=8.18.1
+uvicorn>=0.35.0
+fastapi>=0.116.1
+
+# Image processing dependencies
+cairosvg>=2.8.2

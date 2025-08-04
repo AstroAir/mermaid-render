@@ -177,6 +177,20 @@ class ActivityLogger:
 
         return activities
 
+    def get_activities_by_user(self, user_id: str) -> List[Activity]:
+        """Get all activities for a specific user across all sessions."""
+        return self.get_user_activities(user_id)
+
+    def get_activities_by_type(self, activity_type: ActivityType) -> List[Activity]:
+        """Get all activities of a specific type across all sessions."""
+        activities = []
+        for audit_trail in self.audit_trails.values():
+            activities.extend(audit_trail.get_activities_by_type(activity_type))
+
+        # Sort by timestamp (newest first)
+        activities.sort(key=lambda a: a.timestamp, reverse=True)
+        return activities
+
     def get_activity_summary(self, session_id: str) -> Dict[str, Any]:
         """Get activity summary for a session."""
         if session_id not in self.audit_trails:

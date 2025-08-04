@@ -86,7 +86,7 @@ class PDFRenderer:
                 output_width=None,  # Preserve original dimensions
                 output_height=None,
             )
-            return pdf_data
+            return pdf_data if isinstance(pdf_data, (bytes, bytearray)) else bytes(pdf_data or b"")
 
         except ImportError:
             try:
@@ -115,7 +115,8 @@ class PDFRenderer:
                 html_doc = weasyprint.HTML(string=html_content)
                 pdf_buffer = BytesIO()
                 html_doc.write_pdf(pdf_buffer)
-                return pdf_buffer.getvalue()
+                data = pdf_buffer.getvalue()
+                return data if isinstance(data, (bytes, bytearray)) else bytes(data or b"")
 
             except ImportError:
                 try:
@@ -127,12 +128,17 @@ class PDFRenderer:
                     from svglib.svglib import renderSVG
 
                     # Parse SVG
-                    svg_io = StringIO(svg_content)
                     drawing = renderSVG.renderSVG(svg_io)
 
                     # Convert to PDF
                     pdf_buffer = BytesIO()
-                    renderPDF.drawToFile(drawing, pdf_buffer)
+                    # drawToFile writes to a filename; instead use drawToFile with a temp file fallback
+                    from tempfile import NamedTemporaryFile
+                    with NamedTemporaryFile(suffix=".pdf", delete=True) as tmp:
+                        renderPDF.drawToFile(drawing, tmp.name)
+                        tmp.seek(0)
+                        data = tmp.read()
+                    return data if isinstance(data, (bytes, bytearray)) else bytes(data or b"")
                     return pdf_buffer.getvalue()
 
                 except ImportError:

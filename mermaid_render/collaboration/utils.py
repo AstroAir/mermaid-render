@@ -1,5 +1,6 @@
 """Utility functions for collaboration features."""
 
+from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from .activity_log import ActivityLogger, ActivityType
@@ -73,6 +74,11 @@ def commit_diagram_changes(
     # Convert dict changes to ChangeSet objects
     change_sets = []
     for change_dict in changes:
+        # Handle timestamp - use current time if not provided
+        timestamp = change_dict.get("timestamp")
+        if timestamp is None:
+            timestamp = datetime.now()
+
         change_set = ChangeSet(
             change_id=change_dict.get("change_id", ""),
             change_type=change_dict["change_type"],
@@ -80,7 +86,7 @@ def commit_diagram_changes(
             element_type=change_dict.get("element_type"),
             old_data=change_dict.get("old_data"),
             new_data=change_dict.get("new_data"),
-            timestamp=change_dict.get("timestamp"),
+            timestamp=timestamp,
         )
         change_sets.append(change_set)
 

@@ -136,6 +136,65 @@ svg_content = quick_render(diagram_code, format="svg", theme="dark")
 | Git Graph | `GitGraphDiagram` | Git branching visualization |
 | Mindmap | `MindmapDiagram` | Hierarchical information |
 
+## API Reference
+
+### Core Classes
+
+#### MermaidRenderer
+
+The main rendering engine for converting Mermaid diagrams to various output formats.
+
+```python
+from mermaid_render import MermaidRenderer
+
+renderer = MermaidRenderer(
+    theme="default",           # Built-in theme or custom theme
+    format="svg",             # Output format: svg, png, pdf
+    config=None,              # Custom configuration
+    cache_enabled=True        # Enable caching for performance
+)
+
+# Render diagram to string
+svg_content = renderer.render(diagram)
+
+# Save diagram to file
+renderer.save(diagram, "output.svg")
+
+# Render with custom options
+renderer.render(diagram, theme="dark", format="png", width=800, height=600)
+```
+
+#### Quick Rendering Functions
+
+Convenient functions for simple rendering tasks.
+
+```python
+from mermaid_render import quick_render, render_to_file
+
+# Render Mermaid code directly
+svg_content = quick_render(mermaid_code, format="svg", theme="dark")
+
+# Render and save to file
+render_to_file(mermaid_code, "diagram.png", format="png", theme="forest")
+```
+
+### Configuration Management
+
+```python
+from mermaid_render.config import ConfigManager, ThemeManager
+
+# Global configuration
+config = ConfigManager()
+config.set_default_theme("dark")
+config.set_cache_enabled(True)
+config.set_output_directory("./diagrams")
+
+# Theme management
+theme_manager = ThemeManager()
+available_themes = theme_manager.list_themes()
+custom_theme = theme_manager.create_theme("my_theme", primaryColor="#ff0000")
+```
+
 ## Examples
 
 ### Sequence Diagram

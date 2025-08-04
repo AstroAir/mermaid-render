@@ -139,7 +139,7 @@ class StyleOptimizer:
 class DiagramOptimizer:
     """Main diagram optimizer combining multiple optimization strategies."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.layout_optimizer = LayoutOptimizer()
         self.style_optimizer = StyleOptimizer()
 

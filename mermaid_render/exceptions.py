@@ -445,3 +445,45 @@ class CacheError(MermaidRenderError):
             parts.append(f"Key: {self.cache_key}")
 
         return " - ".join(parts)
+
+
+class VersionControlError(MermaidRenderError):
+    """
+    Raised when version control operations fail.
+
+    This exception is raised when:
+    - Git operations fail
+    - Branch operations fail
+    - Merge conflicts cannot be resolved
+    - Version history is corrupted
+    """
+
+    def __init__(
+        self,
+        message: str,
+        operation: Optional[str] = None,
+        branch: Optional[str] = None,
+    ) -> None:
+        """
+        Initialize version control error.
+
+        Args:
+            message: Error message
+            operation: Version control operation that failed
+            branch: Branch name that caused the error
+        """
+        super().__init__(message)
+        self.operation = operation
+        self.branch = branch
+
+    def __str__(self) -> str:
+        """Return detailed error message."""
+        parts = [self.message]
+
+        if self.operation:
+            parts.append(f"Operation: {self.operation}")
+
+        if self.branch:
+            parts.append(f"Branch: {self.branch}")
+
+        return " - ".join(parts)

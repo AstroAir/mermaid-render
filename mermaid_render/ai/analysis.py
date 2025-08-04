@@ -75,7 +75,7 @@ class AnalysisReport:
 class DiagramAnalyzer:
     """AI-powered analyzer for diagram quality and complexity assessment."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.quality_rules = self._load_quality_rules()
 
     def analyze(

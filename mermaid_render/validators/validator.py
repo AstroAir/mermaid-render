@@ -265,8 +265,8 @@ class MermaidValidator:
 
     def _validate_line_syntax(self, line: str, line_number: int) -> None:
         """Validate syntax of a single line."""
-        # Skip bracket validation for class diagrams as they have special syntax
-        if self.current_diagram_type == "classDiagram":
+        # Skip bracket validation for class and ER diagrams as they have special syntax
+        if self.current_diagram_type in ["classDiagram", "erDiagram"]:
             return
 
         # Check for unmatched brackets/parentheses

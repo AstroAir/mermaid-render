@@ -73,6 +73,28 @@ test-fast:
 test-verbose:
 	pytest -v
 
+# Category-specific tests
+test-svg:
+	pytest tests/svg
+
+test-browser:
+	pytest tests/browser_compatibility
+
+test-error-handling:
+	pytest tests/error_handling
+
+test-theme:
+	pytest tests/theme
+
+test-export:
+	pytest tests/export
+
+test-remote:
+	pytest tests/remote
+
+test-performance:
+	pytest tests/performance
+
 # Code quality targets
 lint:
 	@echo "Running ruff..."

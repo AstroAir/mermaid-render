@@ -4,7 +4,7 @@
 repos:
   # General file checks
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v5.0.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
@@ -22,33 +22,34 @@ repos:
 
   # Python code formatting
   - repo: https://github.com/psf/black
-    rev: 23.12.1
+    rev: 24.10.0
     hooks:
       - id: black
         language_version: python3
         args: ['--line-length=88']
 
-  # Python import sorting
+  # Python linting and formatting with Ruff
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.1.9
+    rev: v0.8.4
     hooks:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
+      - id: ruff-format
 
   # Type checking
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.8.0
+    rev: v1.13.0
     hooks:
       - id: mypy
         additional_dependencies:
           - types-requests
           - types-setuptools
-        args: [--ignore-missing-imports]
+        args: [--ignore-missing-imports, --install-types, --non-interactive]
         files: ^mermaid_render/
 
   # Security checks
   - repo: https://github.com/PyCQA/bandit
-    rev: 1.7.5
+    rev: 1.8.0
     hooks:
       - id: bandit
         args: ['-r', 'mermaid_render/', '-f', 'json', '-o', 'bandit-report.json']
@@ -64,11 +65,12 @@ repos:
 
   # Markdown formatting
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.38.0
+    rev: v0.42.0
     hooks:
       - id: markdownlint
         args: ['--fix']
         files: \.(md|markdown)$
+        exclude: ^(CHANGELOG\.md|docs/.*\.md)$
 
   # YAML formatting
   - repo: https://github.com/pre-commit/mirrors-prettier

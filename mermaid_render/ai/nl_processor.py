@@ -77,12 +77,12 @@ class NLProcessor:
     to understand user requirements for diagram generation.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize NL processor."""
-        self.domain_keywords = self._load_domain_keywords()
-        self.intent_patterns = self._load_intent_patterns()
-        self.entity_patterns = self._load_entity_patterns()
-        self.stopwords = self._load_stopwords()
+        self.domain_keywords: Dict[str, List[str]] = self._load_domain_keywords()
+        self.intent_patterns: Dict[str, List[str]] = self._load_intent_patterns()
+        self.entity_patterns: Dict[str, List[str]] = self._load_entity_patterns()
+        self.stopwords: Set[str] = self._load_stopwords()
 
     def analyze_text(self, text: str) -> TextAnalysis:
         """
@@ -135,8 +135,8 @@ class NLProcessor:
         keywords = [word for word in words if word not in self.stopwords]
 
         # Remove duplicates while preserving order
-        seen = set()
-        unique_keywords = []
+        seen: Set[str] = set()
+        unique_keywords: List[str] = []
         for keyword in keywords:
             if keyword not in seen:
                 seen.add(keyword)
@@ -151,7 +151,8 @@ class NLProcessor:
             keyword_scores.items(), key=lambda x: x[1], reverse=True
         )
 
-        return [kw for kw, score in sorted_keywords[:20]]  # Top 20 keywords
+        # Use underscore for the unused score binding to silence linters
+        return [kw for kw, _score in sorted_keywords[:20]]  # Top 20 keywords
 
     def extract_entities(self, text: str) -> EntityExtraction:
         """
@@ -163,9 +164,9 @@ class NLProcessor:
         Returns:
             Entity extraction result
         """
-        entities = []
-        entity_types = {}
-        relationships = []
+        entities: List[str] = []
+        entity_types: Dict[str, str] = {}
+        relationships: List[Dict[str, str]] = []
 
         # Extract using patterns
         for entity_type, patterns in self.entity_patterns.items():
@@ -201,16 +202,16 @@ class NLProcessor:
         text_lower = text.lower()
 
         # Score each intent based on patterns
-        intent_scores = {}
+        intent_scores: Dict[str, float] = {}
 
         for intent, patterns in self.intent_patterns.items():
-            score = 0
+            score = 0.0
             for pattern in patterns:
                 if re.search(pattern, text_lower):
-                    score += 1
+                    score += 1.0
 
-            if score > 0:
-                intent_scores[intent] = score / len(patterns)
+            if score > 0.0:
+                intent_scores[intent] = score / float(len(patterns))
 
         if not intent_scores:
             return IntentClassification(
@@ -224,8 +225,8 @@ class NLProcessor:
         # Get sub-intents (other high-scoring intents)
         sub_intents = [
             intent
-            for intent, score in intent_scores.items()
-            if intent != best_intent[0] and score >= 0.3
+            for intent, _score in intent_scores.items()
+            if intent != best_intent[0] and _score >= 0.3
         ]
 
         return IntentClassification(
@@ -312,21 +313,21 @@ class NLProcessor:
             Determined domain
         """
         text_lower = text.lower()
-        domain_scores = {}
+        domain_scores: Dict[str, float] = {}
 
         # Score domains based on keyword matches
         for domain, domain_keywords in self.domain_keywords.items():
-            score = 0
+            score = 0.0
             for keyword in keywords:
                 if keyword in domain_keywords:
-                    score += 1
+                    score += 1.0
 
             # Also check for domain-specific phrases in text
             for domain_keyword in domain_keywords:
                 if domain_keyword in text_lower:
                     score += 0.5
 
-            if score > 0:
+            if score > 0.0:
                 domain_scores[domain] = score
 
         if not domain_scores:
@@ -336,7 +337,7 @@ class NLProcessor:
 
     def _score_keywords(self, keywords: List[str], text: str) -> Dict[str, float]:
         """Score keywords by importance."""
-        scores = {}
+        scores: Dict[str, float] = {}
         text_lower = text.lower()
 
         for keyword in keywords:
@@ -344,10 +345,10 @@ class NLProcessor:
 
             # Frequency score
             frequency = text_lower.count(keyword)
-            score += frequency * 0.1
+            score += float(frequency) * 0.1
 
             # Length bonus (longer words are often more important)
-            score += len(keyword) * 0.01
+            score += float(len(keyword)) * 0.01
 
             # Domain relevance bonus
             for domain_keywords in self.domain_keywords.values():
@@ -367,7 +368,7 @@ class NLProcessor:
         self, text: str, entities: List[str]
     ) -> List[Dict[str, str]]:
         """Extract relationships between entities."""
-        relationships = []
+        relationships: List[Dict[str, str]] = []
 
         # Simple relationship patterns
         relationship_patterns = [

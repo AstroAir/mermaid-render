@@ -326,6 +326,10 @@ class WebSocketHandler:
 
     def get_all_sessions(self) -> List[Dict[str, Any]]:
         """Get information about all active sessions."""
-        return [
-            self.get_session_info(session_id) for session_id in self.sessions.keys()
-        ]
+        # Filter out any None values to satisfy the return type.
+        sessions: List[Dict[str, Any]] = []
+        for session_id in self.sessions.keys():
+            info = self.get_session_info(session_id)
+            if info is not None:
+                sessions.append(info)
+        return sessions

@@ -20,10 +20,10 @@ class SuggestionType(Enum):
 class SuggestionPriority(Enum):
     """Priority levels for suggestions."""
 
-    LOW = "low"
-    MEDIUM = "medium"
-    HIGH = "high"
-    CRITICAL = "critical"
+    LOW = 1
+    MEDIUM = 2
+    HIGH = 3
+    CRITICAL = 4
 
 
 @dataclass
@@ -39,24 +39,26 @@ class Suggestion:
     implementation: str
     example: Optional[str] = None
     confidence: float = 0.8
-    created_at: datetime = None
+    created_at: Optional[datetime] = None
 
     def __post_init__(self):
         if self.created_at is None:
             self.created_at = datetime.now()
 
     def to_dict(self) -> Dict[str, Any]:
+        # Map numeric priority back to string for API compatibility
+        priority_map = {1: "low", 2: "medium", 3: "high", 4: "critical"}
         return {
             "suggestion_id": self.suggestion_id,
             "suggestion_type": self.suggestion_type.value,
-            "priority": self.priority.value,
+            "priority": priority_map.get(self.priority.value, "medium"),
             "title": self.title,
             "description": self.description,
             "rationale": self.rationale,
             "implementation": self.implementation,
             "example": self.example,
             "confidence": self.confidence,
-            "created_at": self.created_at.isoformat(),
+            "created_at": self.created_at.isoformat() if self.created_at else None,
         }
 
 
@@ -68,7 +70,11 @@ class SuggestionEngine:
         self.suggestion_counter = 0
 
     def get_suggestions(
-        self, diagram_code: str, context: Optional[Dict[str, Any]] = None
+        self,
+        diagram_code: str,
+        context: Optional[Dict[str, Any]] = None,
+        suggestion_types: Optional[List[SuggestionType]] = None,
+        priority_filter: Optional[SuggestionPriority] = None
     ) -> List[Suggestion]:
         """
         Get suggestions for improving a diagram.
@@ -76,6 +82,8 @@ class SuggestionEngine:
         Args:
             diagram_code: Mermaid diagram code
             context: Additional context about the diagram
+            suggestion_types: Filter by specific suggestion types
+            priority_filter: Filter by minimum priority level
 
         Returns:
             List of suggestions
@@ -89,12 +97,62 @@ class SuggestionEngine:
         for rule in self.suggestion_rules:
             if rule["condition"](diagram_code, analysis, context):
                 suggestion = self._create_suggestion(rule, diagram_code, analysis)
+
+                # Apply type filter
+                if suggestion_types and suggestion.suggestion_type not in suggestion_types:
+                    continue
+
+                # Apply priority filter
+                if priority_filter and suggestion.priority.value < priority_filter.value:
+                    continue
+
                 suggestions.append(suggestion)
 
         # Sort by priority and confidence
         suggestions.sort(key=lambda s: (s.priority.value, -s.confidence), reverse=True)
 
         return suggestions
+
+    def suggest_improvements(self, diagram_code: str, context: Optional[Dict[str, Any]] = None) -> List[Suggestion]:
+        """
+        Get improvement suggestions for a diagram.
+
+        Args:
+            diagram_code: Mermaid diagram code
+            context: Additional context about the diagram
+
+        Returns:
+            List of improvement suggestions
+        """
+        return self.get_suggestions(diagram_code, context)
+
+    def suggest_styling(self, diagram_code: str, context: Optional[Dict[str, Any]] = None) -> List[Suggestion]:
+        """
+        Get styling suggestions for a diagram.
+
+        Args:
+            diagram_code: Mermaid diagram code
+            context: Additional context about the diagram
+
+        Returns:
+            List of styling suggestions
+        """
+        all_suggestions = self.get_suggestions(diagram_code, context)
+        return [s for s in all_suggestions if s.suggestion_type == SuggestionType.STYLE]
+
+    def suggest_layout(self, diagram_code: str, context: Optional[Dict[str, Any]] = None) -> List[Suggestion]:
+        """
+        Get layout suggestions for a diagram.
+
+        Args:
+            diagram_code: Mermaid diagram code
+            context: Additional context about the diagram
+
+        Returns:
+            List of layout suggestions
+        """
+        all_suggestions = self.get_suggestions(diagram_code, context)
+        return [s for s in all_suggestions if s.suggestion_type == SuggestionType.LAYOUT]
 
     def get_suggestions_by_type(
         self,

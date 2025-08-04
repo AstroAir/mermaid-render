@@ -59,6 +59,12 @@ dependencies = [
     "typing-extensions>=4.0.0; python_version<'3.10'",
     "jinja2>=3.0.0",
     "jsonschema>=4.0.0",
+    "openai>=1.98.0",
+    "anthropic>=0.60.0",
+    "ipython>=8.18.1",
+    "uvicorn>=0.35.0",
+    "fastapi>=0.116.1",
+    "cairosvg>=2.8.2",
 ]
 
 [project.optional-dependencies]
@@ -219,6 +225,13 @@ markers = [
     "integration: Integration tests",
     "slow: Slow tests",
     "network: Tests requiring network access",
+    "svg: SVG rendering tests",
+    "browser: Browser compatibility tests",
+    "error_handling: Error handling tests",
+    "theme: Theme support tests",
+    "export: Export functionality tests",
+    "remote: Remote rendering tests",
+    "performance: Performance tests",
 ]
 
 [tool.coverage.run]
@@ -271,3 +284,12 @@ exclude = ["tests*", "docs*", "examples*"]
 
 [tool.setuptools.package-data]
 mermaid_render = ["py.typed", "*.json", "*.yaml", "*.yml"]
+
+[dependency-groups]
+dev = [
+    "types-requests>=2.32.4.20250611",
+]
+
+[[tool.mypy.overrides]]
+module = ["untyped_package.*"]
+follow_untyped_imports = true

@@ -59,7 +59,7 @@ class FlowchartNode:
         "parallelogram": ("[/", "/]"),  # Input/output
         "parallelogram_alt": ("[\\", "\\]"),  # Alternative input/output
         "trapezoid": ("[/", "\\]"),     # Manual operation
-        "trapezoid_alt": ("[\\", "/]"), # Alternative manual operation
+        "trapezoid_alt": ("[\\", "/]"),  # Alternative manual operation
     }
 
     def __init__(
@@ -169,7 +169,7 @@ class FlowchartEdge:
         "arrow": "-->",         # Standard directional arrow
         "open": "---",          # Open line (no arrow)
         "dotted": "-.-",        # Dotted line
-        "dotted_arrow": "-.->", # Dotted arrow
+        "dotted_arrow": "-.->",  # Dotted arrow
         "thick": "==>",         # Thick arrow
         "thick_open": "===",    # Thick open line
     }

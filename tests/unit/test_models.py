@@ -813,6 +813,721 @@ class TestSequenceDiagramAdditional:
         assert "note right of A: Important note" in mermaid_code
 
 
+class TestGanttDiagram:
+    """Test GanttDiagram class."""
+
+    def test_diagram_creation(self):
+        """Test creating a Gantt diagram."""
+        from mermaid_render.models.gantt import GanttDiagram
+
+        diagram = GanttDiagram()
+
+        assert diagram.get_diagram_type() == "gantt"
+        assert diagram.date_format == "%Y-%m-%d"
+        assert len(diagram.sections) == 0
+        assert len(diagram.tasks) == 0
+
+    def test_diagram_with_title_and_format(self):
+        """Test Gantt diagram with title and custom date format."""
+        from mermaid_render.models.gantt import GanttDiagram
+
+        diagram = GanttDiagram(title="Project Timeline", date_format="%m/%d/%Y")
+
+        assert diagram.title == "Project Timeline"
+        assert diagram.date_format == "%m/%d/%Y"
+
+    def test_add_section(self):
+        """Test adding sections to Gantt diagram."""
+        from mermaid_render.models.gantt import GanttDiagram
+
+        diagram = GanttDiagram()
+        diagram.add_section("Planning")
+        diagram.add_section("Development")
+
+        assert len(diagram.sections) == 2
+        assert "Planning" in diagram.sections
+        assert "Development" in diagram.sections
+
+    def test_add_task(self):
+        """Test adding tasks to Gantt diagram."""
+        from mermaid_render.models.gantt import GanttDiagram
+
+        diagram = GanttDiagram()
+        diagram.add_task("Task 1", "2024-01-01", "5d", "active")
+        diagram.add_task("Task 2", "2024-01-06", "3d", "done")
+
+        assert len(diagram.tasks) == 2
+        assert diagram.tasks[0] == ("Task 1", "2024-01-01", "5d", "active")
+        assert diagram.tasks[1] == ("Task 2", "2024-01-06", "3d", "done")
+
+    def test_add_task_defaults(self):
+        """Test adding task with default values."""
+        from mermaid_render.models.gantt import GanttDiagram
+
+        diagram = GanttDiagram()
+        diagram.add_task("Simple Task")
+
+        assert len(diagram.tasks) == 1
+        assert diagram.tasks[0] == ("Simple Task", None, None, "active")
+
+    def test_to_mermaid_basic(self):
+        """Test basic Mermaid generation."""
+        from mermaid_render.models.gantt import GanttDiagram
+
+        diagram = GanttDiagram()
+        diagram.add_task("Task 1", "2024-01-01", "5d")
+
+        mermaid_code = diagram.to_mermaid()
+
+        assert "gantt" in mermaid_code
+        assert "dateFormat %Y-%m-%d" in mermaid_code
+        assert "Task 1 :active, 2024-01-01, 5d" in mermaid_code
+
+    def test_to_mermaid_with_title(self):
+        """Test Mermaid generation with title."""
+        from mermaid_render.models.gantt import GanttDiagram
+
+        diagram = GanttDiagram(title="Project Timeline")
+        diagram.add_task("Task 1", "2024-01-01", "5d")
+
+        mermaid_code = diagram.to_mermaid()
+
+        assert "title Project Timeline" in mermaid_code
+
+    def test_to_mermaid_with_sections(self):
+        """Test Mermaid generation with sections."""
+        from mermaid_render.models.gantt import GanttDiagram
+
+        diagram = GanttDiagram()
+        diagram.add_section("Planning")
+        diagram.add_task("Plan Task", "2024-01-01", "3d")
+        diagram.add_section("Development")
+        diagram.add_task("Dev Task", "2024-01-04", "5d")
+
+        mermaid_code = diagram.to_mermaid()
+
+        assert "section Planning" in mermaid_code
+        assert "section Development" in mermaid_code
+        assert "Plan Task :active, 2024-01-01, 3d" in mermaid_code
+        assert "Dev Task :active, 2024-01-04, 5d" in mermaid_code
+
+    def test_to_mermaid_with_task_status(self):
+        """Test Mermaid generation with task status."""
+        from mermaid_render.models.gantt import GanttDiagram
+
+        diagram = GanttDiagram()
+        diagram.add_task("Done Task", "2024-01-01", "3d", "done")
+        diagram.add_task("Active Task", "2024-01-04", "5d", "active")
+        diagram.add_task("Critical Task", "2024-01-09", "2d", "crit")
+
+        mermaid_code = diagram.to_mermaid()
+
+        assert "Done Task :done, 2024-01-01, 3d" in mermaid_code
+        assert "Active Task :active, 2024-01-04, 5d" in mermaid_code
+        assert "Critical Task :crit, 2024-01-09, 2d" in mermaid_code
+
+
+class TestGitGraphDiagram:
+    """Test GitGraphDiagram class."""
+
+    def test_diagram_creation(self):
+        """Test creating a Git graph diagram."""
+        from mermaid_render.models.git_graph import GitGraphDiagram
+
+        diagram = GitGraphDiagram()
+
+        assert diagram.get_diagram_type() == "gitgraph"
+        assert len(diagram.commits) == 0
+        assert len(diagram.branches) == 0
+        assert len(diagram.merges) == 0
+
+    def test_diagram_with_title(self):
+        """Test Git graph diagram with title."""
+        from mermaid_render.models.git_graph import GitGraphDiagram
+
+        diagram = GitGraphDiagram(title="Version Control Flow")
+
+        assert diagram.title == "Version Control Flow"
+
+    def test_add_commit(self):
+        """Test adding commits to Git graph."""
+        from mermaid_render.models.git_graph import GitGraphDiagram
+
+        diagram = GitGraphDiagram()
+        diagram.add_commit("Initial commit", "main")
+        diagram.add_commit("Add feature", "feature")
+
+        assert len(diagram.commits) == 2
+        assert diagram.commits[0] == ("commit", "Initial commit", "main")
+        assert diagram.commits[1] == ("commit", "Add feature", "feature")
+
+    def test_add_commit_default_branch(self):
+        """Test adding commit with default branch."""
+        from mermaid_render.models.git_graph import GitGraphDiagram
+
+        diagram = GitGraphDiagram()
+        diagram.add_commit("Default branch commit")
+
+        assert len(diagram.commits) == 1
+        assert diagram.commits[0] == ("commit", "Default branch commit", "main")
+
+    def test_add_branch(self):
+        """Test adding branches to Git graph."""
+        from mermaid_render.models.git_graph import GitGraphDiagram
+
+        diagram = GitGraphDiagram()
+        diagram.add_branch("feature")
+        diagram.add_branch("hotfix")
+
+        assert len(diagram.branches) == 2
+        assert "feature" in diagram.branches
+        assert "hotfix" in diagram.branches
+
+    def test_add_merge(self):
+        """Test adding merges to Git graph."""
+        from mermaid_render.models.git_graph import GitGraphDiagram
+
+        diagram = GitGraphDiagram()
+        diagram.add_merge("feature", "main")
+        diagram.add_merge("hotfix", "main")
+
+        assert len(diagram.merges) == 2
+        assert diagram.merges[0] == ("feature", "main")
+        assert diagram.merges[1] == ("hotfix", "main")
+
+    def test_to_mermaid_basic(self):
+        """Test basic Mermaid generation."""
+        from mermaid_render.models.git_graph import GitGraphDiagram
+
+        diagram = GitGraphDiagram()
+        diagram.add_commit("Initial commit")
+
+        mermaid_code = diagram.to_mermaid()
+
+        assert "gitgraph" in mermaid_code
+        assert "commit id: \"Initial commit\"" in mermaid_code
+
+    def test_to_mermaid_with_title(self):
+        """Test Mermaid generation with title."""
+        from mermaid_render.models.git_graph import GitGraphDiagram
+
+        diagram = GitGraphDiagram(title="Git Flow")
+        diagram.add_commit("Initial commit")
+
+        mermaid_code = diagram.to_mermaid()
+
+        assert "title: Git Flow" in mermaid_code
+
+    def test_to_mermaid_with_branches_and_merges(self):
+        """Test Mermaid generation with branches and merges."""
+        from mermaid_render.models.git_graph import GitGraphDiagram
+
+        diagram = GitGraphDiagram()
+        diagram.add_commit("Initial commit", "main")
+        diagram.add_branch("feature")
+        diagram.add_commit("Feature work", "feature")
+        diagram.add_merge("feature", "main")
+
+        mermaid_code = diagram.to_mermaid()
+
+        assert "gitgraph" in mermaid_code
+        assert "commit id: \"Initial commit\"" in mermaid_code
+        assert "branch feature" in mermaid_code
+        assert "commit id: \"Feature work\"" in mermaid_code
+        assert "merge feature" in mermaid_code
+
+
+class TestMindmapDiagram:
+    """Test MindmapDiagram class."""
+
+    def test_diagram_creation(self):
+        """Test creating a mindmap diagram."""
+        from mermaid_render.models.mindmap import MindmapDiagram
+
+        diagram = MindmapDiagram()
+
+        assert diagram.get_diagram_type() == "mindmap"
+        assert diagram.root.id == "root"
+        assert diagram.root.text == "Root"
+        assert len(diagram.root.children) == 0
+
+    def test_diagram_with_title_and_root(self):
+        """Test mindmap diagram with title and custom root."""
+        from mermaid_render.models.mindmap import MindmapDiagram
+
+        diagram = MindmapDiagram(title="Project Planning", root_text="Web App")
+
+        assert diagram.title == "Project Planning"
+        assert diagram.root.text == "Web App"
+
+    def test_add_node_to_root(self):
+        """Test adding nodes to root."""
+        from mermaid_render.models.mindmap import MindmapDiagram
+
+        diagram = MindmapDiagram()
+        node1 = diagram.add_node("root", "frontend", "Frontend")
+        node2 = diagram.add_node("root", "backend", "Backend")
+
+        assert len(diagram.root.children) == 2
+        assert node1.id == "frontend"
+        assert node1.text == "Frontend"
+        assert node2.id == "backend"
+        assert node2.text == "Backend"
+
+    def test_add_node_with_shape(self):
+        """Test adding node with custom shape."""
+        from mermaid_render.models.mindmap import MindmapDiagram
+
+        diagram = MindmapDiagram()
+        node = diagram.add_node("root", "important", "Important", shape="circle")
+
+        assert node.shape == "circle"
+
+    def test_add_nested_nodes(self):
+        """Test adding nested nodes."""
+        from mermaid_render.models.mindmap import MindmapDiagram
+
+        diagram = MindmapDiagram()
+        diagram.add_node("root", "frontend", "Frontend")
+        diagram.add_node("frontend", "react", "React")
+        diagram.add_node("frontend", "vue", "Vue")
+
+        frontend_node = diagram.root.children[0]
+        assert len(frontend_node.children) == 2
+        assert frontend_node.children[0].text == "React"
+        assert frontend_node.children[1].text == "Vue"
+
+    def test_find_node(self):
+        """Test finding nodes in the tree."""
+        from mermaid_render.models.mindmap import MindmapDiagram
+
+        diagram = MindmapDiagram()
+        diagram.add_node("root", "frontend", "Frontend")
+        diagram.add_node("frontend", "react", "React")
+
+        # Test finding existing node
+        frontend_node = diagram._find_node(diagram.root, "frontend")
+        assert frontend_node is not None
+        assert frontend_node.text == "Frontend"
+
+        # Test finding non-existent node
+        missing_node = diagram._find_node(diagram.root, "nonexistent")
+        assert missing_node is None
+
+    def test_to_mermaid_basic(self):
+        """Test basic Mermaid generation."""
+        from mermaid_render.models.mindmap import MindmapDiagram
+
+        diagram = MindmapDiagram(root_text="Central Idea")
+        diagram.add_node("root", "branch1", "Branch 1")
+
+        mermaid_code = diagram.to_mermaid()
+
+        assert "mindmap" in mermaid_code
+        assert "Central Idea" in mermaid_code
+        assert "Branch 1" in mermaid_code
+
+    def test_to_mermaid_with_title(self):
+        """Test Mermaid generation with title."""
+        from mermaid_render.models.mindmap import MindmapDiagram
+
+        diagram = MindmapDiagram(title="My Mindmap", root_text="Central")
+        diagram.add_node("root", "branch1", "Branch 1")
+
+        mermaid_code = diagram.to_mermaid()
+
+        assert "title: My Mindmap" in mermaid_code
+
+    def test_to_mermaid_with_shapes(self):
+        """Test Mermaid generation with different shapes."""
+        from mermaid_render.models.mindmap import MindmapDiagram
+
+        diagram = MindmapDiagram(root_text="Root")
+        diagram.add_node("root", "circle", "Circle Node", shape="circle")
+        diagram.add_node("root", "bang", "Bang Node", shape="bang")
+        diagram.add_node("root", "cloud", "Cloud Node", shape="cloud")
+
+        mermaid_code = diagram.to_mermaid()
+
+        assert "((Circle Node))" in mermaid_code
+        assert ")Bang Node((" in mermaid_code
+        assert "))Cloud Node(((" in mermaid_code
+
+
+class TestPieChartDiagram:
+    """Test PieChartDiagram class."""
+
+    def test_diagram_creation(self):
+        """Test creating a pie chart diagram."""
+        from mermaid_render.models.pie_chart import PieChartDiagram
+
+        diagram = PieChartDiagram()
+
+        assert diagram.get_diagram_type() == "pie"
+        assert diagram.show_data is True
+        assert len(diagram.data) == 0
+
+    def test_diagram_with_options(self):
+        """Test pie chart diagram with options."""
+        from mermaid_render.models.pie_chart import PieChartDiagram
+
+        diagram = PieChartDiagram(title="Data Distribution", show_data=False)
+
+        assert diagram.title == "Data Distribution"
+        assert diagram.show_data is False
+
+    def test_add_slice(self):
+        """Test adding slices to pie chart."""
+        from mermaid_render.models.pie_chart import PieChartDiagram
+
+        diagram = PieChartDiagram()
+        diagram.add_slice("Category A", 35.5)
+        diagram.add_slice("Category B", 28.2)
+        diagram.add_slice("Category C", 36.3)
+
+        assert len(diagram.data) == 3
+        assert diagram.data["Category A"] == 35.5
+        assert diagram.data["Category B"] == 28.2
+        assert diagram.data["Category C"] == 36.3
+
+    def test_to_mermaid_basic(self):
+        """Test basic Mermaid generation."""
+        from mermaid_render.models.pie_chart import PieChartDiagram
+
+        diagram = PieChartDiagram()
+        diagram.add_slice("A", 50)
+        diagram.add_slice("B", 30)
+        diagram.add_slice("C", 20)
+
+        mermaid_code = diagram.to_mermaid()
+
+        assert "pie" in mermaid_code
+        assert "showData" in mermaid_code
+        assert '"A" : 50' in mermaid_code
+        assert '"B" : 30' in mermaid_code
+        assert '"C" : 20' in mermaid_code
+
+    def test_to_mermaid_with_title(self):
+        """Test Mermaid generation with title."""
+        from mermaid_render.models.pie_chart import PieChartDiagram
+
+        diagram = PieChartDiagram(title="Sales Data")
+        diagram.add_slice("Q1", 25)
+
+        mermaid_code = diagram.to_mermaid()
+
+        assert "title Sales Data" in mermaid_code
+
+    def test_to_mermaid_without_show_data(self):
+        """Test Mermaid generation without show data."""
+        from mermaid_render.models.pie_chart import PieChartDiagram
+
+        diagram = PieChartDiagram(show_data=False)
+        diagram.add_slice("A", 50)
+
+        mermaid_code = diagram.to_mermaid()
+
+        assert "pie" in mermaid_code
+        assert "showData" not in mermaid_code
+        assert '"A" : 50' in mermaid_code
+
+
+class TestStateDiagram:
+    """Test StateDiagram class."""
+
+    def test_diagram_creation(self):
+        """Test creating a state diagram."""
+        from mermaid_render.models.state import StateDiagram
+
+        diagram = StateDiagram()
+
+        assert diagram.get_diagram_type() == "stateDiagram-v2"
+        assert len(diagram.states) == 0
+        assert len(diagram.transitions) == 0
+
+    def test_diagram_with_title(self):
+        """Test state diagram with title."""
+        from mermaid_render.models.state import StateDiagram
+
+        diagram = StateDiagram(title="State Machine")
+
+        assert diagram.title == "State Machine"
+
+    def test_add_state(self):
+        """Test adding states to diagram."""
+        from mermaid_render.models.state import StateDiagram
+
+        diagram = StateDiagram()
+        diagram.add_state("idle", "Idle State")
+        diagram.add_state("active")
+
+        assert len(diagram.states) == 2
+        assert diagram.states["idle"] == "Idle State"
+        assert diagram.states["active"] == "active"
+
+    def test_add_transition(self):
+        """Test adding transitions between states."""
+        from mermaid_render.models.state import StateDiagram
+
+        diagram = StateDiagram()
+        diagram.add_transition("idle", "active", "start")
+        diagram.add_transition("active", "idle")
+
+        assert len(diagram.transitions) == 2
+        assert diagram.transitions[0] == ("idle", "active", "start")
+        assert diagram.transitions[1] == ("active", "idle", None)
+
+    def test_to_mermaid_basic(self):
+        """Test basic Mermaid generation."""
+        from mermaid_render.models.state import StateDiagram
+
+        diagram = StateDiagram()
+        diagram.add_state("idle")
+        diagram.add_transition("idle", "active")
+
+        mermaid_code = diagram.to_mermaid()
+
+        assert "stateDiagram-v2" in mermaid_code
+        assert "idle --> active" in mermaid_code
+
+    def test_to_mermaid_with_title(self):
+        """Test Mermaid generation with title."""
+        from mermaid_render.models.state import StateDiagram
+
+        diagram = StateDiagram(title="State Machine")
+        diagram.add_state("idle")
+
+        mermaid_code = diagram.to_mermaid()
+
+        assert "title: State Machine" in mermaid_code
+
+    def test_to_mermaid_with_state_labels(self):
+        """Test Mermaid generation with state labels."""
+        from mermaid_render.models.state import StateDiagram
+
+        diagram = StateDiagram()
+        diagram.add_state("idle", "Idle State")
+        diagram.add_state("active", "Active State")
+
+        mermaid_code = diagram.to_mermaid()
+
+        assert "idle : Idle State" in mermaid_code
+        assert "active : Active State" in mermaid_code
+
+    def test_to_mermaid_with_transition_labels(self):
+        """Test Mermaid generation with transition labels."""
+        from mermaid_render.models.state import StateDiagram
+
+        diagram = StateDiagram()
+        diagram.add_transition("idle", "active", "start")
+        diagram.add_transition("active", "idle", "stop")
+
+        mermaid_code = diagram.to_mermaid()
+
+        assert "idle --> active : start" in mermaid_code
+        assert "active --> idle : stop" in mermaid_code
+
+
+class TestUserJourneyDiagram:
+    """Test UserJourneyDiagram class."""
+
+    def test_diagram_creation(self):
+        """Test creating a user journey diagram."""
+        from mermaid_render.models.user_journey import UserJourneyDiagram
+
+        diagram = UserJourneyDiagram()
+
+        assert diagram.get_diagram_type() == "journey"
+        assert len(diagram.sections) == 0
+        assert len(diagram.tasks) == 0
+
+    def test_diagram_with_title(self):
+        """Test user journey diagram with title."""
+        from mermaid_render.models.user_journey import UserJourneyDiagram
+
+        diagram = UserJourneyDiagram(title="Customer Journey")
+
+        assert diagram.title == "Customer Journey"
+
+    def test_add_section(self):
+        """Test adding sections to user journey."""
+        from mermaid_render.models.user_journey import UserJourneyDiagram
+
+        diagram = UserJourneyDiagram()
+        diagram.add_section("Discovery")
+        diagram.add_section("Purchase")
+
+        assert len(diagram.sections) == 2
+        assert diagram.sections[0] == ("section", "Discovery")
+        assert diagram.sections[1] == ("section", "Purchase")
+
+    def test_add_task(self):
+        """Test adding tasks to user journey."""
+        from mermaid_render.models.user_journey import UserJourneyDiagram
+
+        diagram = UserJourneyDiagram()
+        diagram.add_task("Search products", ["Customer", "Support"], 5)
+        diagram.add_task("Add to cart", ["Customer"], 3)
+
+        assert len(diagram.tasks) == 2
+        assert diagram.tasks[0] == ("Search products", ["Customer", "Support"], 5)
+        assert diagram.tasks[1] == ("Add to cart", ["Customer"], 3)
+
+    def test_to_mermaid_basic(self):
+        """Test basic Mermaid generation."""
+        from mermaid_render.models.user_journey import UserJourneyDiagram
+
+        diagram = UserJourneyDiagram()
+        diagram.add_task("Browse", ["Customer"], 4)
+
+        mermaid_code = diagram.to_mermaid()
+
+        assert "journey" in mermaid_code
+        assert "Browse: 4: Customer" in mermaid_code
+
+    def test_to_mermaid_with_title(self):
+        """Test Mermaid generation with title."""
+        from mermaid_render.models.user_journey import UserJourneyDiagram
+
+        diagram = UserJourneyDiagram(title="Shopping Journey")
+        diagram.add_task("Browse", ["Customer"], 4)
+
+        mermaid_code = diagram.to_mermaid()
+
+        assert "title Shopping Journey" in mermaid_code
+
+    def test_to_mermaid_with_sections(self):
+        """Test Mermaid generation with sections."""
+        from mermaid_render.models.user_journey import UserJourneyDiagram
+
+        diagram = UserJourneyDiagram()
+        diagram.add_section("Discovery")
+        diagram.add_task("Search", ["Customer"], 5)
+        diagram.add_section("Purchase")
+        diagram.add_task("Buy", ["Customer", "Payment"], 3)
+
+        mermaid_code = diagram.to_mermaid()
+
+        assert "section Discovery" in mermaid_code
+        assert "section Purchase" in mermaid_code
+        assert "Search: 5: Customer" in mermaid_code
+        assert "Buy: 3: Customer : Payment" in mermaid_code
+
+    def test_to_mermaid_multiple_actors(self):
+        """Test Mermaid generation with multiple actors."""
+        from mermaid_render.models.user_journey import UserJourneyDiagram
+
+        diagram = UserJourneyDiagram()
+        diagram.add_task("Complex task", ["Customer", "Support", "Admin"], 4)
+
+        mermaid_code = diagram.to_mermaid()
+
+        assert "Complex task: 4: Customer : Support : Admin" in mermaid_code
+
+
+class TestMindmapNode:
+    """Test MindmapNode class."""
+
+    def test_node_creation(self):
+        """Test creating a mindmap node."""
+        from mermaid_render.models.mindmap import MindmapNode
+
+        node = MindmapNode("test", "Test Node")
+
+        assert node.id == "test"
+        assert node.text == "Test Node"
+        assert node.shape == "default"
+        assert len(node.children) == 0
+
+    def test_node_with_shape(self):
+        """Test creating node with custom shape."""
+        from mermaid_render.models.mindmap import MindmapNode
+
+        node = MindmapNode("test", "Test Node", shape="circle")
+
+        assert node.shape == "circle"
+
+    def test_add_child(self):
+        """Test adding child nodes."""
+        from mermaid_render.models.mindmap import MindmapNode
+
+        parent = MindmapNode("parent", "Parent")
+        child1 = MindmapNode("child1", "Child 1")
+        child2 = MindmapNode("child2", "Child 2")
+
+        parent.add_child(child1)
+        parent.add_child(child2)
+
+        assert len(parent.children) == 2
+        assert parent.children[0] is child1
+        assert parent.children[1] is child2
+
+    def test_to_mermaid_default_shape(self):
+        """Test Mermaid generation for default shape."""
+        from mermaid_render.models.mindmap import MindmapNode
+
+        node = MindmapNode("test", "Test Node")
+        lines = node.to_mermaid()
+
+        assert lines == ["Test Node"]
+
+    def test_to_mermaid_circle_shape(self):
+        """Test Mermaid generation for circle shape."""
+        from mermaid_render.models.mindmap import MindmapNode
+
+        node = MindmapNode("test", "Circle Node", shape="circle")
+        lines = node.to_mermaid()
+
+        assert lines == ["((Circle Node))"]
+
+    def test_to_mermaid_with_children(self):
+        """Test Mermaid generation with children."""
+        from mermaid_render.models.mindmap import MindmapNode
+
+        parent = MindmapNode("parent", "Parent")
+        child = MindmapNode("child", "Child")
+        parent.add_child(child)
+
+        lines = parent.to_mermaid()
+
+        assert "Parent" in lines
+        assert "  Child" in lines
+
+    def test_to_mermaid_nested_levels(self):
+        """Test Mermaid generation with multiple nesting levels."""
+        from mermaid_render.models.mindmap import MindmapNode
+
+        root = MindmapNode("root", "Root")
+        level1 = MindmapNode("l1", "Level 1")
+        level2 = MindmapNode("l2", "Level 2")
+
+        root.add_child(level1)
+        level1.add_child(level2)
+
+        lines = root.to_mermaid()
+
+        assert "Root" in lines
+        assert "  Level 1" in lines
+        assert "    Level 2" in lines
+
+    def test_to_mermaid_all_shapes(self):
+        """Test Mermaid generation for all supported shapes."""
+        from mermaid_render.models.mindmap import MindmapNode
+
+        shapes_to_test = [
+            ("default", "Default", "Default"),
+            ("circle", "Circle", "((Circle))"),
+            ("bang", "Bang", ")Bang(("),
+            ("cloud", "Cloud", "))Cloud((("),
+            ("hexagon", "Hexagon", ")Hexagon(("),
+        ]
+
+        for shape, text, expected in shapes_to_test:
+            node = MindmapNode("test", text, shape=shape)
+            lines = node.to_mermaid()
+            assert expected in lines[0]
+
+
 class TestClassMethod:
     """Test ClassMethod class."""
 

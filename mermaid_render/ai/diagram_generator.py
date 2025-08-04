@@ -63,6 +63,7 @@ class GenerationResult:
     diagram_code: str
     diagram_type: DiagramType
     confidence_score: float
+    config: Optional[GenerationConfig] = None
     metadata: Dict[str, Any] = field(default_factory=dict)
     suggestions: List[str] = field(default_factory=list)
     generated_at: datetime = field(default_factory=datetime.now)
@@ -73,6 +74,7 @@ class GenerationResult:
             "diagram_code": self.diagram_code,
             "diagram_type": self.diagram_type.value,
             "confidence_score": self.confidence_score,
+            "config": self.config.to_dict() if self.config else None,
             "metadata": self.metadata,
             "suggestions": self.suggestions,
             "generated_at": self.generated_at.isoformat(),
@@ -147,6 +149,7 @@ class DiagramGenerator:
             diagram_code=diagram_code,
             diagram_type=config.diagram_type,
             confidence_score=confidence,
+            config=config,
             metadata={
                 "input_analysis": analysis.to_dict(),
                 "generation_config": config.to_dict(),
@@ -234,8 +237,14 @@ class DiagramGenerator:
             existing_diagram, improvement_request, config
         )
 
-        # Generate improved diagram
-        improved_code = self.ai_provider.generate_text(prompt)
+        # Generate improved diagram (ai_provider returns GenerationResponse)
+        ai_response = self.ai_provider.generate_text(prompt)
+
+        # Ensure we work with a string body
+        response_text = getattr(ai_response, "text", str(ai_response))
+
+        # Extract code then post-process
+        improved_code = self._extract_diagram_code(response_text)
 
         # Post-process
         improved_code = self._post_process_diagram(improved_code, config)
@@ -249,11 +258,30 @@ class DiagramGenerator:
             diagram_code=improved_code,
             diagram_type=self._detect_diagram_type(improved_code),
             confidence_score=confidence,
+            config=config,
             metadata={
                 "original_diagram": existing_diagram,
                 "improvement_request": improvement_request,
             },
         )
+
+    def get_suggestions(self, diagram_code: str, context: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+        """
+        Get AI-powered suggestions for improving a diagram.
+
+        Args:
+            diagram_code: Mermaid diagram code
+            context: Additional context about the diagram
+
+        Returns:
+            List of suggestions
+        """
+        from .suggestions import SuggestionEngine
+
+        engine = SuggestionEngine()
+        suggestions = engine.get_suggestions(diagram_code, context)
+
+        return [suggestion.to_dict() for suggestion in suggestions]
 
     def _determine_diagram_type(self, analysis: TextAnalysis) -> DiagramType:
         """Determine the best diagram type for the given analysis."""
@@ -299,11 +327,14 @@ class DiagramGenerator:
         # Create generation prompt
         prompt = self._create_generation_prompt(text, analysis, config)
 
-        # Generate with AI
-        response = self.ai_provider.generate_text(prompt)
+        # Generate with AI (ai_provider returns GenerationResponse)
+        ai_response = self.ai_provider.generate_text(prompt)
 
-        # Extract diagram code from response
-        diagram_code = self._extract_diagram_code(response)
+        # Normalize to string
+        response_text = getattr(ai_response, "text", str(ai_response))
+
+        # Extract diagram code from response text
+        diagram_code = self._extract_diagram_code(response_text)
 
         return diagram_code
 

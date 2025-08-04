@@ -6,11 +6,11 @@ This script runs all available examples and generates a complete showcase
 of the library's capabilities.
 """
 
+import subprocess
 import sys
 import time
-import subprocess
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
 
 def create_output_dir():
@@ -24,9 +24,9 @@ def run_example_script(script_path: Path, description: str) -> Dict[str, Any]:
     """Run an example script and return results."""
     print(f"🚀 Running: {description}")
     print(f"   Script: {script_path}")
-    
+
     start_time = time.time()
-    
+
     try:
         # Run the script
         result = subprocess.run(
@@ -35,9 +35,9 @@ def run_example_script(script_path: Path, description: str) -> Dict[str, Any]:
             text=True,
             timeout=300  # 5 minute timeout
         )
-        
+
         execution_time = time.time() - start_time
-        
+
         if result.returncode == 0:
             print(f"   ✅ Completed successfully in {execution_time:.2f}s")
             return {
@@ -60,7 +60,7 @@ def run_example_script(script_path: Path, description: str) -> Dict[str, Any]:
                 "stdout": result.stdout,
                 "stderr": result.stderr
             }
-    
+
     except subprocess.TimeoutExpired:
         print(f"   ⏰ Timed out after 5 minutes")
         return {
