@@ -15,6 +15,7 @@ Available diagram types:
 - PieChartDiagram: Pie charts for data visualization
 - GitGraphDiagram: Git branching diagrams
 - MindmapDiagram: Mind maps and hierarchical structures
+- TimelineDiagram: Timeline diagrams for chronological events
 """
 
 from .class_diagram import ClassDiagram
@@ -26,6 +27,7 @@ from .mindmap import MindmapDiagram
 from .pie_chart import PieChartDiagram
 from .sequence import SequenceDiagram
 from .state import StateDiagram
+from .timeline import TimelineDiagram
 from .user_journey import UserJourneyDiagram
 
 __all__ = [
@@ -39,4 +41,5 @@ __all__ = [
     "PieChartDiagram",
     "GitGraphDiagram",
     "MindmapDiagram",
+    "TimelineDiagram",
 ]

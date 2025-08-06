@@ -23,17 +23,17 @@ from mermaid_render import (
 )
 
 
-def create_output_dir():
+def create_output_dir() -> Path:
     """Create output directory for examples."""
     output_dir = Path("output/integration")
     output_dir.mkdir(parents=True, exist_ok=True)
     return output_dir
 
 
-def flask_integration_example(output_dir: Path):
+def flask_integration_example(output_dir: Path) -> None:
     """Demonstrate Flask web framework integration."""
     print("Flask integration example...")
-    
+
     # Create a Flask app example (as a string since we're demonstrating)
     flask_app_code = '''
 from flask import Flask, request, jsonify, render_template_string
@@ -268,7 +268,7 @@ if __name__ == '__main__':
     print("🌐 Open: http://localhost:5000")
 
 
-def fastapi_integration_example(output_dir: Path):
+def fastapi_integration_example(output_dir: Path) -> None:
     """Demonstrate FastAPI integration."""
     print("FastAPI integration example...")
     
@@ -429,7 +429,7 @@ if __name__ == "__main__":
     print("📖 Docs: http://localhost:8000/docs")
 
 
-def cli_integration_example(output_dir: Path):
+def cli_integration_example(output_dir: Path) -> None:
     """Demonstrate CLI application integration."""
     print("CLI integration example...")
     
@@ -663,7 +663,7 @@ if __name__ == '__main__':
     print("  python advanced_cli.py render diagram.mmd -o output.svg")
 
 
-def main():
+def main() -> None:
     """Run all integration examples."""
     print("=== Mermaid Render Integration Examples ===\n")
     

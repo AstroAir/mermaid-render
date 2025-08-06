@@ -10,10 +10,16 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union, TypedDict
 
 
-def create_output_dir():
+class ExampleScript(TypedDict):
+    """Type definition for example script configuration."""
+    script: Path
+    description: str
+
+
+def create_output_dir() -> Path:
     """Create main output directory for all examples."""
     output_dir = Path("output")
     output_dir.mkdir(exist_ok=True)
@@ -83,18 +89,18 @@ def run_example_script(script_path: Path, description: str) -> Dict[str, Any]:
         }
 
 
-def generate_summary_report(results: List[Dict[str, Any]], output_dir: Path):
+def generate_summary_report(results: List[Dict[str, Any]], output_dir: Path) -> Dict[str, Any]:
     """Generate a comprehensive summary report."""
     print("\n📊 Generating summary report...")
-    
+
     # Calculate statistics
     total_examples = len(results)
     successful_examples = sum(1 for r in results if r['success'])
     failed_examples = total_examples - successful_examples
     total_time = sum(r['execution_time'] for r in results)
-    
+
     # Create summary
-    summary = {
+    summary: Dict[str, Any] = {
         "execution_summary": {
             "total_examples": total_examples,
             "successful": successful_examples,
@@ -243,17 +249,17 @@ def generate_summary_report(results: List[Dict[str, Any]], output_dir: Path):
     return summary
 
 
-def main():
+def main() -> int:
     """Run all examples and generate comprehensive report."""
     print("=== Mermaid Render Complete Examples Showcase ===\n")
-    
+
     # Create output directory
     output_dir = create_output_dir()
     print(f"Output directory: {output_dir.absolute()}\n")
-    
+
     # Define all example scripts
     examples_dir = Path(__file__).parent
-    example_scripts = [
+    example_scripts: List[ExampleScript] = [
         {
             "script": examples_dir / "basic_usage.py",
             "description": "Basic Usage Examples - Fundamental features and simple diagrams"
@@ -295,32 +301,32 @@ def main():
             "description": "Interactive & Collaboration - Real-time editing and version control"
         }
     ]
-    
+
     # Filter to only existing scripts
-    available_scripts = []
+    available_scripts: List[ExampleScript] = []
     for example in example_scripts:
         if example["script"].exists():
             available_scripts.append(example)
         else:
             print(f"⚠️  Script not found: {example['script']}")
-    
+
     print(f"Found {len(available_scripts)} example scripts to run\n")
-    
+
     # Run all examples
-    results = []
+    results: List[Dict[str, Any]] = []
     start_time = time.time()
-    
+
     for i, example in enumerate(available_scripts, 1):
         print(f"[{i}/{len(available_scripts)}] ", end="")
         result = run_example_script(example["script"], example["description"])
         results.append(result)
         print()  # Add spacing between examples
-    
+
     total_time = time.time() - start_time
-    
+
     # Generate summary report
     summary = generate_summary_report(results, output_dir)
-    
+
     # Print final summary
     print(f"\n🎉 All examples completed!")
     print(f"📊 Summary:")
@@ -331,7 +337,7 @@ def main():
     print(f"   Total time: {total_time:.2f}s")
     print(f"\n📁 Check the {output_dir} directory for all generated files and reports.")
     print(f"🌐 Open {output_dir}/example_execution_report.html for a detailed report.")
-    
+
     # Return appropriate exit code
     failed_count = summary['execution_summary']['failed']
     return 0 if failed_count == 0 else 1

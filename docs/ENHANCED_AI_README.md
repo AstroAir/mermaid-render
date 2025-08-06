@@ -3,6 +3,7 @@
 ## 🚀 New Features
 
 ### 1. OpenRouter Integration
+
 Access hundreds of AI models through OpenRouter's unified API:
 
 ```python
@@ -15,6 +16,7 @@ provider = create_openrouter_provider(
 ```
 
 ### 2. Custom Provider Support
+
 Integrate any AI API with flexible configuration:
 
 ```python
@@ -31,6 +33,7 @@ provider = CustomProvider(config)
 ```
 
 ### 3. Multi-Provider Management
+
 Automatic fallback between providers:
 
 ```python
@@ -49,6 +52,7 @@ result = manager.generate_text("Create a flowchart")
 ### 4. Enhanced Utilities
 
 #### Batch Generation
+
 ```python
 from mermaid_render.ai import batch_generate_diagrams
 
@@ -60,6 +64,7 @@ results = batch_generate_diagrams(
 ```
 
 #### Provider Performance Comparison
+
 ```python
 from mermaid_render.ai import compare_provider_performance
 
@@ -73,6 +78,7 @@ comparison = compare_provider_performance(
 ```
 
 #### AI-Powered Validation
+
 ```python
 from mermaid_render.ai import validate_diagram_with_ai
 
@@ -85,6 +91,7 @@ result = validate_diagram_with_ai(
 ## 🔧 Configuration
 
 ### Environment Variables
+
 ```bash
 export OPENAI_API_KEY="your-openai-key"
 export ANTHROPIC_API_KEY="your-anthropic-key"
@@ -92,6 +99,7 @@ export OPENROUTER_API_KEY="your-openrouter-key"
 ```
 
 ### Provider Configuration
+
 ```python
 from mermaid_render.ai import ProviderConfig
 

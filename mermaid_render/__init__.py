@@ -33,6 +33,7 @@ from .exceptions import (
     ConfigurationError,
     DataSourceError,
     DiagramError,
+    ErrorAggregator,
     MermaidRenderError,
     RenderingError,
     TemplateError,
@@ -52,6 +53,7 @@ from .models import (
     PieChartDiagram,
     SequenceDiagram,
     StateDiagram,
+    TimelineDiagram,
     UserJourneyDiagram,
 )
 
@@ -175,6 +177,7 @@ __all__ = [
     "ThemeError",
     "DataSourceError",
     "CacheError",
+    "ErrorAggregator",
     # Diagram models
     "FlowchartDiagram",
     "SequenceDiagram",
@@ -186,6 +189,7 @@ __all__ = [
     "PieChartDiagram",
     "GitGraphDiagram",
     "MindmapDiagram",
+    "TimelineDiagram",
     # Validators
     "MermaidValidator",
     "ValidationResult",

@@ -333,11 +333,13 @@ from mermaid_render.ai import (
 ### Configuration Migration
 
 Old provider initialization:
+
 ```python
 provider = OpenAIProvider(api_key="key", model="gpt-4")
 ```
 
 New provider initialization:
+
 ```python
 config = ProviderConfig(api_key="key", model="gpt-4")
 provider = OpenAIProvider(config)

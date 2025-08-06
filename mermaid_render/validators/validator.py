@@ -134,6 +134,7 @@ class MermaidValidator:
         "pie": r"^pie",
         "gitgraph": r"^gitgraph",
         "mindmap": r"^mindmap",
+        "timeline": r"^timeline",
     }
 
     # Common syntax patterns
@@ -292,6 +293,8 @@ class MermaidValidator:
             self._validate_sequence_diagram(lines)
         elif diagram_type == "classDiagram":
             self._validate_class_diagram(lines)
+        elif diagram_type == "timeline":
+            self._validate_timeline(lines)
         # Add more diagram-specific validations as needed
 
     def _validate_flowchart(self, lines: List[str]) -> None:
@@ -394,6 +397,49 @@ class MermaidValidator:
 
         if not classes:
             self._add_warning("No classes found in class diagram")
+
+    def _validate_timeline(self, lines: List[str]) -> None:
+        """Validate timeline-specific syntax."""
+        has_periods = False
+        has_events = False
+        sections = set()
+
+        for i, original_line in enumerate(lines[1:], 2):  # Skip first line (diagram type)
+            line = original_line.strip()
+            if not line:
+                continue
+
+            # Check for title
+            if line.startswith("title "):
+                continue
+
+            # Check for sections
+            if line.startswith("section "):
+                section_name = line[8:].strip()
+                if section_name:
+                    sections.add(section_name)
+                else:
+                    self._add_error("Empty section name", i)
+                continue
+
+            # Check for time periods and events
+            if ":" in line:
+                has_periods = True
+                parts = line.split(":", 1)
+                if len(parts) == 2:
+                    period = parts[0].strip()
+                    event = parts[1].strip()
+
+                    if not period and not original_line.startswith("              :"):
+                        self._add_error("Empty time period", i)
+                    elif event:
+                        has_events = True
+                    # Empty event is allowed for time periods without events
+
+        if not has_periods:
+            self._add_warning("No time periods found in timeline")
+        elif not has_events:
+            self._add_warning("No events found in timeline")
 
     def validate_node_id(self, node_id: str) -> bool:
         """Validate a node ID according to Mermaid rules."""

@@ -24,12 +24,14 @@ renderer = MermaidRenderer(
 Renders a diagram to a string.
 
 **Parameters:**
+
 - `diagram`: Diagram object or raw Mermaid code string
 - `**kwargs`: Override renderer settings (theme, format, width, height, etc.)
 
 **Returns:** Rendered diagram as string
 
 **Example:**
+
 ```python
 svg_content = renderer.render(flowchart, theme="dark", format="svg")
 ```
@@ -39,11 +41,13 @@ svg_content = renderer.render(flowchart, theme="dark", format="svg")
 Renders and saves a diagram to a file.
 
 **Parameters:**
+
 - `diagram`: Diagram object or raw Mermaid code string
 - `filepath`: Output file path
 - `**kwargs`: Override renderer settings
 
 **Example:**
+
 ```python
 renderer.save(sequence_diagram, "output.png", format="png", width=1200)
 ```
@@ -53,6 +57,7 @@ renderer.save(sequence_diagram, "output.png", format="png", width=1200)
 Renders multiple diagrams efficiently.
 
 **Parameters:**
+
 - `diagrams`: List of diagram objects or Mermaid code strings
 - `**kwargs`: Common settings for all diagrams
 

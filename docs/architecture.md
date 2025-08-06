@@ -71,36 +71,44 @@ graph TB
 ### 1. Core Layer
 
 #### MermaidRenderer
+
 The central rendering engine that orchestrates the entire rendering process.
 
 **Responsibilities:**
+
 - Coordinate diagram rendering pipeline
 - Apply themes and configuration
 - Handle format conversion
 - Manage error handling and recovery
 
 **Key Methods:**
+
 - `render()`: Main rendering method
 - `save()`: Render and save to file
 - `set_theme()`: Apply themes
 
 #### Configuration System
+
 Hierarchical configuration management with multiple sources.
 
 **Configuration Sources (in order of precedence):**
+
 1. Runtime parameters (highest)
 2. Environment variables
 3. Configuration files
 4. Default values (lowest)
 
 **Key Classes:**
+
 - `MermaidConfig`: Core configuration
 - `ConfigManager`: Advanced configuration management
 
 #### Theme Management
+
 Comprehensive theming system supporting built-in and custom themes.
 
 **Features:**
+
 - Built-in theme collection
 - Custom theme support
 - Theme validation
@@ -111,23 +119,28 @@ Comprehensive theming system supporting built-in and custom themes.
 The model layer provides object-oriented interfaces for creating different types of diagrams.
 
 #### Base Classes
+
 - `MermaidDiagram`: Abstract base for all diagram types
 - Provides common functionality: validation, configuration, serialization
 
 #### Diagram Types
+
 Each diagram type has specialized classes for elements:
 
 **FlowchartDiagram:**
+
 - `FlowchartNode`: Individual nodes with shapes and styling
 - `FlowchartEdge`: Connections between nodes
 - `FlowchartSubgraph`: Grouped elements
 
 **SequenceDiagram:**
+
 - `SequenceParticipant`: Actors in the sequence
 - `SequenceMessage`: Communications between participants
 - `SequenceNote`: Annotations and comments
 
 **ClassDiagram:**
+
 - `ClassDefinition`: Class structures
 - `ClassMethod`: Method definitions
 - `ClassAttribute`: Property definitions
@@ -136,44 +149,54 @@ Each diagram type has specialized classes for elements:
 ### 3. Service Layer
 
 #### Validation Service
+
 Comprehensive syntax and semantic validation.
 
 **Features:**
+
 - Mermaid syntax validation
 - Semantic correctness checking
 - Error reporting with line numbers
 - Suggestion generation
 
 #### Export Service
+
 Multi-format export capabilities.
 
 **Supported Formats:**
+
 - SVG: Vector graphics for web
 - PNG: Raster images for documents
 - PDF: Print-ready documents
 
 **Features:**
+
 - Batch export
 - Multi-format export
 - Custom sizing and quality
 
 #### Cache Service
+
 Performance optimization through intelligent caching.
 
 **Cache Backends:**
+
 - Memory: Fast in-process caching
 - File: Persistent disk-based caching
 - Redis: Distributed caching for scalability
 
 **Features:**
+
 - Automatic cache invalidation
 - Performance monitoring
 - Cache warming strategies
 
 #### AI Service
+
 Advanced AI-powered features for diagram generation and optimization.
 
 **Capabilities:**
+
 - Natural language to diagram conversion
 - Diagram optimization and layout
 - Smart suggestions and improvements
@@ -327,16 +350,19 @@ New AI providers can be added by:
 ## Testing Strategy
 
 ### Unit Tests
+
 - Individual component testing
 - Mock external dependencies
 - Edge case coverage
 
 ### Integration Tests
+
 - End-to-end rendering pipeline
 - External service integration
 - Performance benchmarks
 
 ### Quality Assurance
+
 - Code coverage monitoring
 - Static analysis
 - Security scanning
@@ -344,16 +370,19 @@ New AI providers can be added by:
 ## Deployment Patterns
 
 ### Standalone Library
+
 - Direct Python package installation
 - Local rendering capabilities
 - Minimal dependencies
 
 ### Service-Oriented
+
 - Microservice architecture
 - API-based rendering
 - Scalable deployment
 
 ### Hybrid Approach
+
 - Local rendering with cloud fallback
 - Caching for performance
 - Offline capability
@@ -361,12 +390,14 @@ New AI providers can be added by:
 ## Future Enhancements
 
 ### Planned Features
+
 - Real-time collaborative editing
 - Advanced AI capabilities
 - Additional diagram types
 - Enhanced theming system
 
 ### Extensibility
+
 - Plugin architecture
 - Custom element types
 - Advanced styling options

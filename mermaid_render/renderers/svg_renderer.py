@@ -660,8 +660,19 @@ class SVGRenderer:
             # Create mermaid object
             mermaid_obj = md.Mermaid(mermaid_code)
 
-            # Get the SVG content
-            svg_content = str(mermaid_obj)
+            # Get the SVG content using the svg_response property
+            svg_response = mermaid_obj.svg_response
+
+            # Handle different response types
+            if hasattr(svg_response, 'text'):
+                # It's a Response object
+                svg_content = svg_response.text
+            elif isinstance(svg_response, str):
+                # It's already a string
+                svg_content = svg_response
+            else:
+                # Convert to string
+                svg_content = str(svg_response)
 
             # If the content is HTML, extract SVG
             if svg_content.strip().startswith('<html') or '<svg' not in svg_content:
@@ -1558,16 +1569,21 @@ Original Mermaid Code:
                 if strict:
                     result['is_valid'] = False
 
-        # Namespace validation
-        if 'xmlns' not in svg_lower:
-            result['warnings'].append("No XML namespace declaration found")
+        # Namespace validation - be more specific about what's missing
+        if 'xmlns="http://www.w3.org/2000/svg"' not in svg_content:
+            if 'xmlns' not in svg_lower:
+                result['warnings'].append("No XML namespace declaration found")
+            else:
+                result['warnings'].append("SVG namespace declaration may be incorrect")
 
         # Check for valid SVG elements
         valid_svg_elements = [
             'svg', 'g', 'path', 'rect', 'circle', 'ellipse', 'line', 'polyline', 'polygon',
             'text', 'tspan', 'textPath', 'defs', 'clipPath', 'mask', 'pattern', 'image',
             'use', 'symbol', 'marker', 'linearGradient', 'radialGradient', 'stop',
-            'animate', 'animateTransform', 'animateMotion', 'set', 'foreignObject'
+            'animate', 'animateTransform', 'animateMotion', 'set', 'foreignObject',
+            'style', 'title', 'desc', 'metadata',  # Add commonly used SVG elements
+            'p', 'div', 'span', 'br'  # HTML elements that can be valid in foreignObject
         ]
 
         # Extract all element names
@@ -1577,7 +1593,9 @@ Original Mermaid Code:
         invalid_elements = []
         for element in set(elements):
             if element.lower() not in valid_svg_elements:
-                invalid_elements.append(element)
+                # Don't flag common HTML elements that might be valid in certain contexts
+                if element.lower() not in ['html', 'head', 'body', 'div', 'span']:
+                    invalid_elements.append(element)
 
         if invalid_elements:
             result['warnings'].append(
@@ -1633,7 +1651,7 @@ Original Mermaid Code:
         svg_content = re.sub(r'<script[^>]*>.*?</script>',
                              '', svg_content, flags=re.IGNORECASE | re.DOTALL)
 
-        # Remove event handlers
+        # Remove event handlers - improved pattern to handle edge cases
         event_handlers = [
             'onclick', 'onmouseover', 'onmouseout', 'onmousedown', 'onmouseup',
             'onkeydown', 'onkeyup', 'onkeypress', 'onfocus', 'onblur', 'onload',
@@ -1642,8 +1660,14 @@ Original Mermaid Code:
         ]
 
         for handler in event_handlers:
-            pattern = rf'\s{handler}\s*=\s*["\'][^"\']*["\']'
-            svg_content = re.sub(pattern, '', svg_content, flags=re.IGNORECASE)
+            # More robust pattern that handles various quote styles and spacing
+            patterns = [
+                rf'\s{handler}\s*=\s*["\'][^"\']*["\']',  # Standard quotes
+                rf'\s{handler}\s*=\s*[^"\'\s>]+',         # Unquoted values
+                rf'{handler}\s*=\s*["\'][^"\']*["\']',    # No leading space
+            ]
+            for pattern in patterns:
+                svg_content = re.sub(pattern, '', svg_content, flags=re.IGNORECASE)
 
         # Remove dangerous URLs
         dangerous_urls = [
@@ -1685,6 +1709,9 @@ Original Mermaid Code:
         # Ensure proper XML structure
         svg_content = self._fix_xml_structure(svg_content)
 
+        # Fix common compatibility issues
+        svg_content = self._fix_compatibility_issues(svg_content)
+
         return svg_content
 
     def _fix_xml_structure(self, svg_content: str) -> str:
@@ -1695,19 +1722,103 @@ Original Mermaid Code:
             if '<svg' in svg_content:
                 svg_content = '<?xml version="1.0" encoding="UTF-8"?>\n' + svg_content
 
+        # Fix malformed self-closing tags (e.g., '//>') to proper self-closing tags ('/>')
+        svg_content = re.sub(r'/+>', '/>', svg_content)
+
+        # Ensure proper SVG namespace declaration
+        if '<svg' in svg_content and 'xmlns="http://www.w3.org/2000/svg"' not in svg_content:
+            # Find the SVG opening tag and add namespace if missing
+            svg_pattern = r'<svg([^>]*?)>'
+            def add_namespace(match):
+                attrs = match.group(1)
+                if 'xmlns=' not in attrs:
+                    # Add the SVG namespace
+                    if attrs.strip():
+                        return f'<svg{attrs} xmlns="http://www.w3.org/2000/svg">'
+                    else:
+                        return '<svg xmlns="http://www.w3.org/2000/svg">'
+                return match.group(0)
+
+            svg_content = re.sub(svg_pattern, add_namespace, svg_content, count=1)
+
         # Fix self-closing tags that should be properly closed
         self_closing_fixes = [
-            (r'<path([^>]*)>', r'<path\1/>'),
-            (r'<circle([^>]*)>', r'<circle\1/>'),
-            (r'<rect([^>]*)>', r'<rect\1/>'),
-            (r'<line([^>]*)>', r'<line\1/>'),
-            (r'<ellipse([^>]*)>', r'<ellipse\1/>'),
+            (r'<path([^>]*?)(?<!/)>', r'<path\1/>'),
+            (r'<circle([^>]*?)(?<!/)>', r'<circle\1/>'),
+            (r'<rect([^>]*?)(?<!/)>', r'<rect\1/>'),
+            (r'<line([^>]*?)(?<!/)>', r'<line\1/>'),
+            (r'<ellipse([^>]*?)(?<!/)>', r'<ellipse\1/>'),
         ]
 
         for pattern, replacement in self_closing_fixes:
             # Only fix if not already self-closing and not followed by closing tag
             svg_content = re.sub(
-                pattern + r'(?!\s*/>)(?![^<]*</\w+>)', replacement, svg_content)
+                pattern + r'(?![^<]*</\w+>)', replacement, svg_content)
+
+        return svg_content
+
+    def _fix_compatibility_issues(self, svg_content: str) -> str:
+        """Fix common SVG compatibility issues for better browser support."""
+        if not svg_content:
+            return svg_content
+
+        # Fix viewBox attribute casing (some browsers are case-sensitive)
+        svg_content = re.sub(r'\bviewbox\b', 'viewBox', svg_content, flags=re.IGNORECASE)
+
+        # Ensure proper units for width/height if they're just numbers
+        def add_units(match):
+            attr_name = match.group(1)
+            value = match.group(2)
+            # If it's just a number, add 'px' unit
+            if re.match(r'^\d+(\.\d+)?$', value):
+                return f'{attr_name}="{value}px"'
+            return match.group(0)
+
+        # Fix width and height attributes
+        svg_content = re.sub(r'(width|height)="([^"]*)"', add_units, svg_content)
+
+        # Remove any remaining multiple slashes in self-closing tags
+        svg_content = re.sub(r'/+>', '/>', svg_content)
+
+        # Fix any remaining malformed attributes
+        svg_content = re.sub(r'(\w+)=([^"\s>]+)(?=\s|>)', r'\1="\2"', svg_content)
+
+        # Fix XML attribute construct errors
+        svg_content = self._fix_xml_attribute_errors(svg_content)
+
+        return svg_content
+
+    def _fix_xml_attribute_errors(self, svg_content: str) -> str:
+        """Fix XML attribute construct errors that cause parsing issues."""
+        if not svg_content:
+            return svg_content
+
+        # Fix the most common XML attribute issues
+
+        # 1. Fix unquoted attribute values
+        svg_content = re.sub(r'(\w+)=([^"\s>]+)(?=\s|>)', r'\1="\2"', svg_content)
+
+        # 2. Fix unescaped ampersands in attribute values (simple approach)
+        def fix_ampersands(match):
+            attr_name = match.group(1)
+            attr_value = match.group(2)
+            # Only escape & if it's not already part of an entity
+            if '&amp;' not in attr_value:
+                attr_value = attr_value.replace('&', '&amp;')
+            return f'{attr_name}="{attr_value}"'
+
+        svg_content = re.sub(r'([a-zA-Z-]+)="([^"]*&[^"]*)"', fix_ampersands, svg_content)
+
+        # 3. Fix unescaped < and > in attribute values
+        def fix_brackets(match):
+            attr_name = match.group(1)
+            attr_value = match.group(2)
+            # Only escape if not already escaped
+            if '&lt;' not in attr_value and '&gt;' not in attr_value:
+                attr_value = attr_value.replace('<', '&lt;').replace('>', '&gt;')
+            return f'{attr_name}="{attr_value}"'
+
+        svg_content = re.sub(r'([a-zA-Z-]+)="([^"]*[<>][^"]*)"', fix_brackets, svg_content)
 
         return svg_content
 

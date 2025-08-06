@@ -5,14 +5,18 @@ This section contains practical examples and code samples for using Mermaid Rend
 ## 🚀 Quick Start Examples
 
 ### [Basic Usage Examples](../../examples/basic_usage.py)
+
 Fundamental features including flowcharts, sequence diagrams, themes, and validation.
+
 - Simple diagram creation
 - Theme application
 - File export
 - Validation patterns
 
 ### [Advanced Usage Examples](../../examples/advanced_usage.py)
+
 Complex features including custom themes, configuration management, and batch processing.
+
 - Custom theme creation
 - Configuration management
 - Batch processing
@@ -22,7 +26,9 @@ Complex features including custom themes, configuration management, and batch pr
 ## 📊 Diagram Type Examples
 
 ### [Complete Diagram Types Showcase](../../examples/diagram_types_showcase.py)
+
 Comprehensive examples for all supported diagram types with practical use cases:
+
 - **State Diagrams**: User authentication state machines
 - **ER Diagrams**: E-commerce database schemas
 - **User Journey**: Online shopping customer journeys
@@ -34,6 +40,7 @@ Comprehensive examples for all supported diagram types with practical use cases:
 ## 🤖 AI-Powered Features
 
 ### [AI Features Showcase](../../examples/ai_features_showcase.py)
+
 Demonstrate AI capabilities for intelligent diagram generation:
 
 - **Natural Language Generation**: Create diagrams from text descriptions
@@ -45,6 +52,7 @@ Demonstrate AI capabilities for intelligent diagram generation:
 ## 📋 Template System
 
 ### [Template System Showcase](../../examples/template_system_showcase.py)
+
 Template-based diagram generation and reusable patterns:
 
 - **Built-in Templates**: Using pre-built diagram templates
@@ -55,6 +63,7 @@ Template-based diagram generation and reusable patterns:
 ## 🔗 Integration Examples
 
 ### [Integration Patterns](../../examples/integration_examples.py)
+
 Real-world integration patterns for web frameworks and applications:
 
 - **Flask Integration**: Complete web application with diagram editor
@@ -65,6 +74,7 @@ Real-world integration patterns for web frameworks and applications:
 ## 🌍 Real-World Use Cases
 
 ### [Real-World Applications](../../examples/real_world_use_cases.py)
+
 Practical applications demonstrating professional use cases:
 
 - **Software Architecture Documentation**: Complete system architecture with microservices
@@ -75,6 +85,7 @@ Practical applications demonstrating professional use cases:
 ## ⚡ Performance & Optimization
 
 ### [Performance & Caching Showcase](../../examples/performance_caching_showcase.py)
+
 Performance optimization strategies and caching implementations:
 
 - **Basic Caching**: Memory-based caching for improved performance
@@ -86,6 +97,7 @@ Performance optimization strategies and caching implementations:
 ## 🧪 Testing & Validation
 
 ### [Testing & Validation Showcase](../../examples/testing_validation_showcase.py)
+
 Comprehensive testing patterns and validation strategies:
 
 - **Unit Testing**: Testing diagram creation and rendering
@@ -97,6 +109,7 @@ Comprehensive testing patterns and validation strategies:
 ## 🤝 Interactive & Collaboration
 
 ### [Interactive & Collaboration Showcase](../../examples/interactive_collaboration_showcase.py)
+
 Real-time collaboration and interactive editing features:
 
 - **Interactive Builder**: Step-by-step diagram construction
@@ -107,6 +120,7 @@ Real-time collaboration and interactive editing features:
 ## 🚀 Run All Examples
 
 ### [Complete Examples Runner](../../examples/run_all_examples.py)
+
 Comprehensive script that runs all examples and generates detailed reports:
 
 ```bash
@@ -121,6 +135,7 @@ python examples/run_all_examples.py
 ```
 
 **Features:**
+
 - **Automated Execution**: Runs all examples with timeout protection
 - **Performance Tracking**: Measures execution time for each example
 - **Error Handling**: Captures and reports any failures
@@ -168,6 +183,7 @@ output/                                     # Generated files
    - Building an application? See [Integration Examples](../../examples/integration_examples.py)
 
 2. **Run Examples Locally**:
+
    ```bash
    # Clone the repository
    git clone https://github.com/mermaid-render/mermaid-render.git
@@ -204,21 +220,25 @@ Different examples may require additional dependencies:
 ## 💡 Tips for Using Examples
 
 ### Customization
+
 - All examples are designed to be easily modified
 - Change diagram content, themes, and output formats to suit your needs
 - Use examples as starting points for your own applications
 
 ### Performance
+
 - Run the performance examples to understand optimization strategies
 - Use caching for production applications with frequent diagram generation
 - Monitor performance with the built-in performance tracking tools
 
 ### Integration
+
 - Web framework examples show complete integration patterns
 - CLI examples demonstrate command-line tool development
 - Use the testing examples to ensure robust applications
 
 ### Troubleshooting
+
 - Check the validation examples for syntax error handling
 - Review error handling patterns for robust applications
 - Use the testing showcase for debugging strategies
@@ -233,6 +253,7 @@ We welcome contributions of new examples! To contribute:
 4. **Submit PR**: Create a pull request with your new examples
 
 ### Example Guidelines
+
 - **Clear Purpose**: Each example should demonstrate specific features
 - **Self-Contained**: Examples should run independently
 - **Well-Commented**: Include explanatory comments

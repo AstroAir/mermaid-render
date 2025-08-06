@@ -4,6 +4,7 @@ PDF renderer for the Mermaid Render library.
 This module provides PDF rendering functionality by converting SVG to PDF.
 """
 
+import re
 from typing import Any, Dict, Optional
 
 from ..exceptions import RenderingError, UnsupportedFormatError
@@ -67,6 +68,52 @@ class PDFRenderer:
         except Exception as e:
             raise RenderingError(f"PDF rendering failed: {str(e)}") from e
 
+    def render_from_svg(self, svg_content: str) -> bytes:
+        """
+        Render PDF directly from SVG content.
+
+        Args:
+            svg_content: SVG content as string
+
+        Returns:
+            PDF data as bytes
+
+        Raises:
+            RenderingError: If rendering fails
+        """
+        try:
+            return self._svg_to_pdf(svg_content)
+        except Exception as e:
+            raise RenderingError(f"PDF rendering from SVG failed: {str(e)}") from e
+
+    def _clean_svg_content(self, svg_content: str) -> str:
+        """
+        Clean SVG content to ensure it's well-formed XML.
+
+        Args:
+            svg_content: Raw SVG content
+
+        Returns:
+            Cleaned SVG content
+        """
+        # Remove any invalid XML characters
+        svg_content = re.sub(r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]', '', svg_content)
+
+        # Fix common XML issues
+        svg_content = svg_content.replace('&', '&amp;')
+        svg_content = svg_content.replace('<', '&lt;').replace('&lt;svg', '<svg').replace('&lt;/svg', '</svg')
+        svg_content = svg_content.replace('&lt;g', '<g').replace('&lt;/g', '</g')
+        svg_content = svg_content.replace('&lt;path', '<path').replace('&lt;rect', '<rect')
+        svg_content = svg_content.replace('&lt;circle', '<circle').replace('&lt;text', '<text')
+        svg_content = svg_content.replace('&lt;marker', '<marker').replace('&lt;/marker', '</marker')
+        svg_content = svg_content.replace('&lt;defs', '<defs').replace('&lt;/defs', '</defs')
+
+        # Ensure proper XML declaration if missing
+        if not svg_content.strip().startswith('<?xml'):
+            svg_content = '<?xml version="1.0" encoding="UTF-8"?>\n' + svg_content
+
+        return svg_content
+
     def _svg_to_pdf(self, svg_content: str) -> bytes:
         """
         Convert SVG content to PDF.
@@ -78,11 +125,14 @@ class PDFRenderer:
             PDF data as bytes
         """
         try:
+            # Clean the SVG content first
+            cleaned_svg = self._clean_svg_content(svg_content)
+
             # Try to use cairosvg if available
             import cairosvg
 
             pdf_data = cairosvg.svg2pdf(
-                bytestring=svg_content.encode("utf-8"),
+                bytestring=cleaned_svg.encode("utf-8"),
                 output_width=None,  # Preserve original dimensions
                 output_height=None,
             )

@@ -21,6 +21,7 @@ from .exceptions import (
     UnsupportedFormatError,
     ValidationError,
 )
+from .renderers import PNGRenderer, PDFRenderer, SVGRenderer
 
 
 class MermaidConfig:
@@ -333,6 +334,8 @@ class MermaidDiagram(ABC):
         self.title = title
         self._elements: List[str] = []
         self._config: Dict[str, Any] = {}
+        self._cached_mermaid: Optional[str] = None
+        self._is_disposed: bool = False
 
     @abstractmethod
     def get_diagram_type(self) -> str:
@@ -353,17 +356,19 @@ class MermaidDiagram(ABC):
         """
         pass
 
-    @abstractmethod
     def to_mermaid(self) -> str:
         """
         Generate Mermaid syntax for this diagram.
 
-        This method must be implemented by all concrete diagram classes to generate
-        the complete Mermaid syntax string for the diagram, including the diagram
-        type declaration and all diagram elements.
+        This method generates the complete Mermaid syntax string for the diagram,
+        including the diagram type declaration and all diagram elements. It uses
+        caching to improve performance for repeated calls.
 
         Returns:
             Complete Mermaid syntax string for the diagram
+
+        Raises:
+            RuntimeError: If the diagram has been disposed
 
         Example:
             >>> diagram = FlowchartDiagram()
@@ -372,6 +377,32 @@ class MermaidDiagram(ABC):
             >>> print(mermaid_code)
             flowchart TD
                 A[Start]
+        """
+        self._check_disposed()
+
+        # Use cached version if available
+        if self._cached_mermaid is not None:
+            return self._cached_mermaid
+
+        # Generate new Mermaid syntax
+        self._cached_mermaid = self._generate_mermaid()
+        return self._cached_mermaid
+
+    @abstractmethod
+    def _generate_mermaid(self) -> str:
+        """
+        Generate Mermaid syntax for this diagram (internal implementation).
+
+        This method must be implemented by all concrete diagram classes to generate
+        the complete Mermaid syntax string for the diagram, including the diagram
+        type declaration and all diagram elements.
+
+        Returns:
+            Complete Mermaid syntax string for the diagram
+
+        Note:
+            This is the internal implementation that concrete classes should override.
+            External code should call to_mermaid() instead.
         """
         pass
 
@@ -388,7 +419,10 @@ class MermaidDiagram(ABC):
             >>> diagram.add_config("direction", "LR")
             >>> diagram.add_config("theme", "dark")
         """
+        self._check_disposed()
         self._config[key] = value
+        # Clear cache since configuration changed
+        self.clear_cache()
 
     def get_config(self) -> Dict[str, Any]:
         """
@@ -428,6 +462,68 @@ class MermaidDiagram(ABC):
         validator = MermaidValidator()
         result = validator.validate(self.to_mermaid())
         return result.is_valid
+
+    def clear_cache(self) -> None:
+        """
+        Clear any cached diagram data.
+
+        This method clears internal caches to free up memory. It's useful
+        for long-running applications or when processing many diagrams.
+
+        Example:
+            >>> diagram = FlowchartDiagram()
+            >>> # ... build diagram ...
+            >>> diagram.clear_cache()  # Free cached data
+        """
+        self._cached_mermaid = None
+
+    def dispose(self) -> None:
+        """
+        Dispose of diagram resources and mark as disposed.
+
+        This method cleans up all internal resources and marks the diagram
+        as disposed. After calling this method, the diagram should not be used.
+
+        Example:
+            >>> diagram = FlowchartDiagram()
+            >>> # ... use diagram ...
+            >>> diagram.dispose()  # Clean up resources
+        """
+        if self._is_disposed:
+            return
+
+        # Clear all data structures
+        self._elements.clear()
+        self._config.clear()
+        self._cached_mermaid = None
+        self.title = None
+
+        # Mark as disposed
+        self._is_disposed = True
+
+    def __del__(self) -> None:
+        """
+        Destructor to ensure proper cleanup.
+
+        Automatically called when the diagram object is garbage collected.
+        Ensures that resources are properly cleaned up even if dispose()
+        wasn't called explicitly.
+        """
+        try:
+            self.dispose()
+        except Exception:
+            # Ignore errors during cleanup to avoid issues during shutdown
+            pass
+
+    def _check_disposed(self) -> None:
+        """
+        Check if diagram has been disposed and raise error if so.
+
+        Raises:
+            RuntimeError: If the diagram has been disposed
+        """
+        if self._is_disposed:
+            raise RuntimeError("Cannot use diagram after it has been disposed")
 
     def __str__(self) -> str:
         """
@@ -516,6 +612,14 @@ class MermaidRenderer:
         """
         self.config = config or MermaidConfig()
         self._theme: Optional[MermaidTheme] = None
+
+        # Initialize format-specific renderers
+        self._svg_renderer = SVGRenderer()
+        self._png_renderer = PNGRenderer(
+            server_url=self.config.get("server_url", "https://mermaid.ink"),
+            timeout=self.config.get("timeout", 30.0)
+        )
+        self._pdf_renderer = PDFRenderer()
 
         if theme:
             self.set_theme(theme)
@@ -611,7 +715,7 @@ class MermaidRenderer:
 
         return self.render_raw(mermaid_code, format, **options)
 
-    def render_raw(self, mermaid_code: str, format: str = "svg", **options: Any) -> str:
+    def render_raw(self, mermaid_code: str, format: str = "svg", **options: Any) -> Union[str, bytes]:
         """
         Render raw Mermaid code to specified format.
 
@@ -621,26 +725,47 @@ class MermaidRenderer:
             **options: Additional rendering options
 
         Returns:
-            Rendered content
+            Rendered content (str for SVG, bytes for PNG/PDF)
         """
         try:
-            # Create Mermaid object with theme if available
-            config = {}
+            # Prepare theme configuration
+            theme_name = None
             if self._theme:
-                config = self._theme.to_dict()
-            config.update(options)
-
-            # Use mermaid-py for rendering
-            mermaid_obj = md.Mermaid(mermaid_code)
+                theme_name = self._theme.name if self._theme.name != "custom" else None
+                # For custom themes, pass the config directly
+                if self._theme.name == "custom":
+                    options.update(self._theme.to_dict())
 
             if format == "svg":
-                # For SVG, we can get the content directly
-                return str(mermaid_obj)
+                # Use SVG renderer
+                return self._svg_renderer.render(
+                    mermaid_code,
+                    theme=theme_name,
+                    config=options
+                )
+            elif format == "png":
+                # Use PNG renderer
+                return self._png_renderer.render(
+                    mermaid_code,
+                    theme=theme_name,
+                    config=options,
+                    width=options.get("width"),
+                    height=options.get("height")
+                )
+            elif format == "pdf":
+                # Use PDF renderer - first get SVG, then convert
+                # Disable validation for PDF conversion to avoid XML parsing issues
+                svg_content = self._svg_renderer.render(
+                    mermaid_code,
+                    theme=theme_name,
+                    config=options,
+                    validate=False,
+                    sanitize=False
+                )
+                # PDF renderer expects SVG content, not mermaid code
+                return self._pdf_renderer.render_from_svg(svg_content)
             else:
-                # For other formats, we need to use the mermaid.ink service
-                # This is a simplified implementation - in production you'd want
-                # more sophisticated handling
-                raise UnsupportedFormatError(f"Format {format} not yet implemented")
+                raise UnsupportedFormatError(f"Unsupported format: {format}")
 
         except Exception as e:
             raise RenderingError(f"Failed to render diagram: {str(e)}") from e

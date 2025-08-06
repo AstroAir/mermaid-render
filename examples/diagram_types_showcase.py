@@ -7,6 +7,7 @@ that show real-world use cases for each type.
 """
 
 from pathlib import Path
+from typing import List
 from mermaid_render import (
     MermaidRenderer,
     StateDiagram,
@@ -19,26 +20,26 @@ from mermaid_render import (
 )
 
 
-def create_output_dir():
+def create_output_dir() -> Path:
     """Create output directory for examples."""
     output_dir = Path("output/diagram_types")
     output_dir.mkdir(parents=True, exist_ok=True)
     return output_dir
 
 
-def state_diagram_example(output_dir: Path):
+def state_diagram_example(output_dir: Path) -> None:
     """Create a state diagram for a user authentication system."""
     print("Creating state diagram example...")
-    
+
     state = StateDiagram(title="User Authentication State Machine")
-    
+
     # Add states
     state.add_state("logged_out", "Logged Out")
     state.add_state("authenticating", "Authenticating")
     state.add_state("logged_in", "Logged In")
     state.add_state("session_expired", "Session Expired")
     state.add_state("locked_out", "Locked Out")
-    
+
     # Add transitions
     state.add_transition("logged_out", "authenticating", "login_attempt")
     state.add_transition("authenticating", "logged_in", "success")
@@ -56,10 +57,10 @@ def state_diagram_example(output_dir: Path):
     print(f"Saved state diagram to {output_path}")
 
 
-def er_diagram_example(output_dir: Path):
+def er_diagram_example(output_dir: Path) -> None:
     """Create an ER diagram for an e-commerce database."""
     print("Creating ER diagram example...")
-    
+
     er = ERDiagram()  # ER diagrams don't support titles in Mermaid
     
     # Add entities
@@ -115,7 +116,7 @@ def er_diagram_example(output_dir: Path):
     print(f"Saved ER diagram to {output_path}")
 
 
-def user_journey_example(output_dir: Path):
+def user_journey_example(output_dir: Path) -> None:
     """Create a user journey diagram for online shopping."""
     print("Creating user journey diagram example...")
     
@@ -147,7 +148,7 @@ def user_journey_example(output_dir: Path):
     print(f"Saved user journey diagram to {output_path}")
 
 
-def gantt_diagram_example(output_dir: Path):
+def gantt_diagram_example(output_dir: Path) -> None:
     """Create a Gantt chart for a software development project."""
     print("Creating Gantt diagram example...")
     
@@ -180,7 +181,7 @@ def gantt_diagram_example(output_dir: Path):
     print(f"Saved Gantt diagram to {output_path}")
 
 
-def pie_chart_example(output_dir: Path):
+def pie_chart_example(output_dir: Path) -> None:
     """Create a pie chart showing technology stack usage."""
     print("Creating pie chart example...")
     
@@ -201,7 +202,7 @@ def pie_chart_example(output_dir: Path):
     print(f"Saved pie chart to {output_path}")
 
 
-def git_graph_example(output_dir: Path):
+def git_graph_example(output_dir: Path) -> None:
     """Create a Git graph showing branching strategy."""
     print("Creating Git graph example...")
     
@@ -232,7 +233,7 @@ def git_graph_example(output_dir: Path):
     print(f"Saved Git graph to {output_path}")
 
 
-def mindmap_example(output_dir: Path):
+def mindmap_example(output_dir: Path) -> None:
     """Create a mindmap for project planning."""
     print("Creating mindmap example...")
     
@@ -271,7 +272,7 @@ def mindmap_example(output_dir: Path):
     print(f"Saved mindmap to {output_path}")
 
 
-def main():
+def main() -> None:
     """Run all diagram type examples."""
     print("=== Mermaid Render Diagram Types Showcase ===\n")
     

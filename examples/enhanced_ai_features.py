@@ -16,6 +16,7 @@ Run with: python examples/enhanced_ai_features.py
 import os
 import sys
 from pathlib import Path
+from typing import Dict, List, Any, Optional
 
 # Add the project root to the Python path
 project_root = Path(__file__).parent.parent
@@ -46,10 +47,10 @@ from mermaid_render.ai import (
 )
 
 
-def demo_openrouter_provider():
+def demo_openrouter_provider() -> None:
     """Demonstrate OpenRouter provider usage."""
     print("\n=== OpenRouter Provider Demo ===")
-    
+
     # Check if API key is available
     api_key = os.getenv("OPENROUTER_API_KEY")
     if not api_key:
@@ -87,7 +88,7 @@ def demo_openrouter_provider():
         print(f"❌ OpenRouter demo failed: {e}")
 
 
-def demo_custom_provider():
+def demo_custom_provider() -> None:
     """Demonstrate custom provider configuration."""
     print("\n=== Custom Provider Demo ===")
     
@@ -123,7 +124,7 @@ def demo_custom_provider():
         print(f"❌ Custom provider demo failed: {e}")
 
 
-def demo_multi_provider_management():
+def demo_multi_provider_management() -> None:
     """Demonstrate multi-provider setup with fallback."""
     print("\n=== Multi-Provider Management Demo ===")
     
@@ -189,7 +190,7 @@ def demo_multi_provider_management():
         print(f"❌ Multi-provider demo failed: {e}")
 
 
-def demo_batch_generation():
+def demo_batch_generation() -> None:
     """Demonstrate batch diagram generation."""
     print("\n=== Batch Generation Demo ===")
     
@@ -234,7 +235,7 @@ def demo_batch_generation():
         print(f"❌ Batch generation demo failed: {e}")
 
 
-def demo_provider_performance_comparison():
+def demo_provider_performance_comparison() -> None:
     """Demonstrate provider performance comparison."""
     print("\n=== Provider Performance Comparison Demo ===")
     
@@ -283,7 +284,7 @@ def demo_provider_performance_comparison():
         print(f"❌ Performance comparison demo failed: {e}")
 
 
-def demo_ai_validation():
+def demo_ai_validation() -> None:
     """Demonstrate AI-powered diagram validation."""
     print("\n=== AI Validation Demo ===")
     
@@ -335,7 +336,7 @@ def demo_ai_validation():
         print(f"❌ AI validation demo failed: {e}")
 
 
-def main():
+def main() -> None:
     """Run all enhanced AI feature demonstrations."""
     print("🚀 Enhanced AI Features Showcase")
     print("=" * 50)
