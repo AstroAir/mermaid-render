@@ -24,7 +24,7 @@ class UserJourneyDiagram(MermaidDiagram):
         """Add a task with actors and satisfaction score."""
         self.tasks.append((task, actors, score))
 
-    def to_mermaid(self) -> str:
+    def _generate_mermaid(self) -> str:
         """Generate Mermaid syntax for the user journey."""
         lines = ["journey"]
 

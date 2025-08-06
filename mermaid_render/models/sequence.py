@@ -420,7 +420,7 @@ class SequenceDiagram(MermaidDiagram):
             raise DiagramError(f"Participant '{participant_id}' does not exist")
         self.activations[participant_id] = False
 
-    def to_mermaid(self) -> str:
+    def _generate_mermaid(self) -> str:
         """Generate complete Mermaid syntax for the sequence diagram."""
         lines = ["sequenceDiagram"]
 

@@ -145,38 +145,38 @@ def commit_diagram_changes(vc: VersionControl, diagram: FlowchartDiagram, messag
 
 # Try to load real modules; if available, override the shims above
 try:
-    from mermaid_render.interactive import (  # type: ignore
+    from mermaid_render.interactive import (  # type: ignore[assignment]
         DiagramBuilder as _DiagramBuilder,
         InteractiveServer as _InteractiveServer,  # noqa: F401 (intentionally unused in this script)
-        create_interactive_session as _create_interactive_session,
         start_server as _start_server,  # noqa: F401 (intentionally unused)
     )
-    DiagramBuilder = _DiagramBuilder
-    create_interactive_session = _create_interactive_session
+    # 运行时覆盖，避免类型冲突
+    DiagramBuilder = _DiagramBuilder  # type: ignore[assignment]
+    # 统一保持本地 create_interactive_session(diagram_type, title) 的签名与返回类型，避免类型不匹配
+    def create_interactive_session(diagram_type: str, title: str) -> _InteractiveSession:  # type: ignore[override]
+        sid = f"interactive-{int(time.time()*1000)}"
+        return _InteractiveSession(sid, diagram_type, title)
     INTERACTIVE_AVAILABLE = True
 except ImportError:
     print("⚠️  Interactive features not available. Install with: pip install mermaid-render[interactive]")
 
 try:
-    from mermaid_render.collaboration import (  # type: ignore
-        CollaborationManager as _CollaborationManager,
-        VersionControl as _VersionControl,
-        create_collaborative_session as _create_collaborative_session,
-        commit_diagram_changes as _commit_diagram_changes,
+    from mermaid_render.collaboration import (  # type: ignore[assignment]
+        CollaborationManager as _RealCollaborationManager,
+        VersionControl as _RealVersionControl,
+        commit_diagram_changes as _real_commit_diagram_changes,
+        Permission as _RealPermission,
     )
-    CollaborationManager = _CollaborationManager
-    VersionControl = _VersionControl
-    create_collaborative_session = _create_collaborative_session
-    commit_diagram_changes = _commit_diagram_changes
+    # 避免与本地 shim 的同名类产生类型冲突：保留本地类名不变，但单独暴露真实类供需要的位置调用
+    _ExternalCollaborationManager = _RealCollaborationManager  # type: ignore[assignment]
+    _ExternalVersionControl = _RealVersionControl  # type: ignore[assignment]
+    _ExternalCommitDiagramChanges = _real_commit_diagram_changes  # type: ignore[assignment]
+    _ExternalPermission = _RealPermission  # type: ignore[assignment]
     COLLABORATION_AVAILABLE = True
 except ImportError:
     print("⚠️  Collaboration features not available. Install with: pip install mermaid-render[collaboration]")
 
-def create_output_dir():
-    """Create output directory for examples."""
-    output_dir = Path("output/interactive")
-    output_dir.mkdir(parents=True, exist_ok=True)
-    return output_dir
+# 注意：上方已有同名函数定义，避免重复定义导致的“被遮蔽”告警，这里移除重复实现。
 
 
 def interactive_builder_example(output_dir: Path):
@@ -269,12 +269,19 @@ def collaborative_editing_example(output_dir: Path):
         
         # Create a collaborative session
         if COLLABORATION_AVAILABLE:
-            # Real API
-            session = create_collaborative_session(
+            # 使用真实协作管理器在内部创建会话，但不改变本模块类型
+            manager = _ExternalCollaborationManager()  # type: ignore[name-defined]
+            session = manager.create_session(
+                diagram_id="team-architecture",
                 diagram_type="flowchart",
                 title="Team Architecture Diagram",
-                participants=["alice@example.com", "bob@example.com", "charlie@example.com"]
+                owner_id="owner-001",
+                owner_email="owner@example.com",
+                owner_name="Owner User",
+                settings={"demo": True},
             )
+            # 为示例保持 participants 字段，后续日志展示使用
+            setattr(session, "participants", ["alice@example.com", "bob@example.com", "charlie@example.com"])
         else:
             # Fallback simple session object
             class _CollabSession:

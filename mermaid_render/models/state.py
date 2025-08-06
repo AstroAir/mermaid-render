@@ -26,7 +26,7 @@ class StateDiagram(MermaidDiagram):
         """Add a transition between states."""
         self.transitions.append((from_state, to_state, label))
 
-    def to_mermaid(self) -> str:
+    def _generate_mermaid(self) -> str:
         """Generate Mermaid syntax for the state diagram."""
         lines = ["stateDiagram-v2"]
 

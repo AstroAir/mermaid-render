@@ -78,7 +78,7 @@ class MindmapDiagram(MermaidDiagram):
 
         return None
 
-    def to_mermaid(self) -> str:
+    def _generate_mermaid(self) -> str:
         """Generate Mermaid syntax for the mindmap."""
         lines = ["mindmap"]
 

@@ -29,7 +29,7 @@ class GitGraphDiagram(MermaidDiagram):
         """Add a merge between branches."""
         self.merges.append((from_branch, to_branch))
 
-    def to_mermaid(self) -> str:
+    def _generate_mermaid(self) -> str:
         """Generate Mermaid syntax for the git graph."""
         lines = ["gitgraph"]
 

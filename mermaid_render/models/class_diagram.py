@@ -265,7 +265,7 @@ class ClassDiagram(MermaidDiagram):
         self.relationships.append(relationship)
         return relationship
 
-    def to_mermaid(self) -> str:
+    def _generate_mermaid(self) -> str:
         """Generate complete Mermaid syntax for the class diagram."""
         lines = ["classDiagram"]
 

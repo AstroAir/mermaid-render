@@ -33,7 +33,7 @@ class GanttDiagram(MermaidDiagram):
         """Add a task to the Gantt chart."""
         self.tasks.append((name, start_date, duration, status))
 
-    def to_mermaid(self) -> str:
+    def _generate_mermaid(self) -> str:
         """Generate Mermaid syntax for the Gantt diagram."""
         lines = ["gantt"]
 

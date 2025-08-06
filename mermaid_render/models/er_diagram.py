@@ -26,7 +26,7 @@ class ERDiagram(MermaidDiagram):
         """Add a relationship between entities."""
         self.relationships.append((entity1, entity2, relationship))
 
-    def to_mermaid(self) -> str:
+    def _generate_mermaid(self) -> str:
         """Generate Mermaid syntax for the ER diagram."""
         lines = ["erDiagram"]
 

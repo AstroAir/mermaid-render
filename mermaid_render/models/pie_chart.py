@@ -20,7 +20,7 @@ class PieChartDiagram(MermaidDiagram):
         """Add a slice to the pie chart."""
         self.data[label] = value
 
-    def to_mermaid(self) -> str:
+    def _generate_mermaid(self) -> str:
         """Generate Mermaid syntax for the pie chart."""
         lines = ["pie"]
 

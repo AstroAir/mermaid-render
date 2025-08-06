@@ -418,7 +418,7 @@ class FlowchartDiagram(MermaidDiagram):
         """Add styling to a node or edge."""
         self.styles[element_id] = style
 
-    def to_mermaid(self) -> str:
+    def _generate_mermaid(self) -> str:
         """Generate complete Mermaid syntax for the flowchart."""
         lines = []
 
