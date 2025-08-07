@@ -6,20 +6,41 @@ from ..core import MermaidDiagram
 
 
 class MindmapNode:
-    """Represents a node in a mindmap."""
+    """Represents a node in a mindmap.
+
+    Each node has an ID, display text, an optional shape, and a list of child nodes.
+    """
 
     def __init__(self, id: str, text: str, shape: str = "default") -> None:
+        """Initialize a mindmap node.
+
+        Args:
+            id: Unique identifier for the node.
+            text: Display text for the node.
+            shape: Optional Mermaid node shape ('default', 'circle', 'bang', 'cloud', 'hexagon').
+        """
         self.id = id
         self.text = text
         self.shape = shape
         self.children: List[MindmapNode] = []
 
     def add_child(self, child: "MindmapNode") -> None:
-        """Add a child node."""
+        """Add a child node.
+
+        Args:
+            child: The MindmapNode to attach as a child.
+        """
         self.children.append(child)
 
     def to_mermaid(self, level: int = 0) -> List[str]:
-        """Generate Mermaid syntax for this node and its children."""
+        """Generate Mermaid syntax lines for this node and its subtree.
+
+        Args:
+            level: Current indentation level based on depth in the tree.
+
+        Returns:
+            A list of Mermaid lines representing this node and descendants.
+        """
         lines = []
         indent = "  " * level
 
@@ -41,25 +62,45 @@ class MindmapNode:
 
 
 class MindmapDiagram(MermaidDiagram):
-    """Mindmap diagram model for hierarchical information."""
+    """Mindmap diagram model for hierarchical information.
+
+    Manages a root node and provides helpers to add/find nodes and render Mermaid text.
+    """
 
     def __init__(self, title: Optional[str] = None, root_text: str = "Root") -> None:
+        """Initialize a mindmap diagram with a root node.
+
+        Args:
+            title: Optional diagram title.
+            root_text: Text for the root node.
+        """
         super().__init__(title)
         self.root = MindmapNode("root", root_text)
 
     def get_diagram_type(self) -> str:
+        """Return the Mermaid diagram type identifier."""
         return "mindmap"
 
     def add_node(
         self, parent_id: str, node_id: str, text: str, shape: str = "default"
     ) -> MindmapNode:
-        """Add a node to the mindmap."""
+        """Add a node to the mindmap under the given parent.
+
+        Args:
+            parent_id: ID of the parent node ('root' for the root).
+            node_id: Unique ID for the new node.
+            text: Display text for the new node.
+            shape: Optional node shape.
+
+        Returns:
+            The created MindmapNode instance.
+        """
         node = MindmapNode(node_id, text, shape)
 
         if parent_id == "root":
             self.root.add_child(node)
         else:
-            # Find parent node (simplified implementation)
+            # Find parent node (simple DFS)
             parent = self._find_node(self.root, parent_id)
             if parent:
                 parent.add_child(node)

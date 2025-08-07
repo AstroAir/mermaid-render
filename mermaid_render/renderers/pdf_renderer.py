@@ -115,11 +115,18 @@ class PDFRenderer:
         """
         Convert SVG content to PDF.
 
+        Tries multiple backends in order of preference: cairosvg, weasyprint,
+        then reportlab+svglib. Raises UnsupportedFormatError if none are available.
+
         Args:
             svg_content: SVG content as string
 
         Returns:
             PDF data as bytes
+
+        Raises:
+            UnsupportedFormatError: If no PDF backend is available
+            RenderingError: If SVG parsing or PDF generation fails
         """
         # Clean the SVG content first
         cleaned_svg = self._clean_svg_content(svg_content)
@@ -144,6 +151,7 @@ class PDFRenderer:
         # Backend 2: weasyprint
         try:
             from io import BytesIO
+
             import weasyprint  # type: ignore
 
             # Wrap SVG in HTML so WeasyPrint can render it
@@ -175,9 +183,10 @@ class PDFRenderer:
             from io import BytesIO
             from tempfile import NamedTemporaryFile
 
+            from reportlab.graphics import renderPDF  # type: ignore
+
             # svglib converts SVG to a ReportLab drawing
             from svglib.svglib import svg2rlg  # type: ignore
-            from reportlab.graphics import renderPDF  # type: ignore
 
             # Convert SVG string to a drawing
             svg_bytes = cleaned_svg.encode("utf-8")

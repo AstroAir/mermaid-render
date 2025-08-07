@@ -243,7 +243,7 @@ class MermaidValidator:
         """Validate indentation consistency."""
         indent_levels = []
 
-        for i, line in enumerate(lines, 1):
+        for _i, line in enumerate(lines, 1):
             if line.strip():  # Skip empty lines
                 leading_spaces = len(line) - len(line.lstrip())
                 if leading_spaces > 0:
@@ -337,7 +337,7 @@ class MermaidValidator:
         """Validate sequence diagram-specific syntax."""
         participants = set()
 
-        for i, line in enumerate(lines[1:], 2):
+        for _i, line in enumerate(lines[1:], 2):
             line = line.strip()
             if not line:
                 continue
@@ -371,7 +371,7 @@ class MermaidValidator:
         """Validate class diagram-specific syntax."""
         classes = set()
 
-        for i, line in enumerate(lines[1:], 2):
+        for _i, line in enumerate(lines[1:], 2):
             line = line.strip()
             if not line:
                 continue

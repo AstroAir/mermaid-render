@@ -14,9 +14,10 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 try:
-    import mermaid as md
+    import mermaid as md  # type: ignore[import-untyped]  # noqa: F401
     _MERMAID_AVAILABLE = True
 except ImportError:
+    md = None
     _MERMAID_AVAILABLE = False
 
 from .exceptions import (

@@ -275,18 +275,18 @@ class ThemeManager:
             ThemeError: If configuration is invalid
         """
         required_fields = ["theme"]
-        optional_fields = [
-            "primaryColor",
-            "primaryTextColor",
-            "primaryBorderColor",
-            "lineColor",
-            "secondaryColor",
-            "tertiaryColor",
-            "background",
-            "mainBkg",
-            "secondBkg",
-            "tertiaryBkg",
-        ]
+        # optional_fields = [  # TODO: Use optional_fields for validation
+        #     "primaryColor",
+        #     "primaryTextColor",
+        #     "primaryBorderColor",
+        #     "lineColor",
+        #     "secondaryColor",
+        #     "tertiaryColor",
+        #     "background",
+        #     "mainBkg",
+        #     "secondBkg",
+        #     "tertiaryBkg",
+        # ]
 
         # Check for required fields
         for field in required_fields:

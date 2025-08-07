@@ -18,7 +18,35 @@ def create_collaborative_session(
     owner_name: str,
     collaboration_manager: Optional[CollaborationManager] = None,
 ) -> str:
-    """Create a new collaborative session."""
+    """
+    Create a new collaborative session for diagram editing.
+
+    This function sets up a new collaborative session that allows multiple users
+    to work together on a diagram. The session includes version control, activity
+    logging, and permission management.
+
+    Args:
+        diagram_id: Unique identifier for the diagram
+        diagram_type: Type of diagram (flowchart, sequence, etc.)
+        title: Human-readable title for the session
+        owner_id: Unique identifier for the session owner
+        owner_email: Email address of the session owner
+        owner_name: Display name of the session owner
+        collaboration_manager: Optional collaboration manager instance
+
+    Returns:
+        Session ID for the newly created collaborative session
+
+    Example:
+        >>> session_id = create_collaborative_session(
+        ...     diagram_id="diagram_123",
+        ...     diagram_type="flowchart",
+        ...     title="User Registration Flow",
+        ...     owner_id="user_456",
+        ...     owner_email="alice@example.com",
+        ...     owner_name="Alice Smith"
+        ... )
+    """
     if collaboration_manager is None:
         collaboration_manager = CollaborationManager()
 
@@ -43,7 +71,35 @@ def invite_collaborator(
     invited_by: Optional[str] = None,
     collaboration_manager: Optional[CollaborationManager] = None,
 ) -> bool:
-    """Invite a collaborator to a session."""
+    """
+    Invite a collaborator to join a collaborative session.
+
+    Adds a new collaborator to an existing collaborative session with the
+    specified permission level. The collaborator will be able to participate
+    in diagram editing according to their permission level.
+
+    Args:
+        session_id: ID of the collaborative session
+        user_id: Unique identifier for the user being invited
+        email: Email address of the user being invited
+        name: Display name of the user being invited
+        permission: Permission level ("viewer", "editor", "admin")
+        invited_by: ID of the user sending the invitation
+        collaboration_manager: Optional collaboration manager instance
+
+    Returns:
+        True if the invitation was successful, False otherwise
+
+    Example:
+        >>> success = invite_collaborator(
+        ...     session_id="session_123",
+        ...     user_id="user_789",
+        ...     email="bob@example.com",
+        ...     name="Bob Johnson",
+        ...     permission="editor",
+        ...     invited_by="user_456"
+        ... )
+    """
     if collaboration_manager is None:
         collaboration_manager = CollaborationManager()
 
@@ -67,7 +123,41 @@ def commit_diagram_changes(
     diagram_code: str,
     version_control: Optional[VersionControl] = None,
 ) -> str:
-    """Commit changes to diagram version control."""
+    """
+    Commit changes to diagram version control system.
+
+    Records a set of changes to a diagram in the version control system,
+    creating a new commit with the specified message and author information.
+    This enables tracking of diagram evolution and rollback capabilities.
+
+    Args:
+        diagram_id: Unique identifier for the diagram
+        changes: List of change dictionaries describing modifications
+        message: Commit message describing the changes
+        author_id: Unique identifier for the change author
+        author_name: Display name of the change author
+        diagram_data: Complete diagram data after changes
+        diagram_code: Generated Mermaid code after changes
+        version_control: Optional version control instance
+
+    Returns:
+        Commit ID for the newly created commit
+
+    Example:
+        >>> commit_id = commit_diagram_changes(
+        ...     diagram_id="diagram_123",
+        ...     changes=[{
+        ...         "change_type": "add_node",
+        ...         "element_id": "node_1",
+        ...         "new_data": {"label": "Start", "shape": "circle"}
+        ...     }],
+        ...     message="Added start node",
+        ...     author_id="user_456",
+        ...     author_name="Alice Smith",
+        ...     diagram_data={"nodes": [...], "edges": [...]},
+        ...     diagram_code="flowchart TD\\n    A[Start]"
+        ... )
+    """
     if version_control is None:
         version_control = VersionControl(diagram_id)
 

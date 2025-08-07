@@ -70,7 +70,12 @@ class TimelinePeriod:
         return event
 
     def to_mermaid(self) -> List[str]:
-        """Generate Mermaid syntax for this time period."""
+        """
+        Generate Mermaid syntax for this time period.
+
+        Returns:
+            A list of lines for this period and its events.
+        """
         lines = []
 
         if not self.events:
@@ -121,7 +126,12 @@ class TimelineSection:
         return timeline_period
 
     def to_mermaid(self) -> List[str]:
-        """Generate Mermaid syntax for this section."""
+        """
+        Generate Mermaid syntax for this section.
+
+        Returns:
+            Lines including the section header and contained periods.
+        """
         lines = [f"section {self.name}"]
 
         for period in self.periods:
@@ -233,7 +243,12 @@ class TimelineDiagram(MermaidDiagram):
         return new_period.add_event(event_text)
 
     def _generate_mermaid(self) -> str:
-        """Generate complete Mermaid syntax for the timeline diagram."""
+        """
+        Generate complete Mermaid syntax for the timeline diagram.
+
+        Returns:
+            Mermaid timeline text including title, sections, and periods.
+        """
         lines = ["timeline"]
 
         # Add title if present

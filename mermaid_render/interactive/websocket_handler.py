@@ -25,7 +25,7 @@ class DiagramSession:
     updated_at: datetime
     connected_clients: Set[WebSocket]
 
-    def __init__(self, session_id: str, builder: DiagramBuilder):
+    def __init__(self, session_id: str, builder: DiagramBuilder) -> None:
         self.session_id = session_id
         self.builder = builder
         self.created_at = datetime.now()
@@ -55,7 +55,7 @@ class WebSocketHandler:
     synchronization for collaborative diagram editing.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize WebSocket handler."""
         self.sessions: Dict[str, DiagramSession] = {}
         self.client_sessions: Dict[WebSocket, str] = {}
@@ -216,7 +216,7 @@ class WebSocketHandler:
             # Apply updates to builder
             from .builder import Position, Size
 
-            update_params = {}
+            update_params: Dict[str, Any] = {}
             if "label" in updates:
                 update_params["label"] = updates["label"]
             if "position" in updates:
@@ -249,7 +249,7 @@ class WebSocketHandler:
 
         if connection_id and updates:
             # Apply updates to builder
-            update_params = {}
+            update_params: Dict[str, Any] = {}
             if "label" in updates:
                 update_params["label"] = updates["label"]
             if "connection_type" in updates:

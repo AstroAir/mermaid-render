@@ -644,6 +644,8 @@ def export_provider_config(provider: AIProvider) -> Dict[str, Any]:
             # Note: API key is not exported for security
         }
 
+    # Some providers (e.g., CustomProvider) expose a 'custom_config' attribute.
+    # Guard with hasattr and ignore type checker since AIProvider does not define it.
     if hasattr(provider, "custom_config"):
         custom = provider.custom_config
         config_dict["custom_config"] = {

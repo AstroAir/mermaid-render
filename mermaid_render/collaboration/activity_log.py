@@ -42,7 +42,7 @@ class Activity:
     details: Dict[str, Any]
     metadata: Dict[str, Any]
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if not self.activity_id:
             self.activity_id = str(uuid.uuid4())
 
@@ -87,7 +87,7 @@ class AuditTrail:
 class ActivityLogger:
     """Logs and manages activities for collaborative editing."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.activities: Dict[str, Activity] = {}
         self.audit_trails: Dict[str, AuditTrail] = {}
 
@@ -156,7 +156,7 @@ class ActivityLogger:
         limit: Optional[int] = None,
     ) -> List[Activity]:
         """Get activities for a user."""
-        activities = []
+        activities: List[Activity] = []
 
         if session_id:
             # Get activities for specific session
@@ -183,7 +183,7 @@ class ActivityLogger:
 
     def get_activities_by_type(self, activity_type: ActivityType) -> List[Activity]:
         """Get all activities of a specific type across all sessions."""
-        activities = []
+        activities: List[Activity] = []
         for audit_trail in self.audit_trails.values():
             activities.extend(audit_trail.get_activities_by_type(activity_type))
 
@@ -199,13 +199,13 @@ class ActivityLogger:
         activities = self.audit_trails[session_id].activities
 
         # Count activities by type
-        activity_counts = {}
+        activity_counts: Dict[str, int] = {}
         for activity in activities:
             activity_type = activity.activity_type.value
             activity_counts[activity_type] = activity_counts.get(activity_type, 0) + 1
 
         # Count activities by user
-        user_counts = {}
+        user_counts: Dict[str, int] = {}
         for activity in activities:
             user_id = activity.user_id
             user_counts[user_id] = user_counts.get(user_id, 0) + 1
@@ -214,7 +214,7 @@ class ActivityLogger:
         if activities:
             first_activity = min(activities, key=lambda a: a.timestamp)
             last_activity = max(activities, key=lambda a: a.timestamp)
-            time_range = {
+            time_range: Optional[Dict[str, str]] = {
                 "start": first_activity.timestamp.isoformat(),
                 "end": last_activity.timestamp.isoformat(),
             }

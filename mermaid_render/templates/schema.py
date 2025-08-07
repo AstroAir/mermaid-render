@@ -8,7 +8,7 @@ template structure, parameters, and content validation.
 import re
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union, Type
 
 from ..exceptions import ValidationError
 
@@ -79,8 +79,6 @@ class ParameterSchema:
         elif self.type == ParameterType.OBJECT:
             return True  # Accept any object
 
-        return False
-
     def _validate_rules(self, value: Any) -> bool:
         """Validate against custom validation rules."""
         if not self.validation:
@@ -134,7 +132,7 @@ class ParameterSchema:
 
     def _validate_item_type(self, item: Any, expected_type: str) -> bool:
         """Validate list item type."""
-        type_map = {
+        type_map: Dict[str, Union[Type[Any], tuple[Type[Any], ...]]] = {
             "string": str,
             "integer": int,
             "float": (int, float),
@@ -327,7 +325,7 @@ def validate_template_parameters(
 
 def _validate_parameter_type(value: Any, expected_type: str) -> bool:
     """Validate parameter type."""
-    type_map = {
+    type_map: Dict[str, Union[Type[Any], tuple[Type[Any], ...]]] = {
         "string": str,
         "integer": int,
         "float": (int, float),

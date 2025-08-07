@@ -31,7 +31,7 @@ class Comment:
     is_resolved: bool = False
     parent_comment_id: Optional[str] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if not self.comment_id:
             self.comment_id = str(uuid.uuid4())
 
@@ -90,7 +90,7 @@ class Review:
     updated_at: datetime
     comments: List[Comment] = field(default_factory=list)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if not self.review_id:
             self.review_id = str(uuid.uuid4())
 
@@ -114,7 +114,7 @@ class Review:
 class CommentSystem:
     """Manages comments and reviews for collaborative editing."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.comments: Dict[str, Comment] = {}
         self.threads: Dict[str, CommentThread] = {}
         self.reviews: Dict[str, Review] = {}
@@ -200,11 +200,11 @@ class CommentSystem:
         return True
 
     def get_comments_for_element(self, element_id: str) -> List[Comment]:
-        """Get all comments for a specific element."""
+        """Get all unresolved comments for a specific element."""
         return [
             comment
             for comment in self.comments.values()
-            if comment.element_id == element_id
+            if comment.element_id == element_id and not comment.is_resolved
         ]
 
     def create_review(
@@ -242,14 +242,6 @@ class CommentSystem:
         review.updated_at = datetime.now()
 
         return True
-
-    def get_comments_for_element(self, element_id: str) -> List[Comment]:
-        """Get all comments for a specific element."""
-        return [
-            comment
-            for comment in self.comments.values()
-            if comment.element_id == element_id and not comment.is_resolved
-        ]
 
     def get_reviews_for_commit(self, commit_id: str) -> List[Review]:
         """Get all reviews for a specific commit."""

@@ -6,13 +6,13 @@ with the mermaid-render library, including OpenAI, Anthropic, OpenRouter, and
 custom providers.
 """
 
+import importlib.util
 import logging
 import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Union, cast
 from urllib.parse import urljoin
-import importlib.util
 
 import requests
 
@@ -278,7 +278,7 @@ class OpenAIProvider(AIProvider):
                     assert self._client is not None  # for type checker
                     response = self._client.chat.completions.create(
                         model=self.config.model or "gpt-3.5-turbo",
-                        messages=messages,
+                        messages=cast(Any, messages),
                         max_tokens=cast(int, kwargs.get("max_tokens", 1000)),
                         temperature=cast(float, kwargs.get("temperature", 0.7)),
                         top_p=cast(float, kwargs.get("top_p", 1.0)),
@@ -450,10 +450,10 @@ class AnthropicProvider(AIProvider):
                     response = self._client.messages.create(
                         model=self.config.model or "claude-3-5-sonnet-20241022",
                         max_tokens=cast(int, kwargs.get("max_tokens", 1000)),
-                        messages=messages,
+                        messages=cast(Any, messages),
                         temperature=cast(float, kwargs.get("temperature", 0.7)),
                         top_p=cast(float, kwargs.get("top_p", 1.0)),
-                        stop_sequences=kwargs.get("stop"),
+                        stop_sequences=cast(Any, kwargs.get("stop")),
                         stream=cast(bool, kwargs.get("stream", False)),
                     )
 

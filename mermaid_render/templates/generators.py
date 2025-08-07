@@ -13,7 +13,7 @@ class DiagramGenerator(ABC):
     """Base class for diagram generators."""
 
     @abstractmethod
-    def generate(self, data: Dict[str, Any], **options) -> str:
+    def generate(self, data: Dict[str, Any], **options: Any) -> str:
         """Generate diagram from structured data."""
         pass
 
@@ -31,7 +31,7 @@ class FlowchartGenerator(DiagramGenerator):
     automatic styling and layout optimization.
     """
 
-    def generate(self, data: Dict[str, Any], **options) -> str:
+    def generate(self, data: Dict[str, Any], **options: Any) -> str:
         """
         Generate flowchart from structured data.
 
@@ -206,7 +206,7 @@ class SequenceGenerator(DiagramGenerator):
     with automatic lifeline management.
     """
 
-    def generate(self, data: Dict[str, Any], **options) -> str:
+    def generate(self, data: Dict[str, Any], **options: Any) -> str:
         """
         Generate sequence diagram from structured data.
 
@@ -220,7 +220,7 @@ class SequenceGenerator(DiagramGenerator):
         title = data.get("title", "")
         participants = data.get("participants", [])
         messages = data.get("messages", [])
-        notes = data.get("notes", [])
+        # notes = data.get("notes", [])  # TODO: Add support for notes
 
         lines = ["sequenceDiagram"]
 
@@ -334,7 +334,7 @@ class ClassDiagramGenerator(DiagramGenerator):
     attributes, methods, and relationships.
     """
 
-    def generate(self, data: Dict[str, Any], **options) -> str:
+    def generate(self, data: Dict[str, Any], **options: Any) -> str:
         """
         Generate class diagram from structured data.
 
@@ -515,7 +515,7 @@ class ArchitectureGenerator(DiagramGenerator):
     system components and their interactions.
     """
 
-    def generate(self, data: Dict[str, Any], **options) -> str:
+    def generate(self, data: Dict[str, Any], **options: Any) -> str:
         """Generate architecture diagram from structured data."""
         # Use flowchart generator with architecture-specific styling
         flowchart_data = {
@@ -614,7 +614,7 @@ class ProcessFlowGenerator(DiagramGenerator):
     parallel processes, and standard business symbols.
     """
 
-    def generate(self, data: Dict[str, Any], **options) -> str:
+    def generate(self, data: Dict[str, Any], **options: Any) -> str:
         """Generate process flow diagram from structured data."""
         # Implementation similar to FlowchartGenerator but with
         # business process specific shapes and styling

@@ -9,7 +9,7 @@ import json
 import logging
 import uuid
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
 import uvicorn
 from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
@@ -38,7 +38,7 @@ class InteractiveServer:
         static_dir: Optional[Path] = None,
         templates_dir: Optional[Path] = None,
         enable_collaboration: bool = True,
-    ):
+    ) -> None:
         """
         Initialize interactive server.
 
@@ -94,12 +94,14 @@ class InteractiveServer:
 
         # Routes
         @app.get("/", response_class=HTMLResponse)
-        async def index(request: Request):
+        async def index(request: Request) -> HTMLResponse:
             """Main builder interface."""
             return templates.TemplateResponse("index.html", {"request": request})
 
         @app.get("/builder/{diagram_type}", response_class=HTMLResponse)
-        async def builder(request: Request, diagram_type: str):
+        async def builder(
+            request: Request, diagram_type: str
+        ) -> HTMLResponse:
             """Diagram builder for specific type."""
             try:
                 DiagramType(diagram_type)
@@ -115,12 +117,12 @@ class InteractiveServer:
             )
 
         @app.post("/api/sessions")
-        async def create_session(diagram_type: str = "flowchart"):
+        async def create_session(diagram_type: str = "flowchart") -> Dict[str, Any]:
             """Create new diagram session."""
             try:
                 session_id = str(uuid.uuid4())
-                builder = DiagramBuilder(DiagramType(diagram_type))
-                session = DiagramSession(session_id, builder)
+                builder_obj = DiagramBuilder(DiagramType(diagram_type))
+                session = DiagramSession(session_id, builder_obj)
 
                 self.sessions[session_id] = session
 
@@ -133,22 +135,23 @@ class InteractiveServer:
                 raise HTTPException(status_code=400, detail="Invalid diagram type")
 
         @app.get("/api/sessions/{session_id}")
-        async def get_session(session_id: str):
+        async def get_session(session_id: str) -> Dict[str, Any]:
             """Get session information."""
             if session_id not in self.sessions:
                 raise HTTPException(status_code=404, detail="Session not found")
 
             session = self.sessions[session_id]
+            builder_state = session.builder.to_dict()
             return {
                 "session_id": session_id,
                 "diagram_type": session.builder.diagram_type.value,
-                "elements": session.builder.to_dict()["elements"],
-                "connections": session.builder.to_dict()["connections"],
+                "elements": builder_state["elements"],
+                "connections": builder_state["connections"],
                 "metadata": session.builder.metadata,
             }
 
         @app.post("/api/sessions/{session_id}/elements")
-        async def add_element(session_id: str, element_data: dict):
+        async def add_element(session_id: str, element_data: dict) -> Dict[str, Any]:
             """Add element to diagram."""
             if session_id not in self.sessions:
                 raise HTTPException(status_code=404, detail="Session not found")
@@ -183,7 +186,9 @@ class InteractiveServer:
                 raise HTTPException(status_code=400, detail=str(e))
 
         @app.put("/api/sessions/{session_id}/elements/{element_id}")
-        async def update_element(session_id: str, element_id: str, element_data: dict):
+        async def update_element(
+            session_id: str, element_id: str, element_data: dict
+        ) -> Dict[str, Any]:
             """Update element in diagram."""
             if session_id not in self.sessions:
                 raise HTTPException(status_code=404, detail="Session not found")
@@ -191,7 +196,7 @@ class InteractiveServer:
             session = self.sessions[session_id]
 
             # Extract update parameters
-            update_params = {}
+            update_params: Dict[str, Any] = {}
             if "label" in element_data:
                 update_params["label"] = element_data["label"]
             if "position" in element_data:
@@ -222,7 +227,7 @@ class InteractiveServer:
             return {"success": True}
 
         @app.delete("/api/sessions/{session_id}/elements/{element_id}")
-        async def remove_element(session_id: str, element_id: str):
+        async def remove_element(session_id: str, element_id: str) -> Dict[str, Any]:
             """Remove element from diagram."""
             if session_id not in self.sessions:
                 raise HTTPException(status_code=404, detail="Session not found")
@@ -246,7 +251,9 @@ class InteractiveServer:
             return {"success": True}
 
         @app.post("/api/sessions/{session_id}/connections")
-        async def add_connection(session_id: str, connection_data: dict):
+        async def add_connection(
+            session_id: str, connection_data: dict
+        ) -> Dict[str, Any]:
             """Add connection to diagram."""
             if session_id not in self.sessions:
                 raise HTTPException(status_code=404, detail="Session not found")
@@ -278,7 +285,7 @@ class InteractiveServer:
             return connection.to_dict()
 
         @app.get("/api/sessions/{session_id}/code")
-        async def get_mermaid_code(session_id: str):
+        async def get_mermaid_code(session_id: str) -> Dict[str, Any]:
             """Get generated Mermaid code for session."""
             if session_id not in self.sessions:
                 raise HTTPException(status_code=404, detail="Session not found")
@@ -308,7 +315,7 @@ class InteractiveServer:
                 }
 
         @app.get("/api/sessions/{session_id}/preview")
-        async def get_preview(session_id: str, format: str = "svg"):
+        async def get_preview(session_id: str, format: str = "svg") -> Dict[str, Any]:
             """Get rendered preview of diagram."""
             if session_id not in self.sessions:
                 raise HTTPException(status_code=404, detail="Session not found")
@@ -331,7 +338,7 @@ class InteractiveServer:
 
         # WebSocket endpoint for real-time updates
         @app.websocket("/ws/{session_id}")
-        async def websocket_endpoint(websocket: WebSocket, session_id: str):
+        async def websocket_endpoint(websocket: WebSocket, session_id: str) -> None:
             """WebSocket endpoint for real-time collaboration."""
             if not self.enable_collaboration:
                 await websocket.close(code=1000, reason="Collaboration disabled")
@@ -350,11 +357,33 @@ class InteractiveServer:
             except WebSocketDisconnect:
                 self.websocket_handler.disconnect(websocket, session_id)
 
+        # Assign to variables to ensure the functions are referenced (for strict linters)
+        _ = (
+            index,
+            builder,
+            create_session,
+            get_session,
+            add_element,
+            update_element,
+            remove_element,
+            add_connection,
+            get_mermaid_code,
+            get_preview,
+            websocket_endpoint,
+        )
+
         return app
 
-    def run(self, **kwargs) -> None:
-        """Run the server."""
-        uvicorn.run(self.app, host=self.host, port=self.port, **kwargs)
+    def run(self, **kwargs: Any) -> None:
+        """Run the server.
+
+        Notes:
+            - uvicorn.run has many optional keyword parameters (e.g., reload, workers, log_level, etc.).
+              We accept arbitrary keyword args and forward them using **kwargs.
+            - Important: Always pass host/port as keyword arguments to avoid mypy/pylance mis-inferring
+              **kwargs as positional args for unrelated parameters in uvicorn.run overloads.
+        """
+        uvicorn.run(app=self.app, host=self.host, port=self.port, **kwargs)
 
 
 def create_app(
@@ -387,7 +416,7 @@ def start_server(
     static_dir: Optional[Path] = None,
     templates_dir: Optional[Path] = None,
     enable_collaboration: bool = True,
-    **kwargs,
+    **kwargs: Any,
 ) -> None:
     """
     Start the interactive diagram builder server.

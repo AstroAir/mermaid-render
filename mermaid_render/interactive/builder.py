@@ -83,7 +83,7 @@ class DiagramElement:
     created_at: datetime = field(default_factory=datetime.now)
     updated_at: datetime = field(default_factory=datetime.now)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if not self.id:
             self.id = str(uuid.uuid4())
 
@@ -161,7 +161,7 @@ class DiagramConnection:
     created_at: datetime = field(default_factory=datetime.now)
     updated_at: datetime = field(default_factory=datetime.now)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if not self.id:
             self.id = str(uuid.uuid4())
 
@@ -514,6 +514,8 @@ class DiagramBuilder:
         """
         # This would parse Mermaid code and create visual elements
         # For now, this is a placeholder for the parsing logic
+        # Mark parameter as intentionally unused to satisfy linters/type-checkers.
+        _ = code
         pass
 
     def to_dict(self) -> Dict[str, Any]:

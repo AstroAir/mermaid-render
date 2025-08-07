@@ -157,7 +157,7 @@ class ConflictResolver:
 class MergeResolver:
     """High-level merge resolver for diagram collaboration."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.conflict_resolver = ConflictResolver()
 
     def merge_changes(

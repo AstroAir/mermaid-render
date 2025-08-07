@@ -7,7 +7,7 @@ including generation, validation, and management utilities.
 
 import json
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, cast
 
 from ..exceptions import TemplateError as MermaidTemplateError
 from .schema import validate_template_parameters
@@ -135,7 +135,7 @@ def get_template_info(
     }
 
 
-def validate_template_parameters(
+def validate_template_params_by_name(
     template_name: str,
     parameters: Dict[str, Any],
     template_manager: Optional[TemplateManager] = None,
@@ -340,7 +340,7 @@ def get_template_examples(
 
 def _generate_basic_example(parameters: Dict[str, Any]) -> Dict[str, Any]:
     """Generate a basic example from parameter schema."""
-    example = {}
+    example: Dict[str, Any] = {}
 
     required_params = parameters.get("required", [])
     properties = parameters.get("properties", {})
@@ -410,7 +410,7 @@ def search_templates(
         ):
             match = True
 
-        if "tags" in search_fields:
+        if "tags" in search_fields and template.tags:
             for tag in template.tags:
                 if query_lower in tag.lower():
                     match = True
@@ -431,7 +431,7 @@ def search_templates(
             )
 
     # Sort by relevance score
-    matching_templates.sort(key=lambda x: x["relevance_score"], reverse=True)
+    matching_templates.sort(key=lambda x: cast(float, x["relevance_score"]), reverse=True)
 
     return matching_templates
 
@@ -454,7 +454,7 @@ def _calculate_relevance(
         elif any(word in template.description.lower() for word in query.split()):
             score += 1.0
 
-    if "tags" in search_fields:
+    if "tags" in search_fields and template.tags:
         for tag in template.tags:
             if query in tag.lower():
                 score += 2.5

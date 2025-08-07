@@ -45,7 +45,7 @@ class Collaborator:
     cursor_position: Optional[Dict[str, Any]] = None
     selection: Optional[List[str]] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.selection is None:
             self.selection = []
 
@@ -176,7 +176,7 @@ class CollaborationManager:
     coordinating real-time updates, and handling permissions.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize collaboration manager."""
         self.sessions: Dict[str, CollaborativeSession] = {}
         self.user_sessions: Dict[str, Set[str]] = {}  # user_id -> session_ids

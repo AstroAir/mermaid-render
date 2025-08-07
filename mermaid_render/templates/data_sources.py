@@ -10,7 +10,7 @@ import json
 import sqlite3
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple, Union, cast, Type
 from urllib.parse import urljoin
 
 import requests
@@ -22,7 +22,7 @@ class DataSource(ABC):
     """Base class for data sources."""
 
     @abstractmethod
-    def load_data(self, source: str, **options) -> Dict[str, Any]:
+    def load_data(self, source: str, **options: Any) -> Dict[str, Any]:
         """Load data from source and return as dictionary."""
         pass
 
@@ -40,7 +40,7 @@ class JSONDataSource(DataSource):
     nested data structures and parameter mapping.
     """
 
-    def load_data(self, source: str, **options) -> Dict[str, Any]:
+    def load_data(self, source: str, **options: Any) -> Dict[str, Any]:
         """
         Load data from JSON file.
 
@@ -61,15 +61,23 @@ class JSONDataSource(DataSource):
                 raise DataSourceError(f"JSON file not found: {source}")
 
             with open(source_path, encoding="utf-8") as f:
-                data = json.load(f)
+                raw: Any = json.load(f)
+
+            # Ensure we return a dictionary
+            data: Dict[str, Any]
+            if isinstance(raw, dict):
+                data = raw
+            else:
+                # Wrap non-dict JSON (e.g., list) into a dict
+                data = {"data": raw}
 
             # Apply mapping if provided
-            mapping = options.get("mapping")
+            mapping = cast(Optional[Dict[str, str]], options.get("mapping"))
             if mapping:
                 data = self._apply_mapping(data, mapping)
 
             # Apply filters if provided
-            filters = options.get("filters")
+            filters = cast(Optional[Dict[str, Any]], options.get("filters"))
             if filters:
                 data = self._apply_filters(data, filters)
 
@@ -96,7 +104,7 @@ class JSONDataSource(DataSource):
         self, data: Dict[str, Any], mapping: Dict[str, str]
     ) -> Dict[str, Any]:
         """Apply field mapping to transform data structure."""
-        mapped_data = {}
+        mapped_data: Dict[str, Any] = {}
 
         for target_field, source_field in mapping.items():
             # Support nested field access with dot notation
@@ -110,7 +118,7 @@ class JSONDataSource(DataSource):
         self, data: Dict[str, Any], filters: Dict[str, Any]
     ) -> Dict[str, Any]:
         """Apply filters to data."""
-        filtered_data = data.copy()
+        filtered_data: Dict[str, Any] = data.copy()
 
         # Simple filtering implementation
         for field, filter_value in filters.items():
@@ -129,7 +137,7 @@ class JSONDataSource(DataSource):
     def _get_nested_value(self, data: Dict[str, Any], field_path: str) -> Any:
         """Get value from nested dictionary using dot notation."""
         keys = field_path.split(".")
-        value = data
+        value: Any = data
 
         for key in keys:
             if isinstance(value, dict) and key in value:
@@ -162,7 +170,7 @@ class CSVDataSource(DataSource):
     column mapping and data transformation.
     """
 
-    def load_data(self, source: str, **options) -> Dict[str, Any]:
+    def load_data(self, source: str, **options: Any) -> Dict[str, Any]:
         """
         Load data from CSV file.
 
@@ -182,28 +190,28 @@ class CSVDataSource(DataSource):
             if not source_path.exists():
                 raise DataSourceError(f"CSV file not found: {source}")
 
-            delimiter = options.get("delimiter", ",")
-            encoding = options.get("encoding", "utf-8")
+            delimiter = cast(str, options.get("delimiter", ","))
+            encoding = cast(str, options.get("encoding", "utf-8"))
 
-            rows = []
+            rows: List[Dict[str, str]]
             with open(source_path, encoding=encoding) as f:
                 reader = csv.DictReader(f, delimiter=delimiter)
                 rows = list(reader)
 
             # Apply column mapping if provided
-            mapping = options.get("mapping")
+            mapping = cast(Optional[Dict[str, str]], options.get("mapping"))
             if mapping:
                 rows = [self._apply_row_mapping(row, mapping) for row in rows]
 
             # Structure data based on options
-            structure = options.get("structure", "rows")
+            structure = cast(str, options.get("structure", "rows"))
 
             if structure == "rows":
                 return {"data": rows}
             elif structure == "columns":
                 return self._rows_to_columns(rows)
             elif structure == "grouped":
-                group_by = options.get("group_by")
+                group_by = cast(Optional[str], options.get("group_by"))
                 if group_by:
                     return self._group_rows(rows, group_by)
 
@@ -230,7 +238,7 @@ class CSVDataSource(DataSource):
         self, row: Dict[str, str], mapping: Dict[str, str]
     ) -> Dict[str, str]:
         """Apply column mapping to a single row."""
-        mapped_row = {}
+        mapped_row: Dict[str, str] = {}
 
         for target_col, source_col in mapping.items():
             if source_col in row:
@@ -243,7 +251,7 @@ class CSVDataSource(DataSource):
         if not rows:
             return {}
 
-        columns = {}
+        columns: Dict[str, List[str]] = {}
         for column_name in rows[0].keys():
             columns[column_name] = [row.get(column_name, "") for row in rows]
 
@@ -253,7 +261,7 @@ class CSVDataSource(DataSource):
         self, rows: List[Dict[str, str]], group_by: str
     ) -> Dict[str, List[Dict[str, str]]]:
         """Group rows by a specific column."""
-        groups = {}
+        groups: Dict[str, List[Dict[str, str]]] = {}
 
         for row in rows:
             group_value = row.get(group_by, "unknown")
@@ -272,7 +280,7 @@ class DatabaseDataSource(DataSource):
     custom queries and result transformation.
     """
 
-    def __init__(self, connection_string: Optional[str] = None):
+    def __init__(self, connection_string: Optional[str] = None) -> None:
         """
         Initialize database data source.
 
@@ -281,7 +289,7 @@ class DatabaseDataSource(DataSource):
         """
         self.connection_string = connection_string
 
-    def load_data(self, source: str, **options) -> Dict[str, Any]:
+    def load_data(self, source: str, **options: Any) -> Dict[str, Any]:
         """
         Load data from database query.
 
@@ -296,13 +304,14 @@ class DatabaseDataSource(DataSource):
             DataSourceError: If loading fails
         """
         try:
-            connection_string = options.get("connection", self.connection_string)
+            connection_string = cast(
+                Optional[str], options.get("connection", self.connection_string)
+            )
 
             if not connection_string:
                 raise DataSourceError("Database connection string required")
 
             # For simplicity, this implementation uses SQLite
-            # In a full implementation, you'd support multiple database types
             conn = sqlite3.connect(connection_string)
             conn.row_factory = sqlite3.Row  # Enable column access by name
 
@@ -316,21 +325,21 @@ class DatabaseDataSource(DataSource):
                 query = f"SELECT * FROM {source}"
 
             # Execute query with parameters if provided
-            parameters = options.get("parameters", ())
+            parameters = cast(Union[Tuple[Any, ...], List[Any]], options.get("parameters", ()))
             cursor.execute(query, parameters)
 
             rows = cursor.fetchall()
             conn.close()
 
             # Convert to list of dictionaries
-            data = [dict(row) for row in rows]
+            data_list: List[Dict[str, Any]] = [dict(row) for row in rows]
 
             # Apply transformations if provided
-            transform = options.get("transform")
+            transform = cast(Optional[Dict[str, Any]], options.get("transform"))
             if transform:
-                data = self._apply_transform(data, transform)
+                data_list = self._apply_transform(data_list, transform)
 
-            return {"data": data}
+            return {"data": data_list}
 
         except (sqlite3.Error, Exception) as e:
             raise DataSourceError(f"Failed to load database data: {str(e)}") from e
@@ -363,11 +372,11 @@ class DatabaseDataSource(DataSource):
         # In a full implementation, you'd support more complex transformations
 
         if "rename_columns" in transform:
-            mapping = transform["rename_columns"]
+            mapping = cast(Dict[str, str], transform["rename_columns"])
             data = [{mapping.get(k, k): v for k, v in row.items()} for row in data]
 
         if "filter" in transform:
-            filter_criteria = transform["filter"]
+            filter_criteria = cast(Dict[str, Any], transform["filter"])
             data = [
                 row
                 for row in data
@@ -387,7 +396,7 @@ class APIDataSource(DataSource):
 
     def __init__(
         self, base_url: Optional[str] = None, headers: Optional[Dict[str, str]] = None
-    ):
+    ) -> None:
         """
         Initialize API data source.
 
@@ -398,7 +407,7 @@ class APIDataSource(DataSource):
         self.base_url = base_url
         self.default_headers = headers or {}
 
-    def load_data(self, source: str, **options) -> Dict[str, Any]:
+    def load_data(self, source: str, **options: Any) -> Dict[str, Any]:
         """
         Load data from API endpoint.
 
@@ -422,10 +431,10 @@ class APIDataSource(DataSource):
                 raise DataSourceError("Base URL required for relative endpoints")
 
             # Prepare request
-            method = options.get("method", "GET").upper()
-            params = options.get("params", {})
-            headers = {**self.default_headers, **options.get("headers", {})}
-            timeout = options.get("timeout", 30)
+            method = cast(str, options.get("method", "GET")).upper()
+            params = cast(Dict[str, Any], options.get("params", {}))
+            headers = {**self.default_headers, **cast(Dict[str, str], options.get("headers", {}))}
+            timeout = cast(int, options.get("timeout", 30))
 
             # Make request
             response = requests.request(
@@ -441,24 +450,30 @@ class APIDataSource(DataSource):
             response.raise_for_status()
 
             # Parse response
-            content_type = response.headers.get("content-type", "")
+            content_type = response.headers.get("content-type", "") or ""
 
+            parsed: Any
             if "application/json" in content_type:
-                data = response.json()
+                parsed = response.json()
             else:
-                data = {"content": response.text}
+                parsed = {"content": response.text}
 
             # Apply data extraction if provided
-            extract_path = options.get("extract_path")
+            extract_path = cast(Optional[str], options.get("extract_path"))
             if extract_path:
-                data = self._extract_data(data, extract_path)
+                extracted = self._extract_data(parsed, extract_path)
+                parsed = extracted
 
             # Apply transformation if provided
-            transform = options.get("transform")
+            transform = cast(Optional[Dict[str, Any]], options.get("transform"))
             if transform:
-                data = self._apply_api_transform(data, transform)
+                parsed = self._apply_api_transform(parsed, transform)
 
-            return data
+            # Ensure dict return
+            if isinstance(parsed, dict):
+                return parsed
+            else:
+                return {"data": parsed}
 
         except (requests.RequestException, ValueError) as e:
             raise DataSourceError(f"Failed to load API data: {str(e)}") from e
@@ -481,20 +496,24 @@ class APIDataSource(DataSource):
         except requests.RequestException:
             return False
 
-    def _extract_data(self, data: Dict[str, Any], extract_path: str) -> Any:
+    def _extract_data(self, data: Any, extract_path: str) -> Optional[Any]:
         """Extract data from nested response using dot notation."""
         keys = extract_path.split(".")
-        value = data
+        value: Any = data
 
         for key in keys:
-            if isinstance(value, dict) and key in value:
-                value = value[key]
-            elif isinstance(value, list) and key.isdigit():
-                index = int(key)
-                if 0 <= index < len(value):
-                    value = value[index]
+            # First check if current value allows index access by numeric key
+            if key.isdigit():
+                if isinstance(value, list):
+                    index = int(key)
+                    if 0 <= index < len(value):
+                        value = value[index]
+                    else:
+                        return None
                 else:
                     return None
+            elif isinstance(value, dict) and key in value:
+                value = value[key]
             else:
                 return None
 
@@ -504,7 +523,7 @@ class APIDataSource(DataSource):
         """Apply transformations to API response data."""
         # Simple transformation implementation
         if isinstance(data, list) and "map" in transform:
-            mapping = transform["map"]
+            mapping = cast(Dict[str, str], transform["map"])
             return [
                 {target: item.get(source) for target, source in mapping.items()}
                 for item in data
@@ -514,7 +533,7 @@ class APIDataSource(DataSource):
         return data
 
 
-def create_data_source(source_type: str, **config) -> DataSource:
+def create_data_source(source_type: str, **config: Any) -> DataSource:
     """
     Factory function to create data source instances.
 
@@ -532,7 +551,7 @@ def create_data_source(source_type: str, **config) -> DataSource:
         >>> json_source = create_data_source('json')
         >>> api_source = create_data_source('api', base_url='https://api.example.com')
     """
-    source_map = {
+    source_map: Dict[str, Type[DataSource]] = {
         "json": JSONDataSource,
         "csv": CSVDataSource,
         "database": DatabaseDataSource,
@@ -546,9 +565,12 @@ def create_data_source(source_type: str, **config) -> DataSource:
 
     # Pass relevant config to constructor
     if source_type == "database":
-        return source_class(config.get("connection_string"))
+        return DatabaseDataSource(cast(Optional[str], config.get("connection_string")))
     elif source_type == "api":
-        return source_class(config.get("base_url"), config.get("headers"))
+        return APIDataSource(
+            cast(Optional[str], config.get("base_url")),
+            cast(Optional[Dict[str, str]], config.get("headers")),
+        )
     else:
         return source_class()
 
@@ -557,7 +579,7 @@ def load_template_data(
     source_type: str,
     source: str,
     template_mapping: Optional[Dict[str, str]] = None,
-    **options,
+    **options: Any,
 ) -> Dict[str, Any]:
     """
     Convenience function to load and map data for template parameters.
@@ -583,7 +605,7 @@ def load_template_data(
     data = data_source.load_data(source, **options)
 
     if template_mapping:
-        mapped_data = {}
+        mapped_data: Dict[str, Any] = {}
         for template_param, data_field in template_mapping.items():
             if data_field in data:
                 mapped_data[template_param] = data[data_field]

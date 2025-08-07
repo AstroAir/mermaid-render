@@ -6,7 +6,7 @@ patterns and use cases, as well as community-contributed templates.
 """
 
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 
 class BuiltInTemplates:
@@ -17,14 +17,14 @@ class BuiltInTemplates:
     and patterns to accelerate diagram creation.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._templates = self._load_builtin_templates()
 
     def get_all_templates(self) -> List[Dict[str, Any]]:
         """Get all built-in templates."""
         return list(self._templates.values())
 
-    def get_template(self, name: str) -> Dict[str, Any]:
+    def get_template(self, name: str) -> Optional[Dict[str, Any]]:
         """Get specific template by name."""
         return self._templates.get(name)
 
@@ -378,7 +378,7 @@ class CommunityTemplates:
             enable_online: Whether to fetch templates from online repository
         """
         self.enable_online = enable_online
-        self._templates = {}
+        self._templates: Dict[str, Dict[str, Any]] = {}
 
         if enable_online:
             self._load_online_templates()
@@ -387,7 +387,7 @@ class CommunityTemplates:
         """Get all community templates."""
         return list(self._templates.values())
 
-    def get_template(self, name: str) -> Dict[str, Any]:
+    def get_template(self, name: str) -> Optional[Dict[str, Any]]:
         """Get specific template by name."""
         return self._templates.get(name)
 

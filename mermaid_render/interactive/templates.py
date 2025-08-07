@@ -20,7 +20,7 @@ class InteractiveTemplate:
 class TemplateLibrary:
     """Library of interactive templates."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.templates = self._load_default_templates()
 
     def get_template(self, template_id: str) -> Optional[InteractiveTemplate]:

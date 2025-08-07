@@ -201,7 +201,7 @@ class RenderingError(MermaidRenderError):
         if format:
             details["format"] = format
         if status_code:
-            details["status_code"] = status_code
+            details["status_code"] = str(status_code)
 
         super().__init__(
             message,

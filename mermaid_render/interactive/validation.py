@@ -61,7 +61,7 @@ class LiveValidator:
     interactive diagram construction.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize live validator."""
         self.base_validator = MermaidValidator()
 
@@ -84,9 +84,9 @@ class LiveValidator:
         Returns:
             Enhanced validation result
         """
-        errors = []
-        warnings = []
-        suggestions = []
+        errors: List[ValidationIssue] = []
+        warnings: List[ValidationIssue] = []
+        suggestions: List[ValidationIssue] = []
 
         # Basic syntax validation
         base_result = self.base_validator.validate(diagram_code)
@@ -143,9 +143,9 @@ class LiveValidator:
         Returns:
             Validation result for element
         """
-        errors = []
-        warnings = []
-        suggestions = []
+        errors: List[ValidationIssue] = []
+        warnings: List[ValidationIssue] = []
+        suggestions: List[ValidationIssue] = []
 
         # Validate label
         label = element_data.get("label", "")
@@ -214,9 +214,9 @@ class LiveValidator:
         Returns:
             Validation result for connection
         """
-        errors = []
-        warnings = []
-        suggestions = []
+        errors: List[ValidationIssue] = []
+        warnings: List[ValidationIssue] = []
+        suggestions: List[ValidationIssue] = []
 
         source_id = connection_data.get("source_id")
         target_id = connection_data.get("target_id")
@@ -274,9 +274,9 @@ class LiveValidator:
         self, diagram_code: str
     ) -> Dict[str, List[ValidationIssue]]:
         """Validate interactive-specific rules."""
-        errors = []
-        warnings = []
-        suggestions = []
+        errors: List[ValidationIssue] = []
+        warnings: List[ValidationIssue] = []
+        suggestions: List[ValidationIssue] = []
 
         lines = diagram_code.strip().split("\n")
 
@@ -333,7 +333,7 @@ class LiveValidator:
 
     def _get_performance_suggestions(self, diagram_code: str) -> List[ValidationIssue]:
         """Get performance-related suggestions."""
-        suggestions = []
+        suggestions: List[ValidationIssue] = []
 
         lines = diagram_code.strip().split("\n")
 
@@ -356,7 +356,7 @@ class LiveValidator:
                 start = line.find("[")
                 end = line.find("]", start)
                 if end > start:
-                    label = line[start + 1 : end]
+                    label = line[start + 1: end]
                     if len(label) > 30:
                         long_label_count += 1
 
@@ -375,7 +375,7 @@ class LiveValidator:
         self, diagram_code: str
     ) -> List[ValidationIssue]:
         """Get accessibility-related suggestions."""
-        suggestions = []
+        suggestions: List[ValidationIssue] = []
 
         lines = diagram_code.strip().split("\n")
 
@@ -398,7 +398,7 @@ class LiveValidator:
                 start = line.find("[")
                 end = line.find("]", start)
                 if end > start:
-                    label = line[start + 1 : end]
+                    label = line[start + 1: end]
                     if len(label.strip()) < 3:
                         short_label_count += 1
 

@@ -17,7 +17,7 @@ class ExportFormat(Enum):
 class ExportManager:
     """Manages diagram export functionality."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.supported_formats = list(ExportFormat)
 
     def export_diagram(self, diagram_data: Dict[str, Any], format: ExportFormat) -> str:
@@ -30,7 +30,7 @@ class ExportManager:
             # For other formats, would integrate with renderer
             return f"Export to {format.value} not implemented"
 
-    def _export_mermaid_code(self, diagram_data: Dict[str, Any]) -> str:
+    def _export_mermaid_code(self, _diagram_data: Dict[str, Any]) -> str:
         """Export as Mermaid code."""
         # This would use the builder's generate_mermaid_code method
         return "flowchart TD\n    A --> B"

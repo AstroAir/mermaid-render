@@ -7,7 +7,7 @@ including toolboxes, property panels, and editor components.
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 
 @dataclass
@@ -28,7 +28,7 @@ class UIComponent(ABC):
 class NodeComponent(UIComponent):
     """Node component for diagram elements."""
 
-    def __init__(self, node_type: str, label: str, **properties):
+    def __init__(self, node_type: str, label: str, **properties: Any) -> None:
         super().__init__(
             component_id=f"node_{node_type}",
             component_type="node",
@@ -48,7 +48,7 @@ class NodeComponent(UIComponent):
 class EdgeComponent(UIComponent):
     """Edge component for connections."""
 
-    def __init__(self, edge_type: str, **properties):
+    def __init__(self, edge_type: str, **properties: Any) -> None:
         super().__init__(
             component_id=f"edge_{edge_type}",
             component_type="edge",
@@ -67,11 +67,11 @@ class EdgeComponent(UIComponent):
 class ToolboxComponent(UIComponent):
     """Toolbox component with available tools."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             component_id="toolbox", component_type="toolbox", properties={}
         )
-        self.tools = self._get_default_tools()
+        self.tools: List[Dict[str, Any]] = self._get_default_tools()
 
     def render(self) -> Dict[str, Any]:
         return {
@@ -94,11 +94,11 @@ class ToolboxComponent(UIComponent):
 class PropertiesPanel(UIComponent):
     """Properties panel for editing element properties."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             component_id="properties", component_type="properties", properties={}
         )
-        self.selected_element = None
+        self.selected_element: Optional[Dict[str, Any]] = None
 
     def render(self) -> Dict[str, Any]:
         return {
@@ -115,13 +115,13 @@ class PropertiesPanel(UIComponent):
 class CodeEditor(UIComponent):
     """Code editor component for Mermaid code."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             component_id="code_editor",
             component_type="code_editor",
             properties={"language": "mermaid", "theme": "default"},
         )
-        self.code = ""
+        self.code: str = ""
 
     def render(self) -> Dict[str, Any]:
         return {
@@ -139,13 +139,13 @@ class CodeEditor(UIComponent):
 class PreviewPanel(UIComponent):
     """Preview panel for rendered diagrams."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             component_id="preview",
             component_type="preview",
             properties={"format": "svg", "auto_update": True},
         )
-        self.preview_content = ""
+        self.preview_content: str = ""
 
     def render(self) -> Dict[str, Any]:
         return {

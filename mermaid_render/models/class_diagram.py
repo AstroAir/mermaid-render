@@ -12,7 +12,16 @@ from ..exceptions import DiagramError
 
 
 class ClassMethod:
-    """Represents a method in a class."""
+    """Represents a method belonging to a class in a class diagram.
+
+    Attributes:
+        name: Method name.
+        visibility: UML-style visibility ('public', 'private', 'protected', 'package').
+        return_type: Optional return type string.
+        parameters: Optional list of parameter strings (e.g., 'x: int').
+        is_static: Whether the method is static.
+        is_abstract: Whether the method is abstract.
+    """
 
     def __init__(
         self,
@@ -23,7 +32,7 @@ class ClassMethod:
         is_static: bool = False,
         is_abstract: bool = False,
     ) -> None:
-        """Initialize a class method."""
+        """Initialize a ClassMethod with optional metadata."""
         self.name = name
         self.visibility = visibility
         self.return_type = return_type
@@ -32,7 +41,7 @@ class ClassMethod:
         self.is_abstract = is_abstract
 
     def to_mermaid(self) -> str:
-        """Generate Mermaid syntax for this method."""
+        """Return the Mermaid syntax fragment for this method."""
         visibility_map = {
             "public": "+",
             "private": "-",
@@ -56,7 +65,14 @@ class ClassMethod:
 
 
 class ClassAttribute:
-    """Represents an attribute in a class."""
+    """Represents a class attribute (field) in a class diagram.
+
+    Attributes:
+        name: Attribute name.
+        type: Optional type annotation.
+        visibility: UML-style visibility specifier.
+        is_static: Whether the attribute is static.
+    """
 
     def __init__(
         self,
@@ -65,14 +81,14 @@ class ClassAttribute:
         visibility: str = "public",
         is_static: bool = False,
     ) -> None:
-        """Initialize a class attribute."""
+        """Initialize a ClassAttribute with metadata."""
         self.name = name
         self.type = type
         self.visibility = visibility
         self.is_static = is_static
 
     def to_mermaid(self) -> str:
-        """Generate Mermaid syntax for this attribute."""
+        """Return the Mermaid syntax fragment for this attribute."""
         visibility_map = {
             "public": "+",
             "private": "-",
@@ -91,7 +107,16 @@ class ClassAttribute:
 
 
 class ClassDefinition:
-    """Represents a class in a class diagram."""
+    """Represents a class/interface definition in a class diagram.
+
+    Attributes:
+        name: Class name.
+        is_abstract: Marks the class as abstract.
+        is_interface: Marks the class as an interface.
+        stereotype: Optional stereotype label.
+        attributes: Collected attributes defined on this class.
+        methods: Collected methods defined on this class.
+    """
 
     def __init__(
         self,
@@ -100,7 +125,7 @@ class ClassDefinition:
         is_interface: bool = False,
         stereotype: Optional[str] = None,
     ) -> None:
-        """Initialize a class definition."""
+        """Create a new ClassDefinition with optional flags and stereotype."""
         self.name = name
         self.is_abstract = is_abstract
         self.is_interface = is_interface
@@ -109,15 +134,15 @@ class ClassDefinition:
         self.methods: List[ClassMethod] = []
 
     def add_attribute(self, attribute: ClassAttribute) -> None:
-        """Add an attribute to this class."""
+        """Append an attribute to this class definition."""
         self.attributes.append(attribute)
 
     def add_method(self, method: ClassMethod) -> None:
-        """Add a method to this class."""
+        """Append a method to this class definition."""
         self.methods.append(method)
 
     def to_mermaid(self) -> List[str]:
-        """Generate Mermaid syntax for this class."""
+        """Build and return the Mermaid class block as a list of lines."""
         lines = []
 
         # Class declaration
@@ -147,7 +172,24 @@ class ClassDefinition:
 
 
 class ClassRelationship:
-    """Represents a relationship between classes."""
+    """Represents a relationship (edge) between two classes.
+
+    Supported relationship types map to Mermaid arrows:
+        inheritance  -> '<|--'
+        composition  -> '*--'
+        aggregation  -> 'o--'
+        association  -> '-->'
+        dependency   -> '..>'
+        realization  -> '..|>'
+
+    Attributes:
+        from_class: Source class name.
+        to_class: Target class name.
+        relationship_type: One of the supported relationship keys.
+        label: Optional relationship label.
+        from_cardinality: Optional source-side cardinality.
+        to_cardinality: Optional target-side cardinality.
+    """
 
     RELATIONSHIP_TYPES = {
         "inheritance": "<|--",
@@ -167,7 +209,7 @@ class ClassRelationship:
         from_cardinality: Optional[str] = None,
         to_cardinality: Optional[str] = None,
     ) -> None:
-        """Initialize a class relationship."""
+        """Initialize a ClassRelationship and validate the relationship type."""
         self.from_class = from_class
         self.to_class = to_class
         self.relationship_type = relationship_type
@@ -179,7 +221,7 @@ class ClassRelationship:
             raise DiagramError(f"Unknown relationship type: {relationship_type}")
 
     def to_mermaid(self) -> str:
-        """Generate Mermaid syntax for this relationship."""
+        """Return the Mermaid syntax line for this relationship."""
         arrow = self.RELATIONSHIP_TYPES[self.relationship_type]
 
         # Build relationship string
@@ -202,26 +244,20 @@ class ClassRelationship:
 
 
 class ClassDiagram(MermaidDiagram):
-    """
-    Class diagram model with support for classes, interfaces, and relationships.
+    """High-level class diagram container that emits Mermaid classDiagram.
 
-    Example:
-        >>> class_diagram = ClassDiagram()
-        >>> animal = class_diagram.add_class("Animal", is_abstract=True)
-        >>> animal.add_method(ClassMethod("move", "public", "void"))
-        >>> dog = class_diagram.add_class("Dog")
-        >>> class_diagram.add_relationship("Dog", "Animal", "inheritance")
-        >>> print(class_diagram.to_mermaid())
+    Provides APIs to register classes, attributes, methods, and relationships and
+    to generate the final Mermaid diagram text.
     """
 
     def __init__(self, title: Optional[str] = None) -> None:
-        """Initialize class diagram."""
+        """Initialize an empty class diagram with an optional title."""
         super().__init__(title)
         self.classes: Dict[str, ClassDefinition] = {}
         self.relationships: List[ClassRelationship] = []
 
     def get_diagram_type(self) -> str:
-        """Return the Mermaid diagram type identifier."""
+        """Return the Mermaid diagram header keyword ('classDiagram')."""
         return "classDiagram"
 
     def add_class(
@@ -231,7 +267,7 @@ class ClassDiagram(MermaidDiagram):
         is_interface: bool = False,
         stereotype: Optional[str] = None,
     ) -> ClassDefinition:
-        """Add a class to the diagram."""
+        """Create and register a new class; raises if the name already exists."""
         if name in self.classes:
             raise DiagramError(f"Class '{name}' already exists")
 
@@ -248,7 +284,7 @@ class ClassDiagram(MermaidDiagram):
         from_cardinality: Optional[str] = None,
         to_cardinality: Optional[str] = None,
     ) -> ClassRelationship:
-        """Add a relationship between classes."""
+        """Create and register a new relationship; raises if classes are missing."""
         if from_class not in self.classes:
             raise DiagramError(f"Class '{from_class}' does not exist")
         if to_class not in self.classes:
@@ -266,7 +302,7 @@ class ClassDiagram(MermaidDiagram):
         return relationship
 
     def _generate_mermaid(self) -> str:
-        """Generate complete Mermaid syntax for the class diagram."""
+        """Generate and return the full Mermaid text for the diagram."""
         lines = ["classDiagram"]
 
         # Add title if present

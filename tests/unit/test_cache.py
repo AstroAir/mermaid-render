@@ -737,7 +737,9 @@ class TestCacheManager:
 
         # Get performance report
         report = manager.get_performance_report()
-        assert isinstance(report, PerformanceReport)
+        assert isinstance(report, dict)
+        assert "cache_hit_rate" in report
+        assert "average_cache_time" in report
 
     def test_performance_monitoring_disabled(self):
         """Test with performance monitoring disabled."""

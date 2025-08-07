@@ -289,7 +289,7 @@ class DiagramGenerator:
         """Determine the best diagram type for the given analysis."""
         # Simple heuristics based on keywords and intent
         keywords = analysis.keywords
-        intent = analysis.intent.intent if analysis.intent else ""
+        # intent = analysis.intent.intent if analysis.intent else ""  # TODO: Use intent in future
 
         # Process-related keywords suggest flowchart
         process_keywords = ["process", "flow", "step", "procedure", "workflow"]

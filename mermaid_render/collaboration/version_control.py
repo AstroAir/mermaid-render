@@ -35,7 +35,7 @@ class ChangeSet:
     new_data: Optional[Dict[str, Any]]
     timestamp: datetime
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if not self.change_id:
             self.change_id = str(uuid.uuid4())
 
@@ -67,7 +67,7 @@ class Commit:
     diagram_hash: str
     metadata: Dict[str, Any] = field(default_factory=dict)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if not self.commit_id:
             self.commit_id = str(uuid.uuid4())
 
@@ -162,7 +162,7 @@ class VersionControl:
     and merging diagram modifications.
     """
 
-    def __init__(self, diagram_id: str):
+    def __init__(self, diagram_id: str) -> None:
         """
         Initialize version control for a diagram.
 
@@ -339,9 +339,7 @@ class VersionControl:
         if target_branch not in self.branches:
             raise VersionControlError(f"Target branch '{target_branch}' does not exist")
 
-        source = self.branches[source_branch]
-        target = self.branches[target_branch]
-
+        # Access branches directly where needed to avoid unused variable warnings
         # Get commits to merge
         source_commits = self._get_branch_commits(source_branch)
         target_commits = self._get_branch_commits(target_branch)
@@ -371,7 +369,7 @@ class VersionControl:
         # Create merge commit
         merge_commit = Commit(
             commit_id=str(uuid.uuid4()),
-            parent_commit_id=target.head_commit_id,
+            parent_commit_id=self.branches[target_branch].head_commit_id,
             branch_name=target_branch,
             author_id=merged_by,
             author_name=merged_by,
@@ -383,7 +381,8 @@ class VersionControl:
         )
 
         self.commits[merge_commit.commit_id] = merge_commit
-        target.head_commit_id = merge_commit.commit_id
+        # Update target branch head
+        self.branches[target_branch].head_commit_id = merge_commit.commit_id
 
         return MergeResult(
             status=MergeStatus.SUCCESS,
@@ -440,7 +439,7 @@ class VersionControl:
         # In practice, you'd need to reconstruct the diagram state at each commit
         # and compute the actual differences
 
-        commit1 = self.commits[commit1_id]
+        # Access commit2 only since we only return its changes; avoid unused variable for commit1
         commit2 = self.commits[commit2_id]
 
         # Return changes from commit2 (assuming it's newer)
@@ -459,8 +458,8 @@ class VersionControl:
             return []
 
         branch = self.branches[branch_name]
-        commits = []
-        current_commit_id = branch.head_commit_id
+        commits: List[Commit] = []
+        current_commit_id: Optional[str] = branch.head_commit_id
 
         while current_commit_id and current_commit_id in self.commits:
             commit = self.commits[current_commit_id]
@@ -490,7 +489,7 @@ class VersionControl:
     ) -> List[ChangeSet]:
         """Get all changes in a branch since a specific commit."""
         commits = self._get_branch_commits(branch_name)
-        changes = []
+        changes: List[ChangeSet] = []
 
         for commit in commits:
             if commit.commit_id == since_commit_id:
@@ -505,11 +504,11 @@ class VersionControl:
         changes2: List[ChangeSet],
     ) -> List[Dict[str, Any]]:
         """Detect conflicts between two sets of changes."""
-        conflicts = []
+        conflicts: List[Dict[str, Any]] = []
 
         # Group changes by element ID
-        elements1 = {}
-        elements2 = {}
+        elements1: Dict[str, ChangeSet] = {}
+        elements2: Dict[str, ChangeSet] = {}
 
         for change in changes1:
             if change.element_id:

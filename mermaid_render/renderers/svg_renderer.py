@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Union, cast
 
 try:
-    import mermaid as md
+    import mermaid as md  # type: ignore[import-untyped]
 
     _MERMAID_AVAILABLE = True
 except ImportError:
@@ -348,7 +348,7 @@ class SVGRenderer:
         Returns:
             Preload results
         """
-        results = {"successful": 0, "failed": 0, "errors": []}
+        results: Dict[str, Union[int, List[str]]] = {"successful": 0, "failed": 0, "errors": []}
 
         for config in diagram_configs:
             try:
@@ -361,11 +361,11 @@ class SVGRenderer:
 
                 # Render and cache
                 self.render(mermaid_code, theme, render_config)
-                results["successful"] += 1
+                results["successful"] = cast(int, results["successful"]) + 1
 
             except Exception as e:
-                results["failed"] += 1
-                results["errors"].append(str(e))
+                results["failed"] = cast(int, results["failed"]) + 1
+                cast(List[str], results["errors"]).append(str(e))
 
         return results
 
@@ -538,14 +538,14 @@ class SVGRenderer:
                     svg_content = self._render_remote(mermaid_code, theme, config)
                 except Exception as remote_error:
                     # If both fail, create detailed error with context
-                    context = {
+                    error_context: Dict[str, Any] = {
                         "local_error": str(last_error),
                         "remote_error": str(remote_error),
                         "server_url": self.server_url,
                         "use_local": self.use_local,
                     }
                     raise self.create_detailed_error(
-                        RuntimeError("Both local and remote rendering failed"), context
+                        RuntimeError("Both local and remote rendering failed"), error_context
                     ) from last_error
         else:
             svg_content = self._render_remote(mermaid_code, theme, config)
@@ -673,9 +673,10 @@ class SVGRenderer:
             svg_response = mermaid_obj.svg_response
 
             # Handle different response types
+            svg_content: str
             if hasattr(svg_response, "text"):
                 # It's a Response object
-                svg_content = svg_response.text
+                svg_content = str(svg_response.text)
             elif isinstance(svg_response, str):
                 # It's already a string
                 svg_content = svg_response
@@ -811,12 +812,12 @@ class SVGRenderer:
             }
             raise self.create_detailed_error(e, context) from e
         except Exception as e:
-            context = {
+            error_context: Dict[str, Any] = {
                 "server_url": self.server_url,
                 "operation": "remote_svg_rendering",
                 "mermaid_length": len(mermaid_code),
             }
-            raise self.create_detailed_error(e, context) from e
+            raise self.create_detailed_error(e, error_context) from e
 
     def render_to_file(
         self,
@@ -926,7 +927,7 @@ class SVGRenderer:
         """Export SVG to PNG format."""
         try:
             # Try to use cairosvg for PNG conversion
-            import cairosvg  # type: ignore[import-not-found]
+            import cairosvg  # type: ignore[import-untyped]
 
             png_data = cairosvg.svg2png(
                 bytestring=svg_content.encode("utf-8"),
@@ -955,7 +956,7 @@ class SVGRenderer:
         """Export SVG to PDF format."""
         try:
             # Try to use cairosvg for PDF conversion
-            import cairosvg  # type: ignore[import-not-found]
+            import cairosvg
 
             pdf_data = cairosvg.svg2pdf(
                 bytestring=svg_content.encode("utf-8"),
@@ -1079,7 +1080,7 @@ class SVGRenderer:
         output_dir: str,
         format: str = "svg",
         naming_pattern: str = "{index}_{name}",
-        **export_options,
+        **export_options: Any,
     ) -> Dict[str, Any]:
         """
         Export multiple diagrams in batch.
@@ -1228,7 +1229,7 @@ class SVGRenderer:
         template_name: str,
         theme: Optional[str] = None,
         config: Optional[Dict[str, Any]] = None,
-        **overrides,
+        **overrides: Any,
     ) -> Dict[str, Any]:
         """
         Export using a predefined template.
@@ -1712,7 +1713,7 @@ Original Mermaid Code:
 
         # Count opening and closing tags
         opening_tags = re.findall(r"<([a-zA-Z][a-zA-Z0-9]*)[^>]*(?<!/)>", svg_content)
-        closing_tags = re.findall(r"</([a-zA-Z][a-zA-Z0-9]*)>", svg_content)
+        # closing_tags = re.findall(r"</([a-zA-Z][a-zA-Z0-9]*)>", svg_content)  # TODO: Use for validation
 
         # Simple heuristic: assume reasonable nesting based on tag counts
         max_depth = min(len(opening_tags), 20)  # Cap at 20 to avoid issues
@@ -1842,7 +1843,7 @@ Original Mermaid Code:
             # Find the SVG opening tag and add namespace if missing
             svg_pattern = r"<svg([^>]*?)>"
 
-            def add_namespace(match):
+            def add_namespace(match: Any) -> str:
                 attrs = match.group(1)
                 if "xmlns=" not in attrs:
                     # Add the SVG namespace
@@ -1850,7 +1851,7 @@ Original Mermaid Code:
                         return f'<svg{attrs} xmlns="http://www.w3.org/2000/svg">'
                     else:
                         return '<svg xmlns="http://www.w3.org/2000/svg">'
-                return match.group(0)
+                return cast(str, match.group(0))
 
             svg_content = re.sub(svg_pattern, add_namespace, svg_content, count=1)
 
@@ -1880,13 +1881,13 @@ Original Mermaid Code:
         )
 
         # Ensure proper units for width/height if they're just numbers
-        def add_units(match):
+        def add_units(match: Any) -> str:
             attr_name = match.group(1)
             value = match.group(2)
             # If it's just a number, add 'px' unit
             if re.match(r"^\d+(\.\d+)?$", value):
                 return f'{attr_name}="{value}px"'
-            return match.group(0)
+            return cast(str, match.group(0))
 
         # Fix width and height attributes
         svg_content = re.sub(r'(width|height)="([^"]*)"', add_units, svg_content)
@@ -1913,7 +1914,7 @@ Original Mermaid Code:
         svg_content = re.sub(r'(\w+)=([^"\s>]+)(?=\s|>)', r'\1="\2"', svg_content)
 
         # 2. Fix unescaped ampersands in attribute values (simple approach)
-        def fix_ampersands(match):
+        def fix_ampersands(match: Any) -> str:
             attr_name = match.group(1)
             attr_value = match.group(2)
             # Only escape & if it's not already part of an entity
@@ -1926,7 +1927,7 @@ Original Mermaid Code:
         )
 
         # 3. Fix unescaped < and > in attribute values
-        def fix_brackets(match):
+        def fix_brackets(match: Any) -> str:
             attr_name = match.group(1)
             attr_value = match.group(2)
             # Only escape if not already escaped

@@ -39,9 +39,9 @@ class Template:
     updated_at: datetime
     version: str = "1.0.0"
     author: Optional[str] = None
-    tags: List[str] = None
+    tags: Optional[List[str]] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.tags is None:
             self.tags = []
 
@@ -211,7 +211,7 @@ class TemplateManager:
             templates = [t for t in templates if t.diagram_type == diagram_type]
 
         if tags:
-            templates = [t for t in templates if any(tag in t.tags for tag in tags)]
+            templates = [t for t in templates if t.tags and any(tag in t.tags for tag in tags)]
 
         if author:
             templates = [t for t in templates if t.author == author]
@@ -263,7 +263,7 @@ class TemplateManager:
     def delete_template(self, template_id: str) -> bool:
         """Delete a template."""
         if template_id in self._templates:
-            template = self._templates[template_id]
+            # template = self._templates[template_id]  # TODO: Use for logging/validation
             del self._templates[template_id]
 
             # Remove file if it exists

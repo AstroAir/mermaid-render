@@ -18,12 +18,14 @@ from mermaid_render import (
 class TestEndToEndWorkflow:
     """Test complete end-to-end workflows."""
 
-    @patch("mermaid_render.core.md.Mermaid")
+    @patch("mermaid_render.renderers.svg_renderer.md.Mermaid")
     def test_flowchart_creation_and_rendering(self, mock_mermaid, temp_dir):
         """Test complete flowchart workflow."""
         # Mock the mermaid-py library
         mock_instance = Mock()
         mock_instance.__str__ = Mock(return_value="<svg>flowchart content</svg>")
+        mock_instance.svg_response = Mock()
+        mock_instance.svg_response.text = "<svg>flowchart content</svg>"
         mock_mermaid.return_value = mock_instance
 
         # Create flowchart
@@ -44,16 +46,16 @@ class TestEndToEndWorkflow:
         renderer = MermaidRenderer()
         svg_content = renderer.render(flowchart, format="svg")
 
-        assert svg_content == "<svg>flowchart content</svg>"
+        assert svg_content == '<svg xmlns="http://www.w3.org/2000/svg">flowchart content</svg>'
 
         # Save to file
         output_path = temp_dir / "flowchart.svg"
         renderer.save(flowchart, output_path)
 
         assert output_path.exists()
-        assert output_path.read_text() == "<svg>flowchart content</svg>"
+        assert output_path.read_text() == '<svg xmlns="http://www.w3.org/2000/svg">flowchart content</svg>'
 
-    @patch("mermaid_render.core.md.Mermaid")
+    @patch("mermaid_render.renderers.svg_renderer.md.Mermaid")
     def test_sequence_diagram_workflow(self, mock_mermaid, temp_dir):
         """Test complete sequence diagram workflow."""
         # Mock the mermaid-py library
@@ -86,7 +88,7 @@ class TestEndToEndWorkflow:
 
         assert output_path.exists()
 
-    @patch("mermaid_render.core.md.Mermaid")
+    @patch("mermaid_render.renderers.svg_renderer.md.Mermaid")
     def test_quick_render_function(self, mock_mermaid, temp_dir):
         """Test quick_render convenience function."""
         # Mock the mermaid-py library
@@ -114,7 +116,7 @@ flowchart TD
         assert output_path.exists()
         assert output_path.read_text() == "<svg>quick render</svg>"
 
-    @patch("mermaid_render.core.md.Mermaid")
+    @patch("mermaid_render.renderers.svg_renderer.md.Mermaid")
     def test_export_to_file_function(self, mock_mermaid, temp_dir):
         """Test export_to_file convenience function."""
         # Mock the mermaid-py library
@@ -210,7 +212,7 @@ flowchart TD
         # Test validation
         config_manager.validate_config()  # Should not raise
 
-    @patch("mermaid_render.core.md.Mermaid")
+    @patch("mermaid_render.renderers.svg_renderer.md.Mermaid")
     def test_multiple_format_export(self, mock_mermaid, temp_dir):
         """Test exporting to multiple formats."""
         from mermaid_render.utils import export_multiple_formats
