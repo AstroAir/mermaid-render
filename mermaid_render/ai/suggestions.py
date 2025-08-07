@@ -41,7 +41,7 @@ class Suggestion:
     confidence: float = 0.8
     created_at: Optional[datetime] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.created_at is None:
             self.created_at = datetime.now()
 
@@ -65,7 +65,7 @@ class Suggestion:
 class SuggestionEngine:
     """AI-powered suggestion engine for diagram improvements."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.suggestion_rules = self._load_suggestion_rules()
         self.suggestion_counter = 0
 
@@ -74,7 +74,7 @@ class SuggestionEngine:
         diagram_code: str,
         context: Optional[Dict[str, Any]] = None,
         suggestion_types: Optional[List[SuggestionType]] = None,
-        priority_filter: Optional[SuggestionPriority] = None
+        priority_filter: Optional[SuggestionPriority] = None,
     ) -> List[Suggestion]:
         """
         Get suggestions for improving a diagram.
@@ -99,11 +99,17 @@ class SuggestionEngine:
                 suggestion = self._create_suggestion(rule, diagram_code, analysis)
 
                 # Apply type filter
-                if suggestion_types and suggestion.suggestion_type not in suggestion_types:
+                if (
+                    suggestion_types
+                    and suggestion.suggestion_type not in suggestion_types
+                ):
                     continue
 
                 # Apply priority filter
-                if priority_filter and suggestion.priority.value < priority_filter.value:
+                if (
+                    priority_filter
+                    and suggestion.priority.value < priority_filter.value
+                ):
                     continue
 
                 suggestions.append(suggestion)
@@ -113,7 +119,9 @@ class SuggestionEngine:
 
         return suggestions
 
-    def suggest_improvements(self, diagram_code: str, context: Optional[Dict[str, Any]] = None) -> List[Suggestion]:
+    def suggest_improvements(
+        self, diagram_code: str, context: Optional[Dict[str, Any]] = None
+    ) -> List[Suggestion]:
         """
         Get improvement suggestions for a diagram.
 
@@ -126,7 +134,9 @@ class SuggestionEngine:
         """
         return self.get_suggestions(diagram_code, context)
 
-    def suggest_styling(self, diagram_code: str, context: Optional[Dict[str, Any]] = None) -> List[Suggestion]:
+    def suggest_styling(
+        self, diagram_code: str, context: Optional[Dict[str, Any]] = None
+    ) -> List[Suggestion]:
         """
         Get styling suggestions for a diagram.
 
@@ -140,7 +150,9 @@ class SuggestionEngine:
         all_suggestions = self.get_suggestions(diagram_code, context)
         return [s for s in all_suggestions if s.suggestion_type == SuggestionType.STYLE]
 
-    def suggest_layout(self, diagram_code: str, context: Optional[Dict[str, Any]] = None) -> List[Suggestion]:
+    def suggest_layout(
+        self, diagram_code: str, context: Optional[Dict[str, Any]] = None
+    ) -> List[Suggestion]:
         """
         Get layout suggestions for a diagram.
 
@@ -152,7 +164,9 @@ class SuggestionEngine:
             List of layout suggestions
         """
         all_suggestions = self.get_suggestions(diagram_code, context)
-        return [s for s in all_suggestions if s.suggestion_type == SuggestionType.LAYOUT]
+        return [
+            s for s in all_suggestions if s.suggestion_type == SuggestionType.LAYOUT
+        ]
 
     def get_suggestions_by_type(
         self,

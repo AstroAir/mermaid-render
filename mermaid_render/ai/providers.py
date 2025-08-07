@@ -12,6 +12,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Union, cast
 from urllib.parse import urljoin
+import importlib.util
 
 import requests
 
@@ -52,7 +53,9 @@ class GenerationResponse:
 class ProviderError(Exception):
     """Base exception for provider errors."""
 
-    def __init__(self, message: str, provider: str = "unknown", error_code: Optional[str] = None) -> None:
+    def __init__(
+        self, message: str, provider: str = "unknown", error_code: Optional[str] = None
+    ) -> None:
         super().__init__(message)
         self.provider = provider
         self.error_code = error_code
@@ -60,16 +63,19 @@ class ProviderError(Exception):
 
 class AuthenticationError(ProviderError):
     """Authentication-related errors."""
+
     pass
 
 
 class RateLimitError(ProviderError):
     """Rate limiting errors."""
+
     pass
 
 
 class ModelNotFoundError(ProviderError):
     """Model not found errors."""
+
     pass
 
 
@@ -86,7 +92,8 @@ class AIProvider(ABC):
         self.config: ProviderConfig = config or ProviderConfig()
         self._client: Optional[Any] = None
         self.provider_name: str = self.__class__.__name__.replace(
-            "Provider", "").lower()
+            "Provider", ""
+        ).lower()
 
     @abstractmethod
     def generate_text(self, prompt: str, **kwargs: Any) -> GenerationResponse:
@@ -137,8 +144,7 @@ class AIProvider(ABC):
         """
         if not self.config.api_key:
             raise AuthenticationError(
-                "API key is required",
-                provider=self.provider_name
+                "API key is required", provider=self.provider_name
             )
         return True
 
@@ -148,19 +154,17 @@ class AIProvider(ABC):
             raise AuthenticationError(
                 "Invalid API key or authentication failed",
                 provider=self.provider_name,
-                error_code="401"
+                error_code="401",
             )
         elif response.status_code == 429:
             raise RateLimitError(
-                "Rate limit exceeded",
-                provider=self.provider_name,
-                error_code="429"
+                "Rate limit exceeded", provider=self.provider_name, error_code="429"
             )
         elif response.status_code == 404:
             raise ModelNotFoundError(
                 "Model not found or not available",
                 provider=self.provider_name,
-                error_code="404"
+                error_code="404",
             )
         elif response.status_code >= 400:
             try:
@@ -172,7 +176,7 @@ class AIProvider(ABC):
             raise ProviderError(
                 f"HTTP {response.status_code}: {message}",
                 provider=self.provider_name,
-                error_code=str(response.status_code)
+                error_code=str(response.status_code),
             )
 
     def _get_fallback_response(self, prompt: str) -> GenerationResponse:
@@ -208,7 +212,7 @@ class AIProvider(ABC):
         return GenerationResponse(
             content=content,
             provider="fallback",
-            metadata={"fallback": True, "original_provider": self.provider_name}
+            metadata={"fallback": True, "original_provider": self.provider_name},
         )
 
 
@@ -219,13 +223,12 @@ class OpenAIProvider(AIProvider):
     Supports all OpenAI models including GPT-3.5, GPT-4, and newer variants.
     """
 
-    def __init__(self, config: Optional[ProviderConfig] = None, model: str = "gpt-3.5-turbo") -> None:
+    def __init__(
+        self, config: Optional[ProviderConfig] = None, model: str = "gpt-3.5-turbo"
+    ) -> None:
         """Initialize OpenAI provider."""
         if config is None:
-            config = ProviderConfig(
-                api_key=os.getenv("OPENAI_API_KEY"),
-                model=model
-            )
+            config = ProviderConfig(api_key=os.getenv("OPENAI_API_KEY"), model=model)
         elif config.model is None:
             config.model = model
 
@@ -254,13 +257,11 @@ class OpenAIProvider(AIProvider):
             if not self._client:
                 if not self.config.api_key:
                     raise AuthenticationError(
-                        "OpenAI API key not provided",
-                        provider=self.provider_name
+                        "OpenAI API key not provided", provider=self.provider_name
                     )
                 # Create client
                 self._client = openai.OpenAI(
-                    api_key=self.config.api_key,
-                    timeout=self.config.timeout
+                    api_key=self.config.api_key, timeout=self.config.timeout
                 )
 
             # Prepare messages
@@ -277,40 +278,57 @@ class OpenAIProvider(AIProvider):
                     assert self._client is not None  # for type checker
                     response = self._client.chat.completions.create(
                         model=self.config.model or "gpt-3.5-turbo",
-                        messages=messages,  # SDK accepts dicts
+                        messages=messages,
                         max_tokens=cast(int, kwargs.get("max_tokens", 1000)),
                         temperature=cast(float, kwargs.get("temperature", 0.7)),
                         top_p=cast(float, kwargs.get("top_p", 1.0)),
                         frequency_penalty=cast(
-                            float, kwargs.get("frequency_penalty", 0.0)),
+                            float, kwargs.get("frequency_penalty", 0.0)
+                        ),
                         presence_penalty=cast(
-                            float, kwargs.get("presence_penalty", 0.0)),
+                            float, kwargs.get("presence_penalty", 0.0)
+                        ),
                         stop=kwargs.get("stop"),
                         stream=cast(bool, kwargs.get("stream", False)),
                     )
 
-                    content = getattr(response.choices[0].message, "content", "") or ""
+                    # Handle streaming vs non-streaming responses
+                    if hasattr(response, "choices") and response.choices:
+                        content = (
+                            getattr(response.choices[0].message, "content", "") or ""
+                        )
+                        usage_info = None
+                        if hasattr(response, "usage") and response.usage:
+                            usage_info = {
+                                "prompt_tokens": response.usage.prompt_tokens,
+                                "completion_tokens": response.usage.completion_tokens,
+                                "total_tokens": response.usage.total_tokens,
+                            }
 
-                    return GenerationResponse(
-                        content=content,
-                        model=getattr(response, "model", None),
-                        usage=({
-                            "prompt_tokens": response.usage.prompt_tokens,
-                            "completion_tokens": response.usage.completion_tokens,
-                            "total_tokens": response.usage.total_tokens,
-                        } if getattr(response, "usage", None) else None),
-                        provider=self.provider_name,
-                        metadata={
-                            "finish_reason": response.choices[0].finish_reason,
-                            "response_id": response.id,
-                        }
-                    )
+                        return GenerationResponse(
+                            content=content,
+                            model=getattr(response, "model", None),
+                            usage=usage_info,
+                            provider=self.provider_name,
+                            metadata={
+                                "finish_reason": response.choices[0].finish_reason,
+                                "response_id": getattr(response, "id", None),
+                            },
+                        )
+                    else:
+                        # Handle streaming response
+                        return GenerationResponse(
+                            content="",
+                            provider=self.provider_name,
+                            metadata={"stream": True},
+                        )
 
                 except openai.RateLimitError as e:
                     if attempt < self.config.max_retries:
-                        wait_time = 2 ** attempt
+                        wait_time = 2**attempt
                         logger.warning(f"Rate limited, retrying in {wait_time}s...")
                         import time
+
                         time.sleep(wait_time)
                         continue
                     raise RateLimitError(str(e), provider=self.provider_name)
@@ -323,13 +341,15 @@ class OpenAIProvider(AIProvider):
 
                 except Exception as e:
                     if attempt < self.config.max_retries:
-                        wait_time = 2 ** attempt
+                        wait_time = 2**attempt
                         logger.warning(f"API error, retrying in {wait_time}s: {e}")
                         import time
+
                         time.sleep(wait_time)
                         continue
                     raise ProviderError(
-                        f"OpenAI API error: {e}", provider=self.provider_name)
+                        f"OpenAI API error: {e}", provider=self.provider_name
+                    )
 
             # This should never be reached due to the loop structure, but add for safety
             raise ProviderError("Max retries exceeded", provider=self.provider_name)
@@ -342,11 +362,9 @@ class OpenAIProvider(AIProvider):
 
     def is_available(self) -> bool:
         """Check if OpenAI is available."""
-        try:
-            import openai  # noqa: F401
-            return self.config.api_key is not None
-        except ImportError:
-            return False
+        # Avoid importing solely to check availability to prevent unused import errors
+        openai_available = importlib.util.find_spec("openai") is not None
+        return openai_available and (self.config.api_key is not None)
 
     def get_supported_models(self) -> List[str]:
         """Get list of supported OpenAI models."""
@@ -376,13 +394,14 @@ class AnthropicProvider(AIProvider):
     Supports Claude 3 models including Haiku, Sonnet, and Opus variants.
     """
 
-    def __init__(self, config: Optional[ProviderConfig] = None, model: str = "claude-3-5-sonnet-20241022") -> None:
+    def __init__(
+        self,
+        config: Optional[ProviderConfig] = None,
+        model: str = "claude-3-5-sonnet-20241022",
+    ) -> None:
         """Initialize Anthropic provider."""
         if config is None:
-            config = ProviderConfig(
-                api_key=os.getenv("ANTHROPIC_API_KEY"),
-                model=model
-            )
+            config = ProviderConfig(api_key=os.getenv("ANTHROPIC_API_KEY"), model=model)
         elif config.model is None:
             config.model = model
 
@@ -411,12 +430,10 @@ class AnthropicProvider(AIProvider):
             if not self._client:
                 if not self.config.api_key:
                     raise AuthenticationError(
-                        "Anthropic API key not provided",
-                        provider=self.provider_name
+                        "Anthropic API key not provided", provider=self.provider_name
                     )
                 self._client = anthropic.Anthropic(
-                    api_key=self.config.api_key,
-                    timeout=self.config.timeout
+                    api_key=self.config.api_key, timeout=self.config.timeout
                 )
 
             # Prepare messages
@@ -436,37 +453,50 @@ class AnthropicProvider(AIProvider):
                         messages=messages,
                         temperature=cast(float, kwargs.get("temperature", 0.7)),
                         top_p=cast(float, kwargs.get("top_p", 1.0)),
-                        stop_sequences=cast(Optional[List[str]], kwargs.get("stop")),
+                        stop_sequences=kwargs.get("stop"),
                         stream=cast(bool, kwargs.get("stream", False)),
                     )
 
-                    # Extract content
-                    content = ""
-                    if getattr(response, "content", None):
+                    # Handle streaming vs non-streaming responses
+                    if hasattr(response, "content") and response.content:
+                        content = ""
                         for block in response.content:
-                            if hasattr(block, 'text'):
-                                content += getattr(block, 'text', "")
+                            if hasattr(block, "text"):
+                                content += getattr(block, "text", "")
 
-                    return GenerationResponse(
-                        content=content,
-                        model=getattr(response, "model", None),
-                        usage=({
-                            "prompt_tokens": response.usage.input_tokens,
-                            "completion_tokens": response.usage.output_tokens,
-                            "total_tokens": response.usage.input_tokens + response.usage.output_tokens,
-                        } if getattr(response, "usage", None) else None),
-                        provider=self.provider_name,
-                        metadata={
-                            "finish_reason": getattr(response, "stop_reason", None),
-                            "response_id": getattr(response, "id", None),
-                        }
-                    )
+                        usage_info = None
+                        if hasattr(response, "usage") and response.usage:
+                            usage_info = {
+                                "prompt_tokens": response.usage.input_tokens,
+                                "completion_tokens": response.usage.output_tokens,
+                                "total_tokens": response.usage.input_tokens
+                                + response.usage.output_tokens,
+                            }
+
+                        return GenerationResponse(
+                            content=content,
+                            model=getattr(response, "model", None),
+                            usage=usage_info,
+                            provider=self.provider_name,
+                            metadata={
+                                "finish_reason": getattr(response, "stop_reason", None),
+                                "response_id": getattr(response, "id", None),
+                            },
+                        )
+                    else:
+                        # Handle streaming response
+                        return GenerationResponse(
+                            content="",
+                            provider=self.provider_name,
+                            metadata={"stream": True},
+                        )
 
                 except anthropic.RateLimitError as e:
                     if attempt < self.config.max_retries:
-                        wait_time = 2 ** attempt
+                        wait_time = 2**attempt
                         logger.warning(f"Rate limited, retrying in {wait_time}s...")
                         import time
+
                         time.sleep(wait_time)
                         continue
                     raise RateLimitError(str(e), provider=self.provider_name)
@@ -479,13 +509,15 @@ class AnthropicProvider(AIProvider):
 
                 except Exception as e:
                     if attempt < self.config.max_retries:
-                        wait_time = 2 ** attempt
+                        wait_time = 2**attempt
                         logger.warning(f"API error, retrying in {wait_time}s: {e}")
                         import time
+
                         time.sleep(wait_time)
                         continue
                     raise ProviderError(
-                        f"Anthropic API error: {e}", provider=self.provider_name)
+                        f"Anthropic API error: {e}", provider=self.provider_name
+                    )
 
             # This should never be reached due to the loop structure, but add for safety
             raise ProviderError("Max retries exceeded", provider=self.provider_name)
@@ -498,11 +530,8 @@ class AnthropicProvider(AIProvider):
 
     def is_available(self) -> bool:
         """Check if Anthropic is available."""
-        try:
-            import anthropic  # noqa: F401
-            return self.config.api_key is not None
-        except ImportError:
-            return False
+        anthropic_available = importlib.util.find_spec("anthropic") is not None
+        return anthropic_available and (self.config.api_key is not None)
 
     def get_supported_models(self) -> List[str]:
         """Get list of supported Anthropic models."""
@@ -532,7 +561,9 @@ class LocalModelProvider(AIProvider):
     and can be extended to support local AI models.
     """
 
-    def __init__(self, config: Optional[ProviderConfig] = None, model_path: Optional[str] = None) -> None:
+    def __init__(
+        self, config: Optional[ProviderConfig] = None, model_path: Optional[str] = None
+    ) -> None:
         """Initialize local model provider."""
         if config is None:
             config = ProviderConfig(model="local-template")
@@ -548,6 +579,9 @@ class LocalModelProvider(AIProvider):
 
     def generate_text(self, prompt: str, **kwargs: Any) -> GenerationResponse:
         """Generate text using local model or templates."""
+        # Mark kwargs as intentionally unused for linters
+        _ = kwargs
+
         # For now, use template-based generation
         # This can be extended to support actual local models
         content = self._template_generation(prompt)
@@ -556,10 +590,7 @@ class LocalModelProvider(AIProvider):
             content=content,
             model="local-template",
             provider=self.provider_name,
-            metadata={
-                "template_based": True,
-                "model_path": self.model_path
-            }
+            metadata={"template_based": True, "model_path": self.model_path},
         )
 
     def is_available(self) -> bool:
@@ -575,14 +606,20 @@ class LocalModelProvider(AIProvider):
         prompt_lower = prompt.lower()
 
         # Analyze prompt for diagram type hints
-        if any(word in prompt_lower for word in ["sequence", "interaction", "message", "actor"]):
+        if any(
+            word in prompt_lower
+            for word in ["sequence", "interaction", "message", "actor"]
+        ):
             return """sequenceDiagram
     participant A as User
     participant B as System
     A->>B: Request
     B-->>A: Response"""
 
-        elif any(word in prompt_lower for word in ["class", "object", "inheritance", "method"]):
+        elif any(
+            word in prompt_lower
+            for word in ["class", "object", "inheritance", "method"]
+        ):
             return """classDiagram
     class User {
         +String name
@@ -598,7 +635,10 @@ class LocalModelProvider(AIProvider):
     Processing --> Complete : finish
     Complete --> [*]"""
 
-        elif any(word in prompt_lower for word in ["entity", "relationship", "database", "table"]):
+        elif any(
+            word in prompt_lower
+            for word in ["entity", "relationship", "database", "table"]
+        ):
             return """erDiagram
     USER {
         int id PK
@@ -612,7 +652,10 @@ class LocalModelProvider(AIProvider):
     }
     USER ||--o{ ORDER : places"""
 
-        elif any(word in prompt_lower for word in ["gantt", "timeline", "schedule", "project"]):
+        elif any(
+            word in prompt_lower
+            for word in ["gantt", "timeline", "schedule", "project"]
+        ):
             return """gantt
     title Project Timeline
     dateFormat YYYY-MM-DD
@@ -637,13 +680,17 @@ class OpenRouterProvider(AIProvider):
     through a single endpoint with automatic fallbacks and cost optimization.
     """
 
-    def __init__(self, config: Optional[ProviderConfig] = None, model: str = "openai/gpt-3.5-turbo") -> None:
+    def __init__(
+        self,
+        config: Optional[ProviderConfig] = None,
+        model: str = "openai/gpt-3.5-turbo",
+    ) -> None:
         """Initialize OpenRouter provider."""
         if config is None:
             config = ProviderConfig(
                 api_key=os.getenv("OPENROUTER_API_KEY"),
                 base_url="https://openrouter.ai/api/v1",
-                model=model
+                model=model,
             )
         elif config.base_url is None:
             config.base_url = "https://openrouter.ai/api/v1"
@@ -657,15 +704,16 @@ class OpenRouterProvider(AIProvider):
         try:
             if not self.config.api_key:
                 raise AuthenticationError(
-                    "OpenRouter API key not provided",
-                    provider=self.provider_name
+                    "OpenRouter API key not provided", provider=self.provider_name
                 )
 
             # Prepare headers
             headers: Dict[str, str] = {
                 "Authorization": f"Bearer {self.config.api_key}",
                 "Content-Type": "application/json",
-                "HTTP-Referer": cast(str, kwargs.get("site_url", "https://mermaid-render.dev")),
+                "HTTP-Referer": cast(
+                    str, kwargs.get("site_url", "https://mermaid-render.dev")
+                ),
                 "X-Title": cast(str, kwargs.get("site_name", "Mermaid Render")),
             }
 
@@ -723,7 +771,7 @@ class OpenRouterProvider(AIProvider):
                         url,
                         headers=headers,
                         json=request_body,
-                        timeout=self.config.timeout
+                        timeout=self.config.timeout,
                     )
 
                     # Handle HTTP errors
@@ -735,8 +783,7 @@ class OpenRouterProvider(AIProvider):
 
                     if not response_data.get("choices"):
                         raise ProviderError(
-                            "No choices in response",
-                            provider=self.provider_name
+                            "No choices in response", provider=self.provider_name
                         )
 
                     choice = response_data["choices"][0]
@@ -751,33 +798,36 @@ class OpenRouterProvider(AIProvider):
                             "finish_reason": choice.get("finish_reason"),
                             "response_id": response_data.get("id"),
                             "created": response_data.get("created"),
-                            "system_fingerprint": response_data.get("system_fingerprint"),
-                        }
+                            "system_fingerprint": response_data.get(
+                                "system_fingerprint"
+                            ),
+                        },
                     )
 
                 except requests.exceptions.Timeout:
                     if attempt < self.config.max_retries:
-                        wait_time = 2 ** attempt
+                        wait_time = 2**attempt
                         logger.warning(f"Request timeout, retrying in {wait_time}s...")
                         import time
+
                         time.sleep(wait_time)
                         continue
                     raise ProviderError(
                         "Request timeout",
                         provider=self.provider_name,
-                        error_code="timeout"
+                        error_code="timeout",
                     )
 
                 except requests.exceptions.RequestException as e:
                     if attempt < self.config.max_retries:
-                        wait_time = 2 ** attempt
+                        wait_time = 2**attempt
                         logger.warning(f"Request error, retrying in {wait_time}s: {e}")
                         import time
+
                         time.sleep(wait_time)
                         continue
                     raise ProviderError(
-                        f"Request error: {e}",
-                        provider=self.provider_name
+                        f"Request error: {e}", provider=self.provider_name
                     )
 
             # This should never be reached due to the loop structure, but add for safety
@@ -807,27 +857,22 @@ class OpenRouterProvider(AIProvider):
             "openai/gpt-4-turbo",
             "openai/gpt-4",
             "openai/gpt-3.5-turbo",
-
             # Anthropic models
             "anthropic/claude-3-5-sonnet",
             "anthropic/claude-3-opus",
             "anthropic/claude-3-sonnet",
             "anthropic/claude-3-haiku",
-
             # Google models
             "google/gemini-pro",
             "google/gemini-pro-vision",
-
             # Meta models
             "meta-llama/llama-3.1-405b-instruct",
             "meta-llama/llama-3.1-70b-instruct",
             "meta-llama/llama-3.1-8b-instruct",
-
             # Mistral models
             "mistralai/mistral-large",
             "mistralai/mistral-medium",
             "mistralai/mistral-small",
-
             # Other popular models
             "cohere/command-r-plus",
             "perplexity/llama-3.1-sonar-large-128k-online",
@@ -867,8 +912,7 @@ class OpenRouterProvider(AIProvider):
 
         if not self.config.base_url:
             raise ProviderError(
-                "Base URL is required for OpenRouter",
-                provider=self.provider_name
+                "Base URL is required for OpenRouter", provider=self.provider_name
             )
 
         return True
@@ -945,7 +989,7 @@ class CustomProvider(AIProvider):
                         url,
                         headers=headers,
                         json=request_body,
-                        timeout=self.config.timeout
+                        timeout=self.config.timeout,
                     )
 
                     # Handle HTTP errors
@@ -957,27 +1001,28 @@ class CustomProvider(AIProvider):
 
                 except requests.exceptions.Timeout:
                     if attempt < self.config.max_retries:
-                        wait_time = 2 ** attempt
+                        wait_time = 2**attempt
                         logger.warning(f"Request timeout, retrying in {wait_time}s...")
                         import time
+
                         time.sleep(wait_time)
                         continue
                     raise ProviderError(
                         "Request timeout",
                         provider=self.provider_name,
-                        error_code="timeout"
+                        error_code="timeout",
                     )
 
                 except requests.exceptions.RequestException as e:
                     if attempt < self.config.max_retries:
-                        wait_time = 2 ** attempt
+                        wait_time = 2**attempt
                         logger.warning(f"Request error, retrying in {wait_time}s: {e}")
                         import time
+
                         time.sleep(wait_time)
                         continue
                     raise ProviderError(
-                        f"Request error: {e}",
-                        provider=self.provider_name
+                        f"Request error: {e}", provider=self.provider_name
                     )
 
             # This should never be reached due to the loop structure, but add for safety
@@ -987,7 +1032,8 @@ class CustomProvider(AIProvider):
             raise
         except Exception as e:
             logger.error(
-                f"Unexpected error in custom provider {self.provider_name}: {e}")
+                f"Unexpected error in custom provider {self.provider_name}: {e}"
+            )
             return self._get_fallback_response(prompt)
 
     def _prepare_headers(self) -> Dict[str, str]:
@@ -996,11 +1042,14 @@ class CustomProvider(AIProvider):
 
         # Add authentication
         if self.custom_config.auth_type == "bearer" and self.config.api_key:
-            headers[self.custom_config.auth_header] = f"{self.custom_config.auth_prefix} {self.config.api_key}"
+            headers[self.custom_config.auth_header] = (
+                f"{self.custom_config.auth_prefix} {self.config.api_key}"
+            )
         elif self.custom_config.auth_type == "api_key" and self.config.api_key:
             headers[self.custom_config.auth_header] = self.config.api_key
         elif self.custom_config.auth_type == "basic" and self.config.api_key:
             import base64
+
             encoded = base64.b64encode(f":{self.config.api_key}".encode()).decode()
             headers[self.custom_config.auth_header] = f"Basic {encoded}"
         elif self.custom_config.auth_type == "none":
@@ -1028,7 +1077,9 @@ class CustomProvider(AIProvider):
         else:
             return self._prepare_custom_request(messages, **kwargs)
 
-    def _prepare_openai_request(self, messages: List[Dict[str, Any]], **kwargs: Any) -> Dict[str, Any]:
+    def _prepare_openai_request(
+        self, messages: List[Dict[str, Any]], **kwargs: Any
+    ) -> Dict[str, Any]:
         """Prepare OpenAI-format request."""
         request_body: Dict[str, Any] = {
             "model": self._map_model(cast(str, kwargs.get("model", "default"))),
@@ -1049,7 +1100,9 @@ class CustomProvider(AIProvider):
 
         return self._map_parameters(request_body)
 
-    def _prepare_anthropic_request(self, messages: List[Dict[str, Any]], **kwargs: Any) -> Dict[str, Any]:
+    def _prepare_anthropic_request(
+        self, messages: List[Dict[str, Any]], **kwargs: Any
+    ) -> Dict[str, Any]:
         """Prepare Anthropic-format request."""
         request_body: Dict[str, Any] = {
             "model": self._map_model(cast(str, kwargs.get("model", "default"))),
@@ -1066,7 +1119,9 @@ class CustomProvider(AIProvider):
 
         return self._map_parameters(request_body)
 
-    def _prepare_custom_request(self, messages: List[Dict[str, Any]], **kwargs: Any) -> Dict[str, Any]:
+    def _prepare_custom_request(
+        self, messages: List[Dict[str, Any]], **kwargs: Any
+    ) -> Dict[str, Any]:
         """Prepare custom format request - override in subclasses."""
         # Default to OpenAI format for custom providers
         return self._prepare_openai_request(messages, **kwargs)
@@ -1091,7 +1146,7 @@ class CustomProvider(AIProvider):
 
     def _get_endpoint_url(self) -> str:
         """Get the API endpoint URL."""
-        base_url = (self.config.base_url or "").rstrip('/')
+        base_url = (self.config.base_url or "").rstrip("/")
         if not base_url:
             raise ProviderError("Base URL missing", provider=self.provider_name)
 
@@ -1112,13 +1167,12 @@ class CustomProvider(AIProvider):
         else:
             return self._parse_custom_response(response_data)
 
-    def _parse_openai_response(self, response_data: Dict[str, Any]) -> GenerationResponse:
+    def _parse_openai_response(
+        self, response_data: Dict[str, Any]
+    ) -> GenerationResponse:
         """Parse OpenAI-format response."""
         if not response_data.get("choices"):
-            raise ProviderError(
-                "No choices in response",
-                provider=self.provider_name
-            )
+            raise ProviderError("No choices in response", provider=self.provider_name)
 
         choice = response_data["choices"][0]
         content = choice.get("message", {}).get("content", "")
@@ -1132,10 +1186,12 @@ class CustomProvider(AIProvider):
                 "finish_reason": choice.get("finish_reason"),
                 "response_id": response_data.get("id"),
                 "created": response_data.get("created"),
-            }
+            },
         )
 
-    def _parse_anthropic_response(self, response_data: Dict[str, Any]) -> GenerationResponse:
+    def _parse_anthropic_response(
+        self, response_data: Dict[str, Any]
+    ) -> GenerationResponse:
         """Parse Anthropic-format response."""
         content = ""
         if response_data.get("content"):
@@ -1153,10 +1209,12 @@ class CustomProvider(AIProvider):
             metadata={
                 "finish_reason": response_data.get("stop_reason"),
                 "response_id": response_data.get("id"),
-            }
+            },
         )
 
-    def _parse_custom_response(self, response_data: Dict[str, Any]) -> GenerationResponse:
+    def _parse_custom_response(
+        self, response_data: Dict[str, Any]
+    ) -> GenerationResponse:
         """Parse custom format response - override in subclasses."""
         # Default to trying OpenAI format first, then simple text extraction
         try:
@@ -1164,24 +1222,23 @@ class CustomProvider(AIProvider):
         except Exception:
             # Fallback: try to extract text from common fields
             content = (
-                response_data.get("text") or
-                response_data.get("content") or
-                response_data.get("output") or
-                response_data.get("response") or
-                str(response_data)
+                response_data.get("text")
+                or response_data.get("content")
+                or response_data.get("output")
+                or response_data.get("response")
+                or str(response_data)
             )
 
             return GenerationResponse(
                 content=content,
                 provider=self.provider_name,
-                metadata={"raw_response": response_data}
+                metadata={"raw_response": response_data},
             )
 
     def is_available(self) -> bool:
         """Check if custom provider is available."""
-        return (
-            self.config.base_url is not None and
-            (self.config.api_key is not None or self.custom_config.auth_type == "none")
+        return self.config.base_url is not None and (
+            self.config.api_key is not None or self.custom_config.auth_type == "none"
         )
 
     def get_supported_models(self) -> List[str]:
@@ -1194,14 +1251,13 @@ class CustomProvider(AIProvider):
         """Validate custom provider configuration."""
         if not self.custom_config.base_url:
             raise ProviderError(
-                "Base URL is required for custom provider",
-                provider=self.provider_name
+                "Base URL is required for custom provider", provider=self.provider_name
             )
 
         if self.custom_config.auth_type != "none" and not self.config.api_key:
             raise AuthenticationError(
                 "API key is required for this authentication type",
-                provider=self.provider_name
+                provider=self.provider_name,
             )
 
         return True
@@ -1223,7 +1279,7 @@ class ProviderFactory:
         cls,
         provider_type: str,
         config: Optional[Union[ProviderConfig, CustomProviderConfig]] = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> AIProvider:
         """
         Create an AI provider instance.
@@ -1253,7 +1309,8 @@ class ProviderFactory:
         else:
             if isinstance(config, CustomProviderConfig):
                 raise ValueError(
-                    f"ProviderConfig required for {provider_type} provider")
+                    f"ProviderConfig required for {provider_type} provider"
+                )
             return cast(AIProvider, provider_class(config, **kwargs))
 
     @classmethod
@@ -1309,14 +1366,16 @@ class ProviderManager:
         for provider in self.providers:
             if not provider.is_available():
                 logger.debug(
-                    f"Provider {provider.provider_name} not available, skipping")
+                    f"Provider {provider.provider_name} not available, skipping"
+                )
                 continue
 
             try:
                 logger.debug(f"Trying provider: {provider.provider_name}")
                 response = provider.generate_text(prompt, **kwargs)
                 logger.debug(
-                    f"Successfully generated text with {provider.provider_name}")
+                    f"Successfully generated text with {provider.provider_name}"
+                )
                 return response
 
             except (AuthenticationError, ModelNotFoundError) as e:
@@ -1331,7 +1390,8 @@ class ProviderManager:
 
             except Exception as e:
                 logger.error(
-                    f"Unexpected error with provider {provider.provider_name}: {e}")
+                    f"Unexpected error with provider {provider.provider_name}: {e}"
+                )
                 last_error = e
                 continue
 
@@ -1359,8 +1419,7 @@ def create_default_provider_manager() -> ProviderManager:
     if openai_key:
         try:
             provider = ProviderFactory.create_provider(
-                "openai",
-                ProviderConfig(api_key=openai_key)
+                "openai", ProviderConfig(api_key=openai_key)
             )
             manager.add_provider(provider)
         except Exception as e:
@@ -1370,8 +1429,7 @@ def create_default_provider_manager() -> ProviderManager:
     if anthropic_key:
         try:
             provider = ProviderFactory.create_provider(
-                "anthropic",
-                ProviderConfig(api_key=anthropic_key)
+                "anthropic", ProviderConfig(api_key=anthropic_key)
             )
             manager.add_provider(provider)
         except Exception as e:
@@ -1381,8 +1439,7 @@ def create_default_provider_manager() -> ProviderManager:
     if openrouter_key:
         try:
             provider = ProviderFactory.create_provider(
-                "openrouter",
-                ProviderConfig(api_key=openrouter_key)
+                "openrouter", ProviderConfig(api_key=openrouter_key)
             )
             manager.add_provider(provider)
         except Exception as e:

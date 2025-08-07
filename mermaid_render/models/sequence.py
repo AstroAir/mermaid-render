@@ -123,14 +123,14 @@ class SequenceMessage:
     """
 
     MESSAGE_TYPES = {
-        "sync": "->",           # Synchronous message
-        "async": "->>",         # Asynchronous message
-        "return": "-->>",       # Return message
-        "sync_open": "-)",      # Open synchronous message
-        "async_open": "--)",    # Open asynchronous message
-        "activate": "+",        # Activation message
-        "deactivate": "-",      # Deactivation message
-        "destroy": "-x",        # Destroy message
+        "sync": "->",  # Synchronous message
+        "async": "->>",  # Asynchronous message
+        "return": "-->>",  # Return message
+        "sync_open": "-)",  # Open synchronous message
+        "async_open": "--)",  # Open asynchronous message
+        "activate": "+",  # Activation message
+        "deactivate": "-",  # Deactivation message
+        "destroy": "-x",  # Destroy message
     }
 
     def __init__(

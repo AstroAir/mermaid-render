@@ -47,18 +47,18 @@ class FlowchartNode:
     """
 
     SHAPES = {
-        "rectangle": ("[", "]"),        # Standard process
-        "rounded": ("(", ")"),          # Rounded process
-        "stadium": ("([", "])"),        # Stadium shape
-        "subroutine": ("[[", "]]"),     # Subroutine/subprocess
-        "cylindrical": ("[(", ")]"),    # Database/storage
-        "circle": ("((", "))"),         # Start/end point
-        "asymmetric": (">", "]"),       # Asymmetric shape
-        "rhombus": ("{", "}"),          # Decision point
-        "hexagon": ("{{", "}}"),        # Hexagonal process
+        "rectangle": ("[", "]"),  # Standard process
+        "rounded": ("(", ")"),  # Rounded process
+        "stadium": ("([", "])"),  # Stadium shape
+        "subroutine": ("[[", "]]"),  # Subroutine/subprocess
+        "cylindrical": ("[(", ")]"),  # Database/storage
+        "circle": ("((", "))"),  # Start/end point
+        "asymmetric": (">", "]"),  # Asymmetric shape
+        "rhombus": ("{", "}"),  # Decision point
+        "hexagon": ("{{", "}}"),  # Hexagonal process
         "parallelogram": ("[/", "/]"),  # Input/output
         "parallelogram_alt": ("[\\", "\\]"),  # Alternative input/output
-        "trapezoid": ("[/", "\\]"),     # Manual operation
+        "trapezoid": ("[/", "\\]"),  # Manual operation
         "trapezoid_alt": ("[\\", "/]"),  # Alternative manual operation
     }
 
@@ -166,12 +166,12 @@ class FlowchartEdge:
     """
 
     ARROW_TYPES = {
-        "arrow": "-->",         # Standard directional arrow
-        "open": "---",          # Open line (no arrow)
-        "dotted": "-.-",        # Dotted line
+        "arrow": "-->",  # Standard directional arrow
+        "open": "---",  # Open line (no arrow)
+        "dotted": "-.-",  # Dotted line
         "dotted_arrow": "-.->",  # Dotted arrow
-        "thick": "==>",         # Thick arrow
-        "thick_open": "===",    # Thick open line
+        "thick": "==>",  # Thick arrow
+        "thick_open": "===",  # Thick open line
     }
 
     def __init__(

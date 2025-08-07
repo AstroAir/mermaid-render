@@ -13,7 +13,11 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
-import mermaid as md
+try:
+    import mermaid as md
+    _MERMAID_AVAILABLE = True
+except ImportError:
+    _MERMAID_AVAILABLE = False
 
 from .exceptions import (
     ConfigurationError,
@@ -21,7 +25,7 @@ from .exceptions import (
     UnsupportedFormatError,
     ValidationError,
 )
-from .renderers import PNGRenderer, PDFRenderer, SVGRenderer
+from .renderers import PDFRenderer, PNGRenderer, SVGRenderer
 
 
 class MermaidConfig:
@@ -617,7 +621,7 @@ class MermaidRenderer:
         self._svg_renderer = SVGRenderer()
         self._png_renderer = PNGRenderer(
             server_url=self.config.get("server_url", "https://mermaid.ink"),
-            timeout=self.config.get("timeout", 30.0)
+            timeout=self.config.get("timeout", 30.0),
         )
         self._pdf_renderer = PDFRenderer()
 
@@ -673,7 +677,7 @@ class MermaidRenderer:
         diagram: Union[MermaidDiagram, str],
         format: str = "svg",
         **options: Any,
-    ) -> str:
+    ) -> Union[str, bytes]:
         """
         Render a diagram to the specified format.
 
@@ -715,7 +719,9 @@ class MermaidRenderer:
 
         return self.render_raw(mermaid_code, format, **options)
 
-    def render_raw(self, mermaid_code: str, format: str = "svg", **options: Any) -> Union[str, bytes]:
+    def render_raw(
+        self, mermaid_code: str, format: str = "svg", **options: Any
+    ) -> Union[str, bytes]:
         """
         Render raw Mermaid code to specified format.
 
@@ -739,9 +745,7 @@ class MermaidRenderer:
             if format == "svg":
                 # Use SVG renderer
                 return self._svg_renderer.render(
-                    mermaid_code,
-                    theme=theme_name,
-                    config=options
+                    mermaid_code, theme=theme_name, config=options
                 )
             elif format == "png":
                 # Use PNG renderer
@@ -750,7 +754,7 @@ class MermaidRenderer:
                     theme=theme_name,
                     config=options,
                     width=options.get("width"),
-                    height=options.get("height")
+                    height=options.get("height"),
                 )
             elif format == "pdf":
                 # Use PDF renderer - first get SVG, then convert
@@ -760,7 +764,7 @@ class MermaidRenderer:
                     theme=theme_name,
                     config=options,
                     validate=False,
-                    sanitize=False
+                    sanitize=False,
                 )
                 # PDF renderer expects SVG content, not mermaid code
                 return self._pdf_renderer.render_from_svg(svg_content)

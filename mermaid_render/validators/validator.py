@@ -404,7 +404,9 @@ class MermaidValidator:
         has_events = False
         sections = set()
 
-        for i, original_line in enumerate(lines[1:], 2):  # Skip first line (diagram type)
+        for i, original_line in enumerate(
+            lines[1:], 2
+        ):  # Skip first line (diagram type)
             line = original_line.strip()
             if not line:
                 continue

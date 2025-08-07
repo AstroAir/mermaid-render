@@ -98,13 +98,13 @@ def main() -> int:
             return 1
 
         # Render diagram
-        result = quick_render(
+        rendered_content = quick_render(
             diagram_code, output_path=output_path, format=args.format, theme=args.theme
         )
 
         # Output result
         if args.format == "svg" and not output_path:
-            print(result)
+            print(rendered_content)
         elif not args.quiet:
             if output_path:
                 print(f"✅ Diagram rendered to {output_path}")

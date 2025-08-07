@@ -92,8 +92,8 @@ class PNGRenderer:
             url = f"{self.server_url}/img/{encoded}"
             params = {
                 "type": "png",
-                "width": img_width,
-                "height": img_height,
+                "width": str(img_width),
+                "height": str(img_height),
             }
 
             # Make the request

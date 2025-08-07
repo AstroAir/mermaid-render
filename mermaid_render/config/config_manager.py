@@ -283,7 +283,14 @@ class ConfigManager:
         if key in ["timeout", "cache_ttl"]:
             return float(value)
 
-        if key in ["retries", "max_cache_size", "default_width", "default_height", "max_width", "max_height"]:
+        if key in [
+            "retries",
+            "max_cache_size",
+            "default_width",
+            "default_height",
+            "max_width",
+            "max_height",
+        ]:
             return int(value)
 
         # String values (default)

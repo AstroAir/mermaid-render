@@ -2,7 +2,12 @@
 
 from typing import Any, Dict, List, Optional
 
-from mermaid_render.ai.providers import AIProvider, CustomProviderConfig, OpenRouterProvider, ProviderManager
+from mermaid_render.ai.providers import (
+    AIProvider,
+    CustomProviderConfig,
+    OpenRouterProvider,
+    ProviderManager,
+)
 
 from .analysis import DiagramAnalyzer
 from .diagram_generator import DiagramGenerator, GenerationConfig
@@ -311,8 +316,7 @@ def generate_diagram_variations(
 
 
 def create_provider_from_config(
-    provider_type: str,
-    config_dict: Dict[str, Any]
+    provider_type: str, config_dict: Dict[str, Any]
 ) -> AIProvider:
     """
     Create an AI provider from configuration dictionary.
@@ -332,19 +336,24 @@ def create_provider_from_config(
         ... }
         >>> provider = create_provider_from_config("openai", config)
     """
-    from .providers import ProviderFactory, ProviderConfig, CustomProviderConfig as _CustomProviderConfig
+    from .providers import (
+        CustomProviderConfig as _CustomProviderConfig,
+    )
+    from .providers import (
+        ProviderConfig,
+        ProviderFactory,
+    )
 
     if provider_type.lower() == "custom":
-        cfg: _CustomProviderConfig = _CustomProviderConfig(**config_dict)
+        custom_cfg: _CustomProviderConfig = _CustomProviderConfig(**config_dict)
+        return ProviderFactory.create_provider(provider_type, custom_cfg)
     else:
-        cfg: ProviderConfig = ProviderConfig(**config_dict)
-
-    return ProviderFactory.create_provider(provider_type, cfg)
+        provider_cfg: ProviderConfig = ProviderConfig(**config_dict)
+        return ProviderFactory.create_provider(provider_type, provider_cfg)
 
 
 def setup_multi_provider_generation(
-    provider_configs: List[Dict[str, Any]],
-    fallback_to_local: bool = True
+    provider_configs: List[Dict[str, Any]], fallback_to_local: bool = True
 ) -> ProviderManager:
     """
     Setup multiple AI providers with automatic fallback.
@@ -363,7 +372,8 @@ def setup_multi_provider_generation(
         ... ]
         >>> manager = setup_multi_provider_generation(configs)
     """
-    from .providers import ProviderManager as _ProviderManager, ProviderFactory
+    from .providers import ProviderFactory
+    from .providers import ProviderManager as _ProviderManager
 
     manager: _ProviderManager = _ProviderManager()
 
@@ -377,8 +387,10 @@ def setup_multi_provider_generation(
 
         except Exception as e:
             import logging
+
             logging.warning(
-                f"Failed to create provider {provider_config.get('type')}: {e}")
+                f"Failed to create provider {provider_config.get('type')}: {e}"
+            )
 
     if fallback_to_local:
         try:
@@ -386,6 +398,7 @@ def setup_multi_provider_generation(
             manager.add_provider(local_provider)
         except Exception as e:
             import logging
+
             logging.warning(f"Failed to create local provider: {e}")
 
     return manager
@@ -394,7 +407,7 @@ def setup_multi_provider_generation(
 def generate_with_multiple_providers(
     text: str,
     provider_configs: List[Dict[str, Any]],
-    generation_config: Optional[Dict[str, Any]] = None
+    generation_config: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """
     Generate diagram using multiple providers with automatic fallback.
@@ -428,12 +441,14 @@ def generate_with_multiple_providers(
             result_dict = result.to_dict()
             result_dict["provider_used"] = provider.provider_name
             result_dict["available_providers"] = [
-                p.provider_name for p in manager.get_available_providers()]
+                p.provider_name for p in manager.get_available_providers()
+            ]
 
             return result_dict
 
         except Exception as e:
             import logging
+
             logging.warning(f"Provider {provider.provider_name} failed: {e}")
             continue
 
@@ -444,7 +459,7 @@ def batch_generate_diagrams(
     texts: List[str],
     provider_config: Dict[str, Any],
     generation_config: Optional[Dict[str, Any]] = None,
-    max_concurrent: int = 5
+    max_concurrent: int = 5,
 ) -> List[Dict[str, Any]]:
     """
     Generate multiple diagrams in batch with concurrency control.
@@ -464,8 +479,7 @@ def batch_generate_diagrams(
         """Generate a single diagram."""
         try:
             provider = create_provider_from_config(
-                provider_config["type"],
-                provider_config["config"]
+                provider_config["type"], provider_config["config"]
             )
 
             from .diagram_generator import DiagramGenerator, GenerationConfig
@@ -489,7 +503,7 @@ def batch_generate_diagrams(
                 "input_text": text,
                 "status": "error",
                 "error": str(e),
-                "diagram_code": None
+                "diagram_code": None,
             }
 
     # Use ThreadPoolExecutor for concurrent generation
@@ -502,7 +516,7 @@ def batch_generate_diagrams(
 def compare_provider_performance(
     test_prompts: List[str],
     provider_configs: List[Dict[str, Any]],
-    metrics: Optional[List[str]] = None
+    metrics: Optional[List[str]] = None,
 ) -> Dict[str, Any]:
     """
     Compare performance of different AI providers.
@@ -530,13 +544,12 @@ def compare_provider_performance(
             "failed_requests": 0,
             "total_time": 0.0,
             "average_time": 0.0,
-            "responses": []  # type: List[Dict[str, Any]]
+            "responses": [],
         }
 
         try:
             provider = create_provider_from_config(
-                provider_config["type"],
-                provider_config["config"]
+                provider_config["type"], provider_config["config"]
             )
 
             for prompt in test_prompts:
@@ -547,48 +560,57 @@ def compare_provider_performance(
                     end_time = time.time()
 
                     response_time: float = end_time - start_time
-                    results[provider_name]["successful_requests"] = int(
-                        results[provider_name]["successful_requests"]) + 1
-                    results[provider_name]["total_time"] = float(
-                        results[provider_name]["total_time"]) + response_time
+                    results[provider_name]["successful_requests"] = (
+                        int(results[provider_name]["successful_requests"]) + 1
+                    )
+                    results[provider_name]["total_time"] = (
+                        float(results[provider_name]["total_time"]) + response_time
+                    )
 
                     # Ensure responses is a list
                     if not isinstance(results[provider_name]["responses"], list):
                         results[provider_name]["responses"] = []
 
-                    results[provider_name]["responses"].append({
-                        "prompt": prompt,
-                        "response": response.content if hasattr(response, 'content') else str(response),
-                        "response_time": response_time,
-                        "status": "success"
-                    })
+                    results[provider_name]["responses"].append(
+                        {
+                            "prompt": prompt,
+                            "response": (
+                                response.content
+                                if hasattr(response, "content")
+                                else str(response)
+                            ),
+                            "response_time": response_time,
+                            "status": "success",
+                        }
+                    )
 
                 except Exception as e:
                     end_time = time.time()
                     response_time = end_time - start_time
 
-                    results[provider_name]["failed_requests"] = int(
-                        results[provider_name]["failed_requests"]) + 1
+                    results[provider_name]["failed_requests"] = (
+                        int(results[provider_name]["failed_requests"]) + 1
+                    )
                     if not isinstance(results[provider_name]["responses"], list):
                         results[provider_name]["responses"] = []
-                    results[provider_name]["responses"].append({
-                        "prompt": prompt,
-                        "error": str(e),
-                        "response_time": response_time,
-                        "status": "error"
-                    })
+                    results[provider_name]["responses"].append(
+                        {
+                            "prompt": prompt,
+                            "error": str(e),
+                            "response_time": response_time,
+                            "status": "error",
+                        }
+                    )
 
             # Calculate averages
             if int(results[provider_name]["successful_requests"]) > 0:
-                results[provider_name]["average_time"] = (
-                    float(results[provider_name]["total_time"]) /
-                    int(results[provider_name]["successful_requests"])
-                )
+                results[provider_name]["average_time"] = float(
+                    results[provider_name]["total_time"]
+                ) / int(results[provider_name]["successful_requests"])
 
-            results[provider_name]["success_rate"] = (
-                int(results[provider_name]["successful_requests"]) /
-                int(results[provider_name]["total_requests"])
-            )
+            results[provider_name]["success_rate"] = int(
+                results[provider_name]["successful_requests"]
+            ) / int(results[provider_name]["total_requests"])
 
         except Exception as e:
             results[provider_name]["setup_error"] = str(e)
@@ -612,8 +634,8 @@ def export_provider_config(provider: AIProvider) -> Dict[str, Any]:
         "supported_models": provider.get_supported_models(),
     }
 
-    if hasattr(provider, 'config'):
-        config = getattr(provider, 'config')
+    if hasattr(provider, "config"):
+        config = provider.config
         config_dict["config"] = {
             "model": getattr(config, "model", None),
             "timeout": getattr(config, "timeout", None),
@@ -622,8 +644,8 @@ def export_provider_config(provider: AIProvider) -> Dict[str, Any]:
             # Note: API key is not exported for security
         }
 
-    if hasattr(provider, 'custom_config'):
-        custom = getattr(provider, 'custom_config')
+    if hasattr(provider, "custom_config"):
+        custom = provider.custom_config
         config_dict["custom_config"] = {
             "name": getattr(custom, "name", None),
             "base_url": getattr(custom, "base_url", None),
@@ -638,7 +660,7 @@ def export_provider_config(provider: AIProvider) -> Dict[str, Any]:
 def validate_diagram_with_ai(
     diagram_code: str,
     validation_criteria: Optional[List[str]] = None,
-    provider_config: Optional[Dict[str, Any]] = None
+    provider_config: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """
     Use AI to validate and provide feedback on diagram quality.
@@ -657,7 +679,7 @@ def validate_diagram_with_ai(
             "logical_flow",
             "clarity",
             "completeness",
-            "best_practices"
+            "best_practices",
         ]
 
     # Create validation prompt
@@ -682,25 +704,25 @@ Format your response as structured feedback.
     try:
         if provider_config:
             provider = create_provider_from_config(
-                provider_config["type"],
-                provider_config["config"]
+                provider_config["type"], provider_config["config"]
             )
         else:
             # Use default provider
             from .providers import create_default_provider_manager
+
             manager = create_default_provider_manager()
             if not manager.providers:
                 raise ValueError("No AI providers available")
             provider = manager.providers[0]
 
         response = provider.generate_text(prompt)
-        content = response.content if hasattr(response, 'content') else str(response)
+        content = response.content if hasattr(response, "content") else str(response)
 
         return {
             "validation_result": content,
             "criteria_checked": validation_criteria,
             "provider_used": provider.provider_name,
-            "status": "success"
+            "status": "success",
         }
 
     except Exception as e:
@@ -708,7 +730,7 @@ Format your response as structured feedback.
             "validation_result": None,
             "criteria_checked": validation_criteria,
             "error": str(e),
-            "status": "error"
+            "status": "error",
         }
 
 
@@ -716,7 +738,7 @@ def create_openrouter_provider(
     api_key: Optional[str] = None,
     model: str = "openai/gpt-3.5-turbo",
     site_url: Optional[str] = None,
-    site_name: Optional[str] = None
+    site_name: Optional[str] = None,
 ) -> OpenRouterProvider:
     """
     Convenience function to create OpenRouter provider.
@@ -730,16 +752,16 @@ def create_openrouter_provider(
     Returns:
         Configured OpenRouter provider
     """
-    from .providers import OpenRouterProvider as _OpenRouterProvider, ProviderConfig
     import os
+
+    from .providers import OpenRouterProvider as _OpenRouterProvider
+    from .providers import ProviderConfig
 
     if api_key is None:
         api_key = os.getenv("OPENROUTER_API_KEY")
 
     config = ProviderConfig(
-        api_key=api_key,
-        model=model,
-        base_url="https://openrouter.ai/api/v1"
+        api_key=api_key, model=model, base_url="https://openrouter.ai/api/v1"
     )
 
     # Add custom headers for attribution
@@ -751,7 +773,7 @@ def create_openrouter_provider(
 
     if custom_headers:
         # ProviderConfig may support arbitrary fields; set via attribute
-        setattr(config, "custom_headers", custom_headers)
+        config.custom_headers = custom_headers
 
     return _OpenRouterProvider(config)
 
@@ -763,7 +785,7 @@ def create_custom_provider_config(
     request_format: str = "openai",
     response_format: str = "openai",
     auth_type: str = "bearer",
-    **kwargs: Any
+    **kwargs: Any,
 ) -> CustomProviderConfig:
     """
     Convenience function to create custom provider configuration.
@@ -789,5 +811,5 @@ def create_custom_provider_config(
         request_format=request_format,
         response_format=response_format,
         auth_type=auth_type,
-        **kwargs
+        **kwargs,
     )

@@ -21,7 +21,7 @@ Example:
     >>> renderer.save(flowchart, "diagram.png", format="png")
 """
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
 
 # Configuration and themes
 from .config import ConfigManager, ThemeManager
@@ -257,7 +257,7 @@ def quick_render(
     format: str = "svg",
     theme: "Optional[str]" = None,
     config: "Optional[Dict[str, Any]]" = None,
-) -> str:
+) -> Union[str, bytes]:
     """
     Quick utility function to render Mermaid diagram code.
 

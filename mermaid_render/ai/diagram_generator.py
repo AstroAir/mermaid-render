@@ -265,7 +265,9 @@ class DiagramGenerator:
             },
         )
 
-    def get_suggestions(self, diagram_code: str, context: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+    def get_suggestions(
+        self, diagram_code: str, context: Optional[Dict[str, Any]] = None
+    ) -> List[Dict[str, Any]]:
         """
         Get AI-powered suggestions for improving a diagram.
 

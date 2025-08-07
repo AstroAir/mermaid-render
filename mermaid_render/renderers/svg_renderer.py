@@ -5,16 +5,17 @@ This module provides SVG rendering functionality using the mermaid-py library
 and mermaid.ink service.
 """
 
-from typing import Any, Dict, Optional, Union, cast
-import time
-import logging
-import re
 import hashlib
 import json
+import logging
+import re
+import time
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Union, cast
 
 try:
     import mermaid as md
+
     _MERMAID_AVAILABLE = True
 except ImportError:
     _MERMAID_AVAILABLE = False
@@ -81,11 +82,11 @@ class SVGRenderer:
         self._session = self._create_session()
 
         # Performance metrics
-        self._metrics = {
-            'cache_hits': 0,
-            'cache_misses': 0,
-            'render_times': [],
-            'total_requests': 0
+        self._metrics: Dict[str, Any] = {
+            "cache_hits": 0,
+            "cache_misses": 0,
+            "render_times": [],
+            "total_requests": 0,
         }
 
     def _create_session(self) -> requests.Session:
@@ -98,23 +99,27 @@ class SVGRenderer:
         session = requests.Session()
 
         # Set default headers
-        session.headers.update({
-            'User-Agent': 'mermaid-render/1.0.0',
-            'Accept': 'image/svg+xml,text/plain,*/*',
-            'Accept-Encoding': 'gzip, deflate',
-            'Connection': 'keep-alive'
-        })
+        session.headers.update(
+            {
+                "User-Agent": "mermaid-render/1.0.0",
+                "Accept": "image/svg+xml,text/plain,*/*",
+                "Accept-Encoding": "gzip, deflate",
+                "Connection": "keep-alive",
+            }
+        )
 
         return session
 
-    def _generate_cache_key(self, mermaid_code: str, theme: Optional[str], config: Optional[Dict[str, Any]]) -> str:
+    def _generate_cache_key(
+        self, mermaid_code: str, theme: Optional[str], config: Optional[Dict[str, Any]]
+    ) -> str:
         """Generate a cache key for the given parameters."""
         # Create a hash of the input parameters
         cache_data = {
-            'code': mermaid_code,
-            'theme': theme,
-            'config': config or {},
-            'server_url': self.server_url
+            "code": mermaid_code,
+            "theme": theme,
+            "config": config or {},
+            "server_url": self.server_url,
         }
 
         cache_string = json.dumps(cache_data, sort_keys=True)
@@ -140,10 +145,10 @@ class SVGRenderer:
             return False
 
         try:
-            with open(meta_path, 'r') as f:
+            with open(meta_path) as f:
                 metadata = json.load(f)
 
-            cached_time = metadata.get('timestamp', 0)
+            cached_time = float(metadata.get("timestamp", 0))
             current_time = time.time()
 
             return (current_time - cached_time) < self.cache_ttl
@@ -157,10 +162,10 @@ class SVGRenderer:
 
         try:
             cache_path = self._get_cache_path(cache_key)
-            with open(cache_path, 'r', encoding='utf-8') as f:
+            with open(cache_path, encoding="utf-8") as f:
                 content = f.read()
 
-            self._metrics['cache_hits'] += 1
+            self._metrics["cache_hits"] += 1
             self.logger.debug(f"Cache hit for key: {cache_key[:8]}...")
             return content
         except Exception as e:
@@ -177,17 +182,17 @@ class SVGRenderer:
             meta_path = self._get_cache_metadata_path(cache_key)
 
             # Write content
-            with open(cache_path, 'w', encoding='utf-8') as f:
+            with open(cache_path, "w", encoding="utf-8") as f:
                 f.write(content)
 
             # Write metadata
             metadata = {
-                'timestamp': time.time(),
-                'size': len(content),
-                'cache_key': cache_key
+                "timestamp": time.time(),
+                "size": len(content),
+                "cache_key": cache_key,
             }
 
-            with open(meta_path, 'w') as f:
+            with open(meta_path, "w") as f:
                 json.dump(metadata, f)
 
             self.logger.debug(f"Cached content for key: {cache_key[:8]}...")
@@ -216,23 +221,23 @@ class SVGRenderer:
 
     def get_cache_stats(self) -> Dict[str, Any]:
         """Get cache statistics."""
-        stats = {
-            'cache_enabled': self.cache_enabled,
-            'cache_dir': str(self.cache_dir),
-            'cache_hits': self._metrics['cache_hits'],
-            'cache_misses': self._metrics['cache_misses'],
-            'hit_rate': 0.0,
-            'total_files': 0,
-            'total_size': 0
+        stats: Dict[str, Any] = {
+            "cache_enabled": self.cache_enabled,
+            "cache_dir": str(self.cache_dir),
+            "cache_hits": self._metrics["cache_hits"],
+            "cache_misses": self._metrics["cache_misses"],
+            "hit_rate": 0.0,
+            "total_files": 0,
+            "total_size": 0,
         }
 
-        total_requests = stats['cache_hits'] + stats['cache_misses']
+        total_requests = stats["cache_hits"] + stats["cache_misses"]
         if total_requests > 0:
-            stats['hit_rate'] = stats['cache_hits'] / total_requests
+            stats["hit_rate"] = stats["cache_hits"] / total_requests
 
         if self.cache_enabled and self.cache_dir.exists():
             svg_files = list(self.cache_dir.glob("*.svg"))
-            stats['total_files'] = len(svg_files)
+            stats["total_files"] = len(svg_files)
 
             total_size = 0
             for file_path in svg_files:
@@ -240,34 +245,35 @@ class SVGRenderer:
                     total_size += file_path.stat().st_size
                 except Exception:
                     pass
-            stats['total_size'] = total_size
+            stats["total_size"] = total_size
 
         return stats
 
     def get_performance_metrics(self) -> Dict[str, Any]:
         """Get performance metrics."""
-        render_times = self._metrics['render_times']
+        render_times: List[float] = self._metrics["render_times"]
 
-        metrics = {
-            'total_requests': self._metrics['total_requests'],
-            'cache_hits': self._metrics['cache_hits'],
-            'cache_misses': self._metrics['cache_misses'],
-            'cache_hit_rate': 0.0,
-            'average_render_time': 0.0,
-            'min_render_time': 0.0,
-            'max_render_time': 0.0,
-            'total_render_time': 0.0
+        metrics: Dict[str, Any] = {
+            "total_requests": self._metrics["total_requests"],
+            "cache_hits": self._metrics["cache_hits"],
+            "cache_misses": self._metrics["cache_misses"],
+            "cache_hit_rate": 0.0,
+            "average_render_time": 0.0,
+            "min_render_time": 0.0,
+            "max_render_time": 0.0,
+            "total_render_time": 0.0,
         }
 
-        if self._metrics['total_requests'] > 0:
-            metrics['cache_hit_rate'] = self._metrics['cache_hits'] / \
-                self._metrics['total_requests']
+        if self._metrics["total_requests"] > 0:
+            metrics["cache_hit_rate"] = (
+                self._metrics["cache_hits"] / self._metrics["total_requests"]
+            )
 
         if render_times:
-            metrics['average_render_time'] = sum(render_times) / len(render_times)
-            metrics['min_render_time'] = min(render_times)
-            metrics['max_render_time'] = max(render_times)
-            metrics['total_render_time'] = sum(render_times)
+            metrics["average_render_time"] = sum(render_times) / len(render_times)
+            metrics["min_render_time"] = min(render_times)
+            metrics["max_render_time"] = max(render_times)
+            metrics["total_render_time"] = sum(render_times)
 
         return metrics
 
@@ -281,49 +287,54 @@ class SVGRenderer:
         Returns:
             Optimization suggestions
         """
-        analysis = {
-            'size_category': 'small',
-            'complexity_score': 0,
-            'suggestions': [],
-            'estimated_render_time': 'fast'
+        analysis: Dict[str, Any] = {
+            "size_category": "small",
+            "complexity_score": 0,
+            "suggestions": [],
+            "estimated_render_time": "fast",
         }
 
-        lines = len(mermaid_code.split('\n'))
+        lines = len(mermaid_code.split("\n"))
         chars = len(mermaid_code)
 
         # Analyze complexity
-        nodes = len(re.findall(r'\b[A-Za-z0-9_]+\b', mermaid_code))
-        connections = len(re.findall(r'-->|---|\-\.\-|==>', mermaid_code))
+        nodes = len(re.findall(r"\b[A-Za-z0-9_]+\b", mermaid_code))
+        connections = len(re.findall(r"-->|---|\-\.\-|==>", mermaid_code))
 
-        analysis['complexity_score'] = nodes + connections * 2
+        analysis["complexity_score"] = nodes + connections * 2
 
         # Categorize size
         if lines > 100 or chars > 5000 or nodes > 50:
-            analysis['size_category'] = 'large'
-            analysis['estimated_render_time'] = 'slow'
-            analysis['suggestions'].extend([
-                'Consider breaking the diagram into smaller parts',
-                'Use subgraphs to organize complex diagrams',
-                'Enable caching to avoid re-rendering',
-                'Consider using a higher timeout value'
-            ])
+            analysis["size_category"] = "large"
+            analysis["estimated_render_time"] = "slow"
+            analysis["suggestions"].extend(
+                [
+                    "Consider breaking the diagram into smaller parts",
+                    "Use subgraphs to organize complex diagrams",
+                    "Enable caching to avoid re-rendering",
+                    "Consider using a higher timeout value",
+                ]
+            )
         elif lines > 50 or chars > 2000 or nodes > 25:
-            analysis['size_category'] = 'medium'
-            analysis['estimated_render_time'] = 'moderate'
-            analysis['suggestions'].extend([
-                'Consider enabling caching for better performance',
-                'Monitor rendering time for optimization opportunities'
-            ])
+            analysis["size_category"] = "medium"
+            analysis["estimated_render_time"] = "moderate"
+            analysis["suggestions"].extend(
+                [
+                    "Consider enabling caching for better performance",
+                    "Monitor rendering time for optimization opportunities",
+                ]
+            )
         else:
-            analysis['suggestions'].append('Diagram size is optimal for fast rendering')
+            analysis["suggestions"].append("Diagram size is optimal for fast rendering")
 
         # Check for performance-impacting patterns
-        if 'sequenceDiagram' in mermaid_code and connections > 20:
-            analysis['suggestions'].append('Large sequence diagrams may render slowly')
+        if "sequenceDiagram" in mermaid_code and connections > 20:
+            analysis["suggestions"].append("Large sequence diagrams may render slowly")
 
-        if 'classDiagram' in mermaid_code and nodes > 30:
-            analysis['suggestions'].append(
-                'Complex class diagrams may benefit from grouping')
+        if "classDiagram" in mermaid_code and nodes > 30:
+            analysis["suggestions"].append(
+                "Complex class diagrams may benefit from grouping"
+            )
 
         return analysis
 
@@ -337,28 +348,24 @@ class SVGRenderer:
         Returns:
             Preload results
         """
-        results = {
-            'successful': 0,
-            'failed': 0,
-            'errors': []
-        }
+        results = {"successful": 0, "failed": 0, "errors": []}
 
         for config in diagram_configs:
             try:
-                mermaid_code = config.get('code', '')
-                theme = config.get('theme')
-                render_config = config.get('config')
+                mermaid_code = config.get("code", "")
+                theme = config.get("theme")
+                render_config = config.get("config")
 
                 if not mermaid_code:
                     continue
 
                 # Render and cache
                 self.render(mermaid_code, theme, render_config)
-                results['successful'] += 1
+                results["successful"] += 1
 
             except Exception as e:
-                results['failed'] += 1
-                results['errors'].append(str(e))
+                results["failed"] += 1
+                results["errors"].append(str(e))
 
         return results
 
@@ -388,14 +395,14 @@ class SVGRenderer:
 
     def close(self) -> None:
         """Close the session and clean up resources."""
-        if hasattr(self, '_session'):
+        if hasattr(self, "_session"):
             self._session.close()
 
-    def __enter__(self):
+    def __enter__(self) -> "SVGRenderer":
         """Context manager entry."""
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         """Context manager exit."""
         # Touch parameters to avoid unused-variable analysis flags
         _ = (exc_type, exc_val, exc_tb)
@@ -411,17 +418,13 @@ class SVGRenderer:
         try:
             response = self._session.get(f"{self.server_url}/", timeout=5)
             return {
-                'available': response.status_code == 200,
-                'status_code': response.status_code,
-                'response_time': response.elapsed.total_seconds(),
-                'server_url': self.server_url
+                "available": response.status_code == 200,
+                "status_code": response.status_code,
+                "response_time": response.elapsed.total_seconds(),
+                "server_url": self.server_url,
             }
         except Exception as e:
-            return {
-                'available': False,
-                'error': str(e),
-                'server_url': self.server_url
-            }
+            return {"available": False, "error": str(e), "server_url": self.server_url}
 
     def render(
         self,
@@ -452,15 +455,14 @@ class SVGRenderer:
         """
         # Input validation with detailed feedback
         if not mermaid_code or not mermaid_code.strip():
-            context = {'input_length': len(mermaid_code) if mermaid_code else 0}
+            context = {"input_length": len(mermaid_code) if mermaid_code else 0}
             raise self.create_detailed_error(
-                ValueError("Empty mermaid code provided"),
-                context
+                ValueError("Empty mermaid code provided"), context
             )
 
         # Performance tracking
         start_time = time.time()
-        self._metrics['total_requests'] += 1
+        self._metrics["total_requests"] += 1
 
         # Check cache first
         cache_key = self._generate_cache_key(mermaid_code, theme, config)
@@ -470,11 +472,13 @@ class SVGRenderer:
             # Apply post-processing to cached content if needed
             if validate:
                 validation_result = self.validate_svg_content(
-                    cached_content, strict=True)
-                if not validation_result['is_valid']:
+                    cached_content, strict=True
+                )
+                if not validation_result["is_valid"]:
                     # Cache is invalid, remove it and continue with fresh render
                     self.logger.warning(
-                        "Cached content failed validation, removing from cache")
+                        "Cached content failed validation, removing from cache"
+                    )
                     try:
                         self._get_cache_path(cache_key).unlink(missing_ok=True)
                         self._get_cache_metadata_path(cache_key).unlink(missing_ok=True)
@@ -483,40 +487,43 @@ class SVGRenderer:
                 else:
                     # Cache is valid, return it
                     render_time = time.time() - start_time
-                    self._metrics['render_times'].append(render_time)
+                    self._metrics["render_times"].append(render_time)
                     return cached_content
             else:
                 # No validation needed, return cached content
                 render_time = time.time() - start_time
-                self._metrics['render_times'].append(render_time)
+                self._metrics["render_times"].append(render_time)
                 return cached_content
 
         # Cache miss, record it
-        self._metrics['cache_misses'] += 1
+        self._metrics["cache_misses"] += 1
 
         # Validate mermaid syntax if requested
         if validate:
             syntax_result = self.validate_mermaid_syntax(mermaid_code)
-            if not syntax_result['is_valid']:
+            if not syntax_result["is_valid"]:
                 context = {
-                    'errors': syntax_result['errors'],
-                    'line_count': len(mermaid_code.split('\n'))
+                    "errors": syntax_result["errors"],
+                    "line_count": len(mermaid_code.split("\n")),
                 }
                 raise self.create_detailed_error(
                     ValueError(
-                        f"Invalid mermaid syntax: {'; '.join(syntax_result['errors'])}"),
-                    context
+                        f"Invalid mermaid syntax: {'; '.join(syntax_result['errors'])}"
+                    ),
+                    context,
                 )
 
             # Log warnings if any
-            if syntax_result['warnings']:
+            if syntax_result["warnings"]:
                 self.logger.warning(
-                    f"Mermaid syntax warnings: {'; '.join(syntax_result['warnings'])}")
+                    f"Mermaid syntax warnings: {'; '.join(syntax_result['warnings'])}"
+                )
 
             # Log suggestions if any
-            if syntax_result['suggestions']:
+            if syntax_result["suggestions"]:
                 self.logger.info(
-                    f"Mermaid syntax suggestions: {'; '.join(syntax_result['suggestions'])}")
+                    f"Mermaid syntax suggestions: {'; '.join(syntax_result['suggestions'])}"
+                )
 
         svg_content: Optional[str] = None
         last_error: Optional[Exception] = None
@@ -532,14 +539,13 @@ class SVGRenderer:
                 except Exception as remote_error:
                     # If both fail, create detailed error with context
                     context = {
-                        'local_error': str(last_error),
-                        'remote_error': str(remote_error),
-                        'server_url': self.server_url,
-                        'use_local': self.use_local
+                        "local_error": str(last_error),
+                        "remote_error": str(remote_error),
+                        "server_url": self.server_url,
+                        "use_local": self.use_local,
                     }
                     raise self.create_detailed_error(
-                        RuntimeError("Both local and remote rendering failed"),
-                        context
+                        RuntimeError("Both local and remote rendering failed"), context
                     ) from last_error
         else:
             svg_content = self._render_remote(mermaid_code, theme, config)
@@ -548,26 +554,27 @@ class SVGRenderer:
         if svg_content:
             if validate:
                 validation_result = self.validate_svg_content(svg_content, strict=True)
-                if not validation_result['is_valid']:
+                if not validation_result["is_valid"]:
                     context = {
-                        'validation_errors': validation_result['errors'],
-                        'security_issues': validation_result['security_issues'],
-                        'svg_length': len(svg_content)
+                        "validation_errors": validation_result["errors"],
+                        "security_issues": validation_result["security_issues"],
+                        "svg_length": len(svg_content),
                     }
                     raise self.create_detailed_error(
-                        ValueError("Generated SVG content failed validation"),
-                        context
+                        ValueError("Generated SVG content failed validation"), context
                     )
 
                 # Log warnings
-                if validation_result['warnings']:
+                if validation_result["warnings"]:
                     self.logger.warning(
-                        f"SVG validation warnings: {'; '.join(validation_result['warnings'])}")
+                        f"SVG validation warnings: {'; '.join(validation_result['warnings'])}"
+                    )
 
                 # Log security issues
-                if validation_result['security_issues']:
+                if validation_result["security_issues"]:
                     self.logger.warning(
-                        f"SVG security issues: {'; '.join(validation_result['security_issues'])}")
+                        f"SVG security issues: {'; '.join(validation_result['security_issues'])}"
+                    )
 
             if sanitize:
                 svg_content = self.sanitize_svg_content(svg_content, strict=True)
@@ -580,7 +587,7 @@ class SVGRenderer:
 
         # Record performance metrics
         render_time = time.time() - start_time
-        self._metrics['render_times'].append(render_time)
+        self._metrics["render_times"].append(render_time)
 
         return svg_content if svg_content is not None else ""
 
@@ -633,7 +640,8 @@ class SVGRenderer:
 
             # If all servers failed, raise the last error
             raise RenderingError(
-                f"All servers failed. Last error: {str(last_error)}") from last_error
+                f"All servers failed. Last error: {str(last_error)}"
+            ) from last_error
 
     def _render_local(
         self,
@@ -654,7 +662,8 @@ class SVGRenderer:
         """
         if not _MERMAID_AVAILABLE or md is None:
             raise RenderingError(
-                "mermaid-py library not available. Install with: pip install mermaid-py")
+                "mermaid-py library not available. Install with: pip install mermaid-py"
+            )
 
         try:
             # Create mermaid object
@@ -664,7 +673,7 @@ class SVGRenderer:
             svg_response = mermaid_obj.svg_response
 
             # Handle different response types
-            if hasattr(svg_response, 'text'):
+            if hasattr(svg_response, "text"):
                 # It's a Response object
                 svg_content = svg_response.text
             elif isinstance(svg_response, str):
@@ -675,7 +684,7 @@ class SVGRenderer:
                 svg_content = str(svg_response)
 
             # If the content is HTML, extract SVG
-            if svg_content.strip().startswith('<html') or '<svg' not in svg_content:
+            if svg_content.strip().startswith("<html") or "<svg" not in svg_content:
                 svg_content = self._extract_svg_from_html(svg_content)
 
             return svg_content
@@ -696,8 +705,9 @@ class SVGRenderer:
         import re
 
         # Look for SVG tags in the HTML
-        svg_match = re.search(r'<svg[^>]*>.*?</svg>',
-                              html_content, re.DOTALL | re.IGNORECASE)
+        svg_match = re.search(
+            r"<svg[^>]*>.*?</svg>", html_content, re.DOTALL | re.IGNORECASE
+        )
         if svg_match:
             return svg_match.group(0)
 
@@ -734,8 +744,11 @@ class SVGRenderer:
             mermaid_config: Dict[str, Any] = {}
             if config:
                 # Filter out invalid config options
-                valid_config = {k: v for k, v in config.items()
-                                if k in ['width', 'height', 'scale', 'backgroundColor', 'theme']}
+                valid_config = {
+                    k: v
+                    for k, v in config.items()
+                    if k in ["width", "height", "scale", "backgroundColor", "theme"]
+                }
                 mermaid_config.update(valid_config)
 
             # Apply theme configuration
@@ -747,11 +760,11 @@ class SVGRenderer:
                 # Include config in the request
                 payload = {"code": mermaid_code, "mermaid": mermaid_config}
                 json_str = _json.dumps(payload)
-                encoded = base64.b64encode(json_str.encode('utf-8')).decode('ascii')
+                encoded = base64.b64encode(json_str.encode("utf-8")).decode("ascii")
                 url = f"{self.server_url}/svg/{encoded}"
             else:
                 # Simple encoding without config
-                encoded = base64.b64encode(mermaid_code.encode('utf-8')).decode('ascii')
+                encoded = base64.b64encode(mermaid_code.encode("utf-8")).decode("ascii")
                 url = f"{self.server_url}/svg/{encoded}"
 
             # Make the request using the configured session
@@ -764,11 +777,15 @@ class SVGRenderer:
                 raise RenderingError("Empty response from mermaid.ink service")
 
             # Basic SVG validation
-            if not ('<svg' in svg_content.lower() or 'svg' in response.headers.get('content-type', '').lower()):
+            if not (
+                "<svg" in svg_content.lower()
+                or "svg" in response.headers.get("content-type", "").lower()
+            ):
                 # If response doesn't look like SVG, it might be an error message
                 if len(svg_content) < 1000:  # Error messages are usually short
                     raise RenderingError(
-                        f"Invalid response from server: {svg_content[:200]}")
+                        f"Invalid response from server: {svg_content[:200]}"
+                    )
                 else:
                     raise RenderingError("Response does not appear to be valid SVG")
 
@@ -779,20 +796,25 @@ class SVGRenderer:
         except requests.exceptions.HTTPError as e:
             status_code = e.response.status_code if e.response else "unknown"
             raise NetworkError(
-                f"Network request failed with status {status_code}") from e
+                f"Network request failed with status {status_code}"
+            ) from e
         except requests.exceptions.RequestException as e:
             raise NetworkError(f"Network request failed: {str(e)}") from e
         except (UnicodeEncodeError, UnicodeDecodeError) as e:
             context = {
-                'mermaid_code_preview': mermaid_code[:100] + '...' if len(mermaid_code) > 100 else mermaid_code,
-                'encoding_issue': 'unicode'
+                "mermaid_code_preview": (
+                    mermaid_code[:100] + "..."
+                    if len(mermaid_code) > 100
+                    else mermaid_code
+                ),
+                "encoding_issue": "unicode",
             }
             raise self.create_detailed_error(e, context) from e
         except Exception as e:
             context = {
-                'server_url': self.server_url,
-                'operation': 'remote_svg_rendering',
-                'mermaid_length': len(mermaid_code)
+                "server_url": self.server_url,
+                "operation": "remote_svg_rendering",
+                "mermaid_length": len(mermaid_code),
             }
             raise self.create_detailed_error(e, context) from e
 
@@ -836,8 +858,9 @@ class SVGRenderer:
         start_time = time.time()
 
         # Render SVG content
-        svg_content = self.render(mermaid_code, theme, config,
-                                  validate, sanitize, optimize)
+        svg_content = self.render(
+            mermaid_code, theme, config, validate, sanitize, optimize
+        )
 
         # Add metadata if requested
         if add_metadata and svg_content:
@@ -853,38 +876,38 @@ class SVGRenderer:
 
         # Export based on format
         export_info: Dict[str, Any] = {
-            'output_path': str(normalized_output),
-            'format': format,
-            'size_bytes': 0,
-            'render_time': 0.0,
-            'success': False,
-            'error': None
+            "output_path": str(normalized_output),
+            "format": format,
+            "size_bytes": 0,
+            "render_time": 0.0,
+            "success": False,
+            "error": None,
         }
 
         try:
             fmt = format.lower()
-            if fmt == 'svg':
+            if fmt == "svg":
                 self._export_svg(svg_content, normalized_output)
-            elif fmt == 'png':
+            elif fmt == "png":
                 self._export_png(svg_content, normalized_output, quality, background)
-            elif fmt == 'pdf':
+            elif fmt == "pdf":
                 self._export_pdf(svg_content, normalized_output, background)
-            elif fmt == 'html':
+            elif fmt == "html":
                 self._export_html(svg_content, normalized_output, mermaid_code, theme)
             else:
                 raise ValueError(f"Unsupported export format: {format}")
 
             # Get file size
             if normalized_output.exists():
-                export_info['size_bytes'] = normalized_output.stat().st_size
+                export_info["size_bytes"] = normalized_output.stat().st_size
 
-            export_info['success'] = True
+            export_info["success"] = True
 
         except Exception as e:
-            export_info['error'] = str(e)
+            export_info["error"] = str(e)
             raise RenderingError(f"Failed to export to {format}: {str(e)}") from e
         finally:
-            export_info['render_time'] = time.time() - start_time
+            export_info["render_time"] = time.time() - start_time
 
         return export_info
 
@@ -893,22 +916,28 @@ class SVGRenderer:
         with open(output_path, "w", encoding="utf-8") as f:
             f.write(svg_content)
 
-    def _export_png(self, svg_content: str, output_path: Path, quality: int, background: Optional[str]) -> None:
+    def _export_png(
+        self,
+        svg_content: str,
+        output_path: Path,
+        quality: int,
+        background: Optional[str],
+    ) -> None:
         """Export SVG to PNG format."""
         try:
             # Try to use cairosvg for PNG conversion
             import cairosvg  # type: ignore[import-not-found]
 
             png_data = cairosvg.svg2png(
-                bytestring=svg_content.encode('utf-8'),
-                background_color=background or 'white',
+                bytestring=svg_content.encode("utf-8"),
+                background_color=background or "white",
                 output_width=None,
-                output_height=None
+                output_height=None,
             )
             # Ensure bytes for type checkers
             png_bytes = cast(bytes, png_data)
 
-            with open(output_path, 'wb') as f:
+            with open(output_path, "wb") as f:
                 f.write(png_bytes)
 
         except ImportError:
@@ -920,19 +949,21 @@ class SVGRenderer:
         finally:
             _ = quality  # parameter acknowledged for API compatibility
 
-    def _export_pdf(self, svg_content: str, output_path: Path, background: Optional[str]) -> None:
+    def _export_pdf(
+        self, svg_content: str, output_path: Path, background: Optional[str]
+    ) -> None:
         """Export SVG to PDF format."""
         try:
             # Try to use cairosvg for PDF conversion
             import cairosvg  # type: ignore[import-not-found]
 
             pdf_data = cairosvg.svg2pdf(
-                bytestring=svg_content.encode('utf-8'),
-                background_color=background or 'white'
+                bytestring=svg_content.encode("utf-8"),
+                background_color=background or "white",
             )
             pdf_bytes = cast(bytes, pdf_data)
 
-            with open(output_path, 'wb') as f:
+            with open(output_path, "wb") as f:
                 f.write(pdf_bytes)
 
         except ImportError:
@@ -942,7 +973,13 @@ class SVGRenderer:
         except Exception as e:
             raise RenderingError(f"PDF export failed: {str(e)}") from e
 
-    def _export_html(self, svg_content: str, output_path: Path, mermaid_code: str, theme: Optional[str]) -> None:
+    def _export_html(
+        self,
+        svg_content: str,
+        output_path: Path,
+        mermaid_code: str,
+        theme: Optional[str],
+    ) -> None:
         """Export SVG embedded in HTML."""
         import datetime
 
@@ -1008,27 +1045,31 @@ class SVGRenderer:
 </body>
 </html>"""
 
-        with open(output_path, 'w', encoding='utf-8') as f:
+        with open(output_path, "w", encoding="utf-8") as f:
             f.write(html_template)
 
     def _add_background_to_svg(self, svg_content: str, background: str) -> str:
         """Add background color to SVG."""
         # Insert background rectangle after opening svg tag
-        if '<svg' in svg_content:
-            svg_start = svg_content.find('>')
+        if "<svg" in svg_content:
+            svg_start = svg_content.find(">")
             if svg_start != -1:
                 # Extract width and height from SVG tag
-                svg_tag = svg_content[:svg_start + 1]
+                svg_tag = svg_content[: svg_start + 1]
                 width_match = re.search(r'width\s*=\s*["\']([^"\']*)["\']', svg_tag)
                 height_match = re.search(r'height\s*=\s*["\']([^"\']*)["\']', svg_tag)
 
-                width = width_match.group(1) if width_match else '100%'
-                height = height_match.group(1) if height_match else '100%'
+                width = width_match.group(1) if width_match else "100%"
+                height = height_match.group(1) if height_match else "100%"
 
-                background_rect = f'\n<rect width="{width}" height="{height}" fill="{background}"/>'
-                svg_content = (svg_content[:svg_start + 1] +
-                               background_rect +
-                               svg_content[svg_start + 1:])
+                background_rect = (
+                    f'\n<rect width="{width}" height="{height}" fill="{background}"/>'
+                )
+                svg_content = (
+                    svg_content[: svg_start + 1]
+                    + background_rect
+                    + svg_content[svg_start + 1 :]
+                )
 
         return svg_content
 
@@ -1038,7 +1079,7 @@ class SVGRenderer:
         output_dir: str,
         format: str = "svg",
         naming_pattern: str = "{index}_{name}",
-        **export_options
+        **export_options,
     ) -> Dict[str, Any]:
         """
         Export multiple diagrams in batch.
@@ -1059,12 +1100,12 @@ class SVGRenderer:
         output_path.mkdir(parents=True, exist_ok=True)
 
         results: Dict[str, Any] = {
-            'total': len(diagrams),
-            'successful': 0,
-            'failed': 0,
-            'files': [],
-            'errors': [],
-            'total_time': 0.0
+            "total": len(diagrams),
+            "successful": 0,
+            "failed": 0,
+            "files": [],
+            "errors": [],
+            "total_time": 0.0,
         }
 
         start_time = time.time()
@@ -1074,26 +1115,24 @@ class SVGRenderer:
 
         for i, diagram in enumerate(diagrams):
             try:
-                mermaid_code = diagram.get('code', '')
-                name = diagram.get('name', f'diagram_{i}')
-                theme = diagram.get('theme')
-                config = diagram.get('config')
+                mermaid_code = diagram.get("code", "")
+                name = diagram.get("name", f"diagram_{i}")
+                theme = diagram.get("theme")
+                config = diagram.get("config")
 
                 if not mermaid_code:
-                    results['errors'].append(f"Diagram {i}: No code provided")
-                    results['failed'] += 1
+                    results["errors"].append(f"Diagram {i}: No code provided")
+                    results["failed"] += 1
                     continue
 
                 # Generate filename
                 filename = naming_pattern.format(
-                    index=i,
-                    name=name,
-                    theme=theme or 'default'
+                    index=i, name=name, theme=theme or "default"
                 )
 
                 # Add extension if not present
-                if not filename.endswith(f'.{format}'):
-                    filename += f'.{format}'
+                if not filename.endswith(f".{format}"):
+                    filename += f".{format}"
 
                 file_path = output_path / filename
 
@@ -1104,24 +1143,26 @@ class SVGRenderer:
                     theme=theme,
                     config=config,
                     format=format,
-                    **export_options
+                    **export_options,
                 )
 
-                results['files'].append({
-                    'index': i,
-                    'name': name,
-                    'path': str(file_path),
-                    'size': export_info['size_bytes'],
-                    'render_time': export_info['render_time']
-                })
+                results["files"].append(
+                    {
+                        "index": i,
+                        "name": name,
+                        "path": str(file_path),
+                        "size": export_info["size_bytes"],
+                        "render_time": export_info["render_time"],
+                    }
+                )
 
-                results['successful'] += 1
+                results["successful"] += 1
 
             except Exception as e:
-                results['errors'].append(f"Diagram {i} ({name}): {str(e)}")
-                results['failed'] += 1
+                results["errors"].append(f"Diagram {i} ({name}): {str(e)}")
+                results["failed"] += 1
 
-        results['total_time'] = time.time() - start_time
+        results["total_time"] = time.time() - start_time
 
         return results
 
@@ -1136,46 +1177,47 @@ class SVGRenderer:
             Template configuration
         """
         templates: Dict[str, Dict[str, Any]] = {
-            'web': {
-                'format': 'svg',
-                'optimize': True,
-                'sanitize': True,
-                'add_metadata': False,
-                'description': 'Optimized for web use'
+            "web": {
+                "format": "svg",
+                "optimize": True,
+                "sanitize": True,
+                "add_metadata": False,
+                "description": "Optimized for web use",
             },
-            'print': {
-                'format': 'pdf',
-                'background': 'white',
-                'add_metadata': True,
-                'description': 'Optimized for printing'
+            "print": {
+                "format": "pdf",
+                "background": "white",
+                "add_metadata": True,
+                "description": "Optimized for printing",
             },
-            'presentation': {
-                'format': 'png',
-                'quality': 95,
-                'background': 'transparent',
-                'add_metadata': False,
-                'description': 'High quality for presentations'
+            "presentation": {
+                "format": "png",
+                "quality": 95,
+                "background": "transparent",
+                "add_metadata": False,
+                "description": "High quality for presentations",
             },
-            'documentation': {
-                'format': 'html',
-                'add_metadata': True,
-                'validate': True,
-                'description': 'Complete HTML with source code'
+            "documentation": {
+                "format": "html",
+                "add_metadata": True,
+                "validate": True,
+                "description": "Complete HTML with source code",
             },
-            'archive': {
-                'format': 'svg',
-                'add_metadata': True,
-                'validate': True,
-                'sanitize': False,
-                'optimize': False,
-                'description': 'Full fidelity for archival'
-            }
+            "archive": {
+                "format": "svg",
+                "add_metadata": True,
+                "validate": True,
+                "sanitize": False,
+                "optimize": False,
+                "description": "Full fidelity for archival",
+            },
         }
 
         if template_name not in templates:
-            available = ', '.join(templates.keys())
+            available = ", ".join(templates.keys())
             raise ValueError(
-                f"Unknown template '{template_name}'. Available: {available}")
+                f"Unknown template '{template_name}'. Available: {available}"
+            )
 
         return templates[template_name]
 
@@ -1186,7 +1228,7 @@ class SVGRenderer:
         template_name: str,
         theme: Optional[str] = None,
         config: Optional[Dict[str, Any]] = None,
-        **overrides
+        **overrides,
     ) -> Dict[str, Any]:
         """
         Export using a predefined template.
@@ -1208,17 +1250,15 @@ class SVGRenderer:
         template.update(overrides)
 
         # Remove description from export options
-        template.pop('description', None)
+        template.pop("description", None)
 
         return self.render_to_file(
-            mermaid_code,
-            output_path,
-            theme=theme,
-            config=config,
-            **template
+            mermaid_code, output_path, theme=theme, config=config, **template
         )
 
-    def _add_svg_metadata(self, svg_content: str, mermaid_code: str, theme: Optional[str]) -> str:
+    def _add_svg_metadata(
+        self, svg_content: str, mermaid_code: str, theme: Optional[str]
+    ) -> str:
         """
         Add metadata to SVG content.
 
@@ -1244,12 +1284,16 @@ Original Mermaid Code:
 -->"""
 
         # Insert metadata after the opening SVG tag
-        if '<svg' in svg_content:
-            svg_start = svg_content.find('>')
+        if "<svg" in svg_content:
+            svg_start = svg_content.find(">")
             if svg_start != -1:
-                svg_content = (svg_content[:svg_start + 1] +
-                               '\n' + metadata + '\n' +
-                               svg_content[svg_start + 1:])
+                svg_content = (
+                    svg_content[: svg_start + 1]
+                    + "\n"
+                    + metadata
+                    + "\n"
+                    + svg_content[svg_start + 1 :]
+                )
 
         return svg_content
 
@@ -1269,8 +1313,8 @@ Original Mermaid Code:
                     "primaryTextColor": "#ffffff",
                     "primaryBorderColor": "#004499",
                     "lineColor": "#333333",
-                    "backgroundColor": "#ffffff"
-                }
+                    "backgroundColor": "#ffffff",
+                },
             },
             "dark": {
                 "name": "Dark",
@@ -1280,8 +1324,8 @@ Original Mermaid Code:
                     "primaryTextColor": "#ffffff",
                     "primaryBorderColor": "#374151",
                     "lineColor": "#6b7280",
-                    "backgroundColor": "#111827"
-                }
+                    "backgroundColor": "#111827",
+                },
             },
             "forest": {
                 "name": "Forest",
@@ -1291,8 +1335,8 @@ Original Mermaid Code:
                     "primaryTextColor": "#ffffff",
                     "primaryBorderColor": "#16a34a",
                     "lineColor": "#15803d",
-                    "backgroundColor": "#f0f9ff"
-                }
+                    "backgroundColor": "#f0f9ff",
+                },
             },
             "neutral": {
                 "name": "Neutral",
@@ -1302,8 +1346,8 @@ Original Mermaid Code:
                     "primaryTextColor": "#ffffff",
                     "primaryBorderColor": "#4b5563",
                     "lineColor": "#374151",
-                    "backgroundColor": "#f9fafb"
-                }
+                    "backgroundColor": "#f9fafb",
+                },
             },
             "base": {
                 "name": "Base",
@@ -1313,9 +1357,9 @@ Original Mermaid Code:
                     "primaryTextColor": "#ffffff",
                     "primaryBorderColor": "#2563eb",
                     "lineColor": "#1f2937",
-                    "backgroundColor": "#ffffff"
-                }
-            }
+                    "backgroundColor": "#ffffff",
+                },
+            },
         }
 
     def get_theme_names(self) -> list[str]:
@@ -1340,10 +1384,7 @@ Original Mermaid Code:
         return themes.get(theme)
 
     def create_custom_theme(
-        self,
-        name: str,
-        colors: Dict[str, str],
-        description: Optional[str] = None
+        self, name: str, colors: Dict[str, str], description: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Create a custom theme configuration.
@@ -1357,8 +1398,11 @@ Original Mermaid Code:
             Custom theme configuration
         """
         required_colors = [
-            "primaryColor", "primaryTextColor", "primaryBorderColor",
-            "lineColor", "backgroundColor"
+            "primaryColor",
+            "primaryTextColor",
+            "primaryBorderColor",
+            "lineColor",
+            "backgroundColor",
         ]
 
         # Validate required colors
@@ -1368,18 +1412,21 @@ Original Mermaid Code:
 
         # Validate color format (basic hex color validation)
         for color_name, color_value in colors.items():
-            if not re.match(r'^#[0-9a-fA-F]{6}$', color_value):
+            if not re.match(r"^#[0-9a-fA-F]{6}$", color_value):
                 raise ValueError(
-                    f"Invalid color format for {color_name}: {color_value}")
+                    f"Invalid color format for {color_name}: {color_value}"
+                )
 
         return {
             "name": name,
             "description": description or f"Custom theme: {name}",
             "colors": colors,
-            "custom": True
+            "custom": True,
         }
 
-    def apply_theme_to_config(self, config: Dict[str, Any], theme: str) -> Dict[str, Any]:
+    def apply_theme_to_config(
+        self, config: Dict[str, Any], theme: str
+    ) -> Dict[str, Any]:
         """
         Apply theme configuration to mermaid config.
 
@@ -1435,7 +1482,7 @@ Original Mermaid Code:
     classDef default fill:{colors.get('primaryColor', '#0066cc')},stroke:{colors.get('primaryBorderColor', '#004499')},color:{colors.get('primaryTextColor', '#ffffff')}
 """
         elif diagram_type == "sequence":
-            preview_code = f"""sequenceDiagram
+            preview_code = """sequenceDiagram
     participant A as Alice
     participant B as Bob
     A->>B: Hello Bob!
@@ -1444,7 +1491,7 @@ Original Mermaid Code:
     B-->>A: I'm good, thanks!
 """
         else:
-            preview_code = f"""graph TD
+            preview_code = """graph TD
     A --> B
     B --> C
     C --> A
@@ -1462,10 +1509,7 @@ Original Mermaid Code:
         Returns:
             Comparison data for the themes
         """
-        comparison: Dict[str, Any] = {
-            "themes": {},
-            "color_comparison": {}
-        }
+        comparison: Dict[str, Any] = {"themes": {}, "color_comparison": {}}
 
         all_themes = self.get_supported_themes()
 
@@ -1474,15 +1518,21 @@ Original Mermaid Code:
                 comparison["themes"][theme_name] = all_themes[theme_name]
 
         # Create color comparison matrix
-        color_keys = ["primaryColor", "primaryTextColor",
-                      "primaryBorderColor", "lineColor", "backgroundColor"]
+        color_keys = [
+            "primaryColor",
+            "primaryTextColor",
+            "primaryBorderColor",
+            "lineColor",
+            "backgroundColor",
+        ]
         for color_key in color_keys:
             comparison["color_comparison"][color_key] = {}
             for theme_name in themes:
                 if theme_name in comparison["themes"]:
                     colors = comparison["themes"][theme_name].get("colors", {})
                     comparison["color_comparison"][color_key][theme_name] = colors.get(
-                        color_key, "#000000")
+                        color_key, "#000000"
+                    )
 
         return comparison
 
@@ -1502,12 +1552,16 @@ Original Mermaid Code:
             return "forest"
         elif preferences.get("minimal", False) or preferences.get("clean", False):
             return "base"
-        elif preferences.get("neutral", False) or preferences.get("professional", False):
+        elif preferences.get("neutral", False) or preferences.get(
+            "professional", False
+        ):
             return "neutral"
         else:
             return "default"
 
-    def validate_svg_content(self, svg_content: str, strict: bool = False) -> Dict[str, Any]:
+    def validate_svg_content(
+        self, svg_content: str, strict: bool = False
+    ) -> Dict[str, Any]:
         """
         Validate SVG content for correctness and security.
 
@@ -1519,104 +1573,136 @@ Original Mermaid Code:
             Dictionary with validation results
         """
         result: Dict[str, Any] = {
-            'is_valid': True,
-            'errors': [],
-            'warnings': [],
-            'security_issues': [],
-            'structure_issues': []
+            "is_valid": True,
+            "errors": [],
+            "warnings": [],
+            "security_issues": [],
+            "structure_issues": [],
         }
 
         if not svg_content or not isinstance(svg_content, str):
-            result['is_valid'] = False
-            result['errors'].append("Empty or invalid SVG content")
+            result["is_valid"] = False
+            result["errors"].append("Empty or invalid SVG content")
             return result
 
         svg_lower = svg_content.lower()
 
         # Basic structure validation
-        if '<svg' not in svg_lower:
-            result['is_valid'] = False
-            result['errors'].append("No SVG opening tag found")
+        if "<svg" not in svg_lower:
+            result["is_valid"] = False
+            result["errors"].append("No SVG opening tag found")
 
-        if '</svg>' not in svg_lower:
-            result['is_valid'] = False
-            result['errors'].append("No SVG closing tag found")
+        if "</svg>" not in svg_lower:
+            result["is_valid"] = False
+            result["errors"].append("No SVG closing tag found")
 
         # Check for proper XML structure
-        svg_open_count = svg_content.count('<svg')
-        svg_close_count = svg_content.count('</svg>')
+        svg_open_count = svg_content.count("<svg")
+        svg_close_count = svg_content.count("</svg>")
         if svg_open_count != svg_close_count:
-            result['structure_issues'].append(
-                f"Mismatched SVG tags: {svg_open_count} open, {svg_close_count} close")
+            result["structure_issues"].append(
+                f"Mismatched SVG tags: {svg_open_count} open, {svg_close_count} close"
+            )
 
         # Security validation
         security_patterns = [
-            (r'<script[^>]*>', 'Script tags detected'),
-            (r'javascript:', 'JavaScript URLs detected'),
-            (r'on\w+\s*=', 'Event handlers detected'),
-            (r'<iframe[^>]*>', 'Iframe tags detected'),
-            (r'<object[^>]*>', 'Object tags detected'),
-            (r'<embed[^>]*>', 'Embed tags detected'),
-            (r'<link[^>]*>', 'Link tags detected'),
-            (r'<meta[^>]*>', 'Meta tags detected'),
-            (r'data:text/html', 'HTML data URLs detected'),
-            (r'vbscript:', 'VBScript URLs detected')
+            (r"<script[^>]*>", "Script tags detected"),
+            (r"javascript:", "JavaScript URLs detected"),
+            (r"on\w+\s*=", "Event handlers detected"),
+            (r"<iframe[^>]*>", "Iframe tags detected"),
+            (r"<object[^>]*>", "Object tags detected"),
+            (r"<embed[^>]*>", "Embed tags detected"),
+            (r"<link[^>]*>", "Link tags detected"),
+            (r"<meta[^>]*>", "Meta tags detected"),
+            (r"data:text/html", "HTML data URLs detected"),
+            (r"vbscript:", "VBScript URLs detected"),
         ]
 
         for pattern, message in security_patterns:
             if re.search(pattern, svg_content, re.IGNORECASE):
-                result['security_issues'].append(message)
+                result["security_issues"].append(message)
                 if strict:
-                    result['is_valid'] = False
+                    result["is_valid"] = False
 
         # Namespace validation - be more specific about what's missing
         if 'xmlns="http://www.w3.org/2000/svg"' not in svg_content:
-            if 'xmlns' not in svg_lower:
-                result['warnings'].append("No XML namespace declaration found")
+            if "xmlns" not in svg_lower:
+                result["warnings"].append("No XML namespace declaration found")
             else:
-                result['warnings'].append("SVG namespace declaration may be incorrect")
+                result["warnings"].append("SVG namespace declaration may be incorrect")
 
         # Check for valid SVG elements
         valid_svg_elements = [
-            'svg', 'g', 'path', 'rect', 'circle', 'ellipse', 'line', 'polyline', 'polygon',
-            'text', 'tspan', 'textPath', 'defs', 'clipPath', 'mask', 'pattern', 'image',
-            'use', 'symbol', 'marker', 'linearGradient', 'radialGradient', 'stop',
-            'animate', 'animateTransform', 'animateMotion', 'set', 'foreignObject',
-            'style', 'title', 'desc', 'metadata',  # Add commonly used SVG elements
-            'p', 'div', 'span', 'br'  # HTML elements that can be valid in foreignObject
+            "svg",
+            "g",
+            "path",
+            "rect",
+            "circle",
+            "ellipse",
+            "line",
+            "polyline",
+            "polygon",
+            "text",
+            "tspan",
+            "textPath",
+            "defs",
+            "clipPath",
+            "mask",
+            "pattern",
+            "image",
+            "use",
+            "symbol",
+            "marker",
+            "linearGradient",
+            "radialGradient",
+            "stop",
+            "animate",
+            "animateTransform",
+            "animateMotion",
+            "set",
+            "foreignObject",
+            "style",
+            "title",
+            "desc",
+            "metadata",  # Add commonly used SVG elements
+            "p",
+            "div",
+            "span",
+            "br",  # HTML elements that can be valid in foreignObject
         ]
 
         # Extract all element names
-        element_pattern = r'<(\w+)(?:\s|>|/>)'
+        element_pattern = r"<(\w+)(?:\s|>|/>)"
         elements = re.findall(element_pattern, svg_content, re.IGNORECASE)
 
         invalid_elements = []
         for element in set(elements):
             if element.lower() not in valid_svg_elements:
                 # Don't flag common HTML elements that might be valid in certain contexts
-                if element.lower() not in ['html', 'head', 'body', 'div', 'span']:
+                if element.lower() not in ["html", "head", "body", "div", "span"]:
                     invalid_elements.append(element)
 
         if invalid_elements:
-            result['warnings'].append(
-                f"Non-standard SVG elements found: {', '.join(invalid_elements)}")
+            result["warnings"].append(
+                f"Non-standard SVG elements found: {', '.join(invalid_elements)}"
+            )
 
         # Check for excessive size
         if len(svg_content) > 1024 * 1024:  # 1MB
-            result['warnings'].append("SVG content is very large (>1MB)")
+            result["warnings"].append("SVG content is very large (>1MB)")
 
         # Check for deeply nested elements (simplified check)
         try:
             max_depth = self._calculate_nesting_depth(svg_content)
             if max_depth > 50:
-                result['warnings'].append(f"Deep nesting detected (depth: {max_depth})")
+                result["warnings"].append(f"Deep nesting detected (depth: {max_depth})")
         except Exception:
             # If nesting calculation fails, skip it
-            result['warnings'].append("Could not calculate nesting depth")
+            result["warnings"].append("Could not calculate nesting depth")
 
         # Final validation
-        if result['security_issues'] and strict:
-            result['is_valid'] = False
+        if result["security_issues"] and strict:
+            result["is_valid"] = False
 
         return result
 
@@ -1625,8 +1711,8 @@ Original Mermaid Code:
         # Simple regex-based approach to avoid infinite loops
 
         # Count opening and closing tags
-        opening_tags = re.findall(r'<([a-zA-Z][a-zA-Z0-9]*)[^>]*(?<!/)>', svg_content)
-        closing_tags = re.findall(r'</([a-zA-Z][a-zA-Z0-9]*)>', svg_content)
+        opening_tags = re.findall(r"<([a-zA-Z][a-zA-Z0-9]*)[^>]*(?<!/)>", svg_content)
+        closing_tags = re.findall(r"</([a-zA-Z][a-zA-Z0-9]*)>", svg_content)
 
         # Simple heuristic: assume reasonable nesting based on tag counts
         max_depth = min(len(opening_tags), 20)  # Cap at 20 to avoid issues
@@ -1648,63 +1734,84 @@ Original Mermaid Code:
             return svg_content
 
         # Remove script tags and their content
-        svg_content = re.sub(r'<script[^>]*>.*?</script>',
-                             '', svg_content, flags=re.IGNORECASE | re.DOTALL)
+        svg_content = re.sub(
+            r"<script[^>]*>.*?</script>",
+            "",
+            svg_content,
+            flags=re.IGNORECASE | re.DOTALL,
+        )
 
         # Remove event handlers - improved pattern to handle edge cases
         event_handlers = [
-            'onclick', 'onmouseover', 'onmouseout', 'onmousedown', 'onmouseup',
-            'onkeydown', 'onkeyup', 'onkeypress', 'onfocus', 'onblur', 'onload',
-            'onerror', 'onabort', 'onchange', 'onsubmit', 'onreset', 'onselect',
-            'onresize', 'onscroll', 'onunload'
+            "onclick",
+            "onmouseover",
+            "onmouseout",
+            "onmousedown",
+            "onmouseup",
+            "onkeydown",
+            "onkeyup",
+            "onkeypress",
+            "onfocus",
+            "onblur",
+            "onload",
+            "onerror",
+            "onabort",
+            "onchange",
+            "onsubmit",
+            "onreset",
+            "onselect",
+            "onresize",
+            "onscroll",
+            "onunload",
         ]
 
         for handler in event_handlers:
             # More robust pattern that handles various quote styles and spacing
             patterns = [
                 rf'\s{handler}\s*=\s*["\'][^"\']*["\']',  # Standard quotes
-                rf'\s{handler}\s*=\s*[^"\'\s>]+',         # Unquoted values
-                rf'{handler}\s*=\s*["\'][^"\']*["\']',    # No leading space
+                rf'\s{handler}\s*=\s*[^"\'\s>]+',  # Unquoted values
+                rf'{handler}\s*=\s*["\'][^"\']*["\']',  # No leading space
             ]
             for pattern in patterns:
-                svg_content = re.sub(pattern, '', svg_content, flags=re.IGNORECASE)
+                svg_content = re.sub(pattern, "", svg_content, flags=re.IGNORECASE)
 
         # Remove dangerous URLs
         dangerous_urls = [
             r'javascript:[^"\'>\s]*',
             r'vbscript:[^"\'>\s]*',
             r'data:text/html[^"\'>\s]*',
-            r'data:application/[^"\'>\s]*'
+            r'data:application/[^"\'>\s]*',
         ]
 
         for url_pattern in dangerous_urls:
-            svg_content = re.sub(url_pattern, '', svg_content, flags=re.IGNORECASE)
+            svg_content = re.sub(url_pattern, "", svg_content, flags=re.IGNORECASE)
 
         if strict:
             # Remove potentially dangerous elements entirely
             dangerous_elements = [
-                r'<iframe[^>]*>.*?</iframe>',
-                r'<object[^>]*>.*?</object>',
-                r'<embed[^>]*>.*?</embed>',
-                r'<link[^>]*>',
-                r'<meta[^>]*>',
-                r'<style[^>]*>.*?</style>',  # Remove style tags in strict mode
-                r'<foreignObject[^>]*>.*?</foreignObject>'  # Remove foreign objects
+                r"<iframe[^>]*>.*?</iframe>",
+                r"<object[^>]*>.*?</object>",
+                r"<embed[^>]*>.*?</embed>",
+                r"<link[^>]*>",
+                r"<meta[^>]*>",
+                r"<style[^>]*>.*?</style>",  # Remove style tags in strict mode
+                r"<foreignObject[^>]*>.*?</foreignObject>",  # Remove foreign objects
             ]
 
             for element_pattern in dangerous_elements:
-                svg_content = re.sub(element_pattern, '', svg_content,
-                                     flags=re.IGNORECASE | re.DOTALL)
+                svg_content = re.sub(
+                    element_pattern, "", svg_content, flags=re.IGNORECASE | re.DOTALL
+                )
 
         # Clean up attributes that could be dangerous
         dangerous_attributes = [
             r'\sxlink:href\s*=\s*["\']javascript:[^"\']*["\']',
             r'\shref\s*=\s*["\']javascript:[^"\']*["\']',
-            r'\ssrc\s*=\s*["\']javascript:[^"\']*["\']'
+            r'\ssrc\s*=\s*["\']javascript:[^"\']*["\']',
         ]
 
         for attr_pattern in dangerous_attributes:
-            svg_content = re.sub(attr_pattern, '', svg_content, flags=re.IGNORECASE)
+            svg_content = re.sub(attr_pattern, "", svg_content, flags=re.IGNORECASE)
 
         # Ensure proper XML structure
         svg_content = self._fix_xml_structure(svg_content)
@@ -1717,21 +1824,27 @@ Original Mermaid Code:
     def _fix_xml_structure(self, svg_content: str) -> str:
         """Fix basic XML structure issues."""
         # Ensure proper XML declaration if missing
-        if not svg_content.strip().startswith('<?xml') and not svg_content.strip().startswith('<svg'):
+        if not svg_content.strip().startswith(
+            "<?xml"
+        ) and not svg_content.strip().startswith("<svg"):
             # Add XML declaration if it's a standalone SVG
-            if '<svg' in svg_content:
+            if "<svg" in svg_content:
                 svg_content = '<?xml version="1.0" encoding="UTF-8"?>\n' + svg_content
 
         # Fix malformed self-closing tags (e.g., '//>') to proper self-closing tags ('/>')
-        svg_content = re.sub(r'/+>', '/>', svg_content)
+        svg_content = re.sub(r"/+>", "/>", svg_content)
 
         # Ensure proper SVG namespace declaration
-        if '<svg' in svg_content and 'xmlns="http://www.w3.org/2000/svg"' not in svg_content:
+        if (
+            "<svg" in svg_content
+            and 'xmlns="http://www.w3.org/2000/svg"' not in svg_content
+        ):
             # Find the SVG opening tag and add namespace if missing
-            svg_pattern = r'<svg([^>]*?)>'
+            svg_pattern = r"<svg([^>]*?)>"
+
             def add_namespace(match):
                 attrs = match.group(1)
-                if 'xmlns=' not in attrs:
+                if "xmlns=" not in attrs:
                     # Add the SVG namespace
                     if attrs.strip():
                         return f'<svg{attrs} xmlns="http://www.w3.org/2000/svg">'
@@ -1743,17 +1856,16 @@ Original Mermaid Code:
 
         # Fix self-closing tags that should be properly closed
         self_closing_fixes = [
-            (r'<path([^>]*?)(?<!/)>', r'<path\1/>'),
-            (r'<circle([^>]*?)(?<!/)>', r'<circle\1/>'),
-            (r'<rect([^>]*?)(?<!/)>', r'<rect\1/>'),
-            (r'<line([^>]*?)(?<!/)>', r'<line\1/>'),
-            (r'<ellipse([^>]*?)(?<!/)>', r'<ellipse\1/>'),
+            (r"<path([^>]*?)(?<!/)>", r"<path\1/>"),
+            (r"<circle([^>]*?)(?<!/)>", r"<circle\1/>"),
+            (r"<rect([^>]*?)(?<!/)>", r"<rect\1/>"),
+            (r"<line([^>]*?)(?<!/)>", r"<line\1/>"),
+            (r"<ellipse([^>]*?)(?<!/)>", r"<ellipse\1/>"),
         ]
 
         for pattern, replacement in self_closing_fixes:
             # Only fix if not already self-closing and not followed by closing tag
-            svg_content = re.sub(
-                pattern + r'(?![^<]*</\w+>)', replacement, svg_content)
+            svg_content = re.sub(pattern + r"(?![^<]*</\w+>)", replacement, svg_content)
 
         return svg_content
 
@@ -1763,14 +1875,16 @@ Original Mermaid Code:
             return svg_content
 
         # Fix viewBox attribute casing (some browsers are case-sensitive)
-        svg_content = re.sub(r'\bviewbox\b', 'viewBox', svg_content, flags=re.IGNORECASE)
+        svg_content = re.sub(
+            r"\bviewbox\b", "viewBox", svg_content, flags=re.IGNORECASE
+        )
 
         # Ensure proper units for width/height if they're just numbers
         def add_units(match):
             attr_name = match.group(1)
             value = match.group(2)
             # If it's just a number, add 'px' unit
-            if re.match(r'^\d+(\.\d+)?$', value):
+            if re.match(r"^\d+(\.\d+)?$", value):
                 return f'{attr_name}="{value}px"'
             return match.group(0)
 
@@ -1778,7 +1892,7 @@ Original Mermaid Code:
         svg_content = re.sub(r'(width|height)="([^"]*)"', add_units, svg_content)
 
         # Remove any remaining multiple slashes in self-closing tags
-        svg_content = re.sub(r'/+>', '/>', svg_content)
+        svg_content = re.sub(r"/+>", "/>", svg_content)
 
         # Fix any remaining malformed attributes
         svg_content = re.sub(r'(\w+)=([^"\s>]+)(?=\s|>)', r'\1="\2"', svg_content)
@@ -1803,22 +1917,26 @@ Original Mermaid Code:
             attr_name = match.group(1)
             attr_value = match.group(2)
             # Only escape & if it's not already part of an entity
-            if '&amp;' not in attr_value:
-                attr_value = attr_value.replace('&', '&amp;')
+            if "&amp;" not in attr_value:
+                attr_value = attr_value.replace("&", "&amp;")
             return f'{attr_name}="{attr_value}"'
 
-        svg_content = re.sub(r'([a-zA-Z-]+)="([^"]*&[^"]*)"', fix_ampersands, svg_content)
+        svg_content = re.sub(
+            r'([a-zA-Z-]+)="([^"]*&[^"]*)"', fix_ampersands, svg_content
+        )
 
         # 3. Fix unescaped < and > in attribute values
         def fix_brackets(match):
             attr_name = match.group(1)
             attr_value = match.group(2)
             # Only escape if not already escaped
-            if '&lt;' not in attr_value and '&gt;' not in attr_value:
-                attr_value = attr_value.replace('<', '&lt;').replace('>', '&gt;')
+            if "&lt;" not in attr_value and "&gt;" not in attr_value:
+                attr_value = attr_value.replace("<", "&lt;").replace(">", "&gt;")
             return f'{attr_name}="{attr_value}"'
 
-        svg_content = re.sub(r'([a-zA-Z-]+)="([^"]*[<>][^"]*)"', fix_brackets, svg_content)
+        svg_content = re.sub(
+            r'([a-zA-Z-]+)="([^"]*[<>][^"]*)"', fix_brackets, svg_content
+        )
 
         return svg_content
 
@@ -1833,10 +1951,10 @@ Original Mermaid Code:
             Security scan results
         """
         scan_result: Dict[str, Any] = {
-            'risk_level': 'low',
-            'issues': [],
-            'recommendations': [],
-            'safe_to_use': True
+            "risk_level": "low",
+            "issues": [],
+            "recommendations": [],
+            "safe_to_use": True,
         }
 
         if not svg_content:
@@ -1844,78 +1962,76 @@ Original Mermaid Code:
 
         # High-risk patterns
         high_risk_patterns = [
-            (r'<script[^>]*>', 'Script execution capability'),
-            (r'javascript:', 'JavaScript URL scheme'),
-            (r'vbscript:', 'VBScript URL scheme'),
-            (r'data:text/html', 'HTML data URL'),
-            (r'<iframe[^>]*>', 'Embedded iframe'),
-            (r'<object[^>]*>', 'Object embedding'),
-            (r'<embed[^>]*>', 'Plugin embedding')
+            (r"<script[^>]*>", "Script execution capability"),
+            (r"javascript:", "JavaScript URL scheme"),
+            (r"vbscript:", "VBScript URL scheme"),
+            (r"data:text/html", "HTML data URL"),
+            (r"<iframe[^>]*>", "Embedded iframe"),
+            (r"<object[^>]*>", "Object embedding"),
+            (r"<embed[^>]*>", "Plugin embedding"),
         ]
 
         # Medium-risk patterns
         medium_risk_patterns = [
-            (r'on\w+\s*=', 'Event handlers'),
-            (r'<foreignObject[^>]*>', 'Foreign object content'),
-            (r'<use[^>]*href\s*=\s*["\']https?://', 'External resource references'),
-            (r'<image[^>]*href\s*=\s*["\']https?://', 'External image references'),
-            (r'<style[^>]*>', 'Inline styles')
+            (r"on\w+\s*=", "Event handlers"),
+            (r"<foreignObject[^>]*>", "Foreign object content"),
+            (r'<use[^>]*href\s*=\s*["\']https?://', "External resource references"),
+            (r'<image[^>]*href\s*=\s*["\']https?://', "External image references"),
+            (r"<style[^>]*>", "Inline styles"),
         ]
 
         # Low-risk patterns
         low_risk_patterns = [
-            (r'<animate[^>]*>', 'Animation elements'),
-            (r'<animateTransform[^>]*>', 'Transform animations'),
-            (r'<text[^>]*>', 'Text elements with potential for content injection')
+            (r"<animate[^>]*>", "Animation elements"),
+            (r"<animateTransform[^>]*>", "Transform animations"),
+            (r"<text[^>]*>", "Text elements with potential for content injection"),
         ]
 
         # Check high-risk patterns
         for pattern, description in high_risk_patterns:
             if re.search(pattern, svg_content, re.IGNORECASE):
-                scan_result['issues'].append({
-                    'level': 'high',
-                    'description': description,
-                    'pattern': pattern
-                })
-                scan_result['risk_level'] = 'high'
-                scan_result['safe_to_use'] = False
+                scan_result["issues"].append(
+                    {"level": "high", "description": description, "pattern": pattern}
+                )
+                scan_result["risk_level"] = "high"
+                scan_result["safe_to_use"] = False
 
         # Check medium-risk patterns
         for pattern, description in medium_risk_patterns:
             if re.search(pattern, svg_content, re.IGNORECASE):
-                scan_result['issues'].append({
-                    'level': 'medium',
-                    'description': description,
-                    'pattern': pattern
-                })
-                if scan_result['risk_level'] == 'low':
-                    scan_result['risk_level'] = 'medium'
+                scan_result["issues"].append(
+                    {"level": "medium", "description": description, "pattern": pattern}
+                )
+                if scan_result["risk_level"] == "low":
+                    scan_result["risk_level"] = "medium"
 
         # Check low-risk patterns
         for pattern, description in low_risk_patterns:
             if re.search(pattern, svg_content, re.IGNORECASE):
-                scan_result['issues'].append({
-                    'level': 'low',
-                    'description': description,
-                    'pattern': pattern
-                })
+                scan_result["issues"].append(
+                    {"level": "low", "description": description, "pattern": pattern}
+                )
 
         # Generate recommendations
-        if scan_result['risk_level'] == 'high':
-            scan_result['recommendations'].extend([
-                'Do not use this SVG in production without sanitization',
-                'Remove all script tags and JavaScript URLs',
-                'Consider using a strict SVG sanitizer',
-                'Validate the source of this SVG content'
-            ])
-        elif scan_result['risk_level'] == 'medium':
-            scan_result['recommendations'].extend([
-                'Review and sanitize event handlers',
-                'Validate external resource references',
-                'Consider removing foreign object content'
-            ])
+        if scan_result["risk_level"] == "high":
+            scan_result["recommendations"].extend(
+                [
+                    "Do not use this SVG in production without sanitization",
+                    "Remove all script tags and JavaScript URLs",
+                    "Consider using a strict SVG sanitizer",
+                    "Validate the source of this SVG content",
+                ]
+            )
+        elif scan_result["risk_level"] == "medium":
+            scan_result["recommendations"].extend(
+                [
+                    "Review and sanitize event handlers",
+                    "Validate external resource references",
+                    "Consider removing foreign object content",
+                ]
+            )
         else:
-            scan_result['recommendations'].append('SVG appears safe for general use')
+            scan_result["recommendations"].append("SVG appears safe for general use")
 
         return scan_result
 
@@ -1930,34 +2046,42 @@ Original Mermaid Code:
             Complete analysis report
         """
         report: Dict[str, Any] = {
-            'validation': self.validate_svg_content(svg_content, strict=True),
-            'security': self.scan_svg_security(svg_content),
-            'statistics': self._get_svg_statistics(svg_content),
-            'recommendations': []
+            "validation": self.validate_svg_content(svg_content, strict=True),
+            "security": self.scan_svg_security(svg_content),
+            "statistics": self._get_svg_statistics(svg_content),
+            "recommendations": [],
         }
 
         # Combine recommendations
-        if report['validation']['errors']:
-            report['recommendations'].append('Fix validation errors before use')
+        if report["validation"]["errors"]:
+            report["recommendations"].append("Fix validation errors before use")
 
-        if report['security']['risk_level'] != 'low':
-            report['recommendations'].extend(report['security']['recommendations'])
+        if report["security"]["risk_level"] != "low":
+            report["recommendations"].extend(report["security"]["recommendations"])
 
-        if report['statistics']['size'] > 500000:  # 500KB
-            report['recommendations'].append('Consider optimizing SVG size')
+        if report["statistics"]["size"] > 500000:  # 500KB
+            report["recommendations"].append("Consider optimizing SVG size")
 
         return report
 
     def _get_svg_statistics(self, svg_content: str) -> Dict[str, Any]:
         """Get statistics about SVG content."""
         stats: Dict[str, Any] = {
-            'size': len(svg_content),
-            'elements': len(re.findall(r'<\w+', svg_content)),
-            'text_elements': len(re.findall(r'<text[^>]*>', svg_content, re.IGNORECASE)),
-            'paths': len(re.findall(r'<path[^>]*>', svg_content, re.IGNORECASE)),
-            'shapes': len(re.findall(r'<(rect|circle|ellipse|polygon|polyline)[^>]*>', svg_content, re.IGNORECASE)),
-            'groups': len(re.findall(r'<g[^>]*>', svg_content, re.IGNORECASE)),
-            'max_nesting_depth': self._calculate_nesting_depth(svg_content)
+            "size": len(svg_content),
+            "elements": len(re.findall(r"<\w+", svg_content)),
+            "text_elements": len(
+                re.findall(r"<text[^>]*>", svg_content, re.IGNORECASE)
+            ),
+            "paths": len(re.findall(r"<path[^>]*>", svg_content, re.IGNORECASE)),
+            "shapes": len(
+                re.findall(
+                    r"<(rect|circle|ellipse|polygon|polyline)[^>]*>",
+                    svg_content,
+                    re.IGNORECASE,
+                )
+            ),
+            "groups": len(re.findall(r"<g[^>]*>", svg_content, re.IGNORECASE)),
+            "max_nesting_depth": self._calculate_nesting_depth(svg_content),
         }
 
         return stats
@@ -1973,55 +2097,68 @@ Original Mermaid Code:
             Dictionary with validation results
         """
         result: Dict[str, Any] = {
-            'is_valid': True,
-            'errors': [],
-            'warnings': [],
-            'suggestions': []
+            "is_valid": True,
+            "errors": [],
+            "warnings": [],
+            "suggestions": [],
         }
 
         if not mermaid_code or not mermaid_code.strip():
-            result['is_valid'] = False
-            result['errors'].append("Empty mermaid code")
+            result["is_valid"] = False
+            result["errors"].append("Empty mermaid code")
             return result
 
         # Basic syntax validation
-        lines = mermaid_code.strip().split('\n')
+        lines = mermaid_code.strip().split("\n")
         first_line = lines[0].strip()
 
         # Check for diagram type declaration
         valid_diagram_types = [
-            'flowchart', 'graph', 'sequenceDiagram', 'classDiagram',
-            'stateDiagram', 'erDiagram', 'journey', 'gantt', 'pie',
-            'gitgraph', 'mindmap', 'timeline', 'sankey'
+            "flowchart",
+            "graph",
+            "sequenceDiagram",
+            "classDiagram",
+            "stateDiagram",
+            "erDiagram",
+            "journey",
+            "gantt",
+            "pie",
+            "gitgraph",
+            "mindmap",
+            "timeline",
+            "sankey",
         ]
 
         has_diagram_type = any(first_line.startswith(dt) for dt in valid_diagram_types)
         if not has_diagram_type:
-            result['warnings'].append(
-                f"No recognized diagram type found. First line: '{first_line}'")
-            result['suggestions'].append(
-                "Start with a diagram type like 'flowchart TD' or 'sequenceDiagram'")
+            result["warnings"].append(
+                f"No recognized diagram type found. First line: '{first_line}'"
+            )
+            result["suggestions"].append(
+                "Start with a diagram type like 'flowchart TD' or 'sequenceDiagram'"
+            )
 
         # Check for common syntax issues
         for i, line in enumerate(lines, 1):
             line = line.strip()
-            if not line or line.startswith('%'):  # Skip empty lines and comments
+            if not line or line.startswith("%"):  # Skip empty lines and comments
                 continue
 
             # Check for unmatched brackets
-            open_brackets = line.count('[') + line.count('(') + line.count('{')
-            close_brackets = line.count(']') + line.count(')') + line.count('}')
+            open_brackets = line.count("[") + line.count("(") + line.count("{")
+            close_brackets = line.count("]") + line.count(")") + line.count("}")
             if open_brackets != close_brackets:
-                result['warnings'].append(f"Line {i}: Potentially unmatched brackets")
+                result["warnings"].append(f"Line {i}: Potentially unmatched brackets")
 
             # Check for invalid characters in node IDs
-            if '-->' in line or '---' in line:
-                parts = re.split(r'-->|---', line)
+            if "-->" in line or "---" in line:
+                parts = re.split(r"-->|---", line)
                 for part in parts:
                     part = part.strip()
                     if part and not re.match(r'^[A-Za-z0-9_\[\](){}"\s-]+$', part):
-                        result['warnings'].append(
-                            f"Line {i}: Potentially invalid characters in '{part}'")
+                        result["warnings"].append(
+                            f"Line {i}: Potentially invalid characters in '{part}'"
+                        )
 
         return result
 
@@ -2038,40 +2175,50 @@ Original Mermaid Code:
         suggestions: list[str] = []
         error_lower = error_message.lower()
 
-        if 'timeout' in error_lower:
-            suggestions.extend([
-                "Try increasing the timeout value",
-                "Check your internet connection",
-                "Use a simpler diagram to test connectivity",
-                "Consider using a different server URL"
-            ])
+        if "timeout" in error_lower:
+            suggestions.extend(
+                [
+                    "Try increasing the timeout value",
+                    "Check your internet connection",
+                    "Use a simpler diagram to test connectivity",
+                    "Consider using a different server URL",
+                ]
+            )
 
-        if 'network' in error_lower or 'connection' in error_lower:
-            suggestions.extend([
-                "Check your internet connection",
-                "Verify the server URL is accessible",
-                "Try using fallback servers",
-                "Check if you're behind a firewall or proxy"
-            ])
+        if "network" in error_lower or "connection" in error_lower:
+            suggestions.extend(
+                [
+                    "Check your internet connection",
+                    "Verify the server URL is accessible",
+                    "Try using fallback servers",
+                    "Check if you're behind a firewall or proxy",
+                ]
+            )
 
-        if 'invalid' in error_lower and 'svg' in error_lower:
-            suggestions.extend([
-                "Check if the mermaid syntax is correct",
-                "Try a simpler diagram first",
-                "Verify the diagram type is supported",
-                "Check for special characters that might cause issues"
-            ])
+        if "invalid" in error_lower and "svg" in error_lower:
+            suggestions.extend(
+                [
+                    "Check if the mermaid syntax is correct",
+                    "Try a simpler diagram first",
+                    "Verify the diagram type is supported",
+                    "Check for special characters that might cause issues",
+                ]
+            )
 
-        if 'empty' in error_lower:
-            suggestions.extend([
-                "Provide valid mermaid diagram code",
-                "Check that the input is not empty or whitespace only",
-                "Ensure the diagram has at least one element"
-            ])
+        if "empty" in error_lower:
+            suggestions.extend(
+                [
+                    "Provide valid mermaid diagram code",
+                    "Check that the input is not empty or whitespace only",
+                    "Ensure the diagram has at least one element",
+                ]
+            )
 
         return suggestions
 
-    def create_detailed_error(self, base_error: Exception, context: Dict[str, Any]) -> RenderingError:
+    def create_detailed_error(
+        self, base_error: Exception, context: Dict[str, Any]
+    ) -> RenderingError:
         """
         Create a detailed error with context and suggestions.
 
@@ -2112,32 +2259,36 @@ Original Mermaid Code:
             Dictionary with diagnostic information
         """
         diagnosis: Dict[str, Any] = {
-            'syntax_check': self.validate_mermaid_syntax(mermaid_code),
-            'server_status': self.get_server_status(),
-            'recommendations': []
+            "syntax_check": self.validate_mermaid_syntax(mermaid_code),
+            "server_status": self.get_server_status(),
+            "recommendations": [],
         }
 
         # Check code complexity
-        lines = len(mermaid_code.split('\n'))
-        nodes = len(re.findall(r'\b[A-Za-z0-9_]+\b', mermaid_code))
+        lines = len(mermaid_code.split("\n"))
+        nodes = len(re.findall(r"\b[A-Za-z0-9_]+\b", mermaid_code))
 
         if lines > 100:
-            diagnosis['recommendations'].append(
-                "Large diagram detected. Consider breaking into smaller parts.")
+            diagnosis["recommendations"].append(
+                "Large diagram detected. Consider breaking into smaller parts."
+            )
 
         if nodes > 50:
-            diagnosis['recommendations'].append(
-                "Many nodes detected. This might affect rendering performance.")
+            diagnosis["recommendations"].append(
+                "Many nodes detected. This might affect rendering performance."
+            )
 
         # Check for special characters
-        if re.search(r'[^\x00-\x7F]', mermaid_code):
-            diagnosis['recommendations'].append(
-                "Non-ASCII characters detected. Ensure proper encoding.")
+        if re.search(r"[^\x00-\x7F]", mermaid_code):
+            diagnosis["recommendations"].append(
+                "Non-ASCII characters detected. Ensure proper encoding."
+            )
 
         # Check server availability
-        if not diagnosis['server_status']['available']:
-            diagnosis['recommendations'].append(
-                "Server is not available. Check network connection or try fallback servers.")
+        if not diagnosis["server_status"]["available"]:
+            diagnosis["recommendations"].append(
+                "Server is not available. Check network connection or try fallback servers."
+            )
 
         return diagnosis
 
@@ -2173,7 +2324,7 @@ Original Mermaid Code:
 
                 if attempt < max_attempts - 1:
                     # Wait before retry with exponential backoff
-                    wait_time = (2 ** attempt) * self.backoff_factor
+                    wait_time = (2**attempt) * self.backoff_factor
                     self.logger.info(f"Waiting {wait_time:.1f}s before retry...")
                     time.sleep(wait_time)
 
@@ -2186,25 +2337,24 @@ Original Mermaid Code:
                 self.logger.error(f"Rendering error on attempt {attempt + 1}: {e}")
 
                 # For rendering errors, don't retry unless it's a timeout-related issue
-                if 'timeout' not in str(e).lower():
+                if "timeout" not in str(e).lower():
                     break
 
                 if attempt < max_attempts - 1:
-                    wait_time = (2 ** attempt) * self.backoff_factor
+                    wait_time = (2**attempt) * self.backoff_factor
                     self.logger.info(f"Waiting {wait_time:.1f}s before retry...")
                     time.sleep(wait_time)
 
         # If all attempts failed, provide diagnostic information
         diagnosis = self.diagnose_rendering_issues(mermaid_code)
         context = {
-            'attempts': max_attempts,
-            'diagnosis': diagnosis,
-            'last_error': str(last_error)
+            "attempts": max_attempts,
+            "diagnosis": diagnosis,
+            "last_error": str(last_error),
         }
 
         raise self.create_detailed_error(
-            RuntimeError(f"Rendering failed after {max_attempts} attempts"),
-            context
+            RuntimeError(f"Rendering failed after {max_attempts} attempts"), context
         ) from last_error
 
     def optimize_svg_content(self, svg_content: str) -> str:
@@ -2218,10 +2368,10 @@ Original Mermaid Code:
             Optimized SVG content
         """
         # Remove comments
-        svg_content = re.sub(r'<!--.*?-->', '', svg_content, flags=re.DOTALL)
+        svg_content = re.sub(r"<!--.*?-->", "", svg_content, flags=re.DOTALL)
 
         # Remove excessive whitespace between tags
-        svg_content = re.sub(r'>\s+<', '><', svg_content)
+        svg_content = re.sub(r">\s+<", "><", svg_content)
 
         # Remove leading/trailing whitespace
         svg_content = svg_content.strip()

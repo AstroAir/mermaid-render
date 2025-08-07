@@ -356,7 +356,7 @@ class LiveValidator:
                 start = line.find("[")
                 end = line.find("]", start)
                 if end > start:
-                    label = line[start + 1: end]
+                    label = line[start + 1 : end]
                     if len(label) > 30:
                         long_label_count += 1
 
@@ -398,7 +398,7 @@ class LiveValidator:
                 start = line.find("[")
                 end = line.find("]", start)
                 if end > start:
-                    label = line[start + 1: end]
+                    label = line[start + 1 : end]
                     if len(label.strip()) < 3:
                         short_label_count += 1
 

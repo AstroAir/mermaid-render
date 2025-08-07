@@ -202,7 +202,8 @@ class CommentSystem:
     def get_comments_for_element(self, element_id: str) -> List[Comment]:
         """Get all comments for a specific element."""
         return [
-            comment for comment in self.comments.values()
+            comment
+            for comment in self.comments.values()
             if comment.element_id == element_id
         ]
 

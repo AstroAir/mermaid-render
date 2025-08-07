@@ -23,7 +23,7 @@ class MermaidRenderError(Exception):
         message: str,
         error_code: Optional[str] = None,
         suggestions: Optional[List[str]] = None,
-        details: Optional[Dict[str, Any]] = None
+        details: Optional[Dict[str, Any]] = None,
     ) -> None:
         """
         Initialize the exception.
@@ -68,7 +68,7 @@ class MermaidRenderError(Exception):
             "message": self.message,
             "error_code": self.error_code,
             "suggestions": self.suggestions,
-            "details": self.details
+            "details": self.details,
         }
 
 
@@ -107,7 +107,7 @@ class ValidationError(MermaidRenderError):
         super().__init__(
             message,
             error_code=error_code or "VALIDATION_ERROR",
-            suggestions=all_suggestions
+            suggestions=all_suggestions,
         )
         self.errors = errors or []
         self.line_number = line_number
@@ -118,11 +118,17 @@ class ValidationError(MermaidRenderError):
 
         # Common validation error patterns and suggestions
         if "invalid diagram syntax" in message.lower():
-            suggestions.append("Check the diagram type declaration (e.g., 'flowchart TD', 'sequenceDiagram')")
+            suggestions.append(
+                "Check the diagram type declaration (e.g., 'flowchart TD', 'sequenceDiagram')"
+            )
             suggestions.append("Verify that all nodes and connections use valid syntax")
 
-        if "unmatched brackets" in message.lower() or any("bracket" in error.lower() for error in errors):
-            suggestions.append("Check that all brackets are properly closed: [], (), {}")
+        if "unmatched brackets" in message.lower() or any(
+            "bracket" in error.lower() for error in errors
+        ):
+            suggestions.append(
+                "Check that all brackets are properly closed: [], (), {}"
+            )
             suggestions.append("Ensure node labels are properly enclosed in brackets")
 
         if "no nodes found" in message.lower():
@@ -130,7 +136,9 @@ class ValidationError(MermaidRenderError):
             suggestions.append("Check that node definitions follow the correct syntax")
 
         if "unknown diagram type" in message.lower():
-            suggestions.append("Use a supported diagram type: flowchart, sequenceDiagram, classDiagram, etc.")
+            suggestions.append(
+                "Use a supported diagram type: flowchart, sequenceDiagram, classDiagram, etc."
+            )
             suggestions.append("Check the spelling of your diagram type declaration")
 
         return suggestions
@@ -164,6 +172,9 @@ class RenderingError(MermaidRenderError):
     - File I/O operations fail during rendering
     """
 
+    format: Optional[str]
+    status_code: Optional[int]
+
     def __init__(
         self,
         message: str,
@@ -196,12 +207,14 @@ class RenderingError(MermaidRenderError):
             message,
             error_code=error_code or "RENDERING_ERROR",
             suggestions=all_suggestions,
-            details=details
+            details=details,
         )
         self.format = format
         self.status_code = status_code
 
-    def _generate_suggestions(self, message: str, format: Optional[str], status_code: Optional[int]) -> List[str]:
+    def _generate_suggestions(
+        self, message: str, format: Optional[str], status_code: Optional[int]
+    ) -> List[str]:
         """Generate automatic suggestions based on error patterns."""
         suggestions = []
 
@@ -283,6 +296,9 @@ class UnsupportedFormatError(MermaidRenderError):
     - Format-specific features are not available
     """
 
+    requested_format: Optional[str]
+    supported_formats: List[str]
+
     def __init__(
         self,
         message: str,
@@ -302,10 +318,12 @@ class UnsupportedFormatError(MermaidRenderError):
             suggestions: List of suggested fixes
         """
         # Generate suggestions based on requested format
-        auto_suggestions = self._generate_suggestions(requested_format, supported_formats or [])
+        auto_suggestions = self._generate_suggestions(
+            requested_format, supported_formats or []
+        )
         all_suggestions = (suggestions or []) + auto_suggestions
 
-        details = {}
+        details: Dict[str, Any] = {}
         if requested_format:
             details["requested_format"] = requested_format
         if supported_formats:
@@ -315,24 +333,33 @@ class UnsupportedFormatError(MermaidRenderError):
             message,
             error_code=error_code or "UNSUPPORTED_FORMAT",
             suggestions=all_suggestions,
-            details=details
+            details=details,
         )
         self.requested_format = requested_format
         self.supported_formats = supported_formats or []
 
-    def _generate_suggestions(self, requested_format: Optional[str], supported_formats: List[str]) -> List[str]:
+    def _generate_suggestions(
+        self, requested_format: Optional[str], supported_formats: List[str]
+    ) -> List[str]:
         """Generate automatic suggestions based on requested format."""
         suggestions = []
 
         if requested_format and supported_formats:
-            suggestions.append(f"Use one of the supported formats: {', '.join(supported_formats)}")
+            suggestions.append(
+                f"Use one of the supported formats: {', '.join(supported_formats)}"
+            )
 
             # Suggest similar formats
-            if requested_format.lower() in ["jpg", "jpeg"] and "png" in supported_formats:
+            if (
+                requested_format.lower() in ["jpg", "jpeg"]
+                and "png" in supported_formats
+            ):
                 suggestions.append("Try 'png' format for raster images")
             elif requested_format.lower() == "html" and "svg" in supported_formats:
                 suggestions.append("Try 'svg' format which can be embedded in HTML")
-            elif requested_format.lower() in ["eps", "ps"] and "pdf" in supported_formats:
+            elif (
+                requested_format.lower() in ["eps", "ps"] and "pdf" in supported_formats
+            ):
                 suggestions.append("Try 'pdf' format for vector graphics")
 
         return suggestions
@@ -379,30 +406,40 @@ class DiagramError(MermaidRenderError):
             message,
             error_code=error_code or "DIAGRAM_ERROR",
             suggestions=all_suggestions,
-            details=details
+            details=details,
         )
         self.diagram_type = diagram_type
         self.operation = operation
 
-    def _generate_suggestions(self, message: str, diagram_type: Optional[str], operation: Optional[str]) -> List[str]:
+    def _generate_suggestions(
+        self, message: str, diagram_type: Optional[str], operation: Optional[str]
+    ) -> List[str]:
         """Generate automatic suggestions based on error context."""
         suggestions = []
 
         if "disposed" in message.lower():
-            suggestions.append("Create a new diagram instance instead of reusing a disposed one")
-            suggestions.append("Check that dispose() hasn't been called on this diagram")
+            suggestions.append(
+                "Create a new diagram instance instead of reusing a disposed one"
+            )
+            suggestions.append(
+                "Check that dispose() hasn't been called on this diagram"
+            )
 
         if operation == "add_node" and "duplicate" in message.lower():
             suggestions.append("Use unique node IDs for each node")
             suggestions.append("Check if the node already exists before adding")
 
         if operation == "add_edge" and "not found" in message.lower():
-            suggestions.append("Ensure both source and target nodes exist before adding edges")
+            suggestions.append(
+                "Ensure both source and target nodes exist before adding edges"
+            )
             suggestions.append("Check node ID spelling and case sensitivity")
 
         if diagram_type and "empty" in message.lower():
             suggestions.append(f"Add at least one element to your {diagram_type}")
-            suggestions.append("Check the diagram construction methods for your diagram type")
+            suggestions.append(
+                "Check the diagram construction methods for your diagram type"
+            )
 
         return suggestions
 
@@ -442,7 +479,7 @@ class ErrorAggregator:
             "error_count": len(self.errors),
             "warning_count": len(self.warnings),
             "errors": [error.to_dict() for error in self.errors],
-            "warnings": self.warnings
+            "warnings": self.warnings,
         }
 
     def raise_if_errors(self, message: str = "Multiple errors occurred") -> None:
@@ -455,8 +492,8 @@ class ErrorAggregator:
                 details={
                     "error_count": len(self.errors),
                     "errors": error_messages,
-                    "warnings": self.warnings
-                }
+                    "warnings": self.warnings,
+                },
             )
 
 
