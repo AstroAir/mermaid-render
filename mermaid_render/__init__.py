@@ -28,6 +28,7 @@ from .config import ConfigManager, ThemeManager
 
 # Core classes
 from .core import MermaidConfig, MermaidDiagram, MermaidRenderer, MermaidTheme
+from .enhanced_renderer import EnhancedMermaidRenderer
 from .exceptions import (
     CacheError,
     ConfigurationError,
@@ -163,6 +164,7 @@ __license__ = "MIT"
 __all__ = [
     # Core classes
     "MermaidRenderer",
+    "EnhancedMermaidRenderer",
     "MermaidDiagram",
     "MermaidTheme",
     "MermaidConfig",

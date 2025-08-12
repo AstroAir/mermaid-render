@@ -1,0 +1,300 @@
+"""
+Tests for the plugin-based renderer architecture.
+
+This module tests the base renderer interface, registry system,
+and renderer manager functionality.
+"""
+
+import pytest
+from unittest.mock import Mock, patch
+
+from mermaid_render.renderers.base import (
+    BaseRenderer,
+    RendererCapability,
+    RendererInfo,
+    RendererPriority,
+    RenderResult,
+    RendererError,
+)
+from mermaid_render.renderers.registry import RendererRegistry
+from mermaid_render.renderers.manager import RendererManager
+
+
+class MockRenderer(BaseRenderer):
+    """Mock renderer for testing."""
+    
+    def __init__(self, name="mock", formats=None, capabilities=None, **config):
+        super().__init__(**config)
+        self._name = name
+        self._formats = formats or {"svg"}
+        self._capabilities = capabilities or {RendererCapability.THEME_SUPPORT}
+        self._available = config.get("available", True)
+        self._should_fail = config.get("should_fail", False)
+    
+    def get_info(self) -> RendererInfo:
+        return RendererInfo(
+            name=self._name,
+            description=f"Mock renderer: {self._name}",
+            supported_formats=self._formats,
+            capabilities=self._capabilities,
+            priority=RendererPriority.NORMAL,
+        )
+    
+    def render(self, mermaid_code, format, theme=None, config=None, **options):
+        if self._should_fail:
+            raise RenderingError("Mock renderer failure")
+        
+        content = f"<svg>Mock {format} content for {self._name}</svg>"
+        if format != "svg":
+            content = content.encode()
+        
+        return RenderResult(
+            content=content,
+            format=format,
+            renderer_name=self._name,
+            render_time=0.1,
+            success=True,
+        )
+    
+    def is_available(self):
+        return self._available
+
+
+class TestBaseRenderer:
+    """Test the BaseRenderer abstract class."""
+    
+    def test_abstract_methods(self):
+        """Test that BaseRenderer cannot be instantiated directly."""
+        with pytest.raises(TypeError):
+            BaseRenderer()
+    
+    def test_mock_renderer_creation(self):
+        """Test creating a mock renderer."""
+        renderer = MockRenderer()
+        assert renderer.get_info().name == "mock"
+        assert "svg" in renderer.get_supported_formats()
+        assert renderer.has_capability(RendererCapability.THEME_SUPPORT)
+    
+    def test_supports_format(self):
+        """Test format support checking."""
+        renderer = MockRenderer(formats={"svg", "png"})
+        assert renderer.supports_format("svg")
+        assert renderer.supports_format("png")
+        assert not renderer.supports_format("pdf")
+    
+    def test_has_capability(self):
+        """Test capability checking."""
+        capabilities = {RendererCapability.CACHING, RendererCapability.VALIDATION}
+        renderer = MockRenderer(capabilities=capabilities)
+        assert renderer.has_capability(RendererCapability.CACHING)
+        assert renderer.has_capability(RendererCapability.VALIDATION)
+        assert not renderer.has_capability(RendererCapability.BATCH_PROCESSING)
+    
+    def test_context_manager(self):
+        """Test context manager functionality."""
+        with MockRenderer() as renderer:
+            assert isinstance(renderer, MockRenderer)
+
+
+class TestRendererRegistry:
+    """Test the RendererRegistry class."""
+    
+    def test_registry_creation(self):
+        """Test creating a registry."""
+        registry = RendererRegistry()
+        assert len(registry._renderers) == 0
+    
+    def test_register_renderer(self):
+        """Test registering a renderer."""
+        registry = RendererRegistry()
+        registry.register(MockRenderer, "test_mock")
+        
+        assert "test_mock" in registry._renderers
+        assert registry.get_renderer_class("test_mock") == MockRenderer
+    
+    def test_register_duplicate_error(self):
+        """Test error when registering duplicate renderer."""
+        registry = RendererRegistry()
+        registry.register(MockRenderer, "test_mock")
+        
+        with pytest.raises(ValueError, match="already registered"):
+            registry.register(MockRenderer, "test_mock")
+    
+    def test_register_with_override(self):
+        """Test registering with override."""
+        registry = RendererRegistry()
+        registry.register(MockRenderer, "test_mock")
+        
+        # Should not raise error with override=True
+        registry.register(MockRenderer, "test_mock", override=True)
+    
+    def test_unregister_renderer(self):
+        """Test unregistering a renderer."""
+        registry = RendererRegistry()
+        registry.register(MockRenderer, "test_mock")
+        
+        assert registry.unregister("test_mock")
+        assert "test_mock" not in registry._renderers
+        assert not registry.unregister("nonexistent")
+    
+    def test_list_renderers(self):
+        """Test listing renderers with filters."""
+        registry = RendererRegistry()
+        
+        # Register different renderers
+        registry.register(
+            MockRenderer,
+            "svg_only",
+            override=True,
+        )
+        
+        # Create a mock class for PNG renderer
+        class MockPNGRenderer(MockRenderer):
+            def __init__(self, **config):
+                super().__init__(name="png_only", formats={"png"}, **config)
+        
+        registry.register(MockPNGRenderer, "png_only")
+        
+        # Test listing all
+        all_renderers = registry.list_renderers()
+        assert "svg_only" in all_renderers
+        assert "png_only" in all_renderers
+        
+        # Test format filter
+        svg_renderers = registry.list_renderers(format_filter="svg")
+        assert "svg_only" in svg_renderers
+        assert "png_only" not in svg_renderers
+    
+    def test_get_best_renderer(self):
+        """Test getting the best renderer for a format."""
+        registry = RendererRegistry()
+        registry.register(MockRenderer, "test_renderer")
+        
+        best = registry.get_best_renderer("svg")
+        assert best == "test_renderer"
+        
+        # Test with unsupported format
+        best = registry.get_best_renderer("unsupported")
+        assert best is None
+    
+    def test_create_renderer(self):
+        """Test creating renderer instances."""
+        registry = RendererRegistry()
+        registry.register(MockRenderer, "test_renderer")
+        
+        renderer = registry.create_renderer("test_renderer")
+        assert isinstance(renderer, MockRenderer)
+        
+        # Test with nonexistent renderer
+        renderer = registry.create_renderer("nonexistent")
+        assert renderer is None
+
+
+class TestRendererManager:
+    """Test the RendererManager class."""
+    
+    def test_manager_creation(self):
+        """Test creating a renderer manager."""
+        registry = RendererRegistry()
+        manager = RendererManager(registry=registry)
+        assert manager.registry == registry
+    
+    def test_render_success(self):
+        """Test successful rendering."""
+        registry = RendererRegistry()
+        registry.register(MockRenderer, "test_renderer")
+        
+        manager = RendererManager(registry=registry)
+        
+        result = manager.render(
+            mermaid_code="graph TD\n    A --> B",
+            format="svg",
+        )
+        
+        assert result.success
+        assert result.format == "svg"
+        assert result.renderer_name == "test_renderer"
+        assert "Mock svg content" in result.content
+    
+    def test_render_fallback(self):
+        """Test fallback rendering."""
+        registry = RendererRegistry()
+        
+        # Register failing renderer with higher priority
+        class FailingRenderer(MockRenderer):
+            def __init__(self, **config):
+                super().__init__(name="failing", should_fail=True, **config)
+            
+            def get_info(self):
+                info = super().get_info()
+                info.priority = RendererPriority.HIGHEST
+                return info
+        
+        registry.register(FailingRenderer, "failing")
+        registry.register(MockRenderer, "working")
+        
+        manager = RendererManager(registry=registry)
+        
+        result = manager.render(
+            mermaid_code="graph TD\n    A --> B",
+            format="svg",
+        )
+        
+        assert result.success
+        assert result.renderer_name == "working"
+    
+    def test_render_all_fail(self):
+        """Test when all renderers fail."""
+        registry = RendererRegistry()
+        registry.register(
+            MockRenderer,
+            "failing",
+            override=True,
+        )
+        
+        # Make the mock renderer fail
+        with patch.object(MockRenderer, 'render', side_effect=RenderingError("Test failure")):
+            manager = RendererManager(registry=registry)
+            
+            with pytest.raises(RenderingError, match="All renderers failed"):
+                manager.render(
+                    mermaid_code="graph TD\n    A --> B",
+                    format="svg",
+                )
+    
+    def test_unsupported_format(self):
+        """Test unsupported format error."""
+        registry = RendererRegistry()
+        registry.register(MockRenderer, "svg_only")  # Only supports SVG
+        
+        manager = RendererManager(registry=registry)
+        
+        with pytest.raises(UnsupportedFormatError):
+            manager.render(
+                mermaid_code="graph TD\n    A --> B",
+                format="unsupported",
+            )
+    
+    def test_get_available_formats(self):
+        """Test getting available formats."""
+        registry = RendererRegistry()
+        registry.register(MockRenderer, "svg_renderer")
+        
+        class MockPNGRenderer(MockRenderer):
+            def __init__(self, **config):
+                super().__init__(name="png", formats={"png"}, **config)
+        
+        registry.register(MockPNGRenderer, "png_renderer")
+        
+        manager = RendererManager(registry=registry)
+        formats = manager.get_available_formats()
+        
+        assert "svg" in formats
+        assert "png" in formats
+    
+    def test_context_manager(self):
+        """Test context manager functionality."""
+        registry = RendererRegistry()
+        
+        with RendererManager(registry=registry) as manager:
+            assert isinstance(manager, RendererManager)

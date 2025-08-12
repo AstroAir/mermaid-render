@@ -591,6 +591,8 @@ class MermaidRenderer:
         self,
         config: Optional[MermaidConfig] = None,
         theme: Optional[Union[str, MermaidTheme]] = None,
+        use_plugin_system: bool = False,
+        preferred_renderer: Optional[str] = None,
     ) -> None:
         """
         Initialize the renderer.
@@ -600,31 +602,47 @@ class MermaidRenderer:
                 configuration will be used
             theme: Optional theme name (string) or MermaidTheme object. Available
                 built-in themes: "default", "dark", "forest", "neutral", "base"
+            use_plugin_system: Whether to use the new plugin-based rendering system
+            preferred_renderer: Preferred renderer name when using plugin system
 
         Example:
-            >>> # Default renderer
+            >>> # Default renderer (legacy mode)
             >>> renderer = MermaidRenderer()
             >>>
-            >>> # With custom config
-            >>> config = MermaidConfig(timeout=45, cache_enabled=True)
-            >>> renderer = MermaidRenderer(config=config)
+            >>> # With plugin system enabled
+            >>> renderer = MermaidRenderer(use_plugin_system=True)
             >>>
-            >>> # With theme
-            >>> renderer = MermaidRenderer(theme="dark")
-            >>>
-            >>> # With both config and theme
-            >>> renderer = MermaidRenderer(config=config, theme="forest")
+            >>> # With specific renderer preference
+            >>> renderer = MermaidRenderer(
+            ...     use_plugin_system=True,
+            ...     preferred_renderer="playwright"
+            ... )
         """
         self.config = config or MermaidConfig()
         self._theme: Optional[MermaidTheme] = None
+        self.use_plugin_system = use_plugin_system
+        self.preferred_renderer = preferred_renderer
 
-        # Initialize format-specific renderers
-        self._svg_renderer = SVGRenderer()
-        self._png_renderer = PNGRenderer(
-            server_url=self.config.get("server_url", "https://mermaid.ink"),
-            timeout=self.config.get("timeout", 30.0),
-        )
-        self._pdf_renderer = PDFRenderer()
+        if use_plugin_system:
+            # Initialize plugin-based renderer manager
+            from .renderers import RendererManager
+            self._renderer_manager: Optional[RendererManager] = RendererManager(
+                default_fallback_enabled=self.config.get("fallback_enabled", True),
+                max_fallback_attempts=self.config.get("max_fallback_attempts", 3),
+            )
+            # Legacy renderers not initialized in plugin mode
+            self._svg_renderer: Optional[SVGRenderer] = None
+            self._png_renderer: Optional[PNGRenderer] = None
+            self._pdf_renderer: Optional[PDFRenderer] = None
+        else:
+            # Initialize legacy format-specific renderers
+            self._svg_renderer = SVGRenderer()
+            self._png_renderer = PNGRenderer(
+                server_url=self.config.get("server_url", "https://mermaid.ink"),
+                timeout=self.config.get("timeout", 30.0),
+            )
+            self._pdf_renderer = PDFRenderer()
+            self._renderer_manager = None
 
         if theme:
             self.set_theme(theme)
@@ -743,34 +761,53 @@ class MermaidRenderer:
                 if self._theme.name == "custom":
                     options.update(self._theme.to_dict())
 
-            if format == "svg":
-                # Use SVG renderer
-                return self._svg_renderer.render(
-                    mermaid_code, theme=theme_name, config=options
-                )
-            elif format == "png":
-                # Use PNG renderer
-                return self._png_renderer.render(
-                    mermaid_code,
+            if self.use_plugin_system and self._renderer_manager:
+                # Use plugin-based rendering system
+                result = self._renderer_manager.render(
+                    mermaid_code=mermaid_code,
+                    format=format,
                     theme=theme_name,
                     config=options,
-                    width=options.get("width"),
-                    height=options.get("height"),
+                    preferred_renderer=self.preferred_renderer,
                 )
-            elif format == "pdf":
-                # Use PDF renderer - first get SVG, then convert
-                # Disable validation for PDF conversion to avoid XML parsing issues
-                svg_content = self._svg_renderer.render(
-                    mermaid_code,
-                    theme=theme_name,
-                    config=options,
-                    validate=False,
-                    sanitize=False,
-                )
-                # PDF renderer expects SVG content, not mermaid code
-                return self._pdf_renderer.render_from_svg(svg_content)
+
+                if not result.success:
+                    raise RenderingError(result.error or "Rendering failed")
+
+                return result.content
             else:
-                raise UnsupportedFormatError(f"Unsupported format: {format}")
+                # Use legacy rendering system
+                if self._svg_renderer is None or self._png_renderer is None or self._pdf_renderer is None:
+                    raise RenderingError("Legacy renderers not initialized")
+
+                if format == "svg":
+                    # Use SVG renderer
+                    return self._svg_renderer.render(
+                        mermaid_code, theme=theme_name, config=options
+                    )
+                elif format == "png":
+                    # Use PNG renderer
+                    return self._png_renderer.render(
+                        mermaid_code,
+                        theme=theme_name,
+                        config=options,
+                        width=options.get("width"),
+                        height=options.get("height"),
+                    )
+                elif format == "pdf":
+                    # Use PDF renderer - first get SVG, then convert
+                    # Disable validation for PDF conversion to avoid XML parsing issues
+                    svg_content = self._svg_renderer.render(
+                        mermaid_code,
+                        theme=theme_name,
+                        config=options,
+                        validate=False,
+                        sanitize=False,
+                    )
+                    # PDF renderer expects SVG content, not mermaid code
+                    return self._pdf_renderer.render_from_svg(svg_content)
+                else:
+                    raise UnsupportedFormatError(f"Unsupported format: {format}")
 
         except Exception as e:
             raise RenderingError(f"Failed to render diagram: {str(e)}") from e
@@ -819,3 +856,76 @@ class MermaidRenderer:
                     f.write(content.encode())
                 else:
                     f.write(content)
+
+    def get_available_renderers(self) -> List[str]:
+        """
+        Get list of available renderers (plugin system only).
+
+        Returns:
+            List of available renderer names
+
+        Raises:
+            RuntimeError: If plugin system is not enabled
+        """
+        if not self.use_plugin_system or self._renderer_manager is None:
+            raise RuntimeError("Plugin system not enabled. Set use_plugin_system=True")
+
+        return self._renderer_manager.registry.list_renderers(available_only=True)
+
+    def get_renderer_status(self) -> Dict[str, Any]:
+        """
+        Get status of all renderers (plugin system only).
+
+        Returns:
+            Dictionary with renderer status information
+
+        Raises:
+            RuntimeError: If plugin system is not enabled
+        """
+        if not self.use_plugin_system or self._renderer_manager is None:
+            raise RuntimeError("Plugin system not enabled. Set use_plugin_system=True")
+
+        return self._renderer_manager.get_renderer_status()
+
+    def test_renderer(self, renderer_name: str) -> Dict[str, Any]:
+        """
+        Test a specific renderer (plugin system only).
+
+        Args:
+            renderer_name: Name of renderer to test
+
+        Returns:
+            Test results dictionary
+
+        Raises:
+            RuntimeError: If plugin system is not enabled
+        """
+        if not self.use_plugin_system or self._renderer_manager is None:
+            raise RuntimeError("Plugin system not enabled. Set use_plugin_system=True")
+
+        test_diagram = "graph TD\n    A --> B"
+
+        try:
+            result = self._renderer_manager.render(
+                mermaid_code=test_diagram,
+                format="svg",
+                preferred_renderer=renderer_name,
+                fallback_enabled=False,
+            )
+
+            return {
+                "renderer": renderer_name,
+                "success": result.success,
+                "render_time": result.render_time,
+                "content_size": len(result.content),
+                "error": result.error,
+            }
+
+        except Exception as e:
+            return {
+                "renderer": renderer_name,
+                "success": False,
+                "render_time": 0.0,
+                "content_size": 0,
+                "error": str(e),
+            }

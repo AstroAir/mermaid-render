@@ -135,8 +135,12 @@ performance = [
     "cython>=3.0.0",  # Performance optimizations
     "numba>=0.58.0",  # JIT compilation
 ]
+renderers = [
+    "playwright>=1.40.0",  # Playwright renderer for high-fidelity rendering
+    "graphviz>=0.20.0",  # Graphviz renderer for alternative diagram rendering
+]
 all = [
-    "mermaid-render[cache,interactive,ai,collaboration,docs,pdf,performance]"
+    "mermaid-render[cache,interactive,ai,collaboration,docs,pdf,performance,renderers]"
 ]
 
 [project.urls]
