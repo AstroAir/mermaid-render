@@ -46,7 +46,7 @@ provider_configs = [
         "config": {"api_key": "openai-key", "model": "gpt-4"}
     },
     {
-        "type": "anthropic", 
+        "type": "anthropic",
         "config": {"api_key": "anthropic-key", "model": "claude-3-sonnet"}
     },
     {
@@ -158,7 +158,7 @@ from mermaid_render.ai import batch_generate_diagrams
 
 texts = [
     "Create a flowchart for user registration",
-    "Design a sequence diagram for payment processing", 
+    "Design a sequence diagram for payment processing",
     "Generate a class diagram for user management"
 ]
 
@@ -224,7 +224,7 @@ Set up providers using environment variables:
 
 ```bash
 export OPENAI_API_KEY="your-openai-key"
-export ANTHROPIC_API_KEY="your-anthropic-key"  
+export ANTHROPIC_API_KEY="your-anthropic-key"
 export OPENROUTER_API_KEY="your-openrouter-key"
 ```
 
@@ -243,7 +243,7 @@ export OPENROUTER_API_KEY="your-openrouter-key"
       }
     },
     {
-      "type": "openrouter", 
+      "type": "openrouter",
       "config": {
         "api_key": "${OPENROUTER_API_KEY}",
         "model": "anthropic/claude-3-opus",
@@ -265,7 +265,7 @@ providers:
       api_key: ${ANTHROPIC_API_KEY}
       model: claude-3-5-sonnet-20241022
       timeout: 45
-      
+
   - type: custom
     config:
       name: my-api
@@ -281,9 +281,9 @@ The enhanced AI module provides comprehensive error handling:
 
 ```python
 from mermaid_render.ai import (
-    ProviderError, 
-    AuthenticationError, 
-    RateLimitError, 
+    ProviderError,
+    AuthenticationError,
+    RateLimitError,
     ModelNotFoundError
 )
 
@@ -324,7 +324,7 @@ from mermaid_render.ai import OpenAIProvider, ProviderConfig
 # New features
 from mermaid_render.ai import (
     OpenRouterProvider,
-    CustomProvider, 
+    CustomProvider,
     ProviderManager,
     create_openrouter_provider
 )

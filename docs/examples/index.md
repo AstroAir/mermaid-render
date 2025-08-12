@@ -178,6 +178,7 @@ output/                                     # Generated files
 ### Quick Start Guide
 
 1. **Choose Your Starting Point**:
+
    - New to the library? Start with [Basic Usage Examples](../../examples/basic_usage.py)
    - Need specific diagram types? Check [Diagram Types Showcase](../../examples/diagram_types_showcase.py)
    - Building an application? See [Integration Examples](../../examples/integration_examples.py)

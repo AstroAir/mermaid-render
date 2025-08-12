@@ -338,18 +338,67 @@ class SequenceDiagram(MermaidDiagram):
         deactivate: bool = False,
     ) -> SequenceMessage:
         """
-        Add a message between participants.
+        Add a message between participants in the sequence diagram.
+
+        Creates a message interaction between two participants, representing
+        communication, method calls, or other interactions in a sequence.
 
         Args:
-            from_participant: Source participant ID
-            to_participant: Target participant ID
-            message: Message text
-            message_type: Type of message
-            activate: Whether to activate target participant
-            deactivate: Whether to deactivate target participant
+            from_participant (str): Source participant identifier. Must be an
+                existing participant in the diagram.
+            to_participant (str): Target participant identifier. Must be an
+                existing participant in the diagram.
+            message (str): Message text to display on the arrow. Should describe
+                the interaction or method call being made.
+            message_type (str, optional): Type of message arrow. Supported types:
+                - "sync": Synchronous call with solid arrow (->>)
+                - "async": Asynchronous call with open arrow (->)
+                - "return": Return message with dashed arrow (-->>)
+                - "callback": Callback with dotted arrow (-.)
+                Defaults to "sync".
+            activate (bool, optional): Whether to activate (highlight) the target
+                participant after this message. Used to show when a participant
+                becomes active in processing. Defaults to False.
+            deactivate (bool, optional): Whether to deactivate the target
+                participant after this message. Used to show when processing
+                ends. Defaults to False.
 
         Returns:
-            The created SequenceMessage
+            SequenceMessage: The created message object representing the
+            interaction between participants.
+
+        Raises:
+            DiagramError: If either participant doesn't exist in the diagram.
+
+        Examples:
+            Basic message:
+            >>> seq = SequenceDiagram()
+            >>> seq.add_participant("client", "Client")
+            >>> seq.add_participant("server", "Server")
+            >>> seq.add_message("client", "server", "Login request")
+
+            Different message types:
+            >>> seq.add_message("client", "server", "getData()", "sync")
+            >>> seq.add_message("server", "client", "data", "return")
+            >>> seq.add_message("client", "server", "updateAsync()", "async")
+
+            With activation:
+            >>> seq.add_message("client", "server", "process()", activate=True)
+            >>> seq.add_message("server", "client", "result", deactivate=True)
+
+            Complete API interaction:
+            >>> api_flow = SequenceDiagram(title="User Authentication")
+            >>> api_flow.add_participant("user", "User")
+            >>> api_flow.add_participant("app", "Mobile App")
+            >>> api_flow.add_participant("auth", "Auth Service")
+            >>> api_flow.add_participant("db", "Database")
+            >>>
+            >>> api_flow.add_message("user", "app", "Enter credentials")
+            >>> api_flow.add_message("app", "auth", "authenticate(user, pass)", activate=True)
+            >>> api_flow.add_message("auth", "db", "validateUser(user)")
+            >>> api_flow.add_message("db", "auth", "user_data", "return")
+            >>> api_flow.add_message("auth", "app", "auth_token", "return", deactivate=True)
+            >>> api_flow.add_message("app", "user", "Login successful")
         """
         # Auto-create participants if they don't exist
         if from_participant not in self.participants:

@@ -335,14 +335,63 @@ class FlowchartDiagram(MermaidDiagram):
         """
         Add a node to the flowchart.
 
+        Creates a new node with the specified properties and adds it to the flowchart.
+        Each node must have a unique identifier within the diagram.
+
         Args:
-            id: Unique node identifier
-            label: Node display text
-            shape: Node shape
-            style: Optional styling
+            id (str): Unique node identifier. Must be unique within the flowchart.
+                Should follow Mermaid naming conventions (alphanumeric, underscores).
+            label (str): Node display text that will be shown in the rendered diagram.
+                Can contain spaces and special characters.
+            shape (str, optional): Node shape type. Supported shapes include:
+                - "rectangle": Standard rectangular node (default)
+                - "circle": Circular node
+                - "diamond": Diamond-shaped decision node
+                - "rounded": Rounded rectangle
+                - "stadium": Stadium-shaped node
+                - "subroutine": Subroutine node with side lines
+                - "cylindrical": Database/storage node
+                - "hexagon": Hexagonal node
+                Defaults to "rectangle".
+            style (Optional[Dict[str, str]], optional): CSS-style properties for
+                custom node styling. Can include properties like:
+                - "fill": Background color
+                - "stroke": Border color
+                - "stroke-width": Border width
+                - "color": Text color
+                Defaults to None (uses theme defaults).
 
         Returns:
-            The created FlowchartNode
+            FlowchartNode: The created node object, which can be used for further
+            customization or reference.
+
+        Raises:
+            DiagramError: If a node with the same ID already exists in the flowchart.
+
+        Examples:
+            Basic node creation:
+            >>> flowchart = FlowchartDiagram()
+            >>> start_node = flowchart.add_node("start", "Start Process")
+            >>> print(start_node.id)
+            start
+
+            Different node shapes:
+            >>> flowchart.add_node("decision", "Is Valid?", shape="diamond")
+            >>> flowchart.add_node("process", "Process Data", shape="rectangle")
+            >>> flowchart.add_node("end", "End", shape="circle")
+
+            Custom styling:
+            >>> style = {"fill": "#ff6b6b", "stroke": "#000", "color": "#fff"}
+            >>> error_node = flowchart.add_node("error", "Error!", style=style)
+
+            Building a complete workflow:
+            >>> workflow = FlowchartDiagram(title="User Registration")
+            >>> workflow.add_node("start", "User Submits Form", shape="circle")
+            >>> workflow.add_node("validate", "Validate Input", shape="rectangle")
+            >>> workflow.add_node("check", "Valid Data?", shape="diamond")
+            >>> workflow.add_node("save", "Save User", shape="rectangle")
+            >>> workflow.add_node("error", "Show Error", shape="rectangle")
+            >>> workflow.add_node("end", "Registration Complete", shape="circle")
         """
         if id in self.nodes:
             raise DiagramError(f"Node with ID '{id}' already exists")
@@ -360,17 +409,77 @@ class FlowchartDiagram(MermaidDiagram):
         style: Optional[Dict[str, str]] = None,
     ) -> FlowchartEdge:
         """
-        Add an edge between two nodes.
+        Add an edge (connection) between two nodes in the flowchart.
+
+        Creates a directed connection from one node to another, optionally with
+        a label and custom styling. Both nodes must already exist in the flowchart.
 
         Args:
-            from_node: Source node ID
-            to_node: Target node ID
-            label: Optional edge label
-            arrow_type: Type of arrow/connection
-            style: Optional styling
+            from_node (str): Source node identifier. Must be an existing node ID
+                in the flowchart.
+            to_node (str): Target node identifier. Must be an existing node ID
+                in the flowchart.
+            label (Optional[str], optional): Text label to display on the edge.
+                Useful for decision branches or process descriptions.
+                Defaults to None (no label).
+            arrow_type (str, optional): Type of arrow/connection. Supported types:
+                - "arrow": Standard arrow (-->)
+                - "open": Open arrow (---)
+                - "dotted": Dotted line (-.-.)
+                - "thick": Thick arrow (==>)
+                Defaults to "arrow".
+            style (Optional[Dict[str, str]], optional): CSS-style properties for
+                custom edge styling. Can include properties like:
+                - "stroke": Line color
+                - "stroke-width": Line thickness
+                - "stroke-dasharray": Dash pattern
+                Defaults to None (uses theme defaults).
 
         Returns:
-            The created FlowchartEdge
+            FlowchartEdge: The created edge object representing the connection
+            between the two nodes.
+
+        Raises:
+            DiagramError: If either the source or target node doesn't exist
+                in the flowchart.
+
+        Examples:
+            Basic edge creation:
+            >>> flowchart = FlowchartDiagram()
+            >>> flowchart.add_node("A", "Start")
+            >>> flowchart.add_node("B", "End")
+            >>> edge = flowchart.add_edge("A", "B")
+
+            Edge with label:
+            >>> flowchart.add_node("decision", "Valid?", shape="diamond")
+            >>> flowchart.add_node("success", "Process")
+            >>> flowchart.add_node("error", "Error")
+            >>> flowchart.add_edge("decision", "success", label="Yes")
+            >>> flowchart.add_edge("decision", "error", label="No")
+
+            Different arrow types:
+            >>> flowchart.add_edge("A", "B", arrow_type="dotted")
+            >>> flowchart.add_edge("B", "C", arrow_type="thick")
+
+            Custom styling:
+            >>> style = {"stroke": "#ff0000", "stroke-width": "3px"}
+            >>> flowchart.add_edge("error", "retry", label="Retry", style=style)
+
+            Building a complete flow:
+            >>> workflow = FlowchartDiagram(title="Order Processing")
+            >>> workflow.add_node("start", "Order Received", shape="circle")
+            >>> workflow.add_node("validate", "Validate Order")
+            >>> workflow.add_node("check", "Stock Available?", shape="diamond")
+            >>> workflow.add_node("fulfill", "Fulfill Order")
+            >>> workflow.add_node("backorder", "Create Backorder")
+            >>> workflow.add_node("end", "Complete", shape="circle")
+            >>>
+            >>> workflow.add_edge("start", "validate")
+            >>> workflow.add_edge("validate", "check")
+            >>> workflow.add_edge("check", "fulfill", label="Yes")
+            >>> workflow.add_edge("check", "backorder", label="No")
+            >>> workflow.add_edge("fulfill", "end")
+            >>> workflow.add_edge("backorder", "end")
         """
         if from_node not in self.nodes:
             raise DiagramError(f"Source node '{from_node}' does not exist")

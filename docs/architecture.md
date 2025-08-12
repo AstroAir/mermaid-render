@@ -13,13 +13,13 @@ graph TB
         API[Python API]
         Interactive[Interactive Web UI]
     end
-    
+
     subgraph "Core Layer"
         Renderer[MermaidRenderer]
         Config[Configuration]
         Themes[Theme Management]
     end
-    
+
     subgraph "Model Layer"
         Flowchart[FlowchartDiagram]
         Sequence[SequenceDiagram]
@@ -27,39 +27,39 @@ graph TB
         State[StateDiagram]
         Other[Other Diagrams...]
     end
-    
+
     subgraph "Service Layer"
         Validation[Validation Service]
         Export[Export Service]
         Cache[Cache Service]
         AI[AI Service]
     end
-    
+
     subgraph "Infrastructure Layer"
         Renderers[Format Renderers]
         Storage[Storage Backends]
         Providers[AI Providers]
         External[External Services]
     end
-    
+
     CLI --> Renderer
     API --> Renderer
     Interactive --> Renderer
-    
+
     Renderer --> Config
     Renderer --> Themes
     Renderer --> Validation
-    
+
     Renderer --> Flowchart
     Renderer --> Sequence
     Renderer --> Class
     Renderer --> State
     Renderer --> Other
-    
+
     Validation --> Export
     Export --> Cache
     Cache --> AI
-    
+
     Export --> Renderers
     Cache --> Storage
     AI --> Providers
@@ -215,15 +215,15 @@ sequenceDiagram
     participant Cache
     participant FormatRenderer
     participant Output
-    
+
     User->>Renderer: render(diagram, format)
     Renderer->>Validator: validate(diagram)
     Validator-->>Renderer: validation_result
-    
+
     alt validation passes
         Renderer->>Model: to_mermaid()
         Model-->>Renderer: mermaid_syntax
-        
+
         Renderer->>Cache: check_cache(syntax, format)
         alt cache hit
             Cache-->>Renderer: cached_result
@@ -232,7 +232,7 @@ sequenceDiagram
             FormatRenderer-->>Renderer: rendered_content
             Renderer->>Cache: store(syntax, format, content)
         end
-        
+
         Renderer->>Output: write(content)
         Output-->>User: success
     else validation fails
@@ -248,7 +248,7 @@ graph LR
     Env --> Files[Config Files]
     Files --> Runtime[Runtime Parameters]
     Runtime --> Final[Final Configuration]
-    
+
     subgraph "Precedence"
         direction TB
         Low[Low Priority] --> High[High Priority]
@@ -270,7 +270,7 @@ To add a new diagram type:
 class CustomDiagram(MermaidDiagram):
     def get_diagram_type(self) -> str:
         return "custom"
-    
+
     def to_mermaid(self) -> str:
         # Generate Mermaid syntax
         pass

@@ -294,7 +294,7 @@ app = Flask(__name__)
 def render_diagram():
     diagram_code = request.json.get('diagram')
     format = request.json.get('format', 'svg')
-    
+
     try:
         result = quick_render(diagram_code, format=format)
         return jsonify({'success': True, 'content': result})
@@ -308,13 +308,13 @@ def render_diagram():
 def generate_architecture_docs(components):
     """Generate architecture diagrams for documentation."""
     flowchart = FlowchartDiagram(title="System Architecture")
-    
+
     for component in components:
         flowchart.add_node(component.id, component.name)
-    
+
     for connection in get_connections(components):
         flowchart.add_edge(connection.from_id, connection.to_id)
-    
+
     renderer = MermaidRenderer(theme="neutral")
     renderer.save(flowchart, "docs/architecture.svg")
 ```
