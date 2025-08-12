@@ -35,6 +35,12 @@ from .playwright_renderer import PlaywrightRenderer
 from .nodejs_renderer import NodeJSRenderer
 from .graphviz_renderer import GraphvizRenderer
 
+# Enhanced architecture components
+from .error_handler import ErrorHandler, ErrorContext, ErrorDetails, get_global_error_handler
+from .validation import InputValidator, ValidationResult, get_global_validator
+from .config_manager import RendererConfigManager, get_global_config_manager
+from .logging_config import setup_logging, PerformanceLogger, LoggingContext
+
 __all__ = [
     # Original renderers
     "SVGRenderer",
@@ -61,4 +67,17 @@ __all__ = [
     "PlaywrightRenderer",
     "NodeJSRenderer",
     "GraphvizRenderer",
+    # Enhanced architecture components
+    "ErrorHandler",
+    "ErrorContext",
+    "ErrorDetails",
+    "get_global_error_handler",
+    "InputValidator",
+    "ValidationResult",
+    "get_global_validator",
+    "RendererConfigManager",
+    "get_global_config_manager",
+    "setup_logging",
+    "PerformanceLogger",
+    "LoggingContext",
 ]

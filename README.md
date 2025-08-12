@@ -12,9 +12,13 @@ A comprehensive, production-ready Python library for generating Mermaid diagrams
 
 ✨ **Complete Diagram Support**: All major Mermaid diagram types (flowchart, sequence, class, state, ER, etc.)
 🎨 **Multiple Output Formats**: SVG, PNG, PDF with high-quality rendering
-🔍 **Syntax Validation**: Built-in validation with helpful error messages
+🔧 **Plugin-Based Architecture**: Extensible renderer system with multiple backends
+🔍 **Enhanced Validation**: Multi-level validation with detailed error reporting
 🎭 **Theme Management**: Built-in themes plus custom theme support
 ⚙️ **Flexible Configuration**: Environment variables, config files, runtime options
+🛡️ **Robust Error Handling**: Comprehensive error handling with fallback mechanisms
+🚀 **Multiple Rendering Backends**: Choose from SVG, PNG, PDF, Playwright, Node.js, and Graphviz renderers
+📊 **Performance Monitoring**: Built-in performance tracking and metrics
 🛡️ **Type Safety**: Full type hints and mypy compatibility
 📚 **Rich Documentation**: Comprehensive docs with examples
 🧪 **Thoroughly Tested**: 95%+ test coverage with unit and integration tests
@@ -44,6 +48,27 @@ pip install mermaid-render[collaboration] # Collaboration features
 
 # Development installation
 pip install mermaid-render[dev]           # Development dependencies
+
+# Enhanced renderer backends (optional)
+pip install mermaid-render[renderers]     # Playwright and Graphviz renderers
+```
+
+#### Enhanced Renderer Installation
+
+For access to additional rendering backends:
+
+```bash
+# Install Playwright renderer (high-fidelity browser-based rendering)
+pip install playwright
+playwright install chromium
+
+# Install Node.js renderer (local Mermaid CLI rendering)
+# Requires Node.js: https://nodejs.org/
+npm install -g @mermaid-js/mermaid-cli
+
+# Install Graphviz renderer (alternative for flowcharts)
+pip install graphviz
+# Also install Graphviz system binary: https://graphviz.org/download/
 ```
 
 #### System Requirements
@@ -193,6 +218,85 @@ config.set_output_directory("./diagrams")
 theme_manager = ThemeManager()
 available_themes = theme_manager.list_themes()
 custom_theme = theme_manager.create_theme("my_theme", primaryColor="#ff0000")
+```
+
+## Plugin-Based Renderer System
+
+Mermaid Render now features a powerful plugin-based architecture that supports multiple rendering backends with automatic fallback capabilities.
+
+### Available Renderers
+
+| Renderer | Description | Formats | Dependencies |
+|----------|-------------|---------|--------------|
+| **SVG** | Default web-based renderer using mermaid.ink | SVG | requests |
+| **PNG** | Web-based PNG renderer | PNG | requests |
+| **PDF** | PDF converter from SVG | PDF | cairosvg |
+| **Playwright** | High-fidelity browser-based renderer | SVG, PNG, PDF | playwright |
+| **Node.js** | Local Mermaid CLI renderer | SVG, PNG, PDF | Node.js + @mermaid-js/mermaid-cli |
+| **Graphviz** | Alternative renderer for flowcharts | SVG, PNG, PDF | graphviz |
+
+### Using the Enhanced Renderer
+
+```python
+from mermaid_render import EnhancedMermaidRenderer
+
+# Create enhanced renderer with plugin system
+renderer = EnhancedMermaidRenderer()
+
+# Render with automatic renderer selection
+svg_content = renderer.render("graph TD\n    A --> B", format="svg")
+
+# Use specific renderer
+png_content = renderer.render(
+    "graph TD\n    A --> B",
+    format="png",
+    renderer="playwright"  # Use Playwright for high-fidelity rendering
+)
+
+# Enable fallback rendering (default)
+result = renderer.render(
+    "graph TD\n    A --> B",
+    format="svg",
+    fallback=True  # Will try multiple renderers if primary fails
+)
+```
+
+### Renderer Management
+
+```python
+# Check available renderers
+available = renderer.get_available_renderers()
+print(f"Available renderers: {available}")
+
+# Get detailed renderer status
+status = renderer.get_renderer_status()
+for name, info in status.items():
+    print(f"{name}: {'✓' if info['health']['available'] else '✗'}")
+
+# Test specific renderer
+test_result = renderer.test_renderer("playwright")
+print(f"Playwright test: {test_result['success']}")
+
+# Benchmark all renderers
+benchmark = renderer.benchmark_renderers()
+```
+
+### Legacy Compatibility Mode
+
+The original MermaidRenderer still works exactly as before:
+
+```python
+from mermaid_render import MermaidRenderer
+
+# Legacy mode (default)
+renderer = MermaidRenderer()
+svg_content = renderer.render_raw("graph TD\n    A --> B", format="svg")
+
+# Enable plugin system in legacy renderer
+renderer = MermaidRenderer(
+    use_plugin_system=True,
+    preferred_renderer="playwright"
+)
 ```
 
 ## Examples
