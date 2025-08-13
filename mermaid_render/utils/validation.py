@@ -1,12 +1,17 @@
 """
 Validation utilities for the Mermaid Render library.
 
-This module provides convenient validation functions.
+This module provides convenient validation functions that wrap the main
+MermaidValidator class for common validation tasks. These are lightweight
+convenience functions that delegate to the main validator implementation.
 """
 
 from typing import List
 
 from ..validators import MermaidValidator, ValidationResult
+
+# Create a shared validator instance for efficiency
+_shared_validator = MermaidValidator()
 
 
 def validate_mermaid_syntax(mermaid_code: str) -> ValidationResult:
@@ -33,8 +38,7 @@ def validate_mermaid_syntax(mermaid_code: str) -> ValidationResult:
         >>> else:
         ...     print(f"Errors: {result.errors}")
     """
-    validator = MermaidValidator()
-    return validator.validate(mermaid_code)
+    return _shared_validator.validate(mermaid_code)
 
 
 def quick_validate(mermaid_code: str) -> bool:
@@ -51,8 +55,7 @@ def quick_validate(mermaid_code: str) -> bool:
         >>> if quick_validate(my_diagram_code):
         ...     render_diagram(my_diagram_code)
     """
-    result = validate_mermaid_syntax(mermaid_code)
-    return result.is_valid
+    return _shared_validator.validate(mermaid_code).is_valid
 
 
 def get_validation_errors(mermaid_code: str) -> List[str]:
@@ -70,8 +73,7 @@ def get_validation_errors(mermaid_code: str) -> List[str]:
         >>> for error in errors:
         ...     print(f"Error: {error}")
     """
-    result = validate_mermaid_syntax(mermaid_code)
-    return result.errors
+    return _shared_validator.validate(mermaid_code).errors
 
 
 def get_validation_warnings(mermaid_code: str) -> List[str]:
@@ -91,8 +93,7 @@ def get_validation_warnings(mermaid_code: str) -> List[str]:
         ...     for warning in warnings:
         ...         print(f"  - {warning}")
     """
-    result = validate_mermaid_syntax(mermaid_code)
-    return result.warnings
+    return _shared_validator.validate(mermaid_code).warnings
 
 
 def suggest_fixes(mermaid_code: str) -> List[str]:
@@ -110,8 +111,7 @@ def suggest_fixes(mermaid_code: str) -> List[str]:
         >>> for suggestion in suggestions:
         ...     print(f"Suggestion: {suggestion}")
     """
-    validator = MermaidValidator()
-    return validator.suggest_fixes(mermaid_code)
+    return _shared_validator.suggest_fixes(mermaid_code)
 
 
 def validate_node_id(node_id: str) -> bool:
@@ -128,5 +128,4 @@ def validate_node_id(node_id: str) -> bool:
         >>> if validate_node_id("myNode123"):
         ...     flowchart.add_node("myNode123", "My Node")
     """
-    validator = MermaidValidator()
-    return validator.validate_node_id(node_id)
+    return _shared_validator.validate_node_id(node_id)

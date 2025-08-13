@@ -102,6 +102,9 @@ class MermaidConfig:
             "validate_syntax": True,
             "cache_enabled": True,
             "cache_dir": Path.home() / ".mermaid_render_cache",
+            "use_plugin_system": True,  # Default to plugin system
+            "fallback_enabled": True,
+            "max_fallback_attempts": 3,
         }
         self._config.update(kwargs)
 
@@ -591,7 +594,7 @@ class MermaidRenderer:
         self,
         config: Optional[MermaidConfig] = None,
         theme: Optional[Union[str, MermaidTheme]] = None,
-        use_plugin_system: bool = False,
+        use_plugin_system: bool = True,
         preferred_renderer: Optional[str] = None,
     ) -> None:
         """
@@ -602,15 +605,15 @@ class MermaidRenderer:
                 configuration will be used
             theme: Optional theme name (string) or MermaidTheme object. Available
                 built-in themes: "default", "dark", "forest", "neutral", "base"
-            use_plugin_system: Whether to use the new plugin-based rendering system
+            use_plugin_system: Whether to use the plugin-based rendering system (default: True)
             preferred_renderer: Preferred renderer name when using plugin system
 
         Example:
-            >>> # Default renderer (legacy mode)
+            >>> # Default renderer (plugin system enabled)
             >>> renderer = MermaidRenderer()
             >>>
-            >>> # With plugin system enabled
-            >>> renderer = MermaidRenderer(use_plugin_system=True)
+            >>> # Legacy mode (for backward compatibility)
+            >>> renderer = MermaidRenderer(use_plugin_system=False)
             >>>
             >>> # With specific renderer preference
             >>> renderer = MermaidRenderer(
