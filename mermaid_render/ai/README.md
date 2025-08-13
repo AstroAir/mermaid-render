@@ -5,6 +5,7 @@ This module provides AI-powered features for the Mermaid Render library, includi
 ## Components
 
 ### Core AI Services
+
 - **`analysis.py`** - Diagram analysis and quality assessment
 - **`diagram_generator.py`** - AI-powered diagram generation from text descriptions
 - **`nl_processor.py`** - Natural language processing for diagram creation
@@ -12,6 +13,7 @@ This module provides AI-powered features for the Mermaid Render library, includi
 - **`suggestions.py`** - Intelligent suggestions for diagram enhancement
 
 ### Infrastructure
+
 - **`providers.py`** - AI service provider integrations (OpenAI, Anthropic, etc.)
 - **`utils.py`** - Utility functions for AI operations
 
@@ -40,6 +42,7 @@ print(f"Quality score: {analysis.quality.overall_score}")
 ## Dependencies
 
 This module requires the `ai` optional dependency group:
+
 ```bash
 pip install mermaid-render[ai]
 ```
@@ -47,6 +50,7 @@ pip install mermaid-render[ai]
 ## Configuration
 
 AI features can be configured through the main configuration system:
+
 ```python
 from mermaid_render import MermaidConfig
 

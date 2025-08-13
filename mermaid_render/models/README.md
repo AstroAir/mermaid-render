@@ -5,6 +5,7 @@ This module contains object-oriented diagram model classes that provide clean, t
 ## Components
 
 ### Diagram Types
+
 - **`flowchart.py`** - Flowchart and process diagrams
 - **`sequence.py`** - Sequence diagrams for interaction modeling
 - **`class_diagram.py`** - UML class diagrams for object-oriented design
@@ -55,6 +56,7 @@ print(sequence.to_mermaid())
 ## Base Classes
 
 All diagram models inherit from `MermaidDiagram` (defined in `core.py`), which provides:
+
 - Common validation interface
 - Mermaid syntax generation
 - Caching for performance
@@ -63,6 +65,7 @@ All diagram models inherit from `MermaidDiagram` (defined in `core.py`), which p
 ## Validation
 
 Each model includes built-in validation:
+
 ```python
 diagram = FlowchartDiagram()
 # ... build diagram ...

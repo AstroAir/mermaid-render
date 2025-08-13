@@ -5,6 +5,7 @@ This module provides utility functions and helper classes for common operations 
 ## Components
 
 ### Core Utilities
+
 - **`helpers.py`** - General helper functions for file operations, format detection, and common tasks
 - **`export.py`** - Export utilities for saving diagrams in various formats and batch operations
 - **`validation.py`** - Validation utility functions and convenience methods
@@ -44,10 +45,12 @@ safe_name = sanitize_filename("My Diagram (v1.0).svg")
 ## Export Functions
 
 ### Single Diagram Export
+
 - `export_to_file()` - Export single diagram to file
 - `export_multiple_formats()` - Export same diagram to multiple formats
 
 ### Batch Export
+
 - `batch_export()` - Export multiple diagrams efficiently
 - Support for directory organization
 - Automatic format detection
@@ -55,11 +58,13 @@ safe_name = sanitize_filename("My Diagram (v1.0).svg")
 ## Validation Utilities
 
 ### Quick Validation
+
 - `validate_mermaid_syntax()` - Full validation with detailed results
 - `quick_validate()` - Simple boolean validation
 - `get_validation_errors()` - Extract error messages only
 
 ### Specialized Validation
+
 - `validate_node_id()` - Validate node identifiers
 - `suggest_fixes()` - Get suggestions for fixing validation errors
 

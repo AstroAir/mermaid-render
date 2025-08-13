@@ -5,6 +5,7 @@ This module provides collaborative features for the Mermaid Render library, enab
 ## Components
 
 ### Core Collaboration Services
+
 - **`collaboration_manager.py`** - Main collaboration orchestration and session management
 - **`version_control.py`** - Version control integration and diagram versioning
 - **`diff_engine.py`** - Diagram difference detection and visualization
@@ -12,6 +13,7 @@ This module provides collaborative features for the Mermaid Render library, enab
 - **`comments.py`** - Comment system for diagram annotations and feedback
 
 ### Supporting Infrastructure
+
 - **`activity_log.py`** - Activity tracking and audit logging
 - **`utils.py`** - Utility functions for collaboration features
 
@@ -43,6 +45,7 @@ session.commit_changes("Updated user flow diagram")
 ## Dependencies
 
 This module requires the `collaboration` optional dependency group:
+
 ```bash
 pip install mermaid-render[collaboration]
 ```
@@ -50,6 +53,7 @@ pip install mermaid-render[collaboration]
 ## Configuration
 
 Collaboration features require database and WebSocket configuration:
+
 ```python
 from mermaid_render import MermaidConfig
 

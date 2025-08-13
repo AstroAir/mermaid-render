@@ -211,7 +211,8 @@ class TemplateManager:
             templates = [t for t in templates if t.diagram_type == diagram_type]
 
         if tags:
-            templates = [t for t in templates if t.tags and any(tag in t.tags for tag in tags)]
+            templates = [t for t in templates if t.tags and any(
+                tag in t.tags for tag in tags)]
 
         if author:
             templates = [t for t in templates if t.author == author]

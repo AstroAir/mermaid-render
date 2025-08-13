@@ -5,6 +5,7 @@ This module provides comprehensive configuration management for the Mermaid Rend
 ## Components
 
 ### Configuration Management
+
 - **`config_manager.py`** - Advanced configuration management with file loading, environment variables, and validation
 - **`theme_manager.py`** - Theme configuration and management system
 
@@ -62,6 +63,7 @@ cache:
 ## Environment Variables
 
 Configuration can be overridden using environment variables:
+
 - `MERMAID_RENDER_TIMEOUT` - Rendering timeout
 - `MERMAID_RENDER_THEME` - Default theme
 - `MERMAID_RENDER_AI_PROVIDER` - AI provider

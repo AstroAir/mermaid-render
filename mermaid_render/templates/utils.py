@@ -431,7 +431,8 @@ def search_templates(
             )
 
     # Sort by relevance score
-    matching_templates.sort(key=lambda x: cast(float, x["relevance_score"]), reverse=True)
+    matching_templates.sort(key=lambda x: cast(
+        float, x["relevance_score"]), reverse=True)
 
     return matching_templates
 

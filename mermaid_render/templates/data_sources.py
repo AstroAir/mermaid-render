@@ -325,7 +325,8 @@ class DatabaseDataSource(DataSource):
                 query = f"SELECT * FROM {source}"
 
             # Execute query with parameters if provided
-            parameters = cast(Union[Tuple[Any, ...], List[Any]], options.get("parameters", ()))
+            parameters = cast(Union[Tuple[Any, ...], List[Any]],
+                              options.get("parameters", ()))
             cursor.execute(query, parameters)
 
             rows = cursor.fetchall()
@@ -433,7 +434,8 @@ class APIDataSource(DataSource):
             # Prepare request
             method = cast(str, options.get("method", "GET")).upper()
             params = cast(Dict[str, Any], options.get("params", {}))
-            headers = {**self.default_headers, **cast(Dict[str, str], options.get("headers", {}))}
+            headers = {**self.default_headers, **
+                       cast(Dict[str, str], options.get("headers", {}))}
             timeout = cast(int, options.get("timeout", 30))
 
             # Make request

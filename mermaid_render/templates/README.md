@@ -5,15 +5,18 @@ This module provides a comprehensive template system for generating Mermaid diag
 ## Components
 
 ### Core Template System
+
 - **`template_manager.py`** - Template management, storage, and retrieval
 - **`schema.py`** - Template schema definition and validation
 - **`library.py`** - Built-in template library and catalog
 
 ### Data Integration
+
 - **`data_sources.py`** - Data source connectors (JSON, CSV, API, Database)
 - **`generators.py`** - Specialized diagram generators for common patterns
 
 ### Supporting Infrastructure
+
 - **`utils.py`** - Utility functions for template operations
 
 ## Key Features
@@ -27,6 +30,7 @@ This module provides a comprehensive template system for generating Mermaid diag
 ## Template Types
 
 ### Built-in Generators
+
 - **FlowchartGenerator**: Process flows and workflows
 - **SequenceGenerator**: API interactions and system communications
 - **ClassDiagramGenerator**: Object-oriented design patterns

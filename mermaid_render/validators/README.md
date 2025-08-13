@@ -5,6 +5,7 @@ This module provides comprehensive validation capabilities for Mermaid diagram s
 ## Components
 
 ### Core Validation
+
 - **`validator.py`** - Main MermaidValidator class with comprehensive validation logic
 
 ## Key Features
@@ -18,6 +19,7 @@ This module provides comprehensive validation capabilities for Mermaid diagram s
 ## Supported Diagram Types
 
 The validator supports all major Mermaid diagram types:
+
 - Flowcharts (`flowchart TD`, `graph TD`)
 - Sequence Diagrams (`sequenceDiagram`)
 - Class Diagrams (`classDiagram`)
@@ -73,12 +75,14 @@ class ValidationResult:
 ## Advanced Features
 
 ### Custom Validation Rules
+
 ```python
 validator = MermaidValidator()
 validator.add_custom_rule("no_long_labels", lambda code: ...)
 ```
 
 ### Validation Configuration
+
 ```python
 validator = MermaidValidator(
     strict_mode=True,
@@ -90,6 +94,7 @@ validator = MermaidValidator(
 ## Integration
 
 The validator is integrated throughout the library:
+
 - Automatic validation in renderers
 - Real-time validation in interactive mode
 - Template validation in template system
