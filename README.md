@@ -454,6 +454,45 @@ config = MermaidConfig(
 renderer = MermaidRenderer(config=config)
 ```
 
+## Architecture
+
+The Mermaid Render library is designed with a modular, plugin-based architecture that promotes code reusability, maintainability, and extensibility.
+
+### Core Modules
+
+- **`core.py`** - Core classes (`MermaidRenderer`, `MermaidConfig`, `MermaidDiagram`)
+- **`models/`** - Object-oriented diagram models for type-safe diagram creation
+- **`renderers/`** - Plugin-based rendering system with multiple backends
+- **`validators/`** - Comprehensive validation system with detailed error reporting
+- **`config/`** - Advanced configuration management with file and environment support
+- **`utils/`** - Utility functions and helper classes
+- **`convenience.py`** - High-level convenience functions for simple use cases
+
+### Optional Feature Modules
+
+- **`ai/`** - AI-powered diagram generation and optimization
+- **`interactive/`** - Web-based interactive diagram builder
+- **`collaboration/`** - Real-time collaboration and version control
+- **`templates/`** - Template system for generating diagrams from data
+- **`cache/`** - Caching system with multiple backends
+
+### Plugin System
+
+The library uses a plugin-based architecture for rendering, allowing you to:
+- Choose from multiple rendering backends (Playwright, Node.js, Graphviz)
+- Add custom renderers without modifying core code
+- Configure renderer-specific settings independently
+- Fallback gracefully between renderers
+
+### Design Principles
+
+1. **Modularity**: Each module has a single, clear responsibility
+2. **Plugin Architecture**: Extensible through plugins rather than core modifications
+3. **Type Safety**: Full type hints and runtime validation
+4. **Backward Compatibility**: Changes maintain existing APIs
+5. **Performance**: Efficient caching and shared resource management
+6. **Documentation**: Every module includes comprehensive README files
+
 ## Advanced Usage
 
 ### Custom Renderers
