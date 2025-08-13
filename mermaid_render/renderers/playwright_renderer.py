@@ -9,7 +9,10 @@ import json
 import tempfile
 import time
 from pathlib import Path
-from typing import Any, Dict, Optional, Set, Union
+from typing import Any, Dict, Optional, Set, Union, TYPE_CHECKING, cast
+
+if TYPE_CHECKING:
+    from playwright.sync_api import Browser, BrowserContext, Page
 
 from .base import (
     BaseRenderer,
@@ -45,9 +48,9 @@ class PlaywrightRenderer(BaseRenderer):
         self.viewport_height = config.get("viewport_height", 800)
         self.mermaid_version = config.get("mermaid_version", "10.6.1")
 
-        self._browser = None
-        self._context = None
-        self._page = None
+        self._browser: Optional["Browser"] = None
+        self._context: Optional["BrowserContext"] = None
+        self._page: Optional["Page"] = None
 
     def get_info(self) -> RendererInfo:
         """
@@ -108,7 +111,8 @@ class PlaywrightRenderer(BaseRenderer):
         from ..exceptions import RenderingError, UnsupportedFormatError
 
         if format.lower() not in {"svg", "png", "pdf"}:
-            raise UnsupportedFormatError(f"Playwright renderer doesn't support format '{format}'")
+            raise UnsupportedFormatError(
+                f"Playwright renderer doesn't support format '{format}'")
 
         start_time = time.time()
 
@@ -120,12 +124,14 @@ class PlaywrightRenderer(BaseRenderer):
             html_content = self._create_html_template(mermaid_code, theme, config)
 
             # Navigate to the HTML content
+            assert self._page is not None  # Guaranteed by _ensure_browser()
             self._page.set_content(html_content)
 
             # Wait for Mermaid to render
             self._page.wait_for_selector("#mermaid-diagram svg", timeout=self.timeout)
 
             # Get the rendered content based on format
+            content: Union[str, bytes]
             if format.lower() == "svg":
                 content = self._extract_svg()
             elif format.lower() == "png":
@@ -167,6 +173,8 @@ class PlaywrightRenderer(BaseRenderer):
 
     def _ensure_browser(self) -> None:
         """Ensure browser is initialized and ready."""
+        from ..exceptions import RenderingError
+
         if self._page is not None:
             return
 
@@ -180,13 +188,17 @@ class PlaywrightRenderer(BaseRenderer):
                 # Add error handling for browser launch
                 try:
                     if self.browser_type == "chromium":
-                        self._browser = self._playwright.chromium.launch(headless=self.headless)
+                        self._browser = self._playwright.chromium.launch(
+                            headless=self.headless)
                     elif self.browser_type == "firefox":
-                        self._browser = self._playwright.firefox.launch(headless=self.headless)
+                        self._browser = self._playwright.firefox.launch(
+                            headless=self.headless)
                     elif self.browser_type == "webkit":
-                        self._browser = self._playwright.webkit.launch(headless=self.headless)
+                        self._browser = self._playwright.webkit.launch(
+                            headless=self.headless)
                     else:
-                        raise ValueError(f"Unsupported browser type: {self.browser_type}")
+                        raise ValueError(
+                            f"Unsupported browser type: {self.browser_type}")
                 except Exception as e:
                     raise RenderingError(
                         f"Failed to launch {self.browser_type} browser. "
@@ -195,11 +207,14 @@ class PlaywrightRenderer(BaseRenderer):
                     )
 
             if self._context is None:
+                assert self._browser is not None  # Guaranteed by previous code
                 self._context = self._browser.new_context(
-                    viewport={"width": self.viewport_width, "height": self.viewport_height}
+                    viewport={"width": self.viewport_width,
+                              "height": self.viewport_height}
                 )
 
             if self._page is None:
+                assert self._context is not None  # Guaranteed by previous code
                 self._page = self._context.new_page()
 
         except ImportError:
@@ -241,10 +256,12 @@ class PlaywrightRenderer(BaseRenderer):
 
     def _extract_svg(self) -> str:
         """Extract SVG content from the rendered page."""
+        assert self._page is not None  # Should be guaranteed by caller
         return self._page.locator("#mermaid-diagram svg").inner_html()
 
     def _capture_png(self, options: Dict[str, Any]) -> bytes:
         """Capture PNG screenshot of the diagram."""
+        assert self._page is not None  # Should be guaranteed by caller
         element = self._page.locator("#mermaid-diagram svg")
         return element.screenshot(
             type="png",
@@ -253,6 +270,7 @@ class PlaywrightRenderer(BaseRenderer):
 
     def _capture_pdf(self, options: Dict[str, Any]) -> bytes:
         """Capture PDF of the diagram."""
+        assert self._page is not None  # Should be guaranteed by caller
         return self._page.pdf(
             format=options.get("page_size", "A4"),
             landscape=options.get("orientation", "portrait") == "landscape",
@@ -261,6 +279,7 @@ class PlaywrightRenderer(BaseRenderer):
     def _get_diagram_dimensions(self) -> Dict[str, Any]:
         """Get dimensions of the rendered diagram."""
         try:
+            assert self._page is not None  # Should be guaranteed by caller
             element = self._page.locator("#mermaid-diagram svg")
             box = element.bounding_box()
             return {

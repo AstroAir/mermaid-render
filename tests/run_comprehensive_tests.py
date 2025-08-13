@@ -8,6 +8,7 @@ This script runs all tests with detailed reporting and coverage analysis.
 import subprocess
 import sys
 from pathlib import Path
+from typing import Union, Optional
 
 
 def run_command(cmd, description):
@@ -82,7 +83,7 @@ def main():
     ]
 
     # Run individual test categories
-    results = {}
+    results: dict[str, Union[bool, None]] = {}
     for category in test_categories:
         test_path = project_root / category["path"]
         if test_path.exists():

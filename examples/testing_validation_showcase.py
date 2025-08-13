@@ -9,7 +9,7 @@ and error handling for applications using the library.
 import unittest
 from pathlib import Path
 from unittest.mock import Mock, patch
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Union, Optional
 
 from mermaid_render import (
     MermaidRenderer,
@@ -23,14 +23,14 @@ from mermaid_render import (
 from mermaid_render.models.class_diagram import ClassMethod, ClassAttribute  # noqa: F401 (kept for reference consistency)
 
 
-def create_output_dir():
+def create_output_dir() -> Path:
     """Create output directory for examples."""
     output_dir = Path("output/testing")
     output_dir.mkdir(parents=True, exist_ok=True)
     return output_dir
 
 
-def build_flowchart_code(title: str | None = None) -> str:
+def build_flowchart_code(title: Optional[str] = None) -> str:
     """Build a simple flowchart Mermaid string for testing."""
     lines = ["flowchart TD"]
     if title:
@@ -45,7 +45,7 @@ def build_flowchart_code(title: str | None = None) -> str:
     return "\n".join(lines)
 
 
-def build_sequence_code(title: str | None = None) -> str:
+def build_sequence_code(title: Optional[str] = None) -> str:
     """Build a simple sequence diagram Mermaid string for testing."""
     lines = ["sequenceDiagram", "    autonumber"]
     if title:
@@ -59,7 +59,7 @@ def build_sequence_code(title: str | None = None) -> str:
     return "\n".join(lines)
 
 
-def build_class_diagram_code(title: str | None = None) -> str:
+def build_class_diagram_code(title: Optional[str] = None) -> str:
     """Build a simple class diagram Mermaid string for testing."""
     lines = ["classDiagram"]
     if title:
@@ -82,12 +82,12 @@ def build_class_diagram_code(title: str | None = None) -> str:
 class TestDiagramCreation(unittest.TestCase):
     """Test cases for diagram creation and validation."""
     
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test fixtures."""
         self.renderer = MermaidRenderer()
         self.output_dir = create_output_dir()
     
-    def test_flowchart_creation(self):
+    def test_flowchart_creation(self) -> None:
         """Test creating a valid flowchart (string-based)."""
         mermaid_code = build_flowchart_code("Test Flowchart")
 
@@ -101,7 +101,7 @@ class TestDiagramCreation(unittest.TestCase):
         result = validate_mermaid_syntax(mermaid_code)
         self.assertTrue(result.is_valid, f"Validation errors: {result.errors}")
     
-    def test_sequence_diagram_creation(self):
+    def test_sequence_diagram_creation(self) -> None:
         """Test creating a valid sequence diagram (string-based)."""
         mermaid_code = build_sequence_code("Test Sequence")
         
@@ -136,7 +136,7 @@ class TestDiagramCreation(unittest.TestCase):
             if src not in nodes or dst not in nodes:
                 raise DiagramError(f"edge requires existing nodes: {src} -> {dst}")
         
-        nodes = set()
+        nodes: set[str] = set()
         with self.assertRaises(DiagramError):
             add_edge(nodes, "nonexistent1", "nonexistent2")
         
@@ -357,7 +357,7 @@ def validation_patterns_example(output_dir: Path):
     """Demonstrate validation patterns and error handling."""
     print("Validation patterns example...")
     
-    test_cases = [
+    test_cases: List[Dict[str, Any]] = [
         {
             "name": "Valid Flowchart",
             "code": """

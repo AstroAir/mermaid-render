@@ -105,7 +105,8 @@ class PNGRendererPlugin(BaseRenderer):
         from ..exceptions import UnsupportedFormatError
 
         if format.lower() != "png":
-            raise UnsupportedFormatError(f"PNG renderer only supports 'png' format, got '{format}'")
+            raise UnsupportedFormatError(
+                f"PNG renderer only supports 'png' format, got '{format}'")
 
         start_time = time.time()
 

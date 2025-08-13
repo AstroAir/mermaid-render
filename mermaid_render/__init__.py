@@ -90,7 +90,7 @@ except ImportError:
 
 # Cache system (optional)
 try:
-    from .cache import (
+    from .cache import (  # type: ignore[import-not-found]
         CacheManager,
         FileBackend,
         MemoryBackend,

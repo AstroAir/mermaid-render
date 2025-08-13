@@ -54,7 +54,7 @@ class TestSVGRenderer:
     def test_render_local_success(self, mock_mermaid):
         """Test successful local SVG rendering."""
         mock_instance = Mock()
-        mock_instance.__str__ = Mock(return_value="<svg>test content</svg>")
+        mock_instance.__str__ = lambda: "<svg>test content</svg>"
         mock_mermaid.return_value = mock_instance
 
         renderer = SVGRenderer(use_local=True, cache_enabled=False)
@@ -77,7 +77,7 @@ class TestSVGRenderer:
         </html>
         """
         mock_instance = Mock()
-        mock_instance.__str__ = Mock(return_value=html_content)
+        mock_instance.__str__ = lambda: html_content
         mock_mermaid.return_value = mock_instance
 
         renderer = SVGRenderer(use_local=True, cache_enabled=False)
@@ -92,7 +92,7 @@ class TestSVGRenderer:
         """Test handling when no SVG is found in HTML."""
         html_content = "<html><body>No SVG here</body></html>"
         mock_instance = Mock()
-        mock_instance.__str__ = Mock(return_value=html_content)
+        mock_instance.__str__ = lambda: html_content
         mock_mermaid.return_value = mock_instance
 
         renderer = SVGRenderer(use_local=True, cache_enabled=False)
@@ -670,7 +670,7 @@ class TestRendererEdgeCases:
 
         with patch("mermaid_render.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
             mock_instance = Mock()
-            mock_instance.__str__ = Mock(return_value="<svg>large diagram</svg>")
+            mock_instance.__str__ = lambda: "<svg>large diagram</svg>"
             mock_mermaid.return_value = mock_instance
 
             renderer = SVGRenderer(use_local=True)

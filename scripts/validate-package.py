@@ -163,7 +163,7 @@ def validate_version_info() -> Tuple[bool, str]:
         return False, f"❌ Failed to get version info: {e}"
 
 
-def main():
+def main() -> int:
     """Run all validation tests."""
     print("🔍 Validating Mermaid Render Package Structure")
     print("=" * 50)

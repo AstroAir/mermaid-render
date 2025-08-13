@@ -40,7 +40,7 @@ def run_command(cmd: List[str], check: bool = True, cwd: Optional[Path] = None) 
         return e.returncode
 
 
-def setup_dev_environment():
+def setup_dev_environment() -> None:
     """Set up the development environment."""
     print("Setting up development environment...")
     
@@ -54,7 +54,7 @@ def setup_dev_environment():
     print("Development environment setup complete!")
 
 
-def run_tests():
+def run_tests() -> int:
     """Run tests with coverage."""
     print("Running tests with coverage...")
     return run_command([
@@ -67,7 +67,7 @@ def run_tests():
     ])
 
 
-def run_lint():
+def run_lint() -> int:
     """Run linting checks."""
     print("Running linting checks...")
     exit_code = 0
@@ -81,7 +81,7 @@ def run_lint():
     return exit_code
 
 
-def format_code():
+def format_code() -> None:
     """Format code with black and ruff."""
     print("Formatting code...")
     
@@ -94,13 +94,13 @@ def format_code():
     print("Code formatting complete!")
 
 
-def run_type_check():
+def run_type_check() -> int:
     """Run type checking with mypy."""
     print("Running type checks...")
     return run_command([sys.executable, "-m", "mypy", "mermaid_render/"], check=False)
 
 
-def run_security_checks():
+def run_security_checks() -> int:
     """Run security checks."""
     print("Running security checks...")
     exit_code = 0
@@ -117,13 +117,13 @@ def run_security_checks():
     return exit_code
 
 
-def build_package():
+def build_package() -> int:
     """Build the package."""
     print("Building package...")
     return run_command([sys.executable, "-m", "build"])
 
 
-def clean_artifacts():
+def clean_artifacts() -> None:
     """Clean build artifacts."""
     print("Cleaning build artifacts...")
     import shutil
@@ -145,7 +145,7 @@ def clean_artifacts():
                 print(f"Removed file: {path}")
 
 
-def build_docs():
+def build_docs() -> int:
     """Build documentation."""
     print("Building documentation...")
     docs_dir = Path("docs")
@@ -156,7 +156,7 @@ def build_docs():
         return 0
 
 
-def run_all_checks():
+def run_all_checks() -> int:
     """Run all checks."""
     print("Running all checks...")
     exit_code = 0
@@ -174,7 +174,7 @@ def run_all_checks():
     return exit_code
 
 
-def run_pre_commit():
+def run_pre_commit() -> int:
     """Install and run pre-commit hooks."""
     print("Running pre-commit hooks...")
     
@@ -185,7 +185,7 @@ def run_pre_commit():
     return run_command([sys.executable, "-m", "pre_commit", "run", "--all-files"], check=False)
 
 
-def main():
+def main() -> None:
     """Main entry point."""
     parser = argparse.ArgumentParser(description="Development utility for Mermaid Render")
     parser.add_argument("command", choices=[

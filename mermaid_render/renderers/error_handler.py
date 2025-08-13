@@ -16,7 +16,7 @@ from ..exceptions import RenderingError
 
 class ErrorSeverity(Enum):
     """Error severity levels."""
-    
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -25,7 +25,7 @@ class ErrorSeverity(Enum):
 
 class ErrorCategory(Enum):
     """Error categories for classification."""
-    
+
     CONFIGURATION = "configuration"
     DEPENDENCY = "dependency"
     NETWORK = "network"
@@ -39,7 +39,7 @@ class ErrorCategory(Enum):
 @dataclass
 class ErrorContext:
     """Context information for an error."""
-    
+
     renderer_name: Optional[str] = None
     format: Optional[str] = None
     diagram_type: Optional[str] = None
@@ -54,7 +54,7 @@ class ErrorContext:
 @dataclass
 class ErrorDetails:
     """Detailed error information."""
-    
+
     message: str
     category: ErrorCategory
     severity: ErrorSeverity
@@ -69,17 +69,17 @@ class ErrorDetails:
 class ErrorHandler:
     """
     Enhanced error handler for the rendering system.
-    
+
     This class provides comprehensive error handling with categorization,
     severity assessment, recovery suggestions, and detailed reporting.
     """
-    
+
     def __init__(self) -> None:
         """Initialize the error handler."""
         self.logger = logging.getLogger(__name__)
         self._error_patterns = self._initialize_error_patterns()
         self._recovery_strategies = self._initialize_recovery_strategies()
-    
+
     def handle_error(
         self,
         exception: Exception,
@@ -87,11 +87,11 @@ class ErrorHandler:
     ) -> ErrorDetails:
         """
         Handle and analyze an error.
-        
+
         Args:
             exception: The exception that occurred
             context: Context information about the error
-            
+
         Returns:
             ErrorDetails with comprehensive error information
         """
@@ -99,12 +99,12 @@ class ErrorHandler:
         category = self._classify_error(exception, context)
         severity = self._assess_severity(exception, category, context)
         error_code = self._generate_error_code(category, exception)
-        
+
         # Get recovery suggestions
         recovery_suggestions = self._get_recovery_suggestions(
             exception, category, context
         )
-        
+
         # Create error details
         error_details = ErrorDetails(
             message=str(exception),
@@ -116,12 +116,12 @@ class ErrorHandler:
             stack_trace=traceback.format_exc(),
             recovery_suggestions=recovery_suggestions,
         )
-        
+
         # Log the error
         self._log_error(error_details)
-        
+
         return error_details
-    
+
     def _classify_error(
         self,
         exception: Exception,
@@ -130,12 +130,12 @@ class ErrorHandler:
         """Classify an error into a category."""
         exception_type = type(exception).__name__
         message = str(exception).lower()
-        
+
         # Check for specific patterns
         for pattern, category in self._error_patterns.items():
             if pattern in message or pattern in exception_type.lower():
                 return category
-        
+
         # Default classification based on exception type
         if "timeout" in exception_type.lower():
             return ErrorCategory.TIMEOUT
@@ -151,7 +151,7 @@ class ErrorHandler:
             return ErrorCategory.RENDERING
         else:
             return ErrorCategory.SYSTEM
-    
+
     def _assess_severity(
         self,
         exception: Exception,
@@ -162,25 +162,25 @@ class ErrorHandler:
         # Critical errors that prevent any rendering
         if category == ErrorCategory.DEPENDENCY and "playwright" in str(exception):
             return ErrorSeverity.MEDIUM  # Can fallback to other renderers
-        
+
         if category == ErrorCategory.CONFIGURATION:
             return ErrorSeverity.HIGH
-        
+
         if category == ErrorCategory.SYNTAX:
             return ErrorSeverity.HIGH
-        
+
         if category == ErrorCategory.TIMEOUT:
             return ErrorSeverity.MEDIUM
-        
+
         if category == ErrorCategory.NETWORK:
             return ErrorSeverity.MEDIUM  # Can fallback to local renderers
-        
+
         # Consider attempt number
         if context.attempt_number >= context.total_attempts:
             return ErrorSeverity.HIGH  # Final attempt failed
-        
+
         return ErrorSeverity.LOW
-    
+
     def _generate_error_code(
         self,
         category: ErrorCategory,
@@ -190,7 +190,7 @@ class ErrorHandler:
         category_code = category.value.upper()[:4]
         exception_code = type(exception).__name__[:4].upper()
         return f"MR_{category_code}_{exception_code}"
-    
+
     def _get_recovery_suggestions(
         self,
         exception: Exception,
@@ -200,7 +200,7 @@ class ErrorHandler:
         """Get recovery suggestions for an error."""
         suggestions = []
         message = str(exception).lower()
-        
+
         # Category-specific suggestions
         if category == ErrorCategory.DEPENDENCY:
             if "playwright" in message:
@@ -221,7 +221,7 @@ class ErrorHandler:
                     "Install Mermaid CLI: npm install -g @mermaid-js/mermaid-cli",
                     "Use alternative renderers (svg, playwright)",
                 ])
-        
+
         elif category == ErrorCategory.NETWORK:
             suggestions.extend([
                 "Check internet connection",
@@ -229,7 +229,7 @@ class ErrorHandler:
                 "Try using local renderers (playwright, nodejs)",
                 "Check firewall settings",
             ])
-        
+
         elif category == ErrorCategory.TIMEOUT:
             suggestions.extend([
                 "Increase timeout value in configuration",
@@ -237,7 +237,7 @@ class ErrorHandler:
                 "Try a different renderer",
                 "Check system resources",
             ])
-        
+
         elif category == ErrorCategory.SYNTAX:
             suggestions.extend([
                 "Validate Mermaid syntax using online editor",
@@ -245,7 +245,7 @@ class ErrorHandler:
                 "Verify diagram type is supported by the renderer",
                 "Try a different renderer that supports more features",
             ])
-        
+
         elif category == ErrorCategory.CONFIGURATION:
             suggestions.extend([
                 "Check configuration values are valid",
@@ -253,14 +253,15 @@ class ErrorHandler:
                 "Reset to default configuration",
                 "Check configuration schema documentation",
             ])
-        
+
         # Renderer-specific suggestions
         if context.renderer_name:
-            renderer_suggestions = self._recovery_strategies.get(context.renderer_name, [])
+            renderer_suggestions = self._recovery_strategies.get(
+                context.renderer_name, [])
             suggestions.extend(renderer_suggestions)
-        
+
         return suggestions
-    
+
     def _initialize_error_patterns(self) -> Dict[str, ErrorCategory]:
         """Initialize error pattern mappings."""
         return {
@@ -283,7 +284,7 @@ class ErrorHandler:
             "memory": ErrorCategory.SYSTEM,
             "disk": ErrorCategory.SYSTEM,
         }
-    
+
     def _initialize_recovery_strategies(self) -> Dict[str, List[str]]:
         """Initialize renderer-specific recovery strategies."""
         return {
@@ -320,7 +321,7 @@ class ErrorHandler:
                 "Try alternative renderers for unsupported diagram types",
             ],
         }
-    
+
     def _log_error(self, error_details: ErrorDetails) -> None:
         """Log error details with appropriate level."""
         log_message = (
@@ -328,10 +329,10 @@ class ErrorHandler:
             f"(Category: {error_details.category.value}, "
             f"Severity: {error_details.severity.value})"
         )
-        
+
         if error_details.context.renderer_name:
             log_message += f" [Renderer: {error_details.context.renderer_name}]"
-        
+
         # Log with appropriate level based on severity
         if error_details.severity == ErrorSeverity.CRITICAL:
             self.logger.critical(log_message)
@@ -341,14 +342,14 @@ class ErrorHandler:
             self.logger.warning(log_message)
         else:
             self.logger.info(log_message)
-        
+
         # Log recovery suggestions at debug level
         if error_details.recovery_suggestions:
             self.logger.debug(
                 f"Recovery suggestions for {error_details.error_code}: "
                 f"{'; '.join(error_details.recovery_suggestions)}"
             )
-    
+
     def format_error_report(self, error_details: ErrorDetails) -> str:
         """Format a comprehensive error report."""
         report_lines = [
@@ -360,7 +361,7 @@ class ErrorHandler:
             "",
             "Context:",
         ]
-        
+
         # Add context information
         if error_details.context.renderer_name:
             report_lines.append(f"  Renderer: {error_details.context.renderer_name}")
@@ -374,8 +375,9 @@ class ErrorHandler:
                 f"{error_details.context.total_attempts}"
             )
         if error_details.context.elapsed_time > 0:
-            report_lines.append(f"  Elapsed Time: {error_details.context.elapsed_time:.2f}s")
-        
+            report_lines.append(
+                f"  Elapsed Time: {error_details.context.elapsed_time:.2f}s")
+
         # Add recovery suggestions
         if error_details.recovery_suggestions:
             report_lines.extend([
@@ -384,7 +386,7 @@ class ErrorHandler:
             ])
             for i, suggestion in enumerate(error_details.recovery_suggestions, 1):
                 report_lines.append(f"  {i}. {suggestion}")
-        
+
         return "\n".join(report_lines)
 
 

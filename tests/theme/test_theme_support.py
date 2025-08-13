@@ -219,7 +219,7 @@ def test_theme_suggestion():
     print("✓ Minimal theme suggestion passed")
 
     # Test default preference
-    default_prefs = {}
+    default_prefs: dict[str, str] = {}
     suggestion = renderer.suggest_theme(default_prefs)
     assert suggestion == "default"
     print("✓ Default theme suggestion passed")

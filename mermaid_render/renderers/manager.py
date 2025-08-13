@@ -113,7 +113,8 @@ class RendererManager:
 
         if not validation_result.is_valid:
             error_handler = get_global_error_handler()
-            validation_error = RenderingError(f"Validation failed: {validation_result.errors}")
+            validation_error = RenderingError(
+                f"Validation failed: {validation_result.errors}")
             error_details = error_handler.handle_error(validation_error, error_context)
             raise validation_error
 
@@ -173,7 +174,8 @@ class RendererManager:
                     # Get or create renderer instance
                     renderer = self._get_renderer_instance(renderer_name, config or {})
                     if renderer is None:
-                        self.logger.warning(f"Could not create renderer instance: {renderer_name}")
+                        self.logger.warning(
+                            f"Could not create renderer instance: {renderer_name}")
                         continue
 
                     # Check capabilities if required
@@ -186,7 +188,8 @@ class RendererManager:
                             continue
 
                     # Attempt rendering with performance tracking
-                    self.logger.debug(f"Attempting render with '{renderer_name}' (attempt {i+1})")
+                    self.logger.debug(
+                        f"Attempting render with '{renderer_name}' (attempt {i+1})")
 
                     render_start = time.time()
                     result = renderer.render(
@@ -209,7 +212,8 @@ class RendererManager:
 
                     # Add timing information
                     result.metadata["total_render_time"] = time.time() - start_time
-                    result.metadata["attempts"] = attempts + [{"renderer": renderer_name, "success": True}]
+                    result.metadata["attempts"] = attempts + \
+                        [{"renderer": renderer_name, "success": True}]
 
                     self.logger.info(
                         f"Successfully rendered with '{renderer_name}' "

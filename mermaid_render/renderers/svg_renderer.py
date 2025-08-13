@@ -348,7 +348,8 @@ class SVGRenderer:
         Returns:
             Preload results
         """
-        results: Dict[str, Union[int, List[str]]] = {"successful": 0, "failed": 0, "errors": []}
+        results: Dict[str, Union[int, List[str]]] = {
+            "successful": 0, "failed": 0, "errors": []}
 
         for config in diagram_configs:
             try:
@@ -545,7 +546,8 @@ class SVGRenderer:
                         "use_local": self.use_local,
                     }
                     raise self.create_detailed_error(
-                        RuntimeError("Both local and remote rendering failed"), error_context
+                        RuntimeError(
+                            "Both local and remote rendering failed"), error_context
                     ) from last_error
         else:
             svg_content = self._render_remote(mermaid_code, theme, config)
@@ -1069,7 +1071,7 @@ class SVGRenderer:
                 svg_content = (
                     svg_content[: svg_start + 1]
                     + background_rect
-                    + svg_content[svg_start + 1 :]
+                    + svg_content[svg_start + 1:]
                 )
 
         return svg_content
@@ -1293,7 +1295,7 @@ Original Mermaid Code:
                     + "\n"
                     + metadata
                     + "\n"
-                    + svg_content[svg_start + 1 :]
+                    + svg_content[svg_start + 1:]
                 )
 
         return svg_content
@@ -1426,7 +1428,7 @@ Original Mermaid Code:
         }
 
     def apply_theme_to_config(
-        self, config: Dict[str, Any], theme: str
+        self, config: Dict[str, Any], theme: Union[str, Dict[str, Any]]
     ) -> Dict[str, Any]:
         """
         Apply theme configuration to mermaid config.

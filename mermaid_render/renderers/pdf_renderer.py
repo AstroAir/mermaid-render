@@ -183,7 +183,7 @@ class PDFRenderer:
             from io import BytesIO
             from tempfile import NamedTemporaryFile
 
-            from reportlab.graphics import renderPDF  # type: ignore
+            from reportlab.graphics import renderPDF
 
             # svglib converts SVG to a ReportLab drawing
             from svglib.svglib import svg2rlg  # type: ignore

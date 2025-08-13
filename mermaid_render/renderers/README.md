@@ -19,11 +19,13 @@ The plugin-based renderer system consists of several key components:
 ### Renderer Implementations
 
 #### Legacy Renderer Adapters
+
 - **`svg_renderer_plugin.py`**: Plugin adapter for the original SVGRenderer
 - **`png_renderer_plugin.py`**: Plugin adapter for the original PNGRenderer  
 - **`pdf_renderer_plugin.py`**: Plugin adapter for the original PDFRenderer
 
 #### New Renderer Backends
+
 - **`playwright_renderer.py`**: High-fidelity rendering using Playwright and Mermaid.js
 - **`nodejs_renderer.py`**: Local rendering using Node.js and Mermaid CLI
 - **`graphviz_renderer.py`**: Alternative rendering using Graphviz for flowcharts

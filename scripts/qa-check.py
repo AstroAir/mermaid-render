@@ -16,7 +16,7 @@ import json
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, cast
 
 # Add project root to path
 project_root = Path(__file__).parent.parent
@@ -31,7 +31,7 @@ class QAChecker:
         self.results: Dict[str, Dict] = {}
         self.project_root = project_root
     
-    def log(self, message: str, level: str = "INFO"):
+    def log(self, message: str, level: str = "INFO") -> None:
         """Log a message with optional verbosity control."""
         if self.verbose or level in ["ERROR", "WARNING"]:
             prefix = {
@@ -302,7 +302,7 @@ class QAChecker:
             "results": results
         }
     
-    def generate_report(self, results: Dict, output_file: Optional[str] = None):
+    def generate_report(self, results: Dict, output_file: Optional[str] = None) -> Dict:
         """Generate a detailed QA report."""
         report = {
             "timestamp": subprocess.check_output(["date", "-u"]).decode().strip(),
@@ -318,7 +318,7 @@ class QAChecker:
         return report
 
 
-def main():
+def main() -> None:
     """Main entry point."""
     parser = argparse.ArgumentParser(description="Run QA checks for Mermaid Render")
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
@@ -358,7 +358,8 @@ def main():
     if args.check:
         sys.exit(0 if result["passed"] else 1)
     else:
-        sys.exit(0 if results["summary"]["failed"] == 0 else 1)
+        failed_count = cast(int, results["summary"]["failed"])
+        sys.exit(0 if failed_count == 0 else 1)
 
 
 if __name__ == "__main__":

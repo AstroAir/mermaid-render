@@ -273,7 +273,7 @@ class TestDiagramError:
 
         assert str(error) == "Diagram construction failed"
         assert error.diagram_type is None
-        assert error.element is None
+        assert error.operation is None
 
     def test_diagram_error_with_type(self):
         """Test diagram error with diagram type."""
@@ -282,12 +282,12 @@ class TestDiagramError:
         assert error.diagram_type == "flowchart"
         assert "flowchart" in str(error)
 
-    def test_diagram_error_with_element(self):
-        """Test diagram error with element."""
-        error = DiagramError("Invalid element", element="node_a")
+    def test_diagram_error_with_operation(self):
+        """Test diagram error with operation."""
+        error = DiagramError("Invalid operation", operation="add_node")
 
-        assert error.element == "node_a"
-        assert "node_a" in str(error)
+        assert error.operation == "add_node"
+        assert "add_node" in str(error)
 
     def test_diagram_error_inheritance(self):
         """Test DiagramError inheritance."""
