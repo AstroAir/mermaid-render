@@ -13,7 +13,7 @@ from mermaid_render.models.sequence import SequenceMessage, SequenceParticipant
 class TestFlowchartDiagram:
     """Test FlowchartDiagram class."""
 
-    def test_init_default(self):
+    def test_init_default(self) -> None:
         """Test flowchart initialization with defaults."""
         flowchart = FlowchartDiagram()
 
@@ -22,19 +22,19 @@ class TestFlowchartDiagram:
         assert len(flowchart.nodes) == 0
         assert len(flowchart.edges) == 0
 
-    def test_init_custom_direction(self):
+    def test_init_custom_direction(self) -> None:
         """Test flowchart initialization with custom direction."""
         flowchart = FlowchartDiagram(direction="LR", title="Test Flowchart")
 
         assert flowchart.direction == "LR"
         assert flowchart.title == "Test Flowchart"
 
-    def test_invalid_direction(self):
+    def test_invalid_direction(self) -> None:
         """Test flowchart with invalid direction."""
         with pytest.raises(DiagramError, match="Invalid direction"):
             FlowchartDiagram(direction="INVALID")
 
-    def test_add_node(self):
+    def test_add_node(self) -> None:
         """Test adding nodes to flowchart."""
         flowchart = FlowchartDiagram()
 
@@ -46,7 +46,7 @@ class TestFlowchartDiagram:
         assert "A" in flowchart.nodes
         assert flowchart.nodes["A"] is node
 
-    def test_add_duplicate_node(self):
+    def test_add_duplicate_node(self) -> None:
         """Test adding duplicate node ID."""
         flowchart = FlowchartDiagram()
         flowchart.add_node("A", "First")
@@ -54,7 +54,7 @@ class TestFlowchartDiagram:
         with pytest.raises(DiagramError, match="already exists"):
             flowchart.add_node("A", "Second")
 
-    def test_add_edge(self):
+    def test_add_edge(self) -> None:
         """Test adding edges between nodes."""
         flowchart = FlowchartDiagram()
         flowchart.add_node("A", "Start")
@@ -67,14 +67,14 @@ class TestFlowchartDiagram:
         assert edge.label == "Connect"
         assert edge in flowchart.edges
 
-    def test_add_edge_nonexistent_nodes(self):
+    def test_add_edge_nonexistent_nodes(self) -> None:
         """Test adding edge with nonexistent nodes."""
         flowchart = FlowchartDiagram()
 
         with pytest.raises(DiagramError, match="does not exist"):
             flowchart.add_edge("A", "B")
 
-    def test_add_edge_nonexistent_target_node(self):
+    def test_add_edge_nonexistent_target_node(self) -> None:
         """Test adding edge with nonexistent target node."""
         flowchart = FlowchartDiagram()
         flowchart.add_node("A", "Start")
@@ -82,7 +82,7 @@ class TestFlowchartDiagram:
         with pytest.raises(DiagramError, match="Target node 'B' does not exist"):
             flowchart.add_edge("A", "B")
 
-    def test_add_subgraph(self):
+    def test_add_subgraph(self) -> None:
         """Test adding subgraph."""
         flowchart = FlowchartDiagram()
 
@@ -92,7 +92,7 @@ class TestFlowchartDiagram:
         assert subgraph.title == "Subprocess"
         assert "sub1" in flowchart.subgraphs
 
-    def test_add_node_to_subgraph(self):
+    def test_add_node_to_subgraph(self) -> None:
         """Test adding node to subgraph."""
         flowchart = FlowchartDiagram()
         flowchart.add_node("A", "Node")
@@ -102,7 +102,7 @@ class TestFlowchartDiagram:
 
         assert "A" in subgraph.nodes
 
-    def test_to_mermaid(self):
+    def test_to_mermaid(self) -> None:
         """Test generating Mermaid syntax."""
         flowchart = FlowchartDiagram(direction="LR")
         flowchart.add_node("A", "Start", shape="circle")
@@ -120,7 +120,7 @@ class TestFlowchartDiagram:
 class TestFlowchartNode:
     """Test FlowchartNode class."""
 
-    def test_init_default(self):
+    def test_init_default(self) -> None:
         """Test node initialization with defaults."""
         node = FlowchartNode("A", "Label")
 
@@ -128,30 +128,30 @@ class TestFlowchartNode:
         assert node.label == "Label"
         assert node.shape == "rectangle"
 
-    def test_init_custom_shape(self):
+    def test_init_custom_shape(self) -> None:
         """Test node initialization with custom shape."""
         node = FlowchartNode("B", "Circle Node", shape="circle")
 
         assert node.shape == "circle"
 
-    def test_invalid_shape(self):
+    def test_invalid_shape(self) -> None:
         """Test node with invalid shape."""
         with pytest.raises(DiagramError, match="Unknown node shape"):
             FlowchartNode("A", "Label", shape="invalid_shape")
 
-    def test_to_mermaid_rectangle(self):
+    def test_to_mermaid_rectangle(self) -> None:
         """Test Mermaid syntax for rectangle node."""
         node = FlowchartNode("A", "Rectangle", shape="rectangle")
 
         assert node.to_mermaid() == "A[Rectangle]"
 
-    def test_to_mermaid_circle(self):
+    def test_to_mermaid_circle(self) -> None:
         """Test Mermaid syntax for circle node."""
         node = FlowchartNode("B", "Circle", shape="circle")
 
         assert node.to_mermaid() == "B((Circle))"
 
-    def test_to_mermaid_rhombus(self):
+    def test_to_mermaid_rhombus(self) -> None:
         """Test Mermaid syntax for rhombus node."""
         node = FlowchartNode("C", "Decision", shape="rhombus")
 
@@ -161,7 +161,7 @@ class TestFlowchartNode:
 class TestFlowchartEdge:
     """Test FlowchartEdge class."""
 
-    def test_init_default(self):
+    def test_init_default(self) -> None:
         """Test edge initialization with defaults."""
         edge = FlowchartEdge("A", "B")
 
@@ -170,25 +170,25 @@ class TestFlowchartEdge:
         assert edge.arrow_type == "arrow"
         assert edge.label is None
 
-    def test_init_with_label(self):
+    def test_init_with_label(self) -> None:
         """Test edge initialization with label."""
         edge = FlowchartEdge("A", "B", label="Connect", arrow_type="dotted")
 
         assert edge.label == "Connect"
         assert edge.arrow_type == "dotted"
 
-    def test_invalid_arrow_type(self):
+    def test_invalid_arrow_type(self) -> None:
         """Test edge with invalid arrow type."""
         with pytest.raises(DiagramError, match="Unknown arrow type"):
             FlowchartEdge("A", "B", arrow_type="invalid")
 
-    def test_to_mermaid_simple(self):
+    def test_to_mermaid_simple(self) -> None:
         """Test Mermaid syntax for simple edge."""
         edge = FlowchartEdge("A", "B")
 
         assert edge.to_mermaid() == "A --> B"
 
-    def test_to_mermaid_with_label(self):
+    def test_to_mermaid_with_label(self) -> None:
         """Test Mermaid syntax for edge with label."""
         edge = FlowchartEdge("A", "B", label="Yes", arrow_type="arrow")
 
@@ -198,7 +198,7 @@ class TestFlowchartEdge:
 class TestSequenceDiagram:
     """Test SequenceDiagram class."""
 
-    def test_init_default(self):
+    def test_init_default(self) -> None:
         """Test sequence diagram initialization."""
         sequence = SequenceDiagram()
 
@@ -207,14 +207,14 @@ class TestSequenceDiagram:
         assert len(sequence.messages) == 0
         assert sequence.autonumber is False
 
-    def test_init_with_options(self):
+    def test_init_with_options(self) -> None:
         """Test sequence diagram with options."""
         sequence = SequenceDiagram(title="Test Sequence", autonumber=True)
 
         assert sequence.title == "Test Sequence"
         assert sequence.autonumber is True
 
-    def test_add_participant(self):
+    def test_add_participant(self) -> None:
         """Test adding participant."""
         sequence = SequenceDiagram()
 
@@ -224,7 +224,7 @@ class TestSequenceDiagram:
         assert participant.name == "Alice"
         assert "A" in sequence.participants
 
-    def test_add_message(self):
+    def test_add_message(self) -> None:
         """Test adding message between participants."""
         sequence = SequenceDiagram()
 
@@ -239,7 +239,7 @@ class TestSequenceDiagram:
         assert "A" in sequence.participants
         assert "B" in sequence.participants
 
-    def test_add_note(self):
+    def test_add_note(self) -> None:
         """Test adding note."""
         sequence = SequenceDiagram()
         sequence.add_participant("A", "Alice")
@@ -250,7 +250,7 @@ class TestSequenceDiagram:
         assert note.participant == "A"
         assert note.position == "right of"
 
-    def test_to_mermaid(self):
+    def test_to_mermaid(self) -> None:
         """Test generating Mermaid syntax."""
         sequence = SequenceDiagram(title="Test", autonumber=True)
         sequence.add_participant("A", "Alice")
@@ -269,27 +269,27 @@ class TestSequenceDiagram:
 class TestSequenceParticipant:
     """Test SequenceParticipant class."""
 
-    def test_init_default(self):
+    def test_init_default(self) -> None:
         """Test participant initialization."""
         participant = SequenceParticipant("A")
 
         assert participant.id == "A"
         assert participant.name == "A"  # Defaults to ID
 
-    def test_init_with_name(self):
+    def test_init_with_name(self) -> None:
         """Test participant with custom name."""
         participant = SequenceParticipant("A", "Alice")
 
         assert participant.id == "A"
         assert participant.name == "Alice"
 
-    def test_to_mermaid_simple(self):
+    def test_to_mermaid_simple(self) -> None:
         """Test Mermaid syntax for simple participant."""
         participant = SequenceParticipant("A")
 
         assert participant.to_mermaid() == "participant A"
 
-    def test_to_mermaid_with_name(self):
+    def test_to_mermaid_with_name(self) -> None:
         """Test Mermaid syntax for participant with name."""
         participant = SequenceParticipant("A", "Alice")
 
@@ -299,7 +299,7 @@ class TestSequenceParticipant:
 class TestSequenceMessage:
     """Test SequenceMessage class."""
 
-    def test_init_default(self):
+    def test_init_default(self) -> None:
         """Test message initialization."""
         message = SequenceMessage("A", "B", "Hello")
 
@@ -308,19 +308,19 @@ class TestSequenceMessage:
         assert message.message == "Hello"
         assert message.message_type == "sync"
 
-    def test_invalid_message_type(self):
+    def test_invalid_message_type(self) -> None:
         """Test message with invalid type."""
         with pytest.raises(DiagramError, match="Unknown message type"):
             SequenceMessage("A", "B", "Hello", "invalid_type")
 
-    def test_to_mermaid_simple(self):
+    def test_to_mermaid_simple(self) -> None:
         """Test Mermaid syntax for simple message."""
         message = SequenceMessage("A", "B", "Hello", "sync")
 
         lines = message.to_mermaid()
         assert "A->B: Hello" in lines
 
-    def test_to_mermaid_with_activation(self):
+    def test_to_mermaid_with_activation(self) -> None:
         """Test Mermaid syntax with activation."""
         message = SequenceMessage("A", "B", "Hello", "sync", activate=True)
 
@@ -332,7 +332,7 @@ class TestSequenceMessage:
 class TestFlowchartNodeAdditional:
     """Additional tests for FlowchartNode class."""
 
-    def test_invalid_node_shape(self):
+    def test_invalid_node_shape(self) -> None:
         """Test creating node with invalid shape."""
         from mermaid_render.exceptions import DiagramError
         from mermaid_render.models.flowchart import FlowchartNode
@@ -340,7 +340,7 @@ class TestFlowchartNodeAdditional:
         with pytest.raises(DiagramError, match="Unknown node shape"):
             FlowchartNode("A", "Test", shape="invalid_shape")
 
-    def test_node_with_style(self):
+    def test_node_with_style(self) -> None:
         """Test creating node with style."""
         from mermaid_render.models.flowchart import FlowchartNode
 
@@ -350,7 +350,7 @@ class TestFlowchartNodeAdditional:
         assert node.style == style
         assert node.to_mermaid() == "A[Styled Node]"
 
-    def test_all_node_shapes(self):
+    def test_all_node_shapes(self) -> None:
         """Test all supported node shapes."""
         from mermaid_render.models.flowchart import FlowchartNode
 
@@ -378,7 +378,7 @@ class TestFlowchartNodeAdditional:
 class TestFlowchartEdgeAdditional:
     """Additional tests for FlowchartEdge class."""
 
-    def test_invalid_arrow_type(self):
+    def test_invalid_arrow_type(self) -> None:
         """Test creating edge with invalid arrow type."""
         from mermaid_render.exceptions import DiagramError
         from mermaid_render.models.flowchart import FlowchartEdge
@@ -386,7 +386,7 @@ class TestFlowchartEdgeAdditional:
         with pytest.raises(DiagramError, match="Unknown arrow type"):
             FlowchartEdge("A", "B", arrow_type="invalid_arrow")
 
-    def test_edge_without_label(self):
+    def test_edge_without_label(self) -> None:
         """Test edge without label using different arrow types."""
         from mermaid_render.models.flowchart import FlowchartEdge
 
@@ -403,7 +403,7 @@ class TestFlowchartEdgeAdditional:
             edge = FlowchartEdge("A", "B", arrow_type=arrow_type)
             assert edge.to_mermaid() == expected
 
-    def test_edge_with_style(self):
+    def test_edge_with_style(self) -> None:
         """Test creating edge with style."""
         from mermaid_render.models.flowchart import FlowchartEdge
 
@@ -417,7 +417,7 @@ class TestFlowchartEdgeAdditional:
 class TestFlowchartSubgraph:
     """Test FlowchartSubgraph class."""
 
-    def test_subgraph_creation(self):
+    def test_subgraph_creation(self) -> None:
         """Test creating a subgraph."""
         from mermaid_render.models.flowchart import FlowchartSubgraph
 
@@ -428,7 +428,7 @@ class TestFlowchartSubgraph:
         assert subgraph.direction is None
         assert len(subgraph.nodes) == 0
 
-    def test_subgraph_with_direction(self):
+    def test_subgraph_with_direction(self) -> None:
         """Test creating subgraph with direction."""
         from mermaid_render.models.flowchart import FlowchartSubgraph
 
@@ -436,7 +436,7 @@ class TestFlowchartSubgraph:
 
         assert subgraph.direction == "LR"
 
-    def test_add_node_to_subgraph(self):
+    def test_add_node_to_subgraph(self) -> None:
         """Test adding nodes to subgraph."""
         from mermaid_render.models.flowchart import FlowchartSubgraph
 
@@ -448,7 +448,7 @@ class TestFlowchartSubgraph:
         assert "B" in subgraph.nodes
         assert len(subgraph.nodes) == 2
 
-    def test_add_duplicate_node_to_subgraph(self):
+    def test_add_duplicate_node_to_subgraph(self) -> None:
         """Test adding duplicate node to subgraph."""
         from mermaid_render.models.flowchart import FlowchartSubgraph
 
@@ -458,7 +458,7 @@ class TestFlowchartSubgraph:
 
         assert len(subgraph.nodes) == 1
 
-    def test_subgraph_to_mermaid_with_title(self):
+    def test_subgraph_to_mermaid_with_title(self) -> None:
         """Test subgraph Mermaid generation with title."""
         from mermaid_render.models.flowchart import FlowchartSubgraph
 
@@ -473,7 +473,7 @@ class TestFlowchartSubgraph:
         assert "    B" in lines
         assert "end" in lines
 
-    def test_subgraph_to_mermaid_without_title(self):
+    def test_subgraph_to_mermaid_without_title(self) -> None:
         """Test subgraph Mermaid generation without title."""
         from mermaid_render.models.flowchart import FlowchartSubgraph
 
@@ -486,7 +486,7 @@ class TestFlowchartSubgraph:
         assert "    A" in lines
         assert "end" in lines
 
-    def test_subgraph_to_mermaid_with_direction(self):
+    def test_subgraph_to_mermaid_with_direction(self) -> None:
         """Test subgraph Mermaid generation with direction."""
         from mermaid_render.models.flowchart import FlowchartSubgraph
 
@@ -504,7 +504,7 @@ class TestFlowchartSubgraph:
 class TestFlowchartDiagramAdditional:
     """Additional tests for FlowchartDiagram class."""
 
-    def test_duplicate_subgraph_error(self):
+    def test_duplicate_subgraph_error(self) -> None:
         """Test adding duplicate subgraph ID."""
         flowchart = FlowchartDiagram()
         flowchart.add_subgraph("sub1", "First")
@@ -512,7 +512,7 @@ class TestFlowchartDiagramAdditional:
         with pytest.raises(DiagramError, match="already exists"):
             flowchart.add_subgraph("sub1", "Second")
 
-    def test_add_node_to_nonexistent_subgraph(self):
+    def test_add_node_to_nonexistent_subgraph(self) -> None:
         """Test adding node to nonexistent subgraph."""
         flowchart = FlowchartDiagram()
         flowchart.add_node("A", "Node A")
@@ -520,7 +520,7 @@ class TestFlowchartDiagramAdditional:
         with pytest.raises(DiagramError, match="does not exist"):
             flowchart.add_node_to_subgraph("A", "nonexistent")
 
-    def test_add_nonexistent_node_to_subgraph(self):
+    def test_add_nonexistent_node_to_subgraph(self) -> None:
         """Test adding nonexistent node to subgraph."""
         flowchart = FlowchartDiagram()
         flowchart.add_subgraph("sub1", "Subgraph")
@@ -528,7 +528,7 @@ class TestFlowchartDiagramAdditional:
         with pytest.raises(DiagramError, match="does not exist"):
             flowchart.add_node_to_subgraph("nonexistent", "sub1")
 
-    def test_add_style(self):
+    def test_add_style(self) -> None:
         """Test adding style to elements."""
         flowchart = FlowchartDiagram()
 
@@ -538,7 +538,7 @@ class TestFlowchartDiagramAdditional:
         assert "A" in flowchart.styles
         assert flowchart.styles["A"] == style
 
-    def test_to_mermaid_with_title(self):
+    def test_to_mermaid_with_title(self) -> None:
         """Test Mermaid generation with title."""
         flowchart = FlowchartDiagram(title="My Flowchart")
         flowchart.add_node("A", "Start")
@@ -547,7 +547,7 @@ class TestFlowchartDiagramAdditional:
 
         assert "title: My Flowchart" in mermaid_code
 
-    def test_to_mermaid_with_subgraphs(self):
+    def test_to_mermaid_with_subgraphs(self) -> None:
         """Test Mermaid generation with subgraphs."""
         flowchart = FlowchartDiagram()
         flowchart.add_node("A", "Node A")
@@ -562,7 +562,7 @@ class TestFlowchartDiagramAdditional:
         assert "    A" in mermaid_code
         assert "end" in mermaid_code
 
-    def test_to_mermaid_with_styles(self):
+    def test_to_mermaid_with_styles(self) -> None:
         """Test Mermaid generation with styles."""
         flowchart = FlowchartDiagram()
         flowchart.add_node("A", "Styled Node")
@@ -576,7 +576,7 @@ class TestFlowchartDiagramAdditional:
 class TestSequenceParticipantAdditional:
     """Additional tests for SequenceParticipant class."""
 
-    def test_participant_with_same_id_and_name(self):
+    def test_participant_with_same_id_and_name(self) -> None:
         """Test participant where name equals ID."""
         from mermaid_render.models.sequence import SequenceParticipant
 
@@ -590,7 +590,7 @@ class TestSequenceParticipantAdditional:
 class TestSequenceMessageAdditional:
     """Additional tests for SequenceMessage class."""
 
-    def test_message_with_deactivation(self):
+    def test_message_with_deactivation(self) -> None:
         """Test message with deactivation."""
         from mermaid_render.models.sequence import SequenceMessage
 
@@ -600,7 +600,7 @@ class TestSequenceMessageAdditional:
         assert "A->B: Hello" in lines
         assert "deactivate B" in lines
 
-    def test_all_message_types(self):
+    def test_all_message_types(self) -> None:
         """Test all supported message types."""
         from mermaid_render.models.sequence import SequenceMessage
 
@@ -624,7 +624,7 @@ class TestSequenceMessageAdditional:
 class TestSequenceNote:
     """Test SequenceNote class."""
 
-    def test_note_creation(self):
+    def test_note_creation(self) -> None:
         """Test creating a note."""
         from mermaid_render.models.sequence import SequenceNote
 
@@ -634,7 +634,7 @@ class TestSequenceNote:
         assert note.participant == "A"
         assert note.position == "right of"
 
-    def test_invalid_note_position(self):
+    def test_invalid_note_position(self) -> None:
         """Test creating note with invalid position."""
         from mermaid_render.exceptions import DiagramError
         from mermaid_render.models.sequence import SequenceNote
@@ -642,7 +642,7 @@ class TestSequenceNote:
         with pytest.raises(DiagramError, match="Unknown note position"):
             SequenceNote("Test", "A", "invalid_position")
 
-    def test_note_over_participants(self):
+    def test_note_over_participants(self) -> None:
         """Test note over multiple participants."""
         from mermaid_render.models.sequence import SequenceNote
 
@@ -651,7 +651,7 @@ class TestSequenceNote:
         mermaid_syntax = note.to_mermaid()
         assert mermaid_syntax == "note over A,B,C: Spanning note"
 
-    def test_note_positions(self):
+    def test_note_positions(self) -> None:
         """Test all note positions."""
         from mermaid_render.models.sequence import SequenceNote
 
@@ -669,7 +669,7 @@ class TestSequenceNote:
 class TestSequenceLoop:
     """Test SequenceLoop class."""
 
-    def test_loop_creation(self):
+    def test_loop_creation(self) -> None:
         """Test creating a loop."""
         from mermaid_render.models.sequence import SequenceLoop
 
@@ -679,7 +679,7 @@ class TestSequenceLoop:
         assert len(loop.messages) == 0
         assert len(loop.notes) == 0
 
-    def test_add_message_to_loop(self):
+    def test_add_message_to_loop(self) -> None:
         """Test adding message to loop."""
         from mermaid_render.models.sequence import SequenceLoop, SequenceMessage
 
@@ -691,7 +691,7 @@ class TestSequenceLoop:
         assert len(loop.messages) == 1
         assert loop.messages[0] is message
 
-    def test_add_note_to_loop(self):
+    def test_add_note_to_loop(self) -> None:
         """Test adding note to loop."""
         from mermaid_render.models.sequence import SequenceLoop, SequenceNote
 
@@ -703,7 +703,7 @@ class TestSequenceLoop:
         assert len(loop.notes) == 1
         assert loop.notes[0] is note
 
-    def test_loop_to_mermaid(self):
+    def test_loop_to_mermaid(self) -> None:
         """Test loop Mermaid generation."""
         from mermaid_render.models.sequence import (
             SequenceLoop,
@@ -729,7 +729,7 @@ class TestSequenceLoop:
 class TestSequenceDiagramAdditional:
     """Additional tests for SequenceDiagram class."""
 
-    def test_duplicate_participant_error(self):
+    def test_duplicate_participant_error(self) -> None:
         """Test adding duplicate participant."""
         sequence = SequenceDiagram()
         sequence.add_participant("A", "Alice")
@@ -737,14 +737,14 @@ class TestSequenceDiagramAdditional:
         with pytest.raises(DiagramError, match="already exists"):
             sequence.add_participant("A", "Alice Again")
 
-    def test_add_note_to_nonexistent_participant(self):
+    def test_add_note_to_nonexistent_participant(self) -> None:
         """Test adding note to nonexistent participant."""
         sequence = SequenceDiagram()
 
         with pytest.raises(DiagramError, match="does not exist"):
             sequence.add_note("Test note", "nonexistent")
 
-    def test_add_loop(self):
+    def test_add_loop(self) -> None:
         """Test adding loop to sequence diagram."""
         sequence = SequenceDiagram()
 
@@ -754,7 +754,7 @@ class TestSequenceDiagramAdditional:
         assert sequence.loops[0] is loop
         assert loop.condition == "while condition"
 
-    def test_activate_participant(self):
+    def test_activate_participant(self) -> None:
         """Test activating participant."""
         sequence = SequenceDiagram()
         sequence.add_participant("A", "Alice")
@@ -763,14 +763,14 @@ class TestSequenceDiagramAdditional:
 
         assert sequence.activations["A"] is True
 
-    def test_activate_nonexistent_participant(self):
+    def test_activate_nonexistent_participant(self) -> None:
         """Test activating nonexistent participant."""
         sequence = SequenceDiagram()
 
         with pytest.raises(DiagramError, match="does not exist"):
             sequence.activate_participant("nonexistent")
 
-    def test_deactivate_participant(self):
+    def test_deactivate_participant(self) -> None:
         """Test deactivating participant."""
         sequence = SequenceDiagram()
         sequence.add_participant("A", "Alice")
@@ -779,14 +779,14 @@ class TestSequenceDiagramAdditional:
 
         assert sequence.activations["A"] is False
 
-    def test_deactivate_nonexistent_participant(self):
+    def test_deactivate_nonexistent_participant(self) -> None:
         """Test deactivating nonexistent participant."""
         sequence = SequenceDiagram()
 
         with pytest.raises(DiagramError, match="does not exist"):
             sequence.deactivate_participant("nonexistent")
 
-    def test_to_mermaid_with_loops(self):
+    def test_to_mermaid_with_loops(self) -> None:
         """Test Mermaid generation with loops."""
         sequence = SequenceDiagram()
         sequence.add_participant("A", "Alice")
@@ -802,7 +802,7 @@ class TestSequenceDiagramAdditional:
         assert "    A->B: Hello" in mermaid_code
         assert "end" in mermaid_code
 
-    def test_to_mermaid_with_notes(self):
+    def test_to_mermaid_with_notes(self) -> None:
         """Test Mermaid generation with notes."""
         sequence = SequenceDiagram()
         sequence.add_participant("A", "Alice")
@@ -816,7 +816,7 @@ class TestSequenceDiagramAdditional:
 class TestGanttDiagram:
     """Test GanttDiagram class."""
 
-    def test_diagram_creation(self):
+    def test_diagram_creation(self) -> None:
         """Test creating a Gantt diagram."""
         from mermaid_render.models.gantt import GanttDiagram
 
@@ -827,7 +827,7 @@ class TestGanttDiagram:
         assert len(diagram.sections) == 0
         assert len(diagram.tasks) == 0
 
-    def test_diagram_with_title_and_format(self):
+    def test_diagram_with_title_and_format(self) -> None:
         """Test Gantt diagram with title and custom date format."""
         from mermaid_render.models.gantt import GanttDiagram
 
@@ -836,7 +836,7 @@ class TestGanttDiagram:
         assert diagram.title == "Project Timeline"
         assert diagram.date_format == "%m/%d/%Y"
 
-    def test_add_section(self):
+    def test_add_section(self) -> None:
         """Test adding sections to Gantt diagram."""
         from mermaid_render.models.gantt import GanttDiagram
 
@@ -848,7 +848,7 @@ class TestGanttDiagram:
         assert "Planning" in diagram.sections
         assert "Development" in diagram.sections
 
-    def test_add_task(self):
+    def test_add_task(self) -> None:
         """Test adding tasks to Gantt diagram."""
         from mermaid_render.models.gantt import GanttDiagram
 
@@ -860,7 +860,7 @@ class TestGanttDiagram:
         assert diagram.tasks[0] == ("Task 1", "2024-01-01", "5d", "active")
         assert diagram.tasks[1] == ("Task 2", "2024-01-06", "3d", "done")
 
-    def test_add_task_defaults(self):
+    def test_add_task_defaults(self) -> None:
         """Test adding task with default values."""
         from mermaid_render.models.gantt import GanttDiagram
 
@@ -870,7 +870,7 @@ class TestGanttDiagram:
         assert len(diagram.tasks) == 1
         assert diagram.tasks[0] == ("Simple Task", None, None, "active")
 
-    def test_to_mermaid_basic(self):
+    def test_to_mermaid_basic(self) -> None:
         """Test basic Mermaid generation."""
         from mermaid_render.models.gantt import GanttDiagram
 
@@ -883,7 +883,7 @@ class TestGanttDiagram:
         assert "dateFormat %Y-%m-%d" in mermaid_code
         assert "Task 1 :active, 2024-01-01, 5d" in mermaid_code
 
-    def test_to_mermaid_with_title(self):
+    def test_to_mermaid_with_title(self) -> None:
         """Test Mermaid generation with title."""
         from mermaid_render.models.gantt import GanttDiagram
 
@@ -894,7 +894,7 @@ class TestGanttDiagram:
 
         assert "title Project Timeline" in mermaid_code
 
-    def test_to_mermaid_with_sections(self):
+    def test_to_mermaid_with_sections(self) -> None:
         """Test Mermaid generation with sections."""
         from mermaid_render.models.gantt import GanttDiagram
 
@@ -911,7 +911,7 @@ class TestGanttDiagram:
         assert "Plan Task :active, 2024-01-01, 3d" in mermaid_code
         assert "Dev Task :active, 2024-01-04, 5d" in mermaid_code
 
-    def test_to_mermaid_with_task_status(self):
+    def test_to_mermaid_with_task_status(self) -> None:
         """Test Mermaid generation with task status."""
         from mermaid_render.models.gantt import GanttDiagram
 
@@ -930,7 +930,7 @@ class TestGanttDiagram:
 class TestGitGraphDiagram:
     """Test GitGraphDiagram class."""
 
-    def test_diagram_creation(self):
+    def test_diagram_creation(self) -> None:
         """Test creating a Git graph diagram."""
         from mermaid_render.models.git_graph import GitGraphDiagram
 
@@ -941,7 +941,7 @@ class TestGitGraphDiagram:
         assert len(diagram.branches) == 0
         assert len(diagram.merges) == 0
 
-    def test_diagram_with_title(self):
+    def test_diagram_with_title(self) -> None:
         """Test Git graph diagram with title."""
         from mermaid_render.models.git_graph import GitGraphDiagram
 
@@ -949,7 +949,7 @@ class TestGitGraphDiagram:
 
         assert diagram.title == "Version Control Flow"
 
-    def test_add_commit(self):
+    def test_add_commit(self) -> None:
         """Test adding commits to Git graph."""
         from mermaid_render.models.git_graph import GitGraphDiagram
 
@@ -961,7 +961,7 @@ class TestGitGraphDiagram:
         assert diagram.commits[0] == ("commit", "Initial commit", "main")
         assert diagram.commits[1] == ("commit", "Add feature", "feature")
 
-    def test_add_commit_default_branch(self):
+    def test_add_commit_default_branch(self) -> None:
         """Test adding commit with default branch."""
         from mermaid_render.models.git_graph import GitGraphDiagram
 
@@ -971,7 +971,7 @@ class TestGitGraphDiagram:
         assert len(diagram.commits) == 1
         assert diagram.commits[0] == ("commit", "Default branch commit", "main")
 
-    def test_add_branch(self):
+    def test_add_branch(self) -> None:
         """Test adding branches to Git graph."""
         from mermaid_render.models.git_graph import GitGraphDiagram
 
@@ -983,7 +983,7 @@ class TestGitGraphDiagram:
         assert "feature" in diagram.branches
         assert "hotfix" in diagram.branches
 
-    def test_add_merge(self):
+    def test_add_merge(self) -> None:
         """Test adding merges to Git graph."""
         from mermaid_render.models.git_graph import GitGraphDiagram
 
@@ -995,7 +995,7 @@ class TestGitGraphDiagram:
         assert diagram.merges[0] == ("feature", "main")
         assert diagram.merges[1] == ("hotfix", "main")
 
-    def test_to_mermaid_basic(self):
+    def test_to_mermaid_basic(self) -> None:
         """Test basic Mermaid generation."""
         from mermaid_render.models.git_graph import GitGraphDiagram
 
@@ -1007,7 +1007,7 @@ class TestGitGraphDiagram:
         assert "gitgraph" in mermaid_code
         assert "commit id: \"Initial commit\"" in mermaid_code
 
-    def test_to_mermaid_with_title(self):
+    def test_to_mermaid_with_title(self) -> None:
         """Test Mermaid generation with title."""
         from mermaid_render.models.git_graph import GitGraphDiagram
 
@@ -1018,7 +1018,7 @@ class TestGitGraphDiagram:
 
         assert "title: Git Flow" in mermaid_code
 
-    def test_to_mermaid_with_branches_and_merges(self):
+    def test_to_mermaid_with_branches_and_merges(self) -> None:
         """Test Mermaid generation with branches and merges."""
         from mermaid_render.models.git_graph import GitGraphDiagram
 
@@ -1040,7 +1040,7 @@ class TestGitGraphDiagram:
 class TestMindmapDiagram:
     """Test MindmapDiagram class."""
 
-    def test_diagram_creation(self):
+    def test_diagram_creation(self) -> None:
         """Test creating a mindmap diagram."""
         from mermaid_render.models.mindmap import MindmapDiagram
 
@@ -1051,7 +1051,7 @@ class TestMindmapDiagram:
         assert diagram.root.text == "Root"
         assert len(diagram.root.children) == 0
 
-    def test_diagram_with_title_and_root(self):
+    def test_diagram_with_title_and_root(self) -> None:
         """Test mindmap diagram with title and custom root."""
         from mermaid_render.models.mindmap import MindmapDiagram
 
@@ -1060,7 +1060,7 @@ class TestMindmapDiagram:
         assert diagram.title == "Project Planning"
         assert diagram.root.text == "Web App"
 
-    def test_add_node_to_root(self):
+    def test_add_node_to_root(self) -> None:
         """Test adding nodes to root."""
         from mermaid_render.models.mindmap import MindmapDiagram
 
@@ -1074,7 +1074,7 @@ class TestMindmapDiagram:
         assert node2.id == "backend"
         assert node2.text == "Backend"
 
-    def test_add_node_with_shape(self):
+    def test_add_node_with_shape(self) -> None:
         """Test adding node with custom shape."""
         from mermaid_render.models.mindmap import MindmapDiagram
 
@@ -1083,7 +1083,7 @@ class TestMindmapDiagram:
 
         assert node.shape == "circle"
 
-    def test_add_nested_nodes(self):
+    def test_add_nested_nodes(self) -> None:
         """Test adding nested nodes."""
         from mermaid_render.models.mindmap import MindmapDiagram
 
@@ -1097,7 +1097,7 @@ class TestMindmapDiagram:
         assert frontend_node.children[0].text == "React"
         assert frontend_node.children[1].text == "Vue"
 
-    def test_find_node(self):
+    def test_find_node(self) -> None:
         """Test finding nodes in the tree."""
         from mermaid_render.models.mindmap import MindmapDiagram
 
@@ -1114,7 +1114,7 @@ class TestMindmapDiagram:
         missing_node = diagram._find_node(diagram.root, "nonexistent")
         assert missing_node is None
 
-    def test_to_mermaid_basic(self):
+    def test_to_mermaid_basic(self) -> None:
         """Test basic Mermaid generation."""
         from mermaid_render.models.mindmap import MindmapDiagram
 
@@ -1127,7 +1127,7 @@ class TestMindmapDiagram:
         assert "Central Idea" in mermaid_code
         assert "Branch 1" in mermaid_code
 
-    def test_to_mermaid_with_title(self):
+    def test_to_mermaid_with_title(self) -> None:
         """Test Mermaid generation with title."""
         from mermaid_render.models.mindmap import MindmapDiagram
 
@@ -1138,7 +1138,7 @@ class TestMindmapDiagram:
 
         assert "title: My Mindmap" in mermaid_code
 
-    def test_to_mermaid_with_shapes(self):
+    def test_to_mermaid_with_shapes(self) -> None:
         """Test Mermaid generation with different shapes."""
         from mermaid_render.models.mindmap import MindmapDiagram
 
@@ -1157,7 +1157,7 @@ class TestMindmapDiagram:
 class TestPieChartDiagram:
     """Test PieChartDiagram class."""
 
-    def test_diagram_creation(self):
+    def test_diagram_creation(self) -> None:
         """Test creating a pie chart diagram."""
         from mermaid_render.models.pie_chart import PieChartDiagram
 
@@ -1167,7 +1167,7 @@ class TestPieChartDiagram:
         assert diagram.show_data is True
         assert len(diagram.data) == 0
 
-    def test_diagram_with_options(self):
+    def test_diagram_with_options(self) -> None:
         """Test pie chart diagram with options."""
         from mermaid_render.models.pie_chart import PieChartDiagram
 
@@ -1176,7 +1176,7 @@ class TestPieChartDiagram:
         assert diagram.title == "Data Distribution"
         assert diagram.show_data is False
 
-    def test_add_slice(self):
+    def test_add_slice(self) -> None:
         """Test adding slices to pie chart."""
         from mermaid_render.models.pie_chart import PieChartDiagram
 
@@ -1190,7 +1190,7 @@ class TestPieChartDiagram:
         assert diagram.data["Category B"] == 28.2
         assert diagram.data["Category C"] == 36.3
 
-    def test_to_mermaid_basic(self):
+    def test_to_mermaid_basic(self) -> None:
         """Test basic Mermaid generation."""
         from mermaid_render.models.pie_chart import PieChartDiagram
 
@@ -1207,7 +1207,7 @@ class TestPieChartDiagram:
         assert '"B" : 30' in mermaid_code
         assert '"C" : 20' in mermaid_code
 
-    def test_to_mermaid_with_title(self):
+    def test_to_mermaid_with_title(self) -> None:
         """Test Mermaid generation with title."""
         from mermaid_render.models.pie_chart import PieChartDiagram
 
@@ -1218,7 +1218,7 @@ class TestPieChartDiagram:
 
         assert "title Sales Data" in mermaid_code
 
-    def test_to_mermaid_without_show_data(self):
+    def test_to_mermaid_without_show_data(self) -> None:
         """Test Mermaid generation without show data."""
         from mermaid_render.models.pie_chart import PieChartDiagram
 
@@ -1235,7 +1235,7 @@ class TestPieChartDiagram:
 class TestStateDiagram:
     """Test StateDiagram class."""
 
-    def test_diagram_creation(self):
+    def test_diagram_creation(self) -> None:
         """Test creating a state diagram."""
         from mermaid_render.models.state import StateDiagram
 
@@ -1245,7 +1245,7 @@ class TestStateDiagram:
         assert len(diagram.states) == 0
         assert len(diagram.transitions) == 0
 
-    def test_diagram_with_title(self):
+    def test_diagram_with_title(self) -> None:
         """Test state diagram with title."""
         from mermaid_render.models.state import StateDiagram
 
@@ -1253,7 +1253,7 @@ class TestStateDiagram:
 
         assert diagram.title == "State Machine"
 
-    def test_add_state(self):
+    def test_add_state(self) -> None:
         """Test adding states to diagram."""
         from mermaid_render.models.state import StateDiagram
 
@@ -1265,7 +1265,7 @@ class TestStateDiagram:
         assert diagram.states["idle"] == "Idle State"
         assert diagram.states["active"] == "active"
 
-    def test_add_transition(self):
+    def test_add_transition(self) -> None:
         """Test adding transitions between states."""
         from mermaid_render.models.state import StateDiagram
 
@@ -1277,7 +1277,7 @@ class TestStateDiagram:
         assert diagram.transitions[0] == ("idle", "active", "start")
         assert diagram.transitions[1] == ("active", "idle", None)
 
-    def test_to_mermaid_basic(self):
+    def test_to_mermaid_basic(self) -> None:
         """Test basic Mermaid generation."""
         from mermaid_render.models.state import StateDiagram
 
@@ -1290,7 +1290,7 @@ class TestStateDiagram:
         assert "stateDiagram-v2" in mermaid_code
         assert "idle --> active" in mermaid_code
 
-    def test_to_mermaid_with_title(self):
+    def test_to_mermaid_with_title(self) -> None:
         """Test Mermaid generation with title."""
         from mermaid_render.models.state import StateDiagram
 
@@ -1301,7 +1301,7 @@ class TestStateDiagram:
 
         assert "title: State Machine" in mermaid_code
 
-    def test_to_mermaid_with_state_labels(self):
+    def test_to_mermaid_with_state_labels(self) -> None:
         """Test Mermaid generation with state labels."""
         from mermaid_render.models.state import StateDiagram
 
@@ -1314,7 +1314,7 @@ class TestStateDiagram:
         assert "idle : Idle State" in mermaid_code
         assert "active : Active State" in mermaid_code
 
-    def test_to_mermaid_with_transition_labels(self):
+    def test_to_mermaid_with_transition_labels(self) -> None:
         """Test Mermaid generation with transition labels."""
         from mermaid_render.models.state import StateDiagram
 
@@ -1331,7 +1331,7 @@ class TestStateDiagram:
 class TestUserJourneyDiagram:
     """Test UserJourneyDiagram class."""
 
-    def test_diagram_creation(self):
+    def test_diagram_creation(self) -> None:
         """Test creating a user journey diagram."""
         from mermaid_render.models.user_journey import UserJourneyDiagram
 
@@ -1341,7 +1341,7 @@ class TestUserJourneyDiagram:
         assert len(diagram.sections) == 0
         assert len(diagram.tasks) == 0
 
-    def test_diagram_with_title(self):
+    def test_diagram_with_title(self) -> None:
         """Test user journey diagram with title."""
         from mermaid_render.models.user_journey import UserJourneyDiagram
 
@@ -1349,7 +1349,7 @@ class TestUserJourneyDiagram:
 
         assert diagram.title == "Customer Journey"
 
-    def test_add_section(self):
+    def test_add_section(self) -> None:
         """Test adding sections to user journey."""
         from mermaid_render.models.user_journey import UserJourneyDiagram
 
@@ -1361,7 +1361,7 @@ class TestUserJourneyDiagram:
         assert diagram.sections[0] == ("section", "Discovery")
         assert diagram.sections[1] == ("section", "Purchase")
 
-    def test_add_task(self):
+    def test_add_task(self) -> None:
         """Test adding tasks to user journey."""
         from mermaid_render.models.user_journey import UserJourneyDiagram
 
@@ -1373,7 +1373,7 @@ class TestUserJourneyDiagram:
         assert diagram.tasks[0] == ("Search products", ["Customer", "Support"], 5)
         assert diagram.tasks[1] == ("Add to cart", ["Customer"], 3)
 
-    def test_to_mermaid_basic(self):
+    def test_to_mermaid_basic(self) -> None:
         """Test basic Mermaid generation."""
         from mermaid_render.models.user_journey import UserJourneyDiagram
 
@@ -1385,7 +1385,7 @@ class TestUserJourneyDiagram:
         assert "journey" in mermaid_code
         assert "Browse: 4: Customer" in mermaid_code
 
-    def test_to_mermaid_with_title(self):
+    def test_to_mermaid_with_title(self) -> None:
         """Test Mermaid generation with title."""
         from mermaid_render.models.user_journey import UserJourneyDiagram
 
@@ -1396,7 +1396,7 @@ class TestUserJourneyDiagram:
 
         assert "title Shopping Journey" in mermaid_code
 
-    def test_to_mermaid_with_sections(self):
+    def test_to_mermaid_with_sections(self) -> None:
         """Test Mermaid generation with sections."""
         from mermaid_render.models.user_journey import UserJourneyDiagram
 
@@ -1413,7 +1413,7 @@ class TestUserJourneyDiagram:
         assert "Search: 5: Customer" in mermaid_code
         assert "Buy: 3: Customer : Payment" in mermaid_code
 
-    def test_to_mermaid_multiple_actors(self):
+    def test_to_mermaid_multiple_actors(self) -> None:
         """Test Mermaid generation with multiple actors."""
         from mermaid_render.models.user_journey import UserJourneyDiagram
 
@@ -1428,7 +1428,7 @@ class TestUserJourneyDiagram:
 class TestMindmapNode:
     """Test MindmapNode class."""
 
-    def test_node_creation(self):
+    def test_node_creation(self) -> None:
         """Test creating a mindmap node."""
         from mermaid_render.models.mindmap import MindmapNode
 
@@ -1439,7 +1439,7 @@ class TestMindmapNode:
         assert node.shape == "default"
         assert len(node.children) == 0
 
-    def test_node_with_shape(self):
+    def test_node_with_shape(self) -> None:
         """Test creating node with custom shape."""
         from mermaid_render.models.mindmap import MindmapNode
 
@@ -1447,7 +1447,7 @@ class TestMindmapNode:
 
         assert node.shape == "circle"
 
-    def test_add_child(self):
+    def test_add_child(self) -> None:
         """Test adding child nodes."""
         from mermaid_render.models.mindmap import MindmapNode
 
@@ -1462,7 +1462,7 @@ class TestMindmapNode:
         assert parent.children[0] is child1
         assert parent.children[1] is child2
 
-    def test_to_mermaid_default_shape(self):
+    def test_to_mermaid_default_shape(self) -> None:
         """Test Mermaid generation for default shape."""
         from mermaid_render.models.mindmap import MindmapNode
 
@@ -1471,7 +1471,7 @@ class TestMindmapNode:
 
         assert lines == ["Test Node"]
 
-    def test_to_mermaid_circle_shape(self):
+    def test_to_mermaid_circle_shape(self) -> None:
         """Test Mermaid generation for circle shape."""
         from mermaid_render.models.mindmap import MindmapNode
 
@@ -1480,7 +1480,7 @@ class TestMindmapNode:
 
         assert lines == ["((Circle Node))"]
 
-    def test_to_mermaid_with_children(self):
+    def test_to_mermaid_with_children(self) -> None:
         """Test Mermaid generation with children."""
         from mermaid_render.models.mindmap import MindmapNode
 
@@ -1493,7 +1493,7 @@ class TestMindmapNode:
         assert "Parent" in lines
         assert "  Child" in lines
 
-    def test_to_mermaid_nested_levels(self):
+    def test_to_mermaid_nested_levels(self) -> None:
         """Test Mermaid generation with multiple nesting levels."""
         from mermaid_render.models.mindmap import MindmapNode
 
@@ -1510,7 +1510,7 @@ class TestMindmapNode:
         assert "  Level 1" in lines
         assert "    Level 2" in lines
 
-    def test_to_mermaid_all_shapes(self):
+    def test_to_mermaid_all_shapes(self) -> None:
         """Test Mermaid generation for all supported shapes."""
         from mermaid_render.models.mindmap import MindmapNode
 
@@ -1531,7 +1531,7 @@ class TestMindmapNode:
 class TestClassMethod:
     """Test ClassMethod class."""
 
-    def test_method_creation(self):
+    def test_method_creation(self) -> None:
         """Test creating a class method."""
         from mermaid_render.models.class_diagram import ClassMethod
 
@@ -1544,7 +1544,7 @@ class TestClassMethod:
         assert method.is_static is False
         assert method.is_abstract is False
 
-    def test_method_to_mermaid_basic(self):
+    def test_method_to_mermaid_basic(self) -> None:
         """Test basic method Mermaid generation."""
         from mermaid_render.models.class_diagram import ClassMethod
 
@@ -1552,7 +1552,7 @@ class TestClassMethod:
 
         assert method.to_mermaid() == "+getName() String"
 
-    def test_method_to_mermaid_with_parameters(self):
+    def test_method_to_mermaid_with_parameters(self) -> None:
         """Test method with parameters."""
         from mermaid_render.models.class_diagram import ClassMethod
 
@@ -1560,7 +1560,7 @@ class TestClassMethod:
 
         assert method.to_mermaid() == "+setName(name: String, id: int) void"
 
-    def test_method_visibility_symbols(self):
+    def test_method_visibility_symbols(self) -> None:
         """Test all visibility symbols."""
         from mermaid_render.models.class_diagram import ClassMethod
 
@@ -1575,7 +1575,7 @@ class TestClassMethod:
             method = ClassMethod("test", visibility)
             assert method.to_mermaid().startswith(symbol)
 
-    def test_method_static_and_abstract(self):
+    def test_method_static_and_abstract(self) -> None:
         """Test static and abstract method modifiers."""
         from mermaid_render.models.class_diagram import ClassMethod
 
@@ -1597,7 +1597,7 @@ class TestClassMethod:
 class TestClassAttribute:
     """Test ClassAttribute class."""
 
-    def test_attribute_creation(self):
+    def test_attribute_creation(self) -> None:
         """Test creating a class attribute."""
         from mermaid_render.models.class_diagram import ClassAttribute
 
@@ -1608,7 +1608,7 @@ class TestClassAttribute:
         assert attr.visibility == "private"
         assert attr.is_static is False
 
-    def test_attribute_to_mermaid_basic(self):
+    def test_attribute_to_mermaid_basic(self) -> None:
         """Test basic attribute Mermaid generation."""
         from mermaid_render.models.class_diagram import ClassAttribute
 
@@ -1616,7 +1616,7 @@ class TestClassAttribute:
 
         assert attr.to_mermaid() == "-name String"
 
-    def test_attribute_without_type(self):
+    def test_attribute_without_type(self) -> None:
         """Test attribute without type."""
         from mermaid_render.models.class_diagram import ClassAttribute
 
@@ -1624,7 +1624,7 @@ class TestClassAttribute:
 
         assert attr.to_mermaid() == "+count"
 
-    def test_attribute_static(self):
+    def test_attribute_static(self) -> None:
         """Test static attribute."""
         from mermaid_render.models.class_diagram import ClassAttribute
 
@@ -1632,7 +1632,7 @@ class TestClassAttribute:
 
         assert attr.to_mermaid() == "-instance MyClass$"
 
-    def test_attribute_visibility_symbols(self):
+    def test_attribute_visibility_symbols(self) -> None:
         """Test all visibility symbols for attributes."""
         from mermaid_render.models.class_diagram import ClassAttribute
 
@@ -1651,7 +1651,7 @@ class TestClassAttribute:
 class TestClassDefinition:
     """Test ClassDefinition class."""
 
-    def test_class_creation(self):
+    def test_class_creation(self) -> None:
         """Test creating a class definition."""
         from mermaid_render.models.class_diagram import ClassDefinition
 
@@ -1664,7 +1664,7 @@ class TestClassDefinition:
         assert len(class_def.attributes) == 0
         assert len(class_def.methods) == 0
 
-    def test_abstract_class(self):
+    def test_abstract_class(self) -> None:
         """Test creating abstract class."""
         from mermaid_render.models.class_diagram import ClassDefinition
 
@@ -1677,7 +1677,7 @@ class TestClassDefinition:
         assert "    <<abstract>>" in lines
         assert "}" in lines
 
-    def test_interface_class(self):
+    def test_interface_class(self) -> None:
         """Test creating interface."""
         from mermaid_render.models.class_diagram import ClassDefinition
 
@@ -1690,7 +1690,7 @@ class TestClassDefinition:
         assert "    <<interface>>" in lines
         assert "}" in lines
 
-    def test_class_with_stereotype(self):
+    def test_class_with_stereotype(self) -> None:
         """Test class with stereotype."""
         from mermaid_render.models.class_diagram import ClassDefinition
 
@@ -1701,7 +1701,7 @@ class TestClassDefinition:
         assert "    <<entity>>" in lines
         assert "}" in lines
 
-    def test_add_attribute_and_method(self):
+    def test_add_attribute_and_method(self) -> None:
         """Test adding attributes and methods to class."""
         from mermaid_render.models.class_diagram import (
             ClassAttribute,
@@ -1722,7 +1722,7 @@ class TestClassDefinition:
         assert class_def.attributes[0] is attr
         assert class_def.methods[0] is method
 
-    def test_class_to_mermaid_complete(self):
+    def test_class_to_mermaid_complete(self) -> None:
         """Test complete class Mermaid generation."""
         from mermaid_render.models.class_diagram import (
             ClassAttribute,
@@ -1749,7 +1749,7 @@ class TestClassDefinition:
 class TestClassRelationship:
     """Test ClassRelationship class."""
 
-    def test_relationship_creation(self):
+    def test_relationship_creation(self) -> None:
         """Test creating a class relationship."""
         from mermaid_render.models.class_diagram import ClassRelationship
 
@@ -1762,7 +1762,7 @@ class TestClassRelationship:
         assert rel.from_cardinality is None
         assert rel.to_cardinality is None
 
-    def test_invalid_relationship_type(self):
+    def test_invalid_relationship_type(self) -> None:
         """Test creating relationship with invalid type."""
         from mermaid_render.exceptions import DiagramError
         from mermaid_render.models.class_diagram import ClassRelationship
@@ -1770,7 +1770,7 @@ class TestClassRelationship:
         with pytest.raises(DiagramError, match="Unknown relationship type"):
             ClassRelationship("A", "B", "invalid_type")
 
-    def test_all_relationship_types(self):
+    def test_all_relationship_types(self) -> None:
         """Test all supported relationship types."""
         from mermaid_render.models.class_diagram import ClassRelationship
 
@@ -1787,7 +1787,7 @@ class TestClassRelationship:
             rel = ClassRelationship("Dog", "Animal", rel_type)
             assert rel.to_mermaid() == expected
 
-    def test_relationship_with_label(self):
+    def test_relationship_with_label(self) -> None:
         """Test relationship with label."""
         from mermaid_render.models.class_diagram import ClassRelationship
 
@@ -1795,7 +1795,7 @@ class TestClassRelationship:
 
         assert rel.to_mermaid() == "Dog --> Owner : belongs to"
 
-    def test_relationship_with_cardinality(self):
+    def test_relationship_with_cardinality(self) -> None:
         """Test relationship with cardinality."""
         from mermaid_render.models.class_diagram import ClassRelationship
 
@@ -1805,7 +1805,7 @@ class TestClassRelationship:
 
         assert rel.to_mermaid() == 'Order "1" *-- "*" Item'
 
-    def test_relationship_complete(self):
+    def test_relationship_complete(self) -> None:
         """Test relationship with all features."""
         from mermaid_render.models.class_diagram import ClassRelationship
 
@@ -1824,7 +1824,7 @@ class TestClassRelationship:
 class TestClassDiagram:
     """Test ClassDiagram class."""
 
-    def test_diagram_creation(self):
+    def test_diagram_creation(self) -> None:
         """Test creating a class diagram."""
         from mermaid_render.models.class_diagram import ClassDiagram
 
@@ -1834,7 +1834,7 @@ class TestClassDiagram:
         assert len(diagram.classes) == 0
         assert len(diagram.relationships) == 0
 
-    def test_diagram_with_title(self):
+    def test_diagram_with_title(self) -> None:
         """Test class diagram with title."""
         from mermaid_render.models.class_diagram import ClassDiagram
 
@@ -1842,7 +1842,7 @@ class TestClassDiagram:
 
         assert diagram.title == "Animal Hierarchy"
 
-    def test_add_class(self):
+    def test_add_class(self) -> None:
         """Test adding class to diagram."""
         from mermaid_render.models.class_diagram import ClassDiagram
 
@@ -1854,7 +1854,7 @@ class TestClassDiagram:
         assert diagram.classes["Animal"] is class_def
         assert class_def.name == "Animal"
 
-    def test_add_duplicate_class(self):
+    def test_add_duplicate_class(self) -> None:
         """Test adding duplicate class."""
         from mermaid_render.exceptions import DiagramError
         from mermaid_render.models.class_diagram import ClassDiagram
@@ -1865,7 +1865,7 @@ class TestClassDiagram:
         with pytest.raises(DiagramError, match="already exists"):
             diagram.add_class("Animal")
 
-    def test_add_class_with_options(self):
+    def test_add_class_with_options(self) -> None:
         """Test adding class with options."""
         from mermaid_render.models.class_diagram import ClassDiagram
 
@@ -1875,7 +1875,7 @@ class TestClassDiagram:
         assert class_def.is_abstract is True
         assert class_def.stereotype == "entity"
 
-    def test_add_relationship(self):
+    def test_add_relationship(self) -> None:
         """Test adding relationship between classes."""
         from mermaid_render.models.class_diagram import ClassDiagram
 
@@ -1891,7 +1891,7 @@ class TestClassDiagram:
         assert rel.to_class == "Animal"
         assert rel.relationship_type == "inheritance"
 
-    def test_add_relationship_nonexistent_from_class(self):
+    def test_add_relationship_nonexistent_from_class(self) -> None:
         """Test adding relationship with nonexistent from class."""
         from mermaid_render.exceptions import DiagramError
         from mermaid_render.models.class_diagram import ClassDiagram
@@ -1902,7 +1902,7 @@ class TestClassDiagram:
         with pytest.raises(DiagramError, match="does not exist"):
             diagram.add_relationship("NonExistent", "Animal", "inheritance")
 
-    def test_add_relationship_nonexistent_to_class(self):
+    def test_add_relationship_nonexistent_to_class(self) -> None:
         """Test adding relationship with nonexistent to class."""
         from mermaid_render.exceptions import DiagramError
         from mermaid_render.models.class_diagram import ClassDiagram
@@ -1913,7 +1913,7 @@ class TestClassDiagram:
         with pytest.raises(DiagramError, match="does not exist"):
             diagram.add_relationship("Dog", "NonExistent", "inheritance")
 
-    def test_to_mermaid_basic(self):
+    def test_to_mermaid_basic(self) -> None:
         """Test basic Mermaid generation."""
         from mermaid_render.models.class_diagram import ClassDiagram
 
@@ -1926,7 +1926,7 @@ class TestClassDiagram:
         assert "class Animal {" in mermaid_code
         assert "}" in mermaid_code
 
-    def test_to_mermaid_with_title(self):
+    def test_to_mermaid_with_title(self) -> None:
         """Test Mermaid generation with title."""
         from mermaid_render.models.class_diagram import ClassDiagram
 
@@ -1937,7 +1937,7 @@ class TestClassDiagram:
 
         assert "title: Animal Hierarchy" in mermaid_code
 
-    def test_to_mermaid_with_relationships(self):
+    def test_to_mermaid_with_relationships(self) -> None:
         """Test Mermaid generation with relationships."""
         from mermaid_render.models.class_diagram import ClassDiagram
 
@@ -1950,7 +1950,7 @@ class TestClassDiagram:
 
         assert "Dog <|-- Animal" in mermaid_code
 
-    def test_to_mermaid_complete(self):
+    def test_to_mermaid_complete(self) -> None:
         """Test complete Mermaid generation with classes and relationships."""
         from mermaid_render.models.class_diagram import (
             ClassAttribute,
@@ -1988,7 +1988,7 @@ class TestClassDiagram:
 class TestERDiagram:
     """Test ERDiagram class."""
 
-    def test_diagram_creation(self):
+    def test_diagram_creation(self) -> None:
         """Test creating an ER diagram."""
         from mermaid_render.models.er_diagram import ERDiagram
 
@@ -1998,7 +1998,7 @@ class TestERDiagram:
         assert len(diagram.entities) == 0
         assert len(diagram.relationships) == 0
 
-    def test_diagram_with_title(self):
+    def test_diagram_with_title(self) -> None:
         """Test ER diagram with title."""
         from mermaid_render.models.er_diagram import ERDiagram
 
@@ -2006,7 +2006,7 @@ class TestERDiagram:
 
         assert diagram.title == "Customer Database"
 
-    def test_add_entity_without_attributes(self):
+    def test_add_entity_without_attributes(self) -> None:
         """Test adding entity without attributes."""
         from mermaid_render.models.er_diagram import ERDiagram
 
@@ -2017,7 +2017,7 @@ class TestERDiagram:
         assert "Customer" in diagram.entities
         assert diagram.entities["Customer"] == {}
 
-    def test_add_entity_with_attributes(self):
+    def test_add_entity_with_attributes(self) -> None:
         """Test adding entity with attributes."""
         from mermaid_render.models.er_diagram import ERDiagram
 
@@ -2029,7 +2029,7 @@ class TestERDiagram:
         assert "Customer" in diagram.entities
         assert diagram.entities["Customer"] == attributes
 
-    def test_add_relationship(self):
+    def test_add_relationship(self) -> None:
         """Test adding relationship between entities."""
         from mermaid_render.models.er_diagram import ERDiagram
 
@@ -2041,7 +2041,7 @@ class TestERDiagram:
         assert len(diagram.relationships) == 1
         assert diagram.relationships[0] == ("Customer", "Order", "||--o{")
 
-    def test_to_mermaid_basic(self):
+    def test_to_mermaid_basic(self) -> None:
         """Test basic Mermaid generation."""
         from mermaid_render.models.er_diagram import ERDiagram
 
@@ -2054,7 +2054,7 @@ class TestERDiagram:
         assert "Customer {" in mermaid_code
         assert "}" in mermaid_code
 
-    def test_to_mermaid_with_title(self):
+    def test_to_mermaid_with_title(self) -> None:
         """Test Mermaid generation with title."""
         from mermaid_render.models.er_diagram import ERDiagram
 
@@ -2065,7 +2065,7 @@ class TestERDiagram:
 
         assert "title: Customer Database" in mermaid_code
 
-    def test_to_mermaid_with_attributes(self):
+    def test_to_mermaid_with_attributes(self) -> None:
         """Test Mermaid generation with entity attributes."""
         from mermaid_render.models.er_diagram import ERDiagram
 
@@ -2081,7 +2081,7 @@ class TestERDiagram:
         assert "string email" in mermaid_code
         assert "}" in mermaid_code
 
-    def test_to_mermaid_with_relationships(self):
+    def test_to_mermaid_with_relationships(self) -> None:
         """Test Mermaid generation with relationships."""
         from mermaid_render.models.er_diagram import ERDiagram
 
@@ -2094,7 +2094,7 @@ class TestERDiagram:
 
         assert "Customer ||--o{ Order" in mermaid_code
 
-    def test_to_mermaid_complete(self):
+    def test_to_mermaid_complete(self) -> None:
         """Test complete Mermaid generation with entities and relationships."""
         from mermaid_render.models.er_diagram import ERDiagram
 

@@ -22,18 +22,18 @@ from mermaid_render.exceptions import CacheError
 class TestCacheManager:
     """Test cache manager functionality."""
 
-    def test_cache_manager_creation(self):
+    def test_cache_manager_creation(self) -> None:
         """Test creating a cache manager."""
         manager = create_cache_manager("memory")
         assert manager is not None
 
-    def test_cache_manager_with_file_backend(self):
+    def test_cache_manager_with_file_backend(self) -> None:
         """Test cache manager with file backend."""
         with tempfile.TemporaryDirectory() as temp_dir:
             manager = create_cache_manager("file", cache_dir=temp_dir)
             assert manager is not None
 
-    def test_cache_manager_basic_operations(self):
+    def test_cache_manager_basic_operations(self) -> None:
         """Test basic cache operations."""
         manager = create_cache_manager("memory")
 
@@ -51,12 +51,12 @@ class TestCacheManager:
 class TestMemoryBackend:
     """Test memory backend implementation."""
 
-    def test_memory_backend_creation(self):
+    def test_memory_backend_creation(self) -> None:
         """Test memory backend creation."""
         backend = MemoryBackend()
         assert backend is not None
 
-    def test_memory_backend_with_options(self):
+    def test_memory_backend_with_options(self) -> None:
         """Test memory backend with configuration options."""
         backend = MemoryBackend(max_entries=1000)
         assert backend is not None
@@ -65,28 +65,28 @@ class TestMemoryBackend:
 class TestFileBackend:
     """Test file-based cache backend."""
 
-    def test_file_backend_creation(self):
+    def test_file_backend_creation(self) -> None:
         """Test file backend creation."""
         with tempfile.TemporaryDirectory() as temp_dir:
-            backend = FileBackend(cache_dir=temp_dir)
+            backend = FileBackend(cache_dir=Path(temp_dir))
             assert backend is not None
 
-    def test_file_backend_with_options(self):
+    def test_file_backend_with_options(self) -> None:
         """Test file backend with configuration options."""
         with tempfile.TemporaryDirectory() as temp_dir:
-            backend = FileBackend(cache_dir=temp_dir, max_size_mb=50)
+            backend = FileBackend(cache_dir=Path(temp_dir), max_size_mb=50)
             assert backend is not None
 
 
 class TestPerformanceMonitor:
     """Test performance monitoring functionality."""
 
-    def test_performance_monitor_creation(self):
+    def test_performance_monitor_creation(self) -> None:
         """Test performance monitor creation."""
         monitor = PerformanceMonitor()
         assert monitor is not None
 
-    def test_performance_monitor_with_cache_manager(self):
+    def test_performance_monitor_with_cache_manager(self) -> None:
         """Test performance monitor integration with cache manager."""
         manager = create_cache_manager("memory")
         monitor = PerformanceMonitor()

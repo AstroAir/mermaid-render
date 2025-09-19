@@ -205,14 +205,14 @@ class PDFRendererPlugin(BaseRenderer):
             pass
 
         try:
-            import weasyprint  # type: ignore[import-not-found]
+            import weasyprint
             pdf_backends.append("weasyprint")
         except ImportError:
             pass
 
         try:
-            from reportlab.graphics import renderPDF
-            from svglib.svglib import svg2rlg  # type: ignore[import-not-found]
+            from reportlab.graphics import renderPDF  # type: ignore[import-untyped]
+            from svglib.svglib import svg2rlg
             pdf_backends.append("reportlab+svglib")
         except ImportError:
             pass

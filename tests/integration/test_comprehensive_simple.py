@@ -12,7 +12,7 @@ import tempfile
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))
 
 
-def test_basic_functionality():
+def test_basic_functionality() -> None:
     """Test basic SVG rendering functionality."""
     print("Testing basic functionality...")
 
@@ -49,7 +49,7 @@ def test_basic_functionality():
         print("✓ Config rendering passed")
 
 
-def test_validation_and_sanitization():
+def test_validation_and_sanitization() -> None:
     """Test validation and sanitization features."""
     print("\nTesting validation and sanitization...")
 
@@ -74,7 +74,7 @@ def test_validation_and_sanitization():
     print("✓ Security scanning passed")
 
 
-def test_theme_system():
+def test_theme_system() -> None:
     """Test theme system functionality."""
     print("\nTesting theme system...")
 
@@ -106,7 +106,7 @@ def test_theme_system():
     print("✓ Custom theme creation passed")
 
 
-def test_caching_system():
+def test_caching_system() -> None:
     """Test caching system functionality."""
     print("\nTesting caching system...")
 
@@ -143,7 +143,7 @@ def test_caching_system():
             print("✓ Caching system passed")
 
 
-def test_export_functionality():
+def test_export_functionality() -> None:
     """Test export functionality."""
     print("\nTesting export functionality...")
 
@@ -185,7 +185,7 @@ def test_export_functionality():
             print("✓ HTML export passed")
 
 
-def test_error_handling():
+def test_error_handling() -> None:
     """Test error handling functionality."""
     print("\nTesting error handling...")
 
@@ -211,7 +211,7 @@ def test_error_handling():
     print("✓ Error suggestions passed")
 
 
-def test_performance_features():
+def test_performance_features() -> None:
     """Test performance optimization features."""
     print("\nTesting performance features...")
 
@@ -232,7 +232,7 @@ def test_performance_features():
     print("✓ Performance metrics passed")
 
 
-def test_integration_scenarios():
+def test_integration_scenarios() -> None:
     """Test integration scenarios."""
     print("\nTesting integration scenarios...")
 

@@ -8,7 +8,7 @@ and monitoring capabilities.
 
 import time
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Tuple
 
 from mermaid_render import (
     MermaidRenderer,
@@ -37,14 +37,14 @@ except ImportError:
     print("⚠️  Cache system not available. Install with: pip install mermaid-render[cache]")
 
 
-def create_output_dir():
+def create_output_dir() -> Path:
     """Create output directory for examples."""
     output_dir = Path("output/performance")
     output_dir.mkdir(parents=True, exist_ok=True)
     return output_dir
 
 
-def basic_caching_example(output_dir: Path):
+def basic_caching_example(output_dir: Path) -> None:
     """Demonstrate basic caching functionality."""
     print("Basic caching example (simulated)...")
 
@@ -97,7 +97,7 @@ def basic_caching_example(output_dir: Path):
         print(f"❌ Error in basic caching: {e}")
 
 
-def advanced_caching_strategies(output_dir: Path):
+def advanced_caching_strategies(output_dir: Path) -> None:
     """Demonstrate advanced caching strategies."""
     print("Advanced caching strategies example (simulated)...")
 
@@ -156,7 +156,7 @@ def advanced_caching_strategies(output_dir: Path):
         print(f"❌ Error in advanced caching: {e}")
 
 
-def performance_monitoring_example(output_dir: Path):
+def performance_monitoring_example(output_dir: Path) -> None:
     """Demonstrate performance monitoring capabilities."""
     print("Performance monitoring example...")
 
@@ -164,7 +164,7 @@ def performance_monitoring_example(output_dir: Path):
         renderer = MermaidRenderer()
 
         # Create test diagrams of varying complexity
-        test_diagrams = []
+        test_diagrams: List[Tuple[str, Any]] = []
 
         # Simple diagram
         simple = FlowchartDiagram(title="Simple Flow")
@@ -195,7 +195,7 @@ def performance_monitoring_example(output_dir: Path):
         print("Running performance tests...")
 
         total_renders = 0
-        total_time = 0
+        total_time = 0.0
 
         for name, diagram in test_diagrams:
             print(f"Testing {name} diagram...")
@@ -244,7 +244,7 @@ def performance_monitoring_example(output_dir: Path):
         print(f"❌ Error in performance monitoring: {e}")
 
 
-def cache_optimization_example(output_dir: Path):
+def cache_optimization_example(output_dir: Path) -> None:
     """Demonstrate cache optimization techniques."""
     print("Cache optimization example (simulated)...")
 
@@ -306,12 +306,12 @@ def cache_optimization_example(output_dir: Path):
         print(f"❌ Error in cache optimization: {e}")
 
 
-def benchmark_comparison_example(output_dir: Path):
+def benchmark_comparison_example(output_dir: Path) -> None:
     """Compare performance with and without caching."""
     print("Benchmark comparison example...")
     
     # Create test diagrams
-    test_diagrams = []
+    test_diagrams: List[Tuple[str, Any]] = []
     
     # Small diagram
     small = FlowchartDiagram(title="Small Diagram")
@@ -381,7 +381,7 @@ def benchmark_comparison_example(output_dir: Path):
     print(f"📁 Benchmark results saved to {benchmark_path}")
 
 
-def main():
+def main() -> None:
     """Run all performance and caching examples."""
     print("=== Mermaid Render Performance & Caching Showcase ===\n")
     

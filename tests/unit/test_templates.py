@@ -6,6 +6,7 @@ import json
 import tempfile
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 from unittest.mock import Mock, patch, mock_open
 
 import pytest
@@ -30,7 +31,7 @@ from mermaid_render.exceptions import ValidationError
 class TestTemplate:
     """Test Template class."""
 
-    def test_template_creation(self):
+    def test_template_creation(self) -> None:
         """Test basic template creation."""
         now = datetime.now()
         template = Template(
@@ -51,7 +52,7 @@ class TestTemplate:
         assert template.parameters == {"title": "string"}
         assert template.tags == []  # Default empty list
 
-    def test_template_with_tags(self):
+    def test_template_with_tags(self) -> None:
         """Test template creation with tags."""
         now = datetime.now()
         template = Template(
@@ -69,7 +70,7 @@ class TestTemplate:
 
         assert template.tags == ["test", "example"]
 
-    def test_template_to_dict(self):
+    def test_template_to_dict(self) -> None:
         """Test template serialization to dictionary."""
         now = datetime.now()
         template = Template(
@@ -97,7 +98,7 @@ class TestTemplate:
 class TestTemplateManager:
     """Test TemplateManager class."""
 
-    def test_template_manager_init(self):
+    def test_template_manager_init(self) -> None:
         """Test template manager initialization."""
         with tempfile.TemporaryDirectory() as temp_dir:
             manager = TemplateManager(templates_dir=Path(temp_dir))
@@ -105,7 +106,7 @@ class TestTemplateManager:
             assert manager.templates_dir == Path(temp_dir)
             assert isinstance(manager._templates, dict)
 
-    def test_create_template(self):
+    def test_create_template(self) -> None:
         """Test creating a new template."""
         with tempfile.TemporaryDirectory() as temp_dir:
             manager = TemplateManager(templates_dir=Path(temp_dir))
@@ -123,10 +124,10 @@ class TestTemplateManager:
             assert template.name == "Test Template"
             assert template.diagram_type == "flowchart"
             assert template.author == "Test Author"
-            assert "test" in template.tags
+            assert template.tags is not None and "test" in template.tags
             assert template.id in manager._templates
 
-    def test_get_template(self):
+    def test_get_template(self) -> None:
         """Test retrieving a template by ID."""
         with tempfile.TemporaryDirectory() as temp_dir:
             manager = TemplateManager(templates_dir=Path(temp_dir))
@@ -145,7 +146,7 @@ class TestTemplateManager:
             # Test non-existent template
             assert manager.get_template("nonexistent") is None
 
-    def test_get_template_by_name(self):
+    def test_get_template_by_name(self) -> None:
         """Test retrieving a template by name."""
         with tempfile.TemporaryDirectory() as temp_dir:
             manager = TemplateManager(templates_dir=Path(temp_dir))
@@ -161,7 +162,7 @@ class TestTemplateManager:
             assert retrieved is not None
             assert retrieved.id == template.id
 
-    def test_list_templates(self):
+    def test_list_templates(self) -> None:
         """Test listing all templates."""
         with tempfile.TemporaryDirectory() as temp_dir:
             manager = TemplateManager(templates_dir=Path(
@@ -187,7 +188,7 @@ class TestTemplateManager:
             assert "Template 1" in template_names
             assert "Template 2" in template_names
 
-    def test_generate_from_template(self):
+    def test_generate_from_template(self) -> None:
         """Test generating diagram from template."""
         with tempfile.TemporaryDirectory() as temp_dir:
             manager = TemplateManager(templates_dir=Path(temp_dir))
@@ -208,7 +209,7 @@ class TestTemplateManager:
             assert "Finish" in result
             assert "-->" in result
 
-    def test_delete_template(self):
+    def test_delete_template(self) -> None:
         """Test deleting a template."""
         with tempfile.TemporaryDirectory() as temp_dir:
             manager = TemplateManager(templates_dir=Path(temp_dir))
@@ -238,7 +239,7 @@ class TestTemplateManager:
 class TestFlowchartGenerator:
     """Test FlowchartGenerator class."""
 
-    def test_basic_flowchart_generation(self):
+    def test_basic_flowchart_generation(self) -> None:
         """Test basic flowchart generation."""
         generator = FlowchartGenerator()
 
@@ -265,7 +266,7 @@ class TestFlowchartGenerator:
         assert "Begin" in result
         assert "Complete" in result
 
-    def test_flowchart_with_styling(self):
+    def test_flowchart_with_styling(self) -> None:
         """Test flowchart generation with styling."""
         generator = FlowchartGenerator()
 
@@ -287,7 +288,7 @@ class TestFlowchartGenerator:
         assert "Styled Node" in result
         assert "classDef" in result or "class" in result
 
-    def test_flowchart_schema(self):
+    def test_flowchart_schema(self) -> None:
         """Test flowchart generator schema."""
         generator = FlowchartGenerator()
         schema = generator.get_schema()
@@ -301,7 +302,7 @@ class TestFlowchartGenerator:
 class TestSequenceGenerator:
     """Test SequenceGenerator class."""
 
-    def test_basic_sequence_generation(self):
+    def test_basic_sequence_generation(self) -> None:
         """Test basic sequence diagram generation."""
         generator = SequenceGenerator()
 
@@ -325,7 +326,7 @@ class TestSequenceGenerator:
         assert "user->>api: Request" in result
         assert "api->>user: Response" in result
 
-    def test_sequence_with_notes(self):
+    def test_sequence_with_notes(self) -> None:
         """Test sequence diagram with notes."""
         generator = SequenceGenerator()
 
@@ -340,7 +341,7 @@ class TestSequenceGenerator:
 
         assert "Note over A: Important note" in result
 
-    def test_sequence_schema(self):
+    def test_sequence_schema(self) -> None:
         """Test sequence generator schema."""
         generator = SequenceGenerator()
         schema = generator.get_schema()
@@ -354,7 +355,7 @@ class TestSequenceGenerator:
 class TestClassDiagramGenerator:
     """Test ClassDiagramGenerator class."""
 
-    def test_basic_class_generation(self):
+    def test_basic_class_generation(self) -> None:
         """Test basic class diagram generation."""
         generator = ClassDiagramGenerator()
 
@@ -396,7 +397,7 @@ class TestClassDiagramGenerator:
         assert "login()" in result
         assert "Admin --|> User" in result
 
-    def test_class_schema(self):
+    def test_class_schema(self) -> None:
         """Test class generator schema."""
         generator = ClassDiagramGenerator()
         schema = generator.get_schema()
@@ -410,7 +411,7 @@ class TestClassDiagramGenerator:
 class TestArchitectureGenerator:
     """Test ArchitectureGenerator class."""
 
-    def test_architecture_generation(self):
+    def test_architecture_generation(self) -> None:
         """Test architecture diagram generation."""
         generator = ArchitectureGenerator()
 
@@ -432,7 +433,7 @@ class TestArchitectureGenerator:
         assert "Database" in result
         assert "queries" in result
 
-    def test_architecture_schema(self):
+    def test_architecture_schema(self) -> None:
         """Test architecture generator schema."""
         generator = ArchitectureGenerator()
         schema = generator.get_schema()
@@ -446,7 +447,7 @@ class TestArchitectureGenerator:
 class TestProcessFlowGenerator:
     """Test ProcessFlowGenerator class."""
 
-    def test_process_flow_generation(self):
+    def test_process_flow_generation(self) -> None:
         """Test process flow diagram generation."""
         generator = ProcessFlowGenerator()
 
@@ -470,7 +471,7 @@ class TestProcessFlowGenerator:
         assert "Review" in result
         assert "End Process" in result
 
-    def test_process_flow_schema(self):
+    def test_process_flow_schema(self) -> None:
         """Test process flow generator schema."""
         generator = ProcessFlowGenerator()
         schema = generator.get_schema()
@@ -484,7 +485,7 @@ class TestProcessFlowGenerator:
 class TestTemplateValidation:
     """Test template validation functionality."""
 
-    def test_validate_valid_template(self):
+    def test_validate_valid_template(self) -> None:
         """Test validation of valid template."""
         template_data = {
             "name": "Valid Template",
@@ -497,7 +498,7 @@ class TestTemplateValidation:
         # Should not raise an exception
         validate_template(template_data)
 
-    def test_validate_missing_required_fields(self):
+    def test_validate_missing_required_fields(self) -> None:
         """Test validation with missing required fields."""
         template_data = {
             "name": "Incomplete Template",
@@ -507,7 +508,7 @@ class TestTemplateValidation:
         with pytest.raises(ValidationError):
             validate_template(template_data)
 
-    def test_validate_invalid_diagram_type(self):
+    def test_validate_invalid_diagram_type(self) -> None:
         """Test validation with invalid diagram type."""
         template_data = {
             "name": "Invalid Template",
@@ -523,7 +524,7 @@ class TestTemplateValidation:
 class TestTemplateUtilities:
     """Test template utility functions."""
 
-    def test_generate_from_template_function(self):
+    def test_generate_from_template_function(self) -> None:
         """Test generate_from_template utility function."""
         with tempfile.TemporaryDirectory() as temp_dir:
             # Mock the template manager
@@ -538,7 +539,7 @@ class TestTemplateUtilities:
                 mock_manager.generate.assert_called_once_with(
                     "test_template", {"param": "value"}, True)
 
-    def test_list_available_templates_function(self):
+    def test_list_available_templates_function(self) -> None:
         """Test list_available_templates utility function."""
         with patch('mermaid_render.templates.utils.TemplateManager') as mock_manager_class:
             mock_template1 = Mock()
@@ -575,7 +576,7 @@ class TestTemplateUtilities:
             assert result[0]["parameter_count"] == 2
             assert result[1]["parameter_count"] == 1
 
-    def test_get_template_info_function(self):
+    def test_get_template_info_function(self) -> None:
         """Test get_template_info utility function."""
         with patch('mermaid_render.templates.utils.TemplateManager') as mock_manager_class:
             mock_template = Mock()
@@ -596,6 +597,7 @@ class TestTemplateUtilities:
 
             result = get_template_info("test_template_id")
 
+            assert result is not None
             assert result["name"] == "Test Template"
             assert result["diagram_type"] == "flowchart"
             mock_manager.get_template.assert_called_once_with("test_template_id")

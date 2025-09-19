@@ -1,33 +1,63 @@
 # Interactive Module
 
-This module provides interactive web-based features for the Mermaid Render library, including a visual diagram builder, real-time editing, and web server capabilities.
+This module provides a comprehensive interactive web-based diagram builder for Mermaid diagrams with real-time collaboration, advanced validation, security features, and performance optimizations.
 
 ## Components
 
-### Core Interactive Services
+### Core Components
 
-- **`builder.py`** - Interactive diagram builder with drag-and-drop interface
-- **`server.py`** - Web server for hosting interactive diagram editor
-- **`websocket_handler.py`** - Real-time communication for live editing
-- **`validation.py`** - Real-time validation with immediate feedback
+- **`server.py`** - FastAPI web server with WebSocket support, security middleware, and performance monitoring
+- **`builder.py`** - Core diagram building logic with full Mermaid syntax support
+- **`websocket_handler.py`** - WebSocket connection management with rate limiting and debouncing
+- **`validation.py`** - Real-time validation integrated with core MermaidValidator
+- **`export.py`** - Comprehensive diagram export functionality with MermaidRenderer integration
+- **`templates.py`** - Advanced template management and loading system
 
-### User Interface
+### Security & Performance
 
-- **`ui_components.py`** - Reusable UI components for the web interface
-- **`templates.py`** - HTML templates for the interactive editor
-- **`export.py`** - Export functionality for interactive sessions
+- **`security.py`** - Input sanitization, rate limiting, and origin validation
+- **`performance.py`** - Performance monitoring, debouncing, and resource management
 
-### Supporting Infrastructure
+### Static Assets
 
-- **`utils.py`** - Utility functions for interactive features
+- **`static/js/`** - Client-side JavaScript including WebSocket communication
+- **`static/css/`** - Comprehensive styling for the interactive interface
+- **`templates/`** - Jinja2 templates for the web interface
 
-## Key Features
+## Features
 
-- **Visual Diagram Builder**: Drag-and-drop interface for creating diagrams
-- **Real-time Editing**: Live preview and collaborative editing
-- **Interactive Validation**: Immediate syntax checking and error highlighting
-- **Export Integration**: Direct export from the web interface
-- **WebSocket Support**: Real-time synchronization between clients
+### Core Features
+
+- **Real-time collaborative editing** with WebSocket synchronization
+- **Live preview** with instant diagram rendering
+- **Comprehensive template library** with built-in and custom templates
+- **Multi-format export** (SVG, PNG, PDF, Mermaid code, JSON)
+- **Advanced validation** with real-time feedback and suggestions
+- **Full Mermaid syntax support** for all diagram types
+
+### Security Features
+
+- **Input sanitization** to prevent XSS and injection attacks
+- **Rate limiting** for API endpoints and WebSocket connections
+- **Origin validation** for cross-origin request protection
+- **Session management** with secure session handling
+- **Resource limits** to prevent abuse and ensure stability
+
+### Performance Features
+
+- **Debounced operations** to reduce excessive updates
+- **Connection pooling** for efficient WebSocket management
+- **Performance monitoring** with detailed metrics
+- **Resource management** with automatic cleanup
+- **Optimized rendering** with fallback mechanisms
+
+### Supported Diagram Types
+
+- **Flowcharts** (`flowchart TD`, `graph TD`)
+- **Sequence Diagrams** (`sequenceDiagram`)
+- **Class Diagrams** (`classDiagram`)
+- **State Diagrams** (`stateDiagram`)
+- **Entity-Relationship Diagrams** (`erDiagram`)
 
 ## Usage Example
 

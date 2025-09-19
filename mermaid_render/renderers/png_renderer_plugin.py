@@ -163,13 +163,13 @@ class PNGRendererPlugin(BaseRenderer):
         """
         try:
             # Test connectivity to mermaid.ink service
-            import requests
+            import requests  # type: ignore
 
             response = requests.get(
                 f"{self._png_renderer.server_url}/",
                 timeout=5,
             )
-            return response.status_code == 200
+            return bool(response.status_code == 200)
         except Exception:
             return False
 

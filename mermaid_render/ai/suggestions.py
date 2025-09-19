@@ -5,6 +5,9 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
+# Import EnhancementResult and EnhancementType from analysis module
+from .analysis import EnhancementResult, EnhancementType
+
 
 class SuggestionType(Enum):
     """Types of suggestions."""
@@ -190,6 +193,56 @@ class SuggestionEngine:
             for s in all_suggestions
             if s.priority in [SuggestionPriority.HIGH, SuggestionPriority.CRITICAL]
         ]
+
+    def enhance_style(self, diagram_code: str) -> EnhancementResult:
+        """
+        Enhance diagram styling for better appearance.
+
+        Args:
+            diagram_code: Mermaid diagram code to enhance
+
+        Returns:
+            EnhancementResult with style improvements
+        """
+        improvements = []
+        enhanced = diagram_code
+
+        # Add basic styling if missing
+        if "classDef" not in diagram_code:
+            enhanced = self._apply_basic_styling(enhanced)
+            improvements.append("Added basic styling")
+
+        # Improve color scheme
+        if self._needs_color_enhancement(diagram_code):
+            enhanced = self._enhance_colors(enhanced)
+            improvements.append("Enhanced color scheme")
+
+        return EnhancementResult(
+            original_diagram=diagram_code,
+            enhanced_diagram=enhanced,
+            enhancement_type=EnhancementType.STYLE,
+            improvements=improvements,
+            confidence_score=0.7,
+        )
+
+    def _apply_basic_styling(self, code: str) -> str:
+        """Add basic styling to diagram."""
+        styling = """
+    classDef default fill:#f9f9f9,stroke:#333,stroke-width:2px
+    classDef highlight fill:#e1f5fe,stroke:#01579b,stroke-width:2px"""
+
+        return code + styling
+
+    def _needs_color_enhancement(self, code: str) -> bool:
+        """Check if colors need enhancement."""
+        return "fill:" in code and "#ff0000" in code  # Avoid harsh red
+
+    def _enhance_colors(self, code: str) -> str:
+        """Enhance color scheme."""
+        # Replace harsh colors with softer alternatives
+        enhanced = code.replace("#ff0000", "#f44336")  # Softer red
+        enhanced = enhanced.replace("#00ff00", "#4caf50")  # Softer green
+        return enhanced
 
     def _analyze_diagram(self, diagram_code: str) -> Dict[str, Any]:
         """Analyze diagram for suggestion generation."""

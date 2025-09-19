@@ -1,3 +1,4 @@
+from typing import Any, Dict, Union
 """
 Unit tests for utility functions.
 """
@@ -37,7 +38,7 @@ from mermaid_render.utils.validation import (
 class TestExportUtils:
     """Test export utility functions."""
 
-    def test_export_to_file_with_diagram_object(self, temp_dir):
+    def test_export_to_file_with_diagram_object(self, temp_dir: Any) -> None:
         """Test exporting diagram object to file."""
         flowchart = FlowchartDiagram()
         flowchart.add_node("A", "Start")
@@ -57,7 +58,7 @@ class TestExportUtils:
             mock_renderer_class.assert_called_once()
             mock_renderer.save.assert_called_once()
 
-    def test_export_to_file_with_string(self, temp_dir):
+    def test_export_to_file_with_string(self, temp_dir: Any) -> None:
         """Test exporting string diagram to file."""
         diagram_code = "flowchart TD\n    A --> B"
         output_path = temp_dir / "test.svg"
@@ -72,7 +73,7 @@ class TestExportUtils:
 
             mock_renderer.save.assert_called_once_with(diagram_code, output_path, "svg")
 
-    def test_export_to_file_with_theme(self, temp_dir):
+    def test_export_to_file_with_theme(self, temp_dir: Any) -> None:
         """Test exporting with theme."""
         diagram_code = "flowchart TD\n    A --> B"
         output_path = temp_dir / "test.svg"
@@ -87,7 +88,7 @@ class TestExportUtils:
 
             mock_renderer.set_theme.assert_called_once_with("dark")
 
-    def test_export_to_file_format_detection(self, temp_dir):
+    def test_export_to_file_format_detection(self, temp_dir: Any) -> None:
         """Test automatic format detection from file extension."""
         diagram_code = "flowchart TD\n    A --> B"
 
@@ -112,7 +113,7 @@ class TestExportUtils:
                     diagram_code, output_path, expected_format
                 )
 
-    def test_export_multiple_formats(self, temp_dir):
+    def test_export_multiple_formats(self, temp_dir: Any) -> None:
         """Test exporting to multiple formats."""
         diagram_code = "flowchart TD\n    A --> B"
         base_path = temp_dir / "diagram"
@@ -134,7 +135,7 @@ class TestExportUtils:
             assert result["svg"] == base_path.with_suffix(".svg")
             mock_renderer.save.assert_called_once()
 
-    def test_export_multiple_formats_with_theme(self, temp_dir):
+    def test_export_multiple_formats_with_theme(self, temp_dir: Any) -> None:
         """Test exporting multiple formats with theme."""
         diagram_code = "flowchart TD\n    A --> B"
         base_path = temp_dir / "diagram"
@@ -154,9 +155,9 @@ class TestExportUtils:
             # Check that set_theme was called
             mock_renderer.set_theme.assert_called_once_with("dark")
 
-    def test_batch_export(self, temp_dir):
+    def test_batch_export(self, temp_dir: Any) -> None:
         """Test batch export of multiple diagrams."""
-        diagrams = {
+        diagrams: Dict[str, Union[str, Any]] = {
             "flowchart": "flowchart TD\n    A --> B",
             "sequence": "sequenceDiagram\n    A->>B: Hello",
         }
@@ -178,7 +179,7 @@ class TestExportUtils:
             assert mock_renderer.save.call_count == 2
             assert temp_dir.exists()
 
-    def test_detect_format_from_extension(self):
+    def test_detect_format_from_extension(self) -> None:
         """Test format detection from file extension."""
         test_cases = [
             ("test.svg", "svg"),
@@ -193,14 +194,14 @@ class TestExportUtils:
             result = _detect_format_from_extension(path)
             assert result == expected
 
-    def test_detect_format_from_extension_no_extension(self):
+    def test_detect_format_from_extension_no_extension(self) -> None:
         """Test format detection with no extension."""
 
         path = Path("test")
         with pytest.raises(UnsupportedFormatError, match="No file extension provided"):
             _detect_format_from_extension(path)
 
-    def test_sanitize_filename_export(self):
+    def test_sanitize_filename_export(self) -> None:
         """Test filename sanitization in export module."""
         test_cases = [
             ("normal_name", "normal_name"),
@@ -220,7 +221,7 @@ class TestExportUtils:
 class TestHelperUtils:
     """Test helper utility functions."""
 
-    def test_get_supported_formats(self):
+    def test_get_supported_formats(self) -> None:
         """Test getting supported formats."""
         formats = get_supported_formats()
 
@@ -228,7 +229,7 @@ class TestHelperUtils:
         assert "svg" in formats
         assert len(formats) > 0
 
-    def test_get_available_themes(self):
+    def test_get_available_themes(self) -> None:
         """Test getting available themes."""
         themes = get_available_themes()
 
@@ -237,7 +238,7 @@ class TestHelperUtils:
         assert "dark" in themes
         assert len(themes) >= 5  # At least the built-in themes
 
-    def test_detect_diagram_type_flowchart(self):
+    def test_detect_diagram_type_flowchart(self) -> None:
         """Test detecting flowchart diagram type."""
         test_cases = [
             ("flowchart TD\n    A --> B", "flowchart"),
@@ -249,25 +250,25 @@ class TestHelperUtils:
             result = detect_diagram_type(code)
             assert result == expected
 
-    def test_detect_diagram_type_sequence(self):
+    def test_detect_diagram_type_sequence(self) -> None:
         """Test detecting sequence diagram type."""
         code = "sequenceDiagram\n    A->>B: Hello"
         result = detect_diagram_type(code)
         assert result == "sequenceDiagram"
 
-    def test_detect_diagram_type_class(self):
+    def test_detect_diagram_type_class(self) -> None:
         """Test detecting class diagram type."""
         code = "classDiagram\n    class Animal"
         result = detect_diagram_type(code)
         assert result == "classDiagram"
 
-    def test_detect_diagram_type_unknown(self):
+    def test_detect_diagram_type_unknown(self) -> None:
         """Test detecting unknown diagram type."""
         code = "unknown diagram type\n    some content"
         result = detect_diagram_type(code)
         assert result is None
 
-    def test_detect_diagram_type_empty(self):
+    def test_detect_diagram_type_empty(self) -> None:
         """Test detecting diagram type with empty input."""
         result = detect_diagram_type("")
         assert result is None
@@ -275,7 +276,7 @@ class TestHelperUtils:
         result = detect_diagram_type("   ")
         assert result is None
 
-    def test_sanitize_filename(self):
+    def test_sanitize_filename(self) -> None:
         """Test filename sanitization."""
         test_cases = [
             ("normal_filename", "normal_filename"),
@@ -292,7 +293,7 @@ class TestHelperUtils:
             result = sanitize_filename(input_name)
             assert result == expected
 
-    def test_ensure_directory(self, temp_dir):
+    def test_ensure_directory(self, temp_dir: Any) -> None:
         """Test directory creation."""
         test_dir = temp_dir / "nested" / "directory"
 
@@ -301,13 +302,13 @@ class TestHelperUtils:
         assert test_dir.exists()
         assert test_dir.is_dir()
 
-    def test_ensure_directory_existing(self, temp_dir):
+    def test_ensure_directory_existing(self, temp_dir: Any) -> None:
         """Test ensuring existing directory."""
         # Should not raise error for existing directory
         ensure_directory(temp_dir)
         assert temp_dir.exists()
 
-    def test_get_diagram_stats(self):
+    def test_get_diagram_stats(self) -> None:
         """Test getting diagram statistics."""
         diagram_code = """flowchart TD
             A[Start] --> B[Process]
@@ -329,7 +330,7 @@ class TestHelperUtils:
         assert stats["line_count"] > 0
         assert stats["character_count"] > 0
 
-    def test_estimate_complexity(self):
+    def test_estimate_complexity(self) -> None:
         """Test complexity estimation."""
         # Low complexity
         simple_code = "flowchart TD\n    A --> B"
@@ -358,7 +359,7 @@ class TestHelperUtils:
 class TestValidationUtils:
     """Test validation utility functions."""
 
-    def test_validate_mermaid_syntax_valid(self):
+    def test_validate_mermaid_syntax_valid(self) -> None:
         """Test validating valid Mermaid syntax."""
         valid_code = "flowchart TD\n    A[Start] --> B[End]"
 
@@ -377,7 +378,7 @@ class TestValidationUtils:
             assert result.is_valid is True
             mock_validator.validate.assert_called_once_with(valid_code)
 
-    def test_validate_mermaid_syntax_invalid(self):
+    def test_validate_mermaid_syntax_invalid(self) -> None:
         """Test validating invalid Mermaid syntax."""
         invalid_code = "invalid mermaid code"
 
@@ -396,7 +397,7 @@ class TestValidationUtils:
             assert result.is_valid is False
             assert len(result.errors) > 0
 
-    def test_quick_validate_true(self):
+    def test_quick_validate_true(self) -> None:
         """Test quick validation returning True."""
         valid_code = "flowchart TD\n    A --> B"
 
@@ -412,7 +413,7 @@ class TestValidationUtils:
             assert result is True
             mock_validate.assert_called_once_with(valid_code)
 
-    def test_quick_validate_false(self):
+    def test_quick_validate_false(self) -> None:
         """Test quick validation returning False."""
         invalid_code = "invalid code"
 
@@ -427,7 +428,7 @@ class TestValidationUtils:
 
             assert result is False
 
-    def test_get_validation_errors(self):
+    def test_get_validation_errors(self) -> None:
         """Test getting validation errors."""
         invalid_code = "invalid code"
         expected_errors = ["Error 1", "Error 2"]
@@ -443,7 +444,7 @@ class TestValidationUtils:
 
             assert result == expected_errors
 
-    def test_get_validation_warnings(self):
+    def test_get_validation_warnings(self) -> None:
         """Test getting validation warnings."""
         code_with_warnings = "flowchart TD\n    A --> B"
         expected_warnings = ["Warning 1", "Warning 2"]
@@ -459,7 +460,7 @@ class TestValidationUtils:
 
             assert result == expected_warnings
 
-    def test_suggest_fixes(self):
+    def test_suggest_fixes(self) -> None:
         """Test getting fix suggestions."""
         broken_code = "broken diagram"
         expected_suggestions = ["Fix 1", "Fix 2"]
@@ -476,7 +477,7 @@ class TestValidationUtils:
             assert result == expected_suggestions
             mock_validator.suggest_fixes.assert_called_once_with(broken_code)
 
-    def test_validate_node_id_valid(self):
+    def test_validate_node_id_valid(self) -> None:
         """Test validating valid node ID."""
         valid_id = "validNodeId123"
 
@@ -492,7 +493,7 @@ class TestValidationUtils:
             assert result is True
             mock_validator.validate_node_id.assert_called_once_with(valid_id)
 
-    def test_validate_node_id_invalid(self):
+    def test_validate_node_id_invalid(self) -> None:
         """Test validating invalid node ID."""
         invalid_id = "invalid-node-id!"
 
@@ -511,7 +512,7 @@ class TestValidationUtils:
 class TestUtilsIntegration:
     """Test integration between utility functions."""
 
-    def test_export_with_validation(self, temp_dir):
+    def test_export_with_validation(self, temp_dir: Any) -> None:
         """Test exporting with validation check."""
         # Valid diagram
         valid_diagram = "flowchart TD\n    A[Start] --> B[End]"
@@ -540,7 +541,7 @@ class TestUtilsIntegration:
                 export_to_file(valid_diagram, output_path)
                 mock_renderer.save.assert_called_once()
 
-    def test_detect_type_and_export(self, temp_dir):
+    def test_detect_type_and_export(self, temp_dir: Any) -> None:
         """Test detecting diagram type and exporting."""
         diagram_code = "sequenceDiagram\n    A->>B: Hello"
         output_path = temp_dir / "sequence.svg"
@@ -559,7 +560,7 @@ class TestUtilsIntegration:
             export_to_file(diagram_code, output_path)
             mock_renderer.save.assert_called_once()
 
-    def test_sanitize_and_export(self, temp_dir):
+    def test_sanitize_and_export(self, temp_dir: Any) -> None:
         """Test sanitizing filename and exporting."""
         diagram_code = "flowchart TD\n    A --> B"
         unsafe_name = "My Diagram: Version 2.0"
@@ -582,7 +583,7 @@ class TestUtilsIntegration:
             export_to_file(diagram_code, output_path)
             mock_renderer.save.assert_called_once()
 
-    def test_stats_and_complexity_analysis(self):
+    def test_stats_and_complexity_analysis(self) -> None:
         """Test getting stats and analyzing complexity."""
         complex_diagram = """flowchart TD
             title: Complex Process Flow

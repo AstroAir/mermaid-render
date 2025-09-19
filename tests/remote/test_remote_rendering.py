@@ -1,3 +1,4 @@
+from typing import Any
 #!/usr/bin/env python3
 """
 Test script for the improved remote SVG rendering.
@@ -11,7 +12,7 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))
 
 
-def test_session_creation():
+def test_session_creation() -> None:
     """Test that the session is created with proper configuration."""
     print("Testing session creation...")
 
@@ -29,7 +30,7 @@ def test_session_creation():
     print("✓ Session created with proper configuration")
 
 
-def test_context_manager():
+def test_context_manager() -> None:
     """Test context manager functionality."""
     print("Testing context manager...")
 
@@ -42,7 +43,7 @@ def test_context_manager():
     print("✓ Context manager works correctly")
 
 
-def test_server_status():
+def test_server_status() -> None:
     """Test server status checking."""
     print("Testing server status checking...")
 
@@ -73,7 +74,7 @@ def test_server_status():
         print("✓ Server status check works for unavailable server")
 
 
-def test_retry_mechanism():
+def test_retry_mechanism() -> None:
     """Test retry mechanism with mocked failures."""
     print("Testing retry mechanism...")
 
@@ -104,7 +105,7 @@ def test_retry_mechanism():
         print("✓ Retry mechanism works correctly")
 
 
-def test_fallback_servers():
+def test_fallback_servers() -> None:
     """Test fallback server functionality."""
     print("Testing fallback servers...")
 
@@ -112,7 +113,7 @@ def test_fallback_servers():
 
     with patch.object(requests.Session, 'get') as mock_get:
         # Primary server fails, fallback succeeds
-        def side_effect(*args, **kwargs):
+        def side_effect(*args: Any, **kwargs: Any) -> Mock:
             url = args[0]
             if 'primary' in url:
                 raise requests.exceptions.ConnectionError("Primary server down")
@@ -137,7 +138,7 @@ def test_fallback_servers():
         print("✓ Fallback servers work correctly")
 
 
-def test_enhanced_error_handling():
+def test_enhanced_error_handling() -> None:
     """Test enhanced error handling."""
     print("Testing enhanced error handling...")
 

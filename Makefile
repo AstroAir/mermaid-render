@@ -45,7 +45,7 @@ install:
 	pip install -e .
 
 install-dev:
-	pip install -e ".[dev,cache,interactive,ai,collaboration,docs]"
+	pip install -e ".[dev,cache,interactive,ai,docs]"
 
 setup-dev: install-dev
 	@echo "Setting up development environment..."

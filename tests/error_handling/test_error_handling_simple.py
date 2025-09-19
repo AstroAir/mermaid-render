@@ -9,7 +9,7 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))
 
 
-def test_syntax_validation():
+def test_syntax_validation() -> None:
     """Test syntax validation functionality."""
     print("Testing syntax validation...")
 
@@ -37,7 +37,7 @@ def test_syntax_validation():
     print("✓ Missing diagram type validation passed")
 
 
-def test_error_suggestions():
+def test_error_suggestions() -> None:
     """Test error suggestion generation."""
     print("\nTesting error suggestions...")
 
@@ -56,7 +56,7 @@ def test_error_suggestions():
     print("✓ Network suggestions generated")
 
 
-def test_detailed_error_creation():
+def test_detailed_error_creation() -> None:
     """Test detailed error creation."""
     print("\nTesting detailed error creation...")
 
@@ -76,7 +76,7 @@ def test_detailed_error_creation():
     print("✓ Detailed error creation passed")
 
 
-def test_diagnostics():
+def test_diagnostics() -> None:
     """Test rendering diagnostics."""
     print("\nTesting rendering diagnostics...")
 
@@ -102,7 +102,7 @@ def test_diagnostics():
     print("✓ Complex code diagnostics passed")
 
 
-def test_svg_validation_and_sanitization():
+def test_svg_validation_and_sanitization() -> None:
     """Test SVG validation and sanitization."""
     print("\nTesting SVG validation and sanitization...")
 

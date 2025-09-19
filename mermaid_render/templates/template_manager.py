@@ -12,7 +12,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from jinja2 import BaseLoader, Environment, TemplateError
+from jinja2 import BaseLoader, Environment, TemplateError  # type: ignore[import-not-found]
 
 from ..exceptions import TemplateError as MermaidTemplateError
 from ..exceptions import ValidationError
@@ -256,7 +256,7 @@ class TemplateManager:
             jinja_template = self._jinja_env.from_string(template.template_content)
             diagram_code = jinja_template.render(**parameters)
 
-            return diagram_code.strip()
+            return str(diagram_code).strip()
 
         except TemplateError as e:
             raise MermaidTemplateError(f"Template rendering failed: {str(e)}") from e

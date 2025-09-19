@@ -94,12 +94,17 @@ plugins:
       separator: '[\s\-,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
   - autorefs
   - mkdocstrings:
+      default_handler: python
       handlers:
         python:
+          paths: [mermaid_render]
           options:
+            # Documentation style
             docstring_style: google
             docstring_options:
               ignore_init_summary: true
+              returns_multiple_items: false
+            # Class and module display
             merge_init_into_class: true
             show_submodules: false
             show_source: true
@@ -108,13 +113,24 @@ plugins:
             show_root_toc_entry: true
             show_symbol_type_heading: true
             show_symbol_type_toc: true
+            # Signature and cross-references
             signature_crossrefs: true
             separate_signature: true
             unwrap_annotated: true
-            filters: ["!^_"]
+            # Member filtering and organization
+            filters: ["!^_", "!^__"]
             members_order: source
             group_by_category: true
             show_category_heading: true
+            # Inheritance and relationships
+            show_inheritance_diagram: false
+            # Reduce warnings for built-in types
+            show_if_no_docstring: false
+            inherited_members: false
+            # Cross-reference configuration
+            extra:
+              crossrefs: true
+            preload_modules: [typing, pathlib, abc]
   - gen-files:
       scripts:
         - docs/gen_ref_pages.py
@@ -139,6 +155,11 @@ nav:
     - Validation: user-guide/validation.md
     - Export Formats: user-guide/export-formats.md
     - Advanced Features: user-guide/advanced-features.md
+    - AI Features: user-guide/ai-features.md
+    - Caching: user-guide/caching.md
+    - Collaboration: user-guide/collaboration.md
+    - Interactive Features: user-guide/interactive.md
+    - Templates: user-guide/templates.md
   - Examples:
     - examples/index.md
     - Flowcharts: examples/flowcharts.md
@@ -151,10 +172,15 @@ nav:
     - Core: api-reference/core.md
     - Models: api-reference/models.md
     - Renderers: api-reference/renderers.md
-    - Utilities: api-reference/utilities.md
+    - Utils: api-reference/utils.md
     - Validators: api-reference/validators.md
-    - Configuration: api-reference/configuration.md
+    - Config: api-reference/config.md
     - Exceptions: api-reference/exceptions.md
+    - AI Features: api-reference/ai.md
+    - Cache System: api-reference/cache.md
+    - Collaboration: api-reference/collaboration.md
+    - Interactive: api-reference/interactive.md
+    - Templates: api-reference/templates.md
   - Development:
     - development/index.md
     - Contributing: development/contributing.md

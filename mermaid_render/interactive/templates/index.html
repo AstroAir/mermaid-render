@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mermaid Interactive Builder</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="/static/css/components.css">
+    <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
+</head>
+<body>
+    <div id="app">
+        <header class="app-header">
+            <h1>Mermaid Interactive Builder</h1>
+            <nav class="main-nav">
+                <a href="/" class="nav-link active">Home</a>
+                <a href="/builder/flowchart" class="nav-link">Flowchart</a>
+                <a href="/builder/sequence" class="nav-link">Sequence</a>
+                <a href="/builder/class" class="nav-link">Class Diagram</a>
+                <a href="/api/docs" class="nav-link">API Docs</a>
+            </nav>
+        </header>
+
+        <main class="main-content">
+            <div class="welcome-section">
+                <h2>Welcome to Mermaid Interactive Builder</h2>
+                <p>Create beautiful diagrams with our visual, drag-and-drop interface.</p>
+                
+                <div class="diagram-types">
+                    <div class="diagram-type-card" onclick="location.href='/builder/flowchart'">
+                        <div class="card-icon">📊</div>
+                        <h3>Flowchart</h3>
+                        <p>Create process flows and decision trees</p>
+                    </div>
+                    
+                    <div class="diagram-type-card" onclick="location.href='/builder/sequence'">
+                        <div class="card-icon">🔄</div>
+                        <h3>Sequence Diagram</h3>
+                        <p>Model interactions between components</p>
+                    </div>
+                    
+                    <div class="diagram-type-card" onclick="location.href='/builder/class'">
+                        <div class="card-icon">🏗️</div>
+                        <h3>Class Diagram</h3>
+                        <p>Design object-oriented structures</p>
+                    </div>
+                    
+                    <div class="diagram-type-card" onclick="location.href='/builder/state'">
+                        <div class="card-icon">🔀</div>
+                        <h3>State Diagram</h3>
+                        <p>Model state transitions and behaviors</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="features-section">
+                <h2>Features</h2>
+                <div class="features-grid">
+                    <div class="feature-item">
+                        <h4>🎨 Visual Editor</h4>
+                        <p>Drag-and-drop interface for easy diagram creation</p>
+                    </div>
+                    <div class="feature-item">
+                        <h4>⚡ Real-time Preview</h4>
+                        <p>See your diagram update instantly as you build</p>
+                    </div>
+                    <div class="feature-item">
+                        <h4>🤝 Collaboration</h4>
+                        <p>Work together with real-time synchronization</p>
+                    </div>
+                    <div class="feature-item">
+                        <h4>📤 Export Options</h4>
+                        <p>Export to SVG, PNG, PDF, or Mermaid code</p>
+                    </div>
+                    <div class="feature-item">
+                        <h4>✅ Live Validation</h4>
+                        <p>Instant feedback on syntax and structure</p>
+                    </div>
+                    <div class="feature-item">
+                        <h4>📚 Templates</h4>
+                        <p>Start with pre-built templates and patterns</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="getting-started">
+                <h2>Getting Started</h2>
+                <ol>
+                    <li>Choose a diagram type from the cards above</li>
+                    <li>Use the visual editor to add elements</li>
+                    <li>Connect elements to show relationships</li>
+                    <li>Export your diagram when ready</li>
+                </ol>
+            </div>
+        </main>
+
+        <footer class="app-footer">
+            <p>&copy; 2024 Mermaid Interactive Builder. Built with ❤️ for diagram creators.</p>
+        </footer>
+    </div>
+
+    <script src="/static/js/main.js"></script>
+</body>
+</html>

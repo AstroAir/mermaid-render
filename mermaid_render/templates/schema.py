@@ -225,7 +225,7 @@ class TemplateSchema:
     def _validate_jinja_syntax(self) -> bool:
         """Basic Jinja2 syntax validation."""
         try:
-            from jinja2 import BaseLoader, Environment
+            from jinja2 import BaseLoader, Environment  # type: ignore[import-not-found]
 
             env = Environment(loader=BaseLoader())
             env.from_string(self.template_content)

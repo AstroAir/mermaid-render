@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-from mermaid_render import EnhancedMermaidRenderer, MermaidRenderer
+from mermaid_render import PluginMermaidRenderer, MermaidRenderer
 from mermaid_render.core import MermaidConfig, MermaidTheme
 from mermaid_render.renderers import setup_logging
 
@@ -18,14 +18,14 @@ from mermaid_render.renderers import setup_logging
 class TestPluginSystemIntegration:
     """Integration tests for the plugin-based renderer system."""
     
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Set up test environment."""
         # Enable debug logging for tests
         setup_logging(level="DEBUG", console_output=False)
     
-    def test_enhanced_renderer_basic_functionality(self):
-        """Test basic functionality of EnhancedMermaidRenderer."""
-        renderer = EnhancedMermaidRenderer()
+    def test_plugin_renderer_basic_functionality(self) -> None:
+        """Test basic functionality of PluginMermaidRenderer."""
+        renderer = PluginMermaidRenderer()
         
         # Test simple diagram
         result = renderer.render("graph TD\n    A --> B", format="svg")
@@ -33,18 +33,18 @@ class TestPluginSystemIntegration:
         assert len(result) > 100
         assert "<svg" in result
     
-    def test_enhanced_renderer_with_theme(self):
-        """Test enhanced renderer with theme support."""
-        renderer = EnhancedMermaidRenderer()
+    def test_plugin_renderer_with_theme(self) -> None:
+        """Test plugin-based renderer with theme support."""
+        renderer = PluginMermaidRenderer()
         renderer.set_theme("dark")
         
         result = renderer.render("graph TD\n    A --> B", format="svg")
         assert isinstance(result, str)
         assert len(result) > 100
     
-    def test_enhanced_renderer_save_to_file(self):
+    def test_plugin_renderer_save_to_file(self) -> None:
         """Test saving rendered content to file."""
-        renderer = EnhancedMermaidRenderer()
+        renderer = PluginMermaidRenderer()
         
         with tempfile.TemporaryDirectory() as temp_dir:
             output_path = Path(temp_dir) / "test_diagram.svg"
@@ -63,7 +63,7 @@ class TestPluginSystemIntegration:
             content = output_path.read_text()
             assert "<svg" in content
     
-    def test_legacy_renderer_with_plugin_system(self):
+    def test_legacy_renderer_with_plugin_system(self) -> None:
         """Test legacy renderer with plugin system enabled."""
         renderer = MermaidRenderer(use_plugin_system=True)
         
@@ -72,7 +72,7 @@ class TestPluginSystemIntegration:
         assert len(result) > 100
         assert "<svg" in result
     
-    def test_legacy_renderer_pure_mode(self):
+    def test_legacy_renderer_pure_mode(self) -> None:
         """Test legacy renderer in pure legacy mode."""
         renderer = MermaidRenderer()  # Default is legacy mode
         
@@ -81,9 +81,9 @@ class TestPluginSystemIntegration:
         assert len(result) > 100
         assert "<svg" in result
     
-    def test_renderer_fallback_mechanism(self):
+    def test_renderer_fallback_mechanism(self) -> None:
         """Test fallback mechanism when preferred renderer fails."""
-        renderer = EnhancedMermaidRenderer()
+        renderer = PluginMermaidRenderer()
         
         # Try to use a non-existent renderer - should fallback to available one
         result = renderer.render(
@@ -96,9 +96,9 @@ class TestPluginSystemIntegration:
         assert isinstance(result, str)
         assert len(result) > 100
     
-    def test_multiple_formats(self):
+    def test_multiple_formats(self) -> None:
         """Test rendering to multiple formats."""
-        renderer = EnhancedMermaidRenderer()
+        renderer = PluginMermaidRenderer()
         diagram = "graph TD\n    A[Start] --> B[Process] --> C[End]"
         
         # Test SVG
@@ -115,9 +115,9 @@ class TestPluginSystemIntegration:
             # PNG might not be available in test environment
             print(f"PNG test skipped: {e}")
     
-    def test_renderer_status_and_health(self):
+    def test_renderer_status_and_health(self) -> None:
         """Test renderer status and health checking."""
-        renderer = EnhancedMermaidRenderer()
+        renderer = PluginMermaidRenderer()
         
         # Get available renderers
         available = renderer.get_available_renderers()
@@ -134,9 +134,9 @@ class TestPluginSystemIntegration:
             assert "health" in info
             assert "available" in info["health"]
     
-    def test_performance_tracking(self):
+    def test_performance_tracking(self) -> None:
         """Test performance tracking functionality."""
-        renderer = EnhancedMermaidRenderer()
+        renderer = PluginMermaidRenderer()
         
         # Perform multiple renders
         for i in range(3):
@@ -148,9 +148,9 @@ class TestPluginSystemIntegration:
         assert stats["successful_renders"] >= 3
         assert "renderer_usage" in stats
     
-    def test_renderer_testing_functionality(self):
+    def test_renderer_testing_functionality(self) -> None:
         """Test the renderer testing functionality."""
-        renderer = EnhancedMermaidRenderer()
+        renderer = PluginMermaidRenderer()
         
         # Test available renderers
         available = renderer.get_available_renderers()
@@ -161,12 +161,12 @@ class TestPluginSystemIntegration:
             assert "success" in test_result
             assert test_result["renderer"] == renderer_name
     
-    def test_configuration_integration(self):
+    def test_configuration_integration(self) -> None:
         """Test configuration integration."""
         config = MermaidConfig(timeout=45.0)
         theme = MermaidTheme("dark")
         
-        renderer = EnhancedMermaidRenderer(
+        renderer = PluginMermaidRenderer(
             config=config,
             theme=theme,
             fallback_enabled=True,
@@ -181,9 +181,9 @@ class TestPluginSystemIntegration:
         assert isinstance(result, str)
         assert len(result) > 100
     
-    def test_error_handling_integration(self):
+    def test_error_handling_integration(self) -> None:
         """Test error handling integration."""
-        renderer = EnhancedMermaidRenderer()
+        renderer = PluginMermaidRenderer()
         
         # Test with invalid syntax (should be handled gracefully)
         try:
@@ -194,9 +194,9 @@ class TestPluginSystemIntegration:
             # If it fails, error should be informative
             assert len(str(e)) > 10
     
-    def test_benchmark_functionality(self):
+    def test_benchmark_functionality(self) -> None:
         """Test benchmark functionality."""
-        renderer = EnhancedMermaidRenderer()
+        renderer = PluginMermaidRenderer()
         
         # Run benchmark with simple diagrams
         test_diagrams = ["graph TD\n    A --> B"]
@@ -216,9 +216,9 @@ class TestPluginSystemIntegration:
                 assert "render_time" in result
                 assert "format" in result
     
-    def test_context_manager_functionality(self):
+    def test_context_manager_functionality(self) -> None:
         """Test context manager functionality."""
-        with EnhancedMermaidRenderer() as renderer:
+        with PluginMermaidRenderer() as renderer:
             result = renderer.render("graph TD\n    A --> B", format="svg")
             assert isinstance(result, str)
             assert len(result) > 100
@@ -230,7 +230,7 @@ class TestPluginSystemIntegration:
 class TestBackwardCompatibilityIntegration:
     """Integration tests for backward compatibility."""
     
-    def test_existing_api_unchanged(self):
+    def test_existing_api_unchanged(self) -> None:
         """Test that existing API works unchanged."""
         # This should work exactly as before
         renderer = MermaidRenderer()
@@ -244,7 +244,7 @@ class TestBackwardCompatibilityIntegration:
         result = renderer.render_raw("graph TD\n    A --> B", "svg")
         assert isinstance(result, str)
     
-    def test_config_compatibility(self):
+    def test_config_compatibility(self) -> None:
         """Test configuration compatibility."""
         config = MermaidConfig(timeout=30.0)
         renderer = MermaidRenderer(config=config)
@@ -252,7 +252,7 @@ class TestBackwardCompatibilityIntegration:
         result = renderer.render_raw("graph TD\n    A --> B", "svg")
         assert isinstance(result, str)
     
-    def test_theme_compatibility(self):
+    def test_theme_compatibility(self) -> None:
         """Test theme compatibility."""
         theme = MermaidTheme("forest")
         renderer = MermaidRenderer(theme=theme)
@@ -260,7 +260,7 @@ class TestBackwardCompatibilityIntegration:
         result = renderer.render_raw("graph TD\n    A --> B", "svg")
         assert isinstance(result, str)
     
-    def test_save_functionality_compatibility(self):
+    def test_save_functionality_compatibility(self) -> None:
         """Test save functionality compatibility."""
         renderer = MermaidRenderer()
         

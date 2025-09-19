@@ -1,0 +1,200 @@
+# Commitizen configuration for conventional commits
+# This file configures the commitizen tool for consistent commit messages
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+version = "1.0.0"
+tag_format = "v$version"
+version_files = [
+    "pyproject.toml:project.version",
+    "mermaid_render/__init__.py:__version__"
+]
+style = [
+    ["qmark", "fg:#ff9d00 bold"],
+    ["question", "bold"],
+    ["answer", "fg:#ff9d00 bold"],
+    ["pointer", "fg:#ff9d00 bold"],
+    ["highlighted", "fg:#ff9d00 bold"],
+    ["selected", "fg:#cc5454"],
+    ["separator", "fg:#cc5454"],
+    ["instruction", ""],
+    ["text", ""],
+    ["disabled", "fg:#858585 italic"]
+]
+
+# Commit message template
+template = """$type($scope): $subject
+
+$body
+
+$footer"""
+
+# Commit message example
+example = """feat(auth): add OAuth2 authentication
+
+Implement OAuth2 authentication flow with support for:
+- Google OAuth2 provider
+- Token refresh mechanism
+- User profile retrieval
+
+Closes #123
+BREAKING CHANGE: Authentication is now required for all API endpoints"""
+
+# Schema for commit message validation
+schema = """
+<type>(<scope>): <subject>
+<BLANK LINE>
+<body>
+<BLANK LINE>
+<footer>
+"""
+
+# Schema pattern for validation
+schema_pattern = "^(build|ci|docs|feat|fix|perf|refactor|style|test|chore|revert)(\\(.+\\))?: .{1,50}"
+
+# Information about the commit message format
+info = """
+The commit contains the following structural elements:
+
+1. **type**: A noun describing the kind of change
+2. **scope**: Optional noun describing the section of codebase
+3. **subject**: Short description of the change
+4. **body**: Optional longer description
+5. **footer**: Optional metadata (breaking changes, issue references)
+
+Types:
+- feat: A new feature
+- fix: A bug fix
+- docs: Documentation only changes
+- style: Changes that do not affect the meaning of the code
+- refactor: A code change that neither fixes a bug nor adds a feature
+- perf: A code change that improves performance
+- test: Adding missing tests or correcting existing tests
+- build: Changes that affect the build system or external dependencies
+- ci: Changes to CI configuration files and scripts
+- chore: Other changes that don't modify src or test files
+- revert: Reverts a previous commit
+
+Scopes (examples):
+- api: API related changes
+- auth: Authentication related changes
+- cache: Caching related changes
+- cli: Command line interface changes
+- config: Configuration changes
+- core: Core functionality changes
+- docs: Documentation changes
+- models: Data model changes
+- render: Rendering engine changes
+- templates: Template system changes
+- tests: Test related changes
+- ui: User interface changes
+- utils: Utility functions changes
+- validation: Validation related changes
+
+Breaking Changes:
+- Add "BREAKING CHANGE:" in the footer
+- Or add "!" after the type/scope: "feat!: ..."
+
+Examples:
+- feat(auth): add OAuth2 authentication
+- fix(render): resolve SVG export issue
+- docs: update installation guide
+- style(core): format code with black
+- refactor(cache): improve cache invalidation logic
+- perf(render): optimize diagram generation
+- test(api): add integration tests
+- build(deps): update dependencies
+- ci: add automated security scanning
+- chore(release): bump version to 1.2.0
+"""
+
+# Questions for interactive commit message creation
+[[tool.commitizen.customize.questions]]
+type = "list"
+name = "type"
+message = "Select the type of change you are committing:"
+choices = [
+    {value = "feat", name = "feat: ✨ A new feature"},
+    {value = "fix", name = "fix: 🐛 A bug fix"},
+    {value = "docs", name = "docs: 📚 Documentation only changes"},
+    {value = "style", name = "style: 💄 Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)"},
+    {value = "refactor", name = "refactor: ♻️  A code change that neither fixes a bug nor adds a feature"},
+    {value = "perf", name = "perf: 🚀 A code change that improves performance"},
+    {value = "test", name = "test: ✅ Adding missing tests or correcting existing tests"},
+    {value = "build", name = "build: 🏗️  Changes that affect the build system or external dependencies (example scopes: gulp, broccoli, npm)"},
+    {value = "ci", name = "ci: 👷 Changes to our CI configuration files and scripts (example scopes: Travis, Circle, BrowserStack, SauceLabs)"},
+    {value = "chore", name = "chore: 🔧 Other changes that don't modify src or test files"},
+    {value = "revert", name = "revert: ⏪ Reverts a previous commit"}
+]
+
+[[tool.commitizen.customize.questions]]
+type = "input"
+name = "scope"
+message = "What is the scope of this change? (class or file name): (press [enter] to skip)"
+
+[[tool.commitizen.customize.questions]]
+type = "input"
+name = "subject"
+message = "Write a short and imperative summary of the code changes: (lower case and no period)"
+
+[[tool.commitizen.customize.questions]]
+type = "input"
+name = "body"
+message = "Provide additional contextual information about the code changes: (press [enter] to skip)"
+
+[[tool.commitizen.customize.questions]]
+type = "confirm"
+name = "is_breaking_change"
+message = "Is this a BREAKING CHANGE? Correlates with MAJOR in SemVer"
+default = false
+
+[[tool.commitizen.customize.questions]]
+type = "input"
+name = "breaking_change_content"
+message = "Describe the breaking changes:"
+when = "{{ answers.is_breaking_change }}"
+
+[[tool.commitizen.customize.questions]]
+type = "input"
+name = "footer"
+message = "Footer. Information about Breaking Changes and reference issues that this commit closes: (press [enter] to skip)"
+
+# Bump configuration
+[tool.commitizen.bump]
+changelog_file = "CHANGELOG.md"
+changelog_format = "## $version ($date)\n\n$changes"
+changelog_incremental = true
+changelog_start_rev = "v0.1.0"
+
+# Version provider configuration
+[tool.commitizen.version_provider]
+version_files = [
+    "pyproject.toml:project.version",
+    "mermaid_render/__init__.py:__version__"
+]
+
+# Changelog configuration
+[tool.commitizen.changelog]
+file_name = "CHANGELOG.md"
+incremental = true
+unreleased_version = "Unreleased"
+order_by_scope = true
+template = "CHANGELOG.md.j2"
+
+# Custom commit types for this project
+[tool.commitizen.customize.commit_parser]
+pattern = "^(?P<change_type>feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(?:\\((?P<scope>[^)]+)\\))?(?P<breaking>!)?:\\s(?P<message>.+)"
+schema_pattern = "^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\\(.+\\))?!?:\\s.+"
+
+[tool.commitizen.customize.bump_pattern]
+"^feat" = "minor"
+"^fix" = "patch"
+"^perf" = "patch"
+"^refactor" = "patch"
+
+[tool.commitizen.customize.bump_map]
+"^feat" = "MINOR"
+"^fix" = "PATCH"
+"^perf" = "PATCH"
+"^refactor" = "PATCH"
+"^BREAKING CHANGE" = "MAJOR"

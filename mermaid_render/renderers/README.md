@@ -230,9 +230,9 @@ from mermaid_render import MermaidRenderer
 renderer = MermaidRenderer()
 result = renderer.render_raw("graph TD\n    A --> B", "svg")
 
-# New way (enhanced features)
-from mermaid_render import EnhancedMermaidRenderer
-renderer = EnhancedMermaidRenderer()
+# New way (plugin-based features)
+from mermaid_render import PluginMermaidRenderer
+renderer = PluginMermaidRenderer()
 result = renderer.render("graph TD\n    A --> B", format="svg")
 
 # Hybrid approach (legacy renderer with plugin system)
@@ -241,4 +241,4 @@ renderer = MermaidRenderer(use_plugin_system=True, preferred_renderer="playwrigh
 result = renderer.render_raw("graph TD\n    A --> B", "svg")
 ```
 
-The plugin system maintains full backward compatibility while providing enhanced capabilities.
+The plugin system maintains full backward compatibility while providing advanced capabilities.

@@ -16,7 +16,7 @@ from mermaid_render.exceptions import ConfigurationError, ThemeError
 class TestConfigManager:
     """Test ConfigManager class."""
 
-    def test_init_default(self):
+    def test_init_default(self) -> None:
         """Test config manager initialization with defaults."""
         config = ConfigManager(load_env=False)
 
@@ -25,7 +25,7 @@ class TestConfigManager:
         assert config.get("default_theme") == "default"
         assert config.get("validate_syntax") is True
 
-    def test_init_with_runtime_config(self):
+    def test_init_with_runtime_config(self) -> None:
         """Test initialization with runtime configuration."""
         config = ConfigManager(
             load_env=False, timeout=60.0, custom_setting="test_value"
@@ -34,14 +34,14 @@ class TestConfigManager:
         assert config.get("timeout") == 60.0
         assert config.get("custom_setting") == "test_value"
 
-    def test_get_with_default(self):
+    def test_get_with_default(self) -> None:
         """Test getting configuration with default value."""
         config = ConfigManager(load_env=False)
 
         assert config.get("nonexistent_key", "default_value") == "default_value"
         assert config.get("timeout", 999) == 30.0  # Should return actual value
 
-    def test_set_runtime_config(self):
+    def test_set_runtime_config(self) -> None:
         """Test setting runtime configuration."""
         config = ConfigManager(load_env=False)
 
@@ -51,7 +51,7 @@ class TestConfigManager:
         assert config.get("timeout") == 45.0
         assert config.get("new_setting") == "test"
 
-    def test_set_persistent_config(self):
+    def test_set_persistent_config(self) -> None:
         """Test setting persistent configuration."""
         config = ConfigManager(load_env=False)
 
@@ -59,7 +59,7 @@ class TestConfigManager:
 
         assert config.get("timeout") == 45.0
 
-    def test_update_runtime_config(self):
+    def test_update_runtime_config(self) -> None:
         """Test updating multiple runtime configuration values."""
         config = ConfigManager(load_env=False)
 
@@ -70,7 +70,7 @@ class TestConfigManager:
         assert config.get("retries") == 5
         assert config.get("custom_setting") == "test_value"
 
-    def test_update_persistent_config(self):
+    def test_update_persistent_config(self) -> None:
         """Test updating persistent configuration."""
         config = ConfigManager(load_env=False)
 
@@ -80,7 +80,7 @@ class TestConfigManager:
         assert config.get("timeout") == 60.0
         assert config.get("retries") == 5
 
-    def test_get_all(self):
+    def test_get_all(self) -> None:
         """Test getting all configuration values."""
         config = ConfigManager(load_env=False)
         config.set("custom_setting", "test_value")
@@ -92,7 +92,7 @@ class TestConfigManager:
         assert "custom_setting" in all_config
         assert all_config["custom_setting"] == "test_value"
 
-    def test_reset_to_defaults(self):
+    def test_reset_to_defaults(self) -> None:
         """Test resetting configuration to defaults."""
         config = ConfigManager(load_env=False)
         config.set("timeout", 60.0)
@@ -103,7 +103,7 @@ class TestConfigManager:
         assert config.get("timeout") == 30.0  # Back to default
         assert config.get("custom_setting") is None  # Custom setting removed
 
-    def test_runtime_config_precedence(self):
+    def test_runtime_config_precedence(self) -> None:
         """Test that runtime config takes precedence over persistent config."""
         config = ConfigManager(load_env=False)
 
@@ -113,14 +113,14 @@ class TestConfigManager:
         assert config.get("timeout") == 60.0
 
     @patch.dict("os.environ", {"MERMAID_TIMEOUT": "45.0", "MERMAID_RETRIES": "5"})
-    def test_load_environment_variables(self):
+    def test_load_environment_variables(self) -> None:
         """Test loading configuration from environment variables."""
         config = ConfigManager(load_env=True)
 
         assert config.get("timeout") == 45.0
         assert config.get("retries") == 5
 
-    def test_load_config_file(self):
+    def test_load_config_file(self) -> None:
         """Test loading configuration from file."""
         config_data = {"timeout": 45.0, "retries": 5, "custom_setting": "from_file"}
 
@@ -137,7 +137,7 @@ class TestConfigManager:
         finally:
             config_file.unlink()
 
-    def test_load_invalid_config_file(self):
+    def test_load_invalid_config_file(self) -> None:
         """Test loading invalid configuration file."""
         with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
             f.write("invalid json content")
@@ -149,14 +149,14 @@ class TestConfigManager:
         finally:
             config_file.unlink()
 
-    def test_validate_config_valid(self):
+    def test_validate_config_valid(self) -> None:
         """Test configuration validation with valid config."""
         config = ConfigManager(load_env=False)
 
         # Should not raise any exception
         config.validate_config()
 
-    def test_validate_config_invalid_timeout(self):
+    def test_validate_config_invalid_timeout(self) -> None:
         """Test configuration validation with invalid timeout."""
         config = ConfigManager(load_env=False)
         config.set("timeout", -1)
@@ -166,7 +166,7 @@ class TestConfigManager:
         ):
             config.validate_config()
 
-    def test_validate_config_invalid_retries(self):
+    def test_validate_config_invalid_retries(self) -> None:
         """Test configuration validation with invalid retries."""
         config = ConfigManager(load_env=False)
         config.set("retries", -1)
@@ -176,7 +176,7 @@ class TestConfigManager:
         ):
             config.validate_config()
 
-    def test_validate_config_invalid_cache_size(self):
+    def test_validate_config_invalid_cache_size(self) -> None:
         """Test configuration validation with invalid cache size."""
         config = ConfigManager(load_env=False)
         config.set("max_cache_size", -1)
@@ -186,7 +186,7 @@ class TestConfigManager:
         ):
             config.validate_config()
 
-    def test_save_config_file(self):
+    def test_save_config_file(self) -> None:
         """Test saving configuration to file."""
         config = ConfigManager(load_env=False)
         config.set("timeout", 45.0)
@@ -214,14 +214,14 @@ class TestConfigManager:
 class TestThemeManager:
     """Test ThemeManager class."""
 
-    def test_init_default(self):
+    def test_init_default(self) -> None:
         """Test theme manager initialization."""
         theme_manager = ThemeManager()
 
         assert theme_manager.custom_themes_dir is None
         assert len(theme_manager._custom_themes) == 0
 
-    def test_init_with_custom_dir(self):
+    def test_init_with_custom_dir(self) -> None:
         """Test initialization with custom themes directory."""
         with tempfile.TemporaryDirectory() as temp_dir:
             custom_dir = Path(temp_dir)
@@ -229,7 +229,7 @@ class TestThemeManager:
 
             assert theme_manager.custom_themes_dir == custom_dir
 
-    def test_get_built_in_theme(self):
+    def test_get_built_in_theme(self) -> None:
         """Test getting built-in theme."""
         theme_manager = ThemeManager()
 
@@ -239,7 +239,7 @@ class TestThemeManager:
         assert "primaryColor" in default_theme
         assert "primaryTextColor" in default_theme
 
-    def test_get_all_built_in_themes(self):
+    def test_get_all_built_in_themes(self) -> None:
         """Test getting all built-in themes."""
         theme_manager = ThemeManager()
 
@@ -251,14 +251,14 @@ class TestThemeManager:
         assert "neutral" in built_in
         assert "base" in built_in
 
-    def test_get_nonexistent_theme(self):
+    def test_get_nonexistent_theme(self) -> None:
         """Test getting nonexistent theme."""
         theme_manager = ThemeManager()
 
         with pytest.raises(ThemeError, match="Theme 'nonexistent' not found"):
             theme_manager.get_theme("nonexistent")
 
-    def test_get_available_themes(self):
+    def test_get_available_themes(self) -> None:
         """Test getting list of available themes."""
         theme_manager = ThemeManager()
 
@@ -269,7 +269,7 @@ class TestThemeManager:
         assert isinstance(available, list)
         assert len(available) >= 5  # At least the built-in themes
 
-    def test_add_custom_theme(self):
+    def test_add_custom_theme(self) -> None:
         """Test adding custom theme."""
         theme_manager = ThemeManager()
 
@@ -286,7 +286,7 @@ class TestThemeManager:
         retrieved = theme_manager.get_theme("my_theme")
         assert retrieved["primaryColor"] == "#ff0000"
 
-    def test_add_custom_theme_override_builtin(self):
+    def test_add_custom_theme_override_builtin(self) -> None:
         """Test adding custom theme with built-in name should fail."""
         theme_manager = ThemeManager()
 
@@ -295,18 +295,18 @@ class TestThemeManager:
         with pytest.raises(ThemeError, match="Cannot override built-in theme"):
             theme_manager.add_custom_theme("default", custom_theme)
 
-    def test_add_custom_theme_invalid_config(self):
+    def test_add_custom_theme_invalid_config(self) -> None:
         """Test adding custom theme with invalid configuration."""
         theme_manager = ThemeManager()
 
-        invalid_theme = {
+        invalid_theme: dict = {
             # Missing required "theme" field
         }
 
         with pytest.raises(ThemeError, match="Missing required theme field"):
             theme_manager.add_custom_theme("invalid_theme", invalid_theme)
 
-    def test_remove_custom_theme(self):
+    def test_remove_custom_theme(self) -> None:
         """Test removing custom theme."""
         theme_manager = ThemeManager()
 
@@ -323,21 +323,21 @@ class TestThemeManager:
         theme_manager.remove_custom_theme("my_theme")
         assert "my_theme" not in theme_manager.get_available_themes()
 
-    def test_remove_nonexistent_custom_theme(self):
+    def test_remove_nonexistent_custom_theme(self) -> None:
         """Test removing nonexistent custom theme."""
         theme_manager = ThemeManager()
 
         with pytest.raises(ThemeError, match="Custom theme 'nonexistent' not found"):
             theme_manager.remove_custom_theme("nonexistent")
 
-    def test_remove_builtin_theme(self):
+    def test_remove_builtin_theme(self) -> None:
         """Test removing built-in theme should fail."""
         theme_manager = ThemeManager()
 
         with pytest.raises(ThemeError, match="Cannot remove built-in theme"):
             theme_manager.remove_custom_theme("default")
 
-    def test_create_theme_variant(self):
+    def test_create_theme_variant(self) -> None:
         """Test creating theme variant."""
         theme_manager = ThemeManager()
 
@@ -353,7 +353,7 @@ class TestThemeManager:
         # Should inherit other properties from default theme
         assert "primaryTextColor" in variant
 
-    def test_validate_theme_config_valid(self):
+    def test_validate_theme_config_valid(self) -> None:
         """Test theme configuration validation with valid config."""
         theme_manager = ThemeManager()
 
@@ -367,18 +367,18 @@ class TestThemeManager:
         # Should not raise any exception
         theme_manager._validate_theme_config(valid_theme)
 
-    def test_validate_theme_config_missing_required(self):
+    def test_validate_theme_config_missing_required(self) -> None:
         """Test theme validation with missing required fields."""
         theme_manager = ThemeManager()
 
-        invalid_theme = {
+        invalid_theme: dict = {
             # Missing required "theme" field
         }
 
         with pytest.raises(ThemeError, match="Missing required theme field"):
             theme_manager._validate_theme_config(invalid_theme)
 
-    def test_validate_theme_config_invalid_color(self):
+    def test_validate_theme_config_invalid_color(self) -> None:
         """Test theme validation with invalid color format."""
         theme_manager = ThemeManager()
 
@@ -390,7 +390,7 @@ class TestThemeManager:
         with pytest.raises(ThemeError, match="Invalid color value"):
             theme_manager._validate_theme_config(invalid_theme)
 
-    def test_save_theme_to_file(self):
+    def test_save_theme_to_file(self) -> None:
         """Test saving theme to file."""
         with tempfile.TemporaryDirectory() as temp_dir:
             custom_dir = Path(temp_dir)
@@ -413,7 +413,7 @@ class TestThemeManager:
 
             assert saved_theme["primaryColor"] == "#ff0000"
 
-    def test_load_custom_themes_from_directory(self):
+    def test_load_custom_themes_from_directory(self) -> None:
         """Test loading custom themes from directory."""
         with tempfile.TemporaryDirectory() as temp_dir:
             custom_dir = Path(temp_dir)
@@ -437,7 +437,7 @@ class TestThemeManager:
             loaded = theme_manager.get_theme("loaded_theme")
             assert loaded["primaryColor"] == "#00ff00"
 
-    def test_load_invalid_theme_file(self):
+    def test_load_invalid_theme_file(self) -> None:
         """Test loading invalid theme file."""
         with tempfile.TemporaryDirectory() as temp_dir:
             custom_dir = Path(temp_dir)
@@ -451,7 +451,7 @@ class TestThemeManager:
             theme_manager = ThemeManager(custom_themes_dir=custom_dir)
             assert "invalid" not in theme_manager.get_available_themes()
 
-    def test_export_theme(self):
+    def test_export_theme(self) -> None:
         """Test exporting theme to file."""
         theme_manager = ThemeManager()
 
@@ -472,7 +472,7 @@ class TestThemeManager:
             if export_file.exists():
                 export_file.unlink()
 
-    def test_export_nonexistent_theme(self):
+    def test_export_nonexistent_theme(self) -> None:
         """Test exporting nonexistent theme."""
         theme_manager = ThemeManager()
 
@@ -486,7 +486,7 @@ class TestThemeManager:
             if export_file.exists():
                 export_file.unlink()
 
-    def test_import_theme(self):
+    def test_import_theme(self) -> None:
         """Test importing theme from file."""
         theme_manager = ThemeManager()
 
@@ -510,7 +510,7 @@ class TestThemeManager:
         finally:
             import_file.unlink()
 
-    def test_import_theme_with_custom_name(self):
+    def test_import_theme_with_custom_name(self) -> None:
         """Test importing theme with custom name."""
         theme_manager = ThemeManager()
 
@@ -533,7 +533,7 @@ class TestThemeManager:
         finally:
             import_file.unlink()
 
-    def test_get_theme_returns_copy(self):
+    def test_get_theme_returns_copy(self) -> None:
         """Test that get_theme returns a copy, not reference."""
         theme_manager = ThemeManager()
 
@@ -546,7 +546,7 @@ class TestThemeManager:
         # Other copy should be unchanged
         assert theme2["primaryColor"] != "#modified"
 
-    def test_is_theme_available(self):
+    def test_is_theme_available(self) -> None:
         """Test checking if theme is available."""
         theme_manager = ThemeManager()
 

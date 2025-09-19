@@ -6,6 +6,7 @@ import base64
 import json
 from io import BytesIO
 from pathlib import Path
+from typing import Any
 from unittest.mock import Mock, patch, mock_open
 
 import pytest
@@ -24,7 +25,7 @@ from mermaid_render.renderers.svg_renderer import SVGRenderer
 class TestSVGRenderer:
     """Test SVGRenderer class."""
 
-    def test_init_default(self):
+    def test_init_default(self) -> None:
         """Test SVG renderer initialization with defaults."""
         renderer = SVGRenderer()
 
@@ -32,7 +33,7 @@ class TestSVGRenderer:
         assert renderer.timeout == 30.0
         assert renderer.use_local is True
 
-    def test_init_custom(self):
+    def test_init_custom(self) -> None:
         """Test SVG renderer initialization with custom values."""
         renderer = SVGRenderer(
             server_url="http://localhost:8080/",
@@ -44,17 +45,17 @@ class TestSVGRenderer:
         assert renderer.timeout == 60.0
         assert renderer.use_local is False
 
-    def test_server_url_trailing_slash_removal(self):
+    def test_server_url_trailing_slash_removal(self) -> None:
         """Test that trailing slash is removed from server URL."""
         renderer = SVGRenderer(server_url="https://example.com/")
         assert renderer.server_url == "https://example.com"
 
     @patch("mermaid_render.renderers.svg_renderer.md.Mermaid")
     @patch("mermaid_render.renderers.svg_renderer._MERMAID_AVAILABLE", True)
-    def test_render_local_success(self, mock_mermaid):
+    def test_render_local_success(self, mock_mermaid: Any) -> None:
         """Test successful local SVG rendering."""
         mock_instance = Mock()
-        mock_instance.__str__ = lambda: "<svg>test content</svg>"
+        mock_instance.configure_mock(**{"__str__.return_value": "<svg>test content</svg>"})
         mock_mermaid.return_value = mock_instance
 
         renderer = SVGRenderer(use_local=True, cache_enabled=False)
@@ -65,7 +66,7 @@ class TestSVGRenderer:
 
     @patch("mermaid_render.renderers.svg_renderer.md.Mermaid")
     @patch("mermaid_render.renderers.svg_renderer._MERMAID_AVAILABLE", True)
-    def test_render_local_html_extraction(self, mock_mermaid):
+    def test_render_local_html_extraction(self, mock_mermaid: Any) -> None:
         """Test SVG extraction from HTML content."""
         html_content = """
         <html>
@@ -77,7 +78,7 @@ class TestSVGRenderer:
         </html>
         """
         mock_instance = Mock()
-        mock_instance.__str__ = lambda: html_content
+        mock_instance.configure_mock(**{"__str__.return_value": html_content})
         mock_mermaid.return_value = mock_instance
 
         renderer = SVGRenderer(use_local=True, cache_enabled=False)
@@ -88,11 +89,11 @@ class TestSVGRenderer:
 
     @patch("mermaid_render.renderers.svg_renderer.md.Mermaid")
     @patch("mermaid_render.renderers.svg_renderer._MERMAID_AVAILABLE", True)
-    def test_render_local_no_svg_in_html(self, mock_mermaid):
+    def test_render_local_no_svg_in_html(self, mock_mermaid: Any) -> None:
         """Test handling when no SVG is found in HTML."""
         html_content = "<html><body>No SVG here</body></html>"
         mock_instance = Mock()
-        mock_instance.__str__ = lambda: html_content
+        mock_instance.configure_mock(**{"__str__.return_value": html_content})
         mock_mermaid.return_value = mock_instance
 
         renderer = SVGRenderer(use_local=True, cache_enabled=False)
@@ -102,7 +103,7 @@ class TestSVGRenderer:
 
     @patch("mermaid_render.renderers.svg_renderer.md.Mermaid")
     @patch("mermaid_render.renderers.svg_renderer._MERMAID_AVAILABLE", True)
-    def test_render_local_failure_fallback_to_remote(self, mock_mermaid):
+    def test_render_local_failure_fallback_to_remote(self, mock_mermaid: Any) -> None:
         """Test fallback to remote rendering when local fails."""
         mock_mermaid.side_effect = Exception("Local rendering failed")
 
@@ -115,7 +116,7 @@ class TestSVGRenderer:
             assert result == "<svg>remote content</svg>"
             mock_remote.assert_called_once()
 
-    def test_render_remote_success(self):
+    def test_render_remote_success(self) -> None:
         """Test successful remote SVG rendering."""
         renderer = SVGRenderer(use_local=False)
         result = renderer.render("flowchart TD\n    A --> B")
@@ -126,7 +127,7 @@ class TestSVGRenderer:
         # Just check that we got some SVG content
         assert len(result) > 10
 
-    def test_render_remote_with_theme(self):
+    def test_render_remote_with_theme(self) -> None:
         """Test remote rendering with theme."""
         renderer = SVGRenderer(use_local=False)
         result = renderer.render("flowchart TD\n    A --> B", theme="dark")
@@ -137,7 +138,7 @@ class TestSVGRenderer:
         # Just check that we got some SVG content
         assert len(result) > 10
 
-    def test_render_remote_with_config(self):
+    def test_render_remote_with_config(self) -> None:
         """Test remote rendering with configuration."""
         renderer = SVGRenderer(use_local=False)
         config = {"width": 800, "height": 600}
@@ -149,7 +150,7 @@ class TestSVGRenderer:
         # Accept either real content or mocked content
         assert "flowchart" in result or "A" in result or "configured content" in result or "rect" in result
 
-    def test_render_remote_timeout(self):
+    def test_render_remote_timeout(self) -> None:
         """Test remote rendering timeout."""
         renderer = SVGRenderer(use_local=False, cache_enabled=False)
 
@@ -160,7 +161,7 @@ class TestSVGRenderer:
             with pytest.raises(NetworkError, match="Request timeout"):
                 renderer.render("flowchart TD\n    A --> B")
 
-    def test_render_remote_network_error(self):
+    def test_render_remote_network_error(self) -> None:
         """Test remote rendering network error."""
         renderer = SVGRenderer(use_local=False, cache_enabled=False)
 
@@ -171,7 +172,7 @@ class TestSVGRenderer:
             with pytest.raises(NetworkError, match="Network request failed"):
                 renderer.render("flowchart TD\n    A --> B")
 
-    def test_render_remote_http_error(self):
+    def test_render_remote_http_error(self) -> None:
         """Test remote rendering HTTP error."""
         renderer = SVGRenderer(use_local=False, cache_enabled=False)
 
@@ -185,7 +186,7 @@ class TestSVGRenderer:
             with pytest.raises(NetworkError, match="Network request failed"):
                 renderer.render("flowchart TD\n    A --> B")
 
-    def test_render_to_file(self, temp_dir):
+    def test_render_to_file(self, temp_dir: Any) -> None:
         """Test rendering to file."""
         with patch.object(SVGRenderer, "render") as mock_render:
             mock_render.return_value = "<svg>test content</svg>"
@@ -201,7 +202,7 @@ class TestSVGRenderer:
             content = output_path.read_text(encoding="utf-8")
             assert content == "<svg>test content</svg>"
 
-    def test_get_supported_themes(self):
+    def test_get_supported_themes(self) -> None:
         """Test getting supported themes."""
         renderer = SVGRenderer()
         themes = renderer.get_supported_themes()
@@ -217,13 +218,13 @@ class TestSVGRenderer:
             assert "description" in theme_info
             assert "colors" in theme_info
 
-    def test_validate_theme_valid(self):
+    def test_validate_theme_valid(self) -> None:
         """Test validating valid theme."""
         renderer = SVGRenderer()
         assert renderer.validate_theme("dark") is True
         assert renderer.validate_theme("default") is True
 
-    def test_validate_theme_invalid(self):
+    def test_validate_theme_invalid(self) -> None:
         """Test validating invalid theme."""
         renderer = SVGRenderer()
         assert renderer.validate_theme("nonexistent") is False
@@ -232,7 +233,7 @@ class TestSVGRenderer:
 class TestPNGRenderer:
     """Test PNGRenderer class."""
 
-    def test_init_default(self):
+    def test_init_default(self) -> None:
         """Test PNG renderer initialization with defaults."""
         renderer = PNGRenderer()
 
@@ -241,7 +242,7 @@ class TestPNGRenderer:
         assert renderer.default_width == 800
         assert renderer.default_height == 600
 
-    def test_init_custom(self):
+    def test_init_custom(self) -> None:
         """Test PNG renderer initialization with custom values."""
         renderer = PNGRenderer(
             server_url="http://localhost:8080/",
@@ -256,7 +257,7 @@ class TestPNGRenderer:
         assert renderer.default_height == 900
 
     @patch("mermaid_render.renderers.png_renderer.requests.get")
-    def test_render_success(self, mock_get):
+    def test_render_success(self, mock_get: Any) -> None:
         """Test successful PNG rendering."""
         # Mock PNG data (simplified PNG header)
         png_data = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00d\x00\x00\x00d"
@@ -272,7 +273,7 @@ class TestPNGRenderer:
         mock_get.assert_called_once()
 
     @patch("mermaid_render.renderers.png_renderer.requests.get")
-    def test_render_with_dimensions(self, mock_get):
+    def test_render_with_dimensions(self, mock_get: Any) -> None:
         """Test PNG rendering with custom dimensions."""
         png_data = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR"
         mock_response = Mock()
@@ -292,7 +293,7 @@ class TestPNGRenderer:
         assert params["height"] == 900
 
     @patch("mermaid_render.renderers.png_renderer.requests.get")
-    def test_render_with_theme(self, mock_get):
+    def test_render_with_theme(self, mock_get: Any) -> None:
         """Test PNG rendering with theme."""
         png_data = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR"
         mock_response = Mock()
@@ -306,7 +307,7 @@ class TestPNGRenderer:
         assert result == png_data
 
     @patch("mermaid_render.renderers.png_renderer.requests.get")
-    def test_render_invalid_png_data(self, mock_get):
+    def test_render_invalid_png(self, mock_get: Any) -> None:
         """Test handling of invalid PNG data."""
         mock_response = Mock()
         mock_response.content = b"Not PNG data"
@@ -319,7 +320,7 @@ class TestPNGRenderer:
             renderer.render("flowchart TD\n    A --> B")
 
     @patch("mermaid_render.renderers.png_renderer.requests.get")
-    def test_render_timeout(self, mock_get):
+    def test_render_timeout(self, mock_get: Any) -> None:
         """Test PNG rendering timeout."""
         mock_get.side_effect = requests.exceptions.Timeout("Request timeout")
 
@@ -329,7 +330,7 @@ class TestPNGRenderer:
             renderer.render("flowchart TD\n    A --> B")
 
     @patch("mermaid_render.renderers.png_renderer.requests.get")
-    def test_render_network_error(self, mock_get):
+    def test_render_network_error(self, mock_get: Any) -> None:
         """Test PNG rendering network error."""
         mock_get.side_effect = requests.exceptions.RequestException("Network error")
 
@@ -338,7 +339,7 @@ class TestPNGRenderer:
         with pytest.raises(NetworkError, match="Network request failed"):
             renderer.render("flowchart TD\n    A --> B")
 
-    def test_render_to_file(self, temp_dir):
+    def test_render_to_file(self, temp_dir: Any) -> None:
         """Test rendering to file."""
         png_data = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR"
 
@@ -354,7 +355,7 @@ class TestPNGRenderer:
             content = output_path.read_bytes()
             assert content == png_data
 
-    def test_get_supported_themes(self):
+    def test_get_supported_themes(self) -> None:
         """Test getting supported themes."""
         renderer = PNGRenderer()
         themes = renderer.get_supported_themes()
@@ -363,13 +364,13 @@ class TestPNGRenderer:
         assert "default" in themes
         assert "dark" in themes
 
-    def test_validate_theme(self):
+    def test_validate_theme(self) -> None:
         """Test theme validation."""
         renderer = PNGRenderer()
         assert renderer.validate_theme("dark") is True
         assert renderer.validate_theme("nonexistent") is False
 
-    def test_get_max_dimensions(self):
+    def test_get_max_dimensions(self) -> None:
         """Test getting maximum dimensions."""
         renderer = PNGRenderer()
         max_width, max_height = renderer.get_max_dimensions()
@@ -377,13 +378,13 @@ class TestPNGRenderer:
         assert max_width == 4000
         assert max_height == 4000
 
-    def test_validate_dimensions_valid(self):
+    def test_validate_dimensions_valid(self) -> None:
         """Test validating valid dimensions."""
         renderer = PNGRenderer()
         assert renderer.validate_dimensions(800, 600) is True
         assert renderer.validate_dimensions(4000, 4000) is True
 
-    def test_validate_dimensions_invalid(self):
+    def test_validate_dimensions_invalid(self) -> None:
         """Test validating invalid dimensions."""
         renderer = PNGRenderer()
         assert renderer.validate_dimensions(5000, 600) is False
@@ -393,7 +394,7 @@ class TestPNGRenderer:
 class TestPDFRenderer:
     """Test PDFRenderer class."""
 
-    def test_init_default(self):
+    def test_init_default(self) -> None:
         """Test PDF renderer initialization with defaults."""
         renderer = PDFRenderer()
 
@@ -402,21 +403,21 @@ class TestPDFRenderer:
         assert renderer.page_size == "A4"
         assert renderer.orientation == "portrait"
 
-    def test_init_custom_svg_renderer(self):
+    def test_init_custom_svg_renderer(self) -> None:
         """Test PDF renderer with custom SVG renderer."""
         svg_renderer = SVGRenderer(server_url="http://localhost:8080")
         renderer = PDFRenderer(svg_renderer=svg_renderer)
 
         assert renderer.svg_renderer is svg_renderer
 
-    def test_init_custom_page_settings(self):
+    def test_init_custom_page_settings(self) -> None:
         """Test PDF renderer with custom page settings."""
         renderer = PDFRenderer(page_size="Letter", orientation="landscape")
 
         assert renderer.page_size == "Letter"
         assert renderer.orientation == "landscape"
 
-    def test_render_success_cairosvg(self):
+    def test_render_success_cairosvg(self) -> None:
         """Test successful PDF rendering with cairosvg."""
         svg_content = "<svg>test content</svg>"
         pdf_data = b"%PDF-1.4 test pdf content"
@@ -435,7 +436,7 @@ class TestPDFRenderer:
                 "flowchart TD\n    A --> B", None, None)
             mock_svg_to_pdf.assert_called_once_with(svg_content)
 
-    def test_render_success_weasyprint(self):
+    def test_render_success_weasyprint(self) -> None:
         """Test successful PDF rendering with weasyprint fallback."""
         svg_content = "<svg>test content</svg>"
         pdf_data = b"%PDF-1.4 test pdf content"
@@ -451,7 +452,7 @@ class TestPDFRenderer:
 
             assert result == pdf_data
 
-    def test_render_success_reportlab(self):
+    def test_render_success_reportlab(self) -> None:
         """Test successful PDF rendering with reportlab fallback."""
         svg_content = "<svg>test content</svg>"
         pdf_data = b"%PDF-1.4 test pdf content"
@@ -467,7 +468,7 @@ class TestPDFRenderer:
 
             assert result == pdf_data
 
-    def test_render_no_pdf_library(self):
+    def test_render_no_pdf_library(self) -> None:
         """Test PDF rendering when no PDF library is available."""
         with patch.object(SVGRenderer, "render") as mock_svg_render, \
                 patch.object(PDFRenderer, "_svg_to_pdf") as mock_svg_to_pdf:
@@ -481,7 +482,7 @@ class TestPDFRenderer:
             with pytest.raises(RenderingError, match="PDF rendering failed"):
                 renderer.render("flowchart TD\n    A --> B")
 
-    def test_render_svg_failure(self):
+    def test_render_svg_failure(self) -> None:
         """Test PDF rendering when SVG rendering fails."""
         with patch.object(SVGRenderer, "render") as mock_svg_render:
             mock_svg_render.side_effect = RenderingError("SVG failed")
@@ -491,7 +492,7 @@ class TestPDFRenderer:
             with pytest.raises(RenderingError, match="PDF rendering failed"):
                 renderer.render("flowchart TD\n    A --> B")
 
-    def test_render_cairosvg_failure(self):
+    def test_render_cairosvg_failure(self) -> None:
         """Test PDF rendering when cairosvg fails."""
         with patch.object(SVGRenderer, "render") as mock_svg_render, \
                 patch.object(PDFRenderer, "_svg_to_pdf") as mock_svg_to_pdf:
@@ -504,7 +505,7 @@ class TestPDFRenderer:
             with pytest.raises(RenderingError, match="PDF rendering failed"):
                 renderer.render("flowchart TD\n    A --> B")
 
-    def test_render_to_file(self, temp_dir):
+    def test_render_to_file(self, temp_dir: Any) -> None:
         """Test rendering to file."""
         pdf_data = b"%PDF-1.4 test pdf content"
 
@@ -520,7 +521,7 @@ class TestPDFRenderer:
             content = output_path.read_bytes()
             assert content == pdf_data
 
-    def test_get_supported_themes(self):
+    def test_get_supported_themes(self) -> None:
         """Test getting supported themes."""
         with patch.object(SVGRenderer, "get_supported_themes") as mock_themes:
             mock_themes.return_value = ["default", "dark", "forest"]
@@ -531,7 +532,7 @@ class TestPDFRenderer:
             assert themes == ["default", "dark", "forest"]
             mock_themes.assert_called_once()
 
-    def test_validate_theme(self):
+    def test_validate_theme(self) -> None:
         """Test theme validation."""
         with patch.object(SVGRenderer, "validate_theme") as mock_validate:
             mock_validate.return_value = True
@@ -546,14 +547,14 @@ class TestPDFRenderer:
 class TestRendererEdgeCases:
     """Test edge cases and error scenarios for all renderers."""
 
-    def test_svg_renderer_empty_mermaid_code(self):
+    def test_svg_renderer_empty_mermaid_code(self) -> None:
         """Test SVG renderer with empty Mermaid code."""
         renderer = SVGRenderer(use_local=False)
 
         with pytest.raises(RenderingError, match="Empty mermaid code"):
             renderer.render("")
 
-    def test_svg_renderer_invalid_mermaid_code(self):
+    def test_svg_renderer_invalid_mermaid_code(self) -> None:
         """Test SVG renderer with invalid Mermaid code."""
         renderer = SVGRenderer()
 
@@ -566,14 +567,14 @@ class TestRendererEdgeCases:
             # This is also acceptable
             pass
 
-    def test_png_renderer_empty_mermaid_code(self):
+    def test_png_renderer_empty_mermaid_code(self) -> None:
         """Test PNG renderer with empty Mermaid code."""
         renderer = PNGRenderer()
 
         with pytest.raises(NetworkError, match="Network request failed"):
             renderer.render("")
 
-    def test_pdf_renderer_with_theme_and_config(self):
+    def test_pdf_renderer_with_theme_and_config(self) -> None:
         """Test PDF renderer with theme and config."""
         with patch.object(SVGRenderer, "render") as mock_svg_render, \
                 patch.object(PDFRenderer, "_svg_to_pdf") as mock_svg_to_pdf:
@@ -590,7 +591,7 @@ class TestRendererEdgeCases:
             mock_svg_render.assert_called_once_with(
                 "flowchart TD\n    A --> B", "dark", config)
 
-    def test_svg_renderer_url_encoding(self):
+    def test_svg_renderer_url_encoding(self) -> None:
         """Test SVG renderer URL encoding with special characters."""
         renderer = SVGRenderer(use_local=False)
         # Test with special characters that need encoding
@@ -603,7 +604,7 @@ class TestRendererEdgeCases:
         # Accept either real content or mocked content
         assert "Special" in result or "chars" in result or "A" in result or "encoded content" in result
 
-    def test_png_renderer_url_params(self):
+    def test_png_renderer_url_params(self) -> None:
         """Test PNG renderer URL parameter construction."""
         with patch("mermaid_render.renderers.png_renderer.requests.get") as mock_get:
             png_data = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR"
@@ -622,7 +623,7 @@ class TestRendererEdgeCases:
             assert params["width"] == 1600
             assert params["height"] == 1200
 
-    def test_svg_renderer_file_write_error(self, temp_dir):
+    def test_svg_renderer_file_write_error(self, temp_dir: Any) -> None:
         """Test SVG renderer file write error handling."""
         with patch.object(SVGRenderer, "render") as mock_render:
             mock_render.return_value = "<svg>test content</svg>"
@@ -635,7 +636,7 @@ class TestRendererEdgeCases:
             with pytest.raises(PermissionError):
                 renderer.render_to_file("flowchart TD\n    A --> B", invalid_path)
 
-    def test_png_renderer_file_write_error(self, temp_dir):
+    def test_png_renderer_file_write_error(self, temp_dir: Any) -> None:
         """Test PNG renderer file write error handling."""
         with patch.object(PNGRenderer, "render") as mock_render:
             mock_render.return_value = b"\x89PNG\r\n\x1a\n"
@@ -648,7 +649,7 @@ class TestRendererEdgeCases:
             with pytest.raises(PermissionError):
                 renderer.render_to_file("flowchart TD\n    A --> B", invalid_path)
 
-    def test_pdf_renderer_file_write_error(self, temp_dir):
+    def test_pdf_renderer_file_write_error(self, temp_dir: Any) -> None:
         """Test PDF renderer file write error handling."""
         with patch.object(PDFRenderer, "render") as mock_render:
             mock_render.return_value = b"%PDF-1.4 test"
@@ -661,7 +662,7 @@ class TestRendererEdgeCases:
             with pytest.raises(PermissionError):
                 renderer.render_to_file("flowchart TD\n    A --> B", invalid_path)
 
-    def test_svg_renderer_large_diagram(self):
+    def test_svg_renderer_large_diagram(self) -> None:
         """Test SVG renderer with large diagram."""
         # Create a large diagram code
         large_diagram = "flowchart TD\n"
@@ -670,7 +671,7 @@ class TestRendererEdgeCases:
 
         with patch("mermaid_render.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
             mock_instance = Mock()
-            mock_instance.__str__ = lambda: "<svg>large diagram</svg>"
+            mock_instance.configure_mock(**{"__str__.return_value": "<svg>large diagram</svg>"})
             mock_mermaid.return_value = mock_instance
 
             renderer = SVGRenderer(use_local=True)
@@ -678,7 +679,7 @@ class TestRendererEdgeCases:
 
             assert result == "<svg>large diagram</svg>"
 
-    def test_png_renderer_extreme_dimensions(self):
+    def test_png_renderer_extreme_dimensions(self) -> None:
         """Test PNG renderer with extreme dimensions."""
         renderer = PNGRenderer()
 
@@ -694,7 +695,7 @@ class TestRendererEdgeCases:
         assert renderer.validate_dimensions(800, 0) is False
         assert renderer.validate_dimensions(-100, 600) is False
 
-    def test_svg_renderer_malformed_html_response(self):
+    def test_svg_renderer_malformed_html_response(self) -> None:
         """Test SVG renderer handling malformed HTML response."""
         # Test that the renderer can handle normal input and produce valid SVG
         renderer = SVGRenderer(use_local=False)
@@ -706,7 +707,7 @@ class TestRendererEdgeCases:
         # Just check that we got some SVG content
         assert len(result) > 10
 
-    def test_svg_renderer_empty_response(self):
+    def test_svg_renderer_empty_response(self) -> None:
         """Test SVG renderer handling normal input."""
         # Test that the renderer produces valid output for normal input
         renderer = SVGRenderer(use_local=False)
@@ -719,7 +720,7 @@ class TestRendererEdgeCases:
         assert len(result) > 10
 
     @patch("mermaid_render.renderers.png_renderer.requests.get")
-    def test_png_renderer_empty_response(self, mock_get):
+    def test_png_renderer_empty_response(self, mock_get: Any) -> None:
         """Test PNG renderer handling empty response."""
         mock_response = Mock()
         mock_response.content = b""

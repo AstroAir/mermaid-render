@@ -14,7 +14,7 @@ import time
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))
 
 
-def test_all_diagram_types():
+def test_all_diagram_types() -> None:
     """Test rendering of all supported Mermaid diagram types."""
     print("Testing all diagram types...")
 
@@ -52,7 +52,7 @@ def test_all_diagram_types():
                 continue
 
 
-def test_edge_cases():
+def test_edge_cases() -> None:
     """Test edge cases and boundary conditions."""
     print("\nTesting edge cases...")
 
@@ -93,7 +93,7 @@ def test_edge_cases():
         print("✓ Many nodes diagram passed")
 
 
-def test_error_conditions():
+def test_error_conditions() -> None:
     """Test various error conditions."""
     print("\nTesting error conditions...")
 
@@ -162,7 +162,7 @@ def test_error_conditions():
         print("✓ Invalid SVG response error handling passed")
 
 
-def test_theme_combinations():
+def test_theme_combinations() -> None:
     """Test all theme combinations."""
     print("\nTesting theme combinations...")
 
@@ -193,7 +193,7 @@ def test_theme_combinations():
         print("✓ No theme rendering passed")
 
 
-def test_configuration_options():
+def test_configuration_options() -> None:
     """Test various configuration options."""
     print("\nTesting configuration options...")
 
@@ -219,13 +219,13 @@ def test_configuration_options():
         ]
 
         for config in configs:
-            result = renderer.render(diagram_code, config=config)
+            result = renderer.render(diagram_code, config=config)  # type: ignore
             # Just check that we got SVG content
             assert '<svg' in result and '</svg>' in result
             print(f"✓ Configuration {config} rendering passed")
 
 
-def test_performance_scenarios():
+def test_performance_scenarios() -> None:
     """Test performance-related scenarios."""
     print("\nTesting performance scenarios...")
 

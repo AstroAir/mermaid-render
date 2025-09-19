@@ -10,12 +10,11 @@ from mermaid_render import (
     MermaidTheme,
     MermaidConfig,
 )
-from mermaid_render.models.class_diagram import ClassMethod, ClassAttribute
 from mermaid_render.utils import validate_mermaid_syntax
 from mermaid_render.config import ThemeManager
 
 
-def demo_flowchart():
+def demo_flowchart() -> None:
     """Demonstrate flowchart creation."""
     print("🔄 Creating a flowchart diagram...")
 
@@ -49,7 +48,7 @@ def demo_flowchart():
     print()
 
 
-def demo_sequence():
+def demo_sequence() -> None:
     """Demonstrate sequence diagram creation."""
     print("📊 Creating a sequence diagram...")
 
@@ -88,7 +87,7 @@ def demo_sequence():
     print()
 
 
-def demo_class_diagram():
+def demo_class_diagram() -> None:
     """Demonstrate class diagram creation."""
     print("🏗️ Creating a class diagram...")
 
@@ -147,7 +146,7 @@ def demo_class_diagram():
     print()
 
 
-def demo_validation():
+def demo_validation() -> None:
     """Demonstrate validation functionality."""
     print("✅ Testing validation...")
 
@@ -185,7 +184,7 @@ flowchart TD
     print()
 
 
-def demo_themes():
+def demo_themes() -> None:
     """Demonstrate theme management."""
     print("🎨 Testing theme management...")
 
@@ -219,7 +218,7 @@ def demo_themes():
     print()
 
 
-def demo_configuration():
+def demo_configuration() -> None:
     """Demonstrate configuration management."""
     print("⚙️ Testing configuration...")
 
@@ -244,7 +243,7 @@ def demo_configuration():
     print()
 
 
-def demo_utilities():
+def demo_utilities() -> None:
     """Demonstrate utility functions."""
     print("🛠️ Testing utilities...")
 
@@ -277,7 +276,7 @@ def demo_utilities():
     print()
 
 
-def main():
+def main() -> None:
     """Run the complete demonstration."""
     print("🚀 Mermaid Render Library Demonstration")
     print("=" * 50)

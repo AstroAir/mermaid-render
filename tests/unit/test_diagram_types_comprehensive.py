@@ -23,7 +23,7 @@ from mermaid_render.exceptions import DiagramError
 class TestFlowchartDiagramComprehensive:
     """Comprehensive tests for FlowchartDiagram."""
 
-    def test_all_node_shapes(self):
+    def test_all_node_shapes(self) -> None:
         """Test all supported node shapes."""
         diagram = FlowchartDiagram()
 
@@ -44,7 +44,7 @@ class TestFlowchartDiagramComprehensive:
         for i in range(len(shapes)):
             assert f"node_{i}" in mermaid_code
 
-    def test_all_edge_types(self):
+    def test_all_edge_types(self) -> None:
         """Test all supported edge types."""
         diagram = FlowchartDiagram()
 
@@ -67,7 +67,7 @@ class TestFlowchartDiagramComprehensive:
             assert f"n{i}" in mermaid_code
             assert f"n{i+1}" in mermaid_code
 
-    def test_subgraphs_complex(self):
+    def test_subgraphs_complex(self) -> None:
         """Test complex subgraph functionality."""
         diagram = FlowchartDiagram()
 
@@ -94,7 +94,7 @@ class TestFlowchartDiagramComprehensive:
         assert "subgraph sub1" in mermaid_code
         assert "subgraph sub2" in mermaid_code
 
-    def test_styling_and_classes(self):
+    def test_styling_and_classes(self) -> None:
         """Test node styling and CSS classes."""
         diagram = FlowchartDiagram()
 
@@ -116,7 +116,7 @@ class TestFlowchartDiagramComprehensive:
 class TestSequenceDiagramComprehensive:
     """Comprehensive tests for SequenceDiagram."""
 
-    def test_all_message_types(self):
+    def test_all_message_types(self) -> None:
         """Test all supported message types."""
         diagram = SequenceDiagram(title="Message Types Test")
 
@@ -145,7 +145,7 @@ class TestSequenceDiagramComprehensive:
         assert "participant A as Alice" in mermaid_code
         assert "participant B as Bob" in mermaid_code
 
-    def test_loops_and_alternatives(self):
+    def test_loops_and_alternatives(self) -> None:
         """Test loops and alternative flows."""
         diagram = SequenceDiagram()
 
@@ -164,7 +164,7 @@ class TestSequenceDiagramComprehensive:
 class TestClassDiagramComprehensive:
     """Comprehensive tests for ClassDiagram."""
 
-    def test_complex_class_hierarchy(self):
+    def test_complex_class_hierarchy(self) -> None:
         """Test complex class hierarchy with all features."""
         diagram = ClassDiagram(title="Complex Hierarchy")
 
@@ -200,7 +200,7 @@ class TestClassDiagramComprehensive:
         assert "<<abstract>>" in mermaid_code
         assert "<<interface>>" in mermaid_code
 
-    def test_all_relationship_types(self):
+    def test_all_relationship_types(self) -> None:
         """Test all relationship types."""
         diagram = ClassDiagram()
 
@@ -231,7 +231,7 @@ class TestClassDiagramComprehensive:
 class TestStateDiagramComprehensive:
     """Comprehensive tests for StateDiagram."""
 
-    def test_complex_state_machine(self):
+    def test_complex_state_machine(self) -> None:
         """Test complex state machine with all features."""
         diagram = StateDiagram(title="Complex State Machine")
 
@@ -257,7 +257,7 @@ class TestStateDiagramComprehensive:
 class TestDiagramValidation:
     """Test diagram validation across all types."""
 
-    def test_flowchart_validation(self):
+    def test_flowchart_validation(self) -> None:
         """Test flowchart validation."""
         diagram = FlowchartDiagram()
         diagram.add_node("A", "Start")
@@ -272,7 +272,7 @@ class TestDiagramValidation:
         result = empty_diagram.validate()
         assert isinstance(result, bool)
 
-    def test_sequence_validation(self):
+    def test_sequence_validation(self) -> None:
         """Test sequence diagram validation."""
         diagram = SequenceDiagram()
         diagram.add_participant("A")
@@ -281,7 +281,7 @@ class TestDiagramValidation:
 
         assert diagram.validate() is True
 
-    def test_class_diagram_validation(self):
+    def test_class_diagram_validation(self) -> None:
         """Test class diagram validation."""
         diagram = ClassDiagram()
         diagram.add_class("TestClass")
@@ -292,7 +292,7 @@ class TestDiagramValidation:
 class TestDiagramComplexity:
     """Test diagram complexity calculations."""
 
-    def test_flowchart_complexity(self):
+    def test_flowchart_complexity(self) -> None:
         """Test flowchart complexity calculation."""
         diagram = FlowchartDiagram()
 

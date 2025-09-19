@@ -28,7 +28,7 @@ from .config import ConfigManager, ThemeManager
 
 # Core classes
 from .core import MermaidConfig, MermaidDiagram, MermaidRenderer, MermaidTheme
-from .enhanced_renderer import EnhancedMermaidRenderer
+from .plugin_renderer import PluginMermaidRenderer
 from .exceptions import (
     CacheError,
     ConfigurationError,
@@ -90,7 +90,7 @@ except ImportError:
 
 # Cache system (optional)
 try:
-    from .cache import (  # type: ignore[import-not-found]
+    from .cache import (
         CacheManager,
         FileBackend,
         MemoryBackend,
@@ -120,18 +120,8 @@ try:
 except ImportError:
     _INTERACTIVE_AVAILABLE = False
 
-# Collaboration (optional)
-try:
-    from .collaboration import (
-        CollaborationManager,
-        VersionControl,
-        commit_diagram_changes,
-        create_collaborative_session,
-    )
-
-    _COLLABORATION_AVAILABLE = True
-except ImportError:
-    _COLLABORATION_AVAILABLE = False
+# Collaboration (removed)
+_COLLABORATION_AVAILABLE = False
 
 # AI-powered features (optional)
 try:
@@ -155,7 +145,12 @@ if TYPE_CHECKING:
     from pathlib import Path
     from typing import Any, Dict, List, Optional, Union
 
-__version__ = "1.0.0"
+# Version is managed by hatch-vcs and set during build
+try:
+    from ._version import __version__
+except ImportError:
+    # Fallback for development installations
+    __version__ = "0.0.0+dev"
 __author__ = "Mermaid Render Team"
 __email__ = "contact@mermaid-render.dev"
 __license__ = "MIT"
@@ -164,7 +159,8 @@ __license__ = "MIT"
 __all__ = [
     # Core classes
     "MermaidRenderer",
-    "EnhancedMermaidRenderer",
+    "PluginMermaidRenderer",
+    "EnhancedMermaidRenderer",  # Deprecated alias
     "MermaidDiagram",
     "MermaidTheme",
     "MermaidConfig",
@@ -230,11 +226,7 @@ __all__ = [
     "InteractiveServer",
     "start_server",
     "create_interactive_session",
-    # Collaboration
-    "CollaborationManager",
-    "VersionControl",
-    "create_collaborative_session",
-    "commit_diagram_changes",
+
     # AI-powered features
     "DiagramGenerator",
     "NLProcessor",
@@ -252,8 +244,28 @@ __all__ = [
     "__license__",
 ]
 
+# MCP (Model Context Protocol) functionality (optional)
+try:
+    from .mcp import (
+        render_diagram as mcp_render_diagram,
+        validate_diagram as mcp_validate_diagram,
+        list_themes as mcp_list_themes,
+    )
+    _MCP_AVAILABLE = True
+except ImportError:
+    _MCP_AVAILABLE = False
+
+# Add MCP exports if available
+if _MCP_AVAILABLE:
+    __all__.extend([
+        "mcp_render_diagram",
+        "mcp_validate_diagram",
+        "mcp_list_themes",
+    ])
 
 # Import convenience functions
 from .convenience import quick_render, render_to_file
-# Backward compatibility alias
+
+# Backward compatibility aliases
 render = quick_render
+EnhancedMermaidRenderer = PluginMermaidRenderer  # Deprecated: use PluginMermaidRenderer

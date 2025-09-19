@@ -257,24 +257,26 @@ class PlaywrightRenderer(BaseRenderer):
     def _extract_svg(self) -> str:
         """Extract SVG content from the rendered page."""
         assert self._page is not None  # Should be guaranteed by caller
-        return self._page.locator("#mermaid-diagram svg").inner_html()
+        return str(self._page.locator("#mermaid-diagram svg").inner_html())
 
     def _capture_png(self, options: Dict[str, Any]) -> bytes:
         """Capture PNG screenshot of the diagram."""
         assert self._page is not None  # Should be guaranteed by caller
         element = self._page.locator("#mermaid-diagram svg")
-        return element.screenshot(
+        result = element.screenshot(
             type="png",
             quality=options.get("quality", 90),
         )
+        return bytes(result)
 
     def _capture_pdf(self, options: Dict[str, Any]) -> bytes:
         """Capture PDF of the diagram."""
         assert self._page is not None  # Should be guaranteed by caller
-        return self._page.pdf(
+        result = self._page.pdf(
             format=options.get("page_size", "A4"),
             landscape=options.get("orientation", "portrait") == "landscape",
         )
+        return bytes(result)
 
     def _get_diagram_dimensions(self) -> Dict[str, Any]:
         """Get dimensions of the rendered diagram."""

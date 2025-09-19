@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
 from ..validators import MermaidValidator
+from ..validators.validator import ValidationResult as CoreValidationResult
 
 
 @dataclass
@@ -88,27 +89,45 @@ class LiveValidator:
         warnings: List[ValidationIssue] = []
         suggestions: List[ValidationIssue] = []
 
-        # Basic syntax validation
-        base_result = self.base_validator.validate(diagram_code)
+        # Basic syntax validation using core validator
+        base_result: CoreValidationResult = self.base_validator.validate(diagram_code)
 
-        # Convert base validation results
+        # Convert base validation results with line information
         for error in base_result.errors:
+            # Try to extract line information from error message
+            line_num = self._extract_line_number(error)
             errors.append(
                 ValidationIssue(
                     type="error",
                     message=error,
+                    line=line_num,
                     suggestion=self._get_error_suggestion(error),
                 )
             )
 
         for warning in base_result.warnings:
+            # Try to extract line information from warning message
+            line_num = self._extract_line_number(warning)
             warnings.append(
                 ValidationIssue(
                     type="warning",
                     message=warning,
+                    line=line_num,
                     suggestion=self._get_warning_suggestion(warning),
                 )
             )
+
+        # Add line-specific errors from core validator
+        for line_num, line_errors in base_result.line_errors.items():
+            for line_error in line_errors:
+                errors.append(
+                    ValidationIssue(
+                        type="error",
+                        message=line_error,
+                        line=line_num,
+                        suggestion=self._get_error_suggestion(line_error),
+                    )
+                )
 
         # Interactive-specific validation
         interactive_issues = self._validate_interactive_rules(diagram_code)
@@ -439,5 +458,21 @@ class LiveValidator:
         for pattern, suggestion in warning_suggestions.items():
             if pattern.lower() in warning.lower():
                 return suggestion
+
+        return None
+
+    def _extract_line_number(self, message: str) -> Optional[int]:
+        """Extract line number from error/warning message."""
+        import re
+
+        # Look for patterns like "line 5", "Line 3", etc.
+        line_match = re.search(r'\bline\s+(\d+)\b', message, re.IGNORECASE)
+        if line_match:
+            return int(line_match.group(1))
+
+        # Look for patterns like "at line 5", "on line 3", etc.
+        at_line_match = re.search(r'\b(?:at|on)\s+line\s+(\d+)\b', message, re.IGNORECASE)
+        if at_line_match:
+            return int(at_line_match.group(1))
 
         return None

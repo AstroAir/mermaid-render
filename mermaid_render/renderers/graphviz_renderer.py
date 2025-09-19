@@ -228,7 +228,7 @@ class GraphvizRenderer(BaseRenderer):
     ) -> Any:
         """Render DOT code using Graphviz."""
         try:
-            import graphviz  # type: ignore[import-untyped]
+            import graphviz
 
             # Create Graphviz source
             source = graphviz.Source(dot_code)

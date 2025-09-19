@@ -8,7 +8,7 @@ import base64
 import json
 from typing import Any, Dict, Optional
 
-import requests
+import requests  # type: ignore
 
 from ..exceptions import NetworkError, RenderingError
 
@@ -104,7 +104,7 @@ class PNGRenderer:
             if not response.content.startswith(b"\x89PNG"):
                 raise RenderingError("Response is not valid PNG data")
 
-            return response.content
+            return bytes(response.content)
 
         except requests.exceptions.Timeout as e:
             raise NetworkError(

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ diagram_type.title() }} Builder - Mermaid Interactive</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="/static/css/builder.css">
+    <link rel="stylesheet" href="/static/css/components.css">
+    <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
+</head>
+<body>
+    <div id="app" class="builder-app">
+        <header class="app-header">
+            <div class="header-left">
+                <a href="/" class="back-link">← Back to Home</a>
+                <h1>{{ diagram_type.title() }} Builder</h1>
+            </div>
+            <div class="header-right">
+                <button id="save-btn" class="btn btn-primary">Save</button>
+                <button id="export-btn" class="btn btn-secondary">Export</button>
+                <div class="collaboration-status">
+                    <span id="client-count">1</span> user(s) online
+                </div>
+            </div>
+        </header>
+
+        <div class="builder-layout">
+            <!-- Toolbox Panel -->
+            <aside class="toolbox-panel">
+                <div class="panel-header">
+                    <h3>Toolbox</h3>
+                </div>
+                <div class="tool-categories">
+                    <div class="tool-category">
+                        <h4>Basic Elements</h4>
+                        <div class="tool-grid" id="basic-tools">
+                            <!-- Tools will be populated by JavaScript -->
+                        </div>
+                    </div>
+                    <div class="tool-category">
+                        <h4>Connections</h4>
+                        <div class="tool-grid" id="connection-tools">
+                            <!-- Connection tools will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="templates-section">
+                    <h4>Templates</h4>
+                    <select id="template-selector">
+                        <option value="">Choose a template...</option>
+                    </select>
+                    <button id="load-template-btn" class="btn btn-small">Load</button>
+                </div>
+            </aside>
+
+            <!-- Main Canvas Area -->
+            <main class="canvas-area">
+                <div class="canvas-toolbar">
+                    <div class="toolbar-left">
+                        <button id="select-tool" class="tool-btn active" data-tool="select">
+                            <span class="tool-icon">🖱️</span> Select
+                        </button>
+                        <button id="pan-tool" class="tool-btn" data-tool="pan">
+                            <span class="tool-icon">✋</span> Pan
+                        </button>
+                    </div>
+                    <div class="toolbar-center">
+                        <button id="zoom-in" class="btn btn-small">+</button>
+                        <span id="zoom-level">100%</span>
+                        <button id="zoom-out" class="btn btn-small">-</button>
+                        <button id="zoom-fit" class="btn btn-small">Fit</button>
+                    </div>
+                    <div class="toolbar-right">
+                        <button id="undo" class="btn btn-small">↶ Undo</button>
+                        <button id="redo" class="btn btn-small">↷ Redo</button>
+                    </div>
+                </div>
+                
+                <div class="canvas-container">
+                    <svg id="diagram-canvas" class="diagram-canvas">
+                        <defs>
+                            <marker id="arrowhead" markerWidth="10" markerHeight="7" 
+                                    refX="9" refY="3.5" orient="auto">
+                                <polygon points="0 0, 10 3.5, 0 7" fill="#333" />
+                            </marker>
+                        </defs>
+                        <g id="canvas-group">
+                            <!-- Diagram elements will be rendered here -->
+                        </g>
+                    </svg>
+                </div>
+            </main>
+
+            <!-- Properties Panel -->
+            <aside class="properties-panel">
+                <div class="panel-header">
+                    <h3>Properties</h3>
+                </div>
+                <div id="properties-content">
+                    <div class="no-selection">
+                        <p>Select an element to edit its properties</p>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <!-- Bottom Panel with Code and Preview -->
+        <div class="bottom-panel">
+            <div class="panel-tabs">
+                <button class="tab-btn active" data-tab="code">Code</button>
+                <button class="tab-btn" data-tab="preview">Preview</button>
+                <button class="tab-btn" data-tab="validation">Validation</button>
+            </div>
+            
+            <div class="tab-content">
+                <div id="code-tab" class="tab-pane active">
+                    <div class="code-editor-container">
+                        <textarea id="code-editor" placeholder="Generated Mermaid code will appear here..."></textarea>
+                        <div class="code-actions">
+                            <button id="copy-code" class="btn btn-small">Copy</button>
+                            <button id="apply-code" class="btn btn-small">Apply Changes</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="preview-tab" class="tab-pane">
+                    <div class="preview-container">
+                        <div id="preview-content">
+                            <p>Preview will appear here...</p>
+                        </div>
+                        <div class="preview-actions">
+                            <button id="refresh-preview" class="btn btn-small">Refresh</button>
+                            <select id="preview-format">
+                                <option value="svg">SVG</option>
+                                <option value="png">PNG</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="validation-tab" class="tab-pane">
+                    <div class="validation-container">
+                        <div id="validation-results">
+                            <div class="validation-status">
+                                <span class="status-icon">✅</span>
+                                <span class="status-text">Diagram is valid</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div id="export-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Export Diagram</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="export-options">
+                    <label>
+                        <input type="radio" name="export-format" value="svg" checked>
+                        SVG (Vector)
+                    </label>
+                    <label>
+                        <input type="radio" name="export-format" value="png">
+                        PNG (Raster)
+                    </label>
+                    <label>
+                        <input type="radio" name="export-format" value="pdf">
+                        PDF (Document)
+                    </label>
+                    <label>
+                        <input type="radio" name="export-format" value="mermaid">
+                        Mermaid Code
+                    </label>
+                </div>
+                <div class="export-settings">
+                    <label>
+                        Filename: <input type="text" id="export-filename" value="diagram">
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="export-download" class="btn btn-primary">Download</button>
+                <button class="btn btn-secondary modal-close">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Pass diagram type to JavaScript
+        window.DIAGRAM_TYPE = '{{ diagram_type }}';
+    </script>
+    <script src="/static/js/builder.js"></script>
+    <script src="/static/js/websocket.js"></script>
+</body>
+</html>

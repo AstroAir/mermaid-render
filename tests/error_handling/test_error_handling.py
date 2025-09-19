@@ -1,3 +1,4 @@
+from typing import Any
 #!/usr/bin/env python3
 """
 Test enhanced error handling functionality.
@@ -16,7 +17,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))
 logging.basicConfig(level=logging.INFO)
 
 
-def test_mermaid_syntax_validation():
+def test_mermaid_syntax_validation() -> None:
     """Test Mermaid syntax validation."""
     print("Testing Mermaid syntax validation...")
 
@@ -41,7 +42,7 @@ def test_mermaid_syntax_validation():
     print("✓ Missing diagram type validation passed")
 
 
-def test_error_suggestions():
+def test_error_suggestions() -> None:
     """Test error suggestion generation."""
     print("\nTesting error suggestions...")
 
@@ -63,7 +64,7 @@ def test_error_suggestions():
     print("✓ Invalid SVG suggestions generated")
 
 
-def test_detailed_error_creation():
+def test_detailed_error_creation() -> None:
     """Test detailed error creation."""
     print("\nTesting detailed error creation...")
 
@@ -82,7 +83,7 @@ def test_detailed_error_creation():
     print("✓ Detailed error creation passed")
 
 
-def test_enhanced_render_errors():
+def test_enhanced_render_errors() -> None:
     """Test enhanced error handling in render method."""
     print("\nTesting enhanced render errors...")
 
@@ -108,7 +109,7 @@ def test_enhanced_render_errors():
         print("✓ Enhanced syntax error passed")
 
 
-def test_network_error_enhancement():
+def test_network_error_enhancement() -> None:
     """Test enhanced network error handling."""
     print("\nTesting enhanced network errors...")
 
@@ -149,7 +150,7 @@ def test_network_error_enhancement():
         print("✓ Enhanced HTTP error passed")
 
 
-def test_diagnostics():
+def test_diagnostics() -> None:
     """Test rendering diagnostics."""
     print("\nTesting rendering diagnostics...")
 
@@ -173,7 +174,7 @@ def test_diagnostics():
     print("✓ Complex code diagnostics passed")
 
 
-def test_render_with_recovery():
+def test_render_with_recovery() -> None:
     """Test render with recovery mechanism."""
     print("\nTesting render with recovery...")
 
@@ -185,7 +186,7 @@ def test_render_with_recovery():
     # Test that recovery mechanism works by mocking the render method
     call_count = 0
 
-    def mock_render_side_effect(*args, **kwargs):
+    def mock_render_side_effect(*args: Any, **kwargs: Any) -> str:
         nonlocal call_count
         call_count += 1
         if call_count < 3:

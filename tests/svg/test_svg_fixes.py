@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))
 from mermaid_render.renderers.svg_renderer import SVGRenderer
 
 
-def test_malformed_self_closing_tags():
+def test_malformed_self_closing_tags() -> None:
     """Test fixing malformed self-closing tags."""
     print("Testing malformed self-closing tag fixes...")
     
@@ -35,7 +35,7 @@ def test_malformed_self_closing_tags():
     print("✓ Malformed self-closing tag fixes passed")
 
 
-def test_namespace_fixes():
+def test_namespace_fixes() -> None:
     """Test SVG namespace fixes."""
     print("\nTesting SVG namespace fixes...")
     
@@ -52,7 +52,7 @@ def test_namespace_fixes():
     print("✓ Namespace fixes passed")
 
 
-def test_compatibility_fixes():
+def test_compatibility_fixes() -> None:
     """Test SVG compatibility fixes."""
     print("\nTesting SVG compatibility fixes...")
     
@@ -74,7 +74,7 @@ def test_compatibility_fixes():
     print("✓ Compatibility fixes passed")
 
 
-def test_improved_validation():
+def test_improved_validation() -> None:
     """Test improved SVG validation."""
     print("\nTesting improved SVG validation...")
     
@@ -99,7 +99,7 @@ def test_improved_validation():
     print("✓ Improved validation passed")
 
 
-def test_enhanced_sanitization():
+def test_enhanced_sanitization() -> None:
     """Test enhanced SVG sanitization."""
     print("\nTesting enhanced SVG sanitization...")
     
@@ -122,7 +122,7 @@ def test_enhanced_sanitization():
     print("✓ Enhanced sanitization passed")
 
 
-def test_complete_svg_processing():
+def test_complete_svg_processing() -> None:
     """Test complete SVG processing pipeline."""
     print("\nTesting complete SVG processing pipeline...")
     

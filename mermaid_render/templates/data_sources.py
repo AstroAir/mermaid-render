@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union, cast, Type
 from urllib.parse import urljoin
 
-import requests
+import requests  # type: ignore
 
 from ..exceptions import DataSourceError
 
@@ -493,7 +493,7 @@ class APIDataSource(DataSource):
 
             # Test with HEAD request
             response = requests.head(url, headers=self.default_headers, timeout=10)
-            return response.status_code < 400
+            return bool(response.status_code < 400)
 
         except requests.RequestException:
             return False

@@ -106,16 +106,9 @@ Comprehensive testing patterns and validation strategies:
 - **Validation Patterns**: Comprehensive syntax validation examples
 - **Error Handling**: Robust error handling and recovery patterns
 
-## 🤝 Interactive & Collaboration
+## 🎨 Interactive Features
 
-### [Interactive & Collaboration Showcase](../../examples/interactive_collaboration_showcase.py)
-
-Real-time collaboration and interactive editing features:
-
-- **Interactive Builder**: Step-by-step diagram construction
-- **Collaborative Editing**: Multi-user real-time editing simulation
-- **Version Control**: Git-like version control for diagrams
-- **Real-time Collaboration**: Live cursor tracking and change synchronization
+Interactive diagram building and web-based tools are available through the interactive module. See the interactive examples in the main examples directory for demonstrations of web-based diagram editing capabilities.
 
 ## 🚀 Run All Examples
 
@@ -155,7 +148,7 @@ examples/
 ├── real_world_use_cases.py                # Practical applications
 ├── performance_caching_showcase.py         # Performance optimization
 ├── testing_validation_showcase.py          # Testing patterns
-├── interactive_collaboration_showcase.py   # Collaboration features
+
 └── run_all_examples.py                    # Execute all examples
 
 output/                                     # Generated files

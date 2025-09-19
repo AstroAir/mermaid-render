@@ -8,10 +8,10 @@ This script runs all tests with detailed reporting and coverage analysis.
 import subprocess
 import sys
 from pathlib import Path
-from typing import Union, Optional
+from typing import Union, Optional, Dict, Any
 
 
-def run_command(cmd, description):
+def run_command(cmd: list[str], description: str) -> bool:
     """Run a command and return the result."""
     print(f"\n{'='*60}")
     print(f"Running: {description}")
@@ -29,7 +29,7 @@ def run_command(cmd, description):
         return False
 
 
-def main():
+def main() -> bool:
     """Run comprehensive tests."""
     print("Mermaid Render - Comprehensive Test Suite")
     print("=" * 60)
@@ -83,9 +83,9 @@ def main():
     ]
 
     # Run individual test categories
-    results: dict[str, Union[bool, None]] = {}
-    for category in test_categories:
-        test_path = project_root / category["path"]
+    results: Dict[str, Optional[bool]] = {}
+    for test_category in test_categories:
+        test_path = project_root / test_category["path"]
         if test_path.exists():
             cmd = [
                 sys.executable, "-m", "pytest",
@@ -94,11 +94,11 @@ def main():
                 "--tb=short"
             ]
             success = run_command(
-                cmd, f"{category['name']} - {category['description']}")
-            results[category["name"]] = success
+                cmd, f"{test_category['name']} - {test_category['description']}")
+            results[test_category["name"]] = success
         else:
-            print(f"Skipping {category['name']} - path does not exist: {test_path}")
-            results[category["name"]] = None
+            print(f"Skipping {test_category['name']} - path does not exist: {test_path}")
+            results[test_category["name"]] = None
 
     # Run coverage analysis
     print(f"\n{'='*60}")
@@ -139,15 +139,15 @@ def main():
         }
     ]
 
-    for pattern in test_patterns:
+    for test_pattern in test_patterns:
         cmd = [
             sys.executable, "-m", "pytest",
-            "-k", pattern["pattern"],
+            "-k", test_pattern["pattern"],
             "-v",
             "--tb=short"
         ]
-        pattern_success = run_command(cmd, f"Pattern: {pattern['description']}")
-        results[f"Pattern: {pattern['pattern']}"] = pattern_success
+        pattern_success = run_command(cmd, f"Pattern: {test_pattern['description']}")
+        results[f"Pattern: {test_pattern['pattern']}"] = pattern_success
 
     # Generate summary report
     print(f"\n{'='*60}")
@@ -167,6 +167,7 @@ def main():
 
     print(f"\nDetailed Results:")
     for category, result in results.items():
+        # category: str, result: Optional[bool]
         if result is True:
             status = "✅ PASSED"
         elif result is False:

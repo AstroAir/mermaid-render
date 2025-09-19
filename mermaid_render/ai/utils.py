@@ -9,10 +9,9 @@ from mermaid_render.ai.providers import (
     ProviderManager,
 )
 
-from .analysis import DiagramAnalyzer
+from .analysis import DiagramAnalyzer, EnhancementResult, EnhancementType
 from .diagram_generator import DiagramGenerator, GenerationConfig
 from .nl_processor import NLProcessor
-from .optimization import DiagramOptimizer
 from .suggestions import SuggestionEngine
 
 
@@ -62,20 +61,18 @@ def optimize_diagram(
     Returns:
         List of optimization results
     """
-    optimizer = DiagramOptimizer()
-
     if optimization_types is None:
         optimization_types = ["layout", "style"]
 
     results: List[Dict[str, Any]] = []
 
     if "layout" in optimization_types:
-        layout_result = optimizer.optimize_layout(diagram_code)
-        results.append(layout_result.to_dict())
+        layout_result = enhance_diagram_layout(diagram_code)
+        results.append(layout_result)
 
     if "style" in optimization_types:
-        style_result = optimizer.optimize_style(diagram_code)
-        results.append(style_result.to_dict())
+        style_result = enhance_diagram_style(diagram_code)
+        results.append(style_result)
 
     return results
 
@@ -211,14 +208,13 @@ def get_diagram_insights(diagram_code: str) -> Dict[str, Any]:
     suggestion_engine = SuggestionEngine()
     suggestions = suggestion_engine.get_suggestions(diagram_code)
 
-    # Get optimization recommendations
-    optimizer = DiagramOptimizer()
-    optimization_suggestions = optimizer.get_optimization_suggestions(diagram_code)
+    # Get enhancement recommendations
+    enhancement_suggestions = get_enhancement_suggestions(diagram_code)
 
     return {
         "analysis": analysis.to_dict(),
         "suggestions": [s.to_dict() for s in suggestions],
-        "optimization_suggestions": optimization_suggestions,
+        "enhancement_suggestions": enhancement_suggestions,
         "summary": {
             "complexity_level": analysis.complexity.complexity_level,
             "overall_quality": analysis.quality.overall_score,
@@ -313,6 +309,90 @@ def generate_diagram_variations(
             continue
 
     return variations
+
+
+def enhance_diagram_layout(diagram_code: str) -> Dict[str, Any]:
+    """
+    Enhance diagram layout for better readability.
+
+    Args:
+        diagram_code: Mermaid diagram code
+
+    Returns:
+        Enhancement result dictionary
+    """
+    analyzer = DiagramAnalyzer()
+    result = analyzer.enhance_layout(diagram_code)
+    return result.to_dict()
+
+
+def enhance_diagram_style(diagram_code: str) -> Dict[str, Any]:
+    """
+    Enhance diagram styling for better appearance.
+
+    Args:
+        diagram_code: Mermaid diagram code
+
+    Returns:
+        Enhancement result dictionary
+    """
+    engine = SuggestionEngine()
+    result = engine.enhance_style(diagram_code)
+    return result.to_dict()
+
+
+def get_enhancement_suggestions(diagram_code: str) -> List[str]:
+    """
+    Get suggestions for diagram enhancement.
+
+    Args:
+        diagram_code: Mermaid diagram code
+
+    Returns:
+        List of enhancement suggestions
+    """
+    suggestions = []
+
+    # Check for common issues
+    if len(diagram_code.split("\n")) > 50:
+        suggestions.append(
+            "Consider breaking large diagram into smaller components"
+        )
+
+    if diagram_code.count("-->") > 20:
+        suggestions.append("Diagram has many connections - consider simplifying")
+
+    if "classDef" not in diagram_code:
+        suggestions.append("Add styling to improve visual appeal")
+
+    if not any(direction in diagram_code for direction in ["TD", "LR", "BT", "RL"]):
+        suggestions.append("Specify diagram direction for better layout")
+
+    return suggestions
+
+
+def enhance_diagram_all(diagram_code: str) -> List[Dict[str, Any]]:
+    """
+    Apply all enhancements to a diagram.
+
+    Args:
+        diagram_code: Mermaid diagram code
+
+    Returns:
+        List of enhancement results
+    """
+    results = []
+
+    # Apply layout enhancement
+    layout_result = enhance_diagram_layout(diagram_code)
+    results.append(layout_result)
+
+    # Apply style enhancement to layout-enhanced diagram
+    enhanced_code = layout_result["enhanced_diagram"]
+    style_result = enhance_diagram_style(enhanced_code)
+    results.append(style_result)
+
+    return results
 
 
 def create_provider_from_config(

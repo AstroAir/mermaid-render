@@ -296,10 +296,7 @@ def main() -> int:
             "script": examples_dir / "testing_validation_showcase.py",
             "description": "Testing & Validation - Testing patterns and error handling"
         },
-        {
-            "script": examples_dir / "interactive_collaboration_showcase.py",
-            "description": "Interactive & Collaboration - Real-time editing and version control"
-        }
+
     ]
 
     # Filter to only existing scripts

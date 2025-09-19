@@ -53,7 +53,7 @@ mermaid-render/
 ├── examples/                  # Usage examples
 ├── mermaid_render/           # Main package
 │   ├── ai/                   # AI-powered features
-│   ├── collaboration/        # Collaboration tools
+
 │   ├── diagrams/            # Diagram implementations
 │   ├── renderers/           # Output renderers
 │   ├── templates/           # Template system

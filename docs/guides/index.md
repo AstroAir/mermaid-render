@@ -66,15 +66,11 @@ Improve performance with intelligent caching strategies.
 
 ### [Interactive Features](advanced/interactive.md)
 
-Build interactive diagram editors and real-time collaboration tools.
+Build interactive diagram editors and web-based tools.
 
 ### [AI Integration](advanced/ai.md)
 
 Generate diagrams from natural language and optimize existing ones.
-
-### [Collaboration](advanced/collaboration.md)
-
-Multi-user editing, version control, and team workflows.
 
 ## Integration Guides
 

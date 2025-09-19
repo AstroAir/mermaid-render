@@ -133,7 +133,7 @@ class PDFRenderer:
 
         # Backend 1: cairosvg
         try:
-            import cairosvg  # type: ignore
+            import cairosvg
 
             pdf_data = cairosvg.svg2pdf(
                 bytestring=cleaned_svg.encode("utf-8"),
@@ -152,7 +152,7 @@ class PDFRenderer:
         try:
             from io import BytesIO
 
-            import weasyprint  # type: ignore
+            import weasyprint
 
             # Wrap SVG in HTML so WeasyPrint can render it
             html_content = f"""<!DOCTYPE html>
@@ -183,10 +183,10 @@ class PDFRenderer:
             from io import BytesIO
             from tempfile import NamedTemporaryFile
 
-            from reportlab.graphics import renderPDF
+            from reportlab.graphics import renderPDF  # type: ignore[import-untyped]
 
             # svglib converts SVG to a ReportLab drawing
-            from svglib.svglib import svg2rlg  # type: ignore
+            from svglib.svglib import svg2rlg
 
             # Convert SVG string to a drawing
             svg_bytes = cleaned_svg.encode("utf-8")

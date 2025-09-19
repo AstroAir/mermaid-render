@@ -11,7 +11,7 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))
 
 
-def test_theme_information():
+def test_theme_information() -> None:
     """Test theme information retrieval."""
     print("Testing theme information...")
 
@@ -41,7 +41,7 @@ def test_theme_information():
     print("✓ Specific theme info retrieval passed")
 
 
-def test_theme_validation():
+def test_theme_validation() -> None:
     """Test theme validation."""
     print("\nTesting theme validation...")
 
@@ -60,7 +60,7 @@ def test_theme_validation():
         print(f"✓ Invalid theme '{theme}' validation passed")
 
 
-def test_custom_theme_creation():
+def test_custom_theme_creation() -> None:
     """Test custom theme creation."""
     print("\nTesting custom theme creation...")
 
@@ -108,7 +108,7 @@ def test_custom_theme_creation():
         print("✓ Invalid color format validation passed")
 
 
-def test_theme_application():
+def test_theme_application() -> None:
     """Test theme application to config."""
     print("\nTesting theme application...")
 
@@ -142,7 +142,7 @@ def test_theme_application():
     print("✓ Custom theme application passed")
 
 
-def test_theme_preview():
+def test_theme_preview() -> None:
     """Test theme preview generation."""
     print("\nTesting theme preview...")
 
@@ -172,7 +172,7 @@ def test_theme_preview():
         print("✓ Invalid theme preview validation passed")
 
 
-def test_theme_comparison():
+def test_theme_comparison() -> None:
     """Test theme comparison functionality."""
     print("\nTesting theme comparison...")
 
@@ -194,7 +194,7 @@ def test_theme_comparison():
     print("✓ Theme comparison passed")
 
 
-def test_theme_suggestion():
+def test_theme_suggestion() -> None:
     """Test theme suggestion functionality."""
     print("\nTesting theme suggestion...")
 
@@ -225,7 +225,7 @@ def test_theme_suggestion():
     print("✓ Default theme suggestion passed")
 
 
-def test_themed_rendering():
+def test_themed_rendering() -> None:
     """Test rendering with themes."""
     print("\nTesting themed rendering...")
 

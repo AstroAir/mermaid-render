@@ -14,7 +14,7 @@ import json
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))
 
 
-def test_enhanced_svg_export():
+def test_enhanced_svg_export() -> None:
     """Test enhanced SVG export functionality."""
     print("Testing enhanced SVG export...")
 
@@ -56,7 +56,7 @@ def test_enhanced_svg_export():
             print("✓ Enhanced SVG export passed")
 
 
-def test_html_export():
+def test_html_export() -> None:
     """Test HTML export functionality."""
     print("\nTesting HTML export...")
 
@@ -97,7 +97,7 @@ def test_html_export():
             print("✓ HTML export passed")
 
 
-def test_background_addition():
+def test_background_addition() -> None:
     """Test background addition to SVG."""
     print("\nTesting background addition...")
 
@@ -113,7 +113,7 @@ def test_background_addition():
     print("✓ Background addition passed")
 
 
-def test_export_templates():
+def test_export_templates() -> None:
     """Test export template functionality."""
     print("\nTesting export templates...")
 
@@ -141,7 +141,7 @@ def test_export_templates():
         print("✓ Invalid template validation passed")
 
 
-def test_template_export():
+def test_template_export() -> None:
     """Test export with template."""
     print("\nTesting template export...")
 
@@ -173,7 +173,7 @@ def test_template_export():
             print("✓ Template export passed")
 
 
-def test_batch_export():
+def test_batch_export() -> None:
     """Test batch export functionality."""
     print("\nTesting batch export...")
 
@@ -231,7 +231,7 @@ def test_batch_export():
             print("✓ Batch export passed")
 
 
-def test_export_error_handling():
+def test_export_error_handling() -> None:
     """Test export error handling."""
     print("\nTesting export error handling...")
 
@@ -251,7 +251,7 @@ def test_export_error_handling():
             print("✓ Unsupported format error handling passed")
 
 
-def test_png_pdf_export_fallback():
+def test_png_pdf_export_fallback() -> None:
     """Test PNG/PDF export fallback when cairosvg is not available."""
     print("\nTesting PNG/PDF export fallback...")
 

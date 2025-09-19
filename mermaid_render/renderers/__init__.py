@@ -67,7 +67,7 @@ __all__ = [
     "PlaywrightRenderer",
     "NodeJSRenderer",
     "GraphvizRenderer",
-    # Enhanced architecture components
+    # Plugin architecture components
     "ErrorHandler",
     "ErrorContext",
     "ErrorDetails",

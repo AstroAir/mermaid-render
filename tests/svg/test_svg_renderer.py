@@ -11,7 +11,7 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))
 
 
-def test_validation_methods():
+def test_validation_methods() -> None:
     """Test the validation and sanitization methods."""
     print("Testing validation and sanitization methods...")
 
@@ -39,7 +39,7 @@ def test_validation_methods():
     print(f"Optimized SVG: {optimized_svg}")
 
 
-def test_remote_rendering_mock():
+def test_remote_rendering_mock() -> None:
     """Test remote rendering with mocked requests."""
     print("\nTesting remote rendering with mock...")
 
@@ -70,7 +70,7 @@ def test_remote_rendering_mock():
             traceback.print_exc()
 
 
-def test_error_handling():
+def test_error_handling() -> None:
     """Test error handling scenarios."""
     print("\nTesting error handling...")
 
@@ -94,7 +94,7 @@ def test_error_handling():
             print(f"Correctly caught timeout error: {e}")
 
 
-def test_theme_validation():
+def test_theme_validation() -> None:
     """Test theme validation."""
     print("\nTesting theme validation...")
 

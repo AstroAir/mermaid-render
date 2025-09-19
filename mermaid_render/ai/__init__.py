@@ -36,6 +36,8 @@ from .analysis import (
     AnalysisReport,
     ComplexityAnalysis,
     DiagramAnalyzer,
+    EnhancementResult,
+    EnhancementType,
     QualityMetrics,
 )
 from .diagram_generator import (
@@ -52,10 +54,12 @@ from .nl_processor import (
     NLProcessor,
     TextAnalysis,
 )
-from .optimization import (
+# Import compatibility wrappers for backward compatibility
+from .compatibility import (
     DiagramOptimizer,
     LayoutOptimizer,
     OptimizationResult,
+    OptimizationType,
     StyleOptimizer,
 )
 from .providers import (
@@ -92,10 +96,14 @@ from .utils import (
     create_custom_provider_config,
     create_openrouter_provider,
     create_provider_from_config,
+    enhance_diagram_all,
+    enhance_diagram_layout,
+    enhance_diagram_style,
     export_provider_config,
     extract_entities,
     generate_from_text,
     generate_with_multiple_providers,
+    get_enhancement_suggestions,
     get_suggestions,
     optimize_diagram,
     setup_multi_provider_generation,
@@ -113,11 +121,15 @@ __all__ = [
     "TextAnalysis",
     "EntityExtraction",
     "IntentClassification",
-    # Optimization
+    # Optimization (backward compatibility)
     "DiagramOptimizer",
     "LayoutOptimizer",
     "StyleOptimizer",
     "OptimizationResult",
+    "OptimizationType",
+    # Enhancement (new integrated functionality)
+    "EnhancementResult",
+    "EnhancementType",
     # Suggestions
     "SuggestionEngine",
     "Suggestion",
@@ -160,8 +172,12 @@ __all__ = [
     "create_custom_provider_config",
     "create_openrouter_provider",
     "create_provider_from_config",
+    "enhance_diagram_all",
+    "enhance_diagram_layout",
+    "enhance_diagram_style",
     "export_provider_config",
     "generate_with_multiple_providers",
+    "get_enhancement_suggestions",
     "setup_multi_provider_generation",
     "validate_diagram_with_ai",
 ]

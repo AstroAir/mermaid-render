@@ -9,7 +9,7 @@ from mermaid_render.validators import MermaidValidator, ValidationResult
 class TestValidationResult:
     """Test ValidationResult class."""
 
-    def test_valid_result(self):
+    def test_valid_result(self) -> None:
         """Test valid validation result."""
         result = ValidationResult(
             is_valid=True, errors=[], warnings=["Minor warning"], line_errors={}
@@ -21,7 +21,7 @@ class TestValidationResult:
         assert len(result.warnings) == 1
         assert "Valid" in str(result)
 
-    def test_invalid_result(self):
+    def test_invalid_result(self) -> None:
         """Test invalid validation result."""
         result = ValidationResult(
             is_valid=False,
@@ -40,7 +40,7 @@ class TestValidationResult:
 class TestMermaidValidator:
     """Test MermaidValidator class."""
 
-    def test_init(self):
+    def test_init(self) -> None:
         """Test validator initialization."""
         validator = MermaidValidator()
 
@@ -48,7 +48,7 @@ class TestMermaidValidator:
         assert len(validator.warnings) == 0
         assert len(validator.line_errors) == 0
 
-    def test_validate_empty_code(self):
+    def test_validate_empty_code(self) -> None:
         """Test validation of empty code."""
         validator = MermaidValidator()
 
@@ -57,7 +57,7 @@ class TestMermaidValidator:
         assert not result.is_valid
         assert "Empty diagram code" in result.errors
 
-    def test_validate_whitespace_only(self):
+    def test_validate_whitespace_only(self) -> None:
         """Test validation of whitespace-only code."""
         validator = MermaidValidator()
 
@@ -66,7 +66,7 @@ class TestMermaidValidator:
         assert not result.is_valid
         assert "Empty diagram code" in result.errors
 
-    def test_validate_valid_flowchart(self):
+    def test_validate_valid_flowchart(self) -> None:
         """Test validation of valid flowchart."""
         validator = MermaidValidator()
 
@@ -81,7 +81,7 @@ flowchart TD
         assert result.is_valid
         assert len(result.errors) == 0
 
-    def test_validate_valid_sequence(self):
+    def test_validate_valid_sequence(self) -> None:
         """Test validation of valid sequence diagram."""
         validator = MermaidValidator()
 
@@ -98,7 +98,7 @@ sequenceDiagram
         assert result.is_valid
         assert len(result.errors) == 0
 
-    def test_validate_invalid_diagram_type(self):
+    def test_validate_invalid_diagram_type(self) -> None:
         """Test validation of invalid diagram type."""
         validator = MermaidValidator()
 
@@ -114,7 +114,7 @@ invalidDiagram
             "Unknown or invalid diagram type" in error for error in result.errors
         )
 
-    def test_validate_unmatched_brackets(self):
+    def test_validate_unmatched_brackets(self) -> None:
         """Test validation of unmatched brackets."""
         validator = MermaidValidator()
 
@@ -129,7 +129,7 @@ flowchart TD
         assert not result.is_valid
         # Should detect bracket mismatch
 
-    def test_detect_diagram_type_flowchart(self):
+    def test_detect_diagram_type_flowchart(self) -> None:
         """Test diagram type detection for flowchart."""
         validator = MermaidValidator()
 
@@ -137,33 +137,33 @@ flowchart TD
         assert validator._detect_diagram_type("flowchart LR") == "flowchart"
         assert validator._detect_diagram_type("flowchart TB") == "flowchart"
 
-    def test_detect_diagram_type_sequence(self):
+    def test_detect_diagram_type_sequence(self) -> None:
         """Test diagram type detection for sequence."""
         validator = MermaidValidator()
 
         assert validator._detect_diagram_type("sequenceDiagram") == "sequenceDiagram"
 
-    def test_detect_diagram_type_class(self):
+    def test_detect_diagram_type_class(self) -> None:
         """Test diagram type detection for class diagram."""
         validator = MermaidValidator()
 
         assert validator._detect_diagram_type("classDiagram") == "classDiagram"
 
-    def test_detect_diagram_type_state(self):
+    def test_detect_diagram_type_state(self) -> None:
         """Test diagram type detection for state diagram."""
         validator = MermaidValidator()
 
         assert validator._detect_diagram_type("stateDiagram") == "stateDiagram"
         assert validator._detect_diagram_type("stateDiagram-v2") == "stateDiagram"
 
-    def test_detect_diagram_type_unknown(self):
+    def test_detect_diagram_type_unknown(self) -> None:
         """Test diagram type detection for unknown type."""
         validator = MermaidValidator()
 
         assert validator._detect_diagram_type("unknownDiagram") is None
         assert validator._detect_diagram_type("") is None
 
-    def test_validate_node_id_valid(self):
+    def test_validate_node_id_valid(self) -> None:
         """Test validation of valid node IDs."""
         validator = MermaidValidator()
 
@@ -172,7 +172,7 @@ flowchart TD
         assert validator.validate_node_id("my_node")
         assert validator.validate_node_id("nodeABC123")
 
-    def test_validate_node_id_invalid(self):
+    def test_validate_node_id_invalid(self) -> None:
         """Test validation of invalid node IDs."""
         validator = MermaidValidator()
 
@@ -181,7 +181,7 @@ flowchart TD
         assert not validator.validate_node_id("node with space")  # Contains space
         assert not validator.validate_node_id("")  # Empty
 
-    def test_suggest_fixes_unknown_type(self):
+    def test_suggest_fixes_unknown_type(self) -> None:
         """Test fix suggestions for unknown diagram type."""
         validator = MermaidValidator()
 
@@ -191,7 +191,7 @@ flowchart TD
             "diagram type declaration" in suggestion for suggestion in suggestions
         )
 
-    def test_suggest_fixes_unmatched_brackets(self):
+    def test_suggest_fixes_unmatched_brackets(self) -> None:
         """Test fix suggestions for unmatched brackets."""
         validator = MermaidValidator()
 
@@ -204,7 +204,7 @@ flowchart TD
 
         assert any("bracket" in suggestion for suggestion in suggestions)
 
-    def test_suggest_fixes_empty_diagram(self):
+    def test_suggest_fixes_empty_diagram(self) -> None:
         """Test fix suggestions for empty diagram."""
         validator = MermaidValidator()
 
@@ -212,7 +212,7 @@ flowchart TD
 
         assert any("diagram content" in suggestion for suggestion in suggestions)
 
-    def test_validate_flowchart_specific(self):
+    def test_validate_flowchart_specific(self) -> None:
         """Test flowchart-specific validation."""
         validator = MermaidValidator()
 
@@ -228,7 +228,7 @@ flowchart TD
         # Should pass basic validation
         assert result.is_valid or len(result.errors) == 0
 
-    def test_validate_sequence_specific(self):
+    def test_validate_sequence_specific(self) -> None:
         """Test sequence diagram-specific validation."""
         validator = MermaidValidator()
 
@@ -244,7 +244,7 @@ sequenceDiagram
         # Should pass basic validation
         assert result.is_valid or len(result.errors) == 0
 
-    def test_validate_class_specific(self):
+    def test_validate_class_specific(self) -> None:
         """Test class diagram-specific validation."""
         validator = MermaidValidator()
 
@@ -265,7 +265,7 @@ classDiagram
         # Should pass basic validation
         assert result.is_valid or len(result.errors) == 0
 
-    def test_validation_warnings(self):
+    def test_validation_warnings(self) -> None:
         """Test validation warnings generation."""
         validator = MermaidValidator()
 
@@ -283,7 +283,7 @@ flowchart TD
         # The exact behavior depends on implementation
         assert isinstance(result.warnings, list)
 
-    def test_validate_complex_valid_diagram(self):
+    def test_validate_complex_valid_diagram(self) -> None:
         """Test validation of complex but valid diagram."""
         validator = MermaidValidator()
 
@@ -313,7 +313,7 @@ flowchart TD
         assert result.is_valid is True
         assert len(result.errors) == 0
 
-    def test_validate_special_characters(self):
+    def test_validate_special_characters(self) -> None:
         """Test validation with special characters in labels."""
         validator = MermaidValidator()
 
@@ -327,7 +327,7 @@ flowchart TD
         result = validator.validate(special_chars)
         assert result.is_valid is True
 
-    def test_validate_multiple_diagram_types(self):
+    def test_validate_multiple_diagram_types(self) -> None:
         """Test validation of different diagram types."""
         validator = MermaidValidator()
 
@@ -347,7 +347,7 @@ flowchart TD
             # Most should be valid, but some might not be fully supported
             assert isinstance(result, ValidationResult)
 
-    def test_validate_edge_cases(self):
+    def test_validate_edge_cases(self) -> None:
         """Test validation of edge cases."""
         validator = MermaidValidator()
 
@@ -364,7 +364,7 @@ flowchart TD
             assert isinstance(result, ValidationResult)
             # Some might be valid, some invalid, but should not crash
 
-    def test_validate_performance_large_diagram(self):
+    def test_validate_performance_large_diagram(self) -> None:
         """Test validation performance with large diagrams."""
         validator = MermaidValidator()
 

@@ -12,14 +12,14 @@ from mermaid_render import (
 )
 import tempfile
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Generator
 
 import pytest
 
 # Register test categories as markers
 
 
-def pytest_configure(config):
+def pytest_configure(config: Any) -> None:
     """Configure pytest with custom markers."""
     config.addinivalue_line("markers", "unit: Unit tests")
     config.addinivalue_line("markers", "integration: Integration tests")
@@ -35,7 +35,7 @@ def pytest_configure(config):
 
 
 @pytest.fixture
-def temp_dir():
+def temp_dir() -> Generator[Path, None, None]:
     """Create a temporary directory for tests."""
     with tempfile.TemporaryDirectory() as tmpdir:
         yield Path(tmpdir)
@@ -54,19 +54,19 @@ def sample_config() -> Dict[str, Any]:
 
 
 @pytest.fixture
-def mermaid_config(sample_config) -> MermaidConfig:
+def mermaid_config(sample_config: Any) -> MermaidConfig:
     """Create a MermaidConfig instance for testing."""
     return MermaidConfig(**sample_config)
 
 
 @pytest.fixture
-def mermaid_renderer(mermaid_config) -> MermaidRenderer:
+def mermaid_renderer(mermaid_config: Any) -> MermaidRenderer:
     """Create a MermaidRenderer instance for testing."""
     return MermaidRenderer(config=mermaid_config)
 
 
 @pytest.fixture
-def theme_manager(temp_dir) -> ThemeManager:
+def theme_manager(temp_dir: Any) -> ThemeManager:
     """Create a ThemeManager instance for testing."""
     return ThemeManager(custom_themes_dir=temp_dir / "themes")
 
@@ -149,7 +149,7 @@ def sample_themes() -> Dict[str, Dict[str, Any]]:
 
 # Test data fixtures
 @pytest.fixture
-def diagram_test_cases():
+def diagram_test_cases() -> Dict[str, str]:
     """Test cases for different diagram types."""
     return {
         "flowchart": """
@@ -188,7 +188,7 @@ stateDiagram-v2
 
 
 @pytest.fixture
-def mock_responses():
+def mock_responses() -> Dict[str, Any]:
     """Mock HTTP responses for testing."""
     return {
         "svg_success": """<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">
@@ -231,8 +231,4 @@ sequenceDiagram
     return diagrams.get(diagram_type, diagrams["flowchart"])
 
 
-# Markers for different test categories
-pytest.mark.unit = pytest.mark.unit
-pytest.mark.integration = pytest.mark.integration
-pytest.mark.slow = pytest.mark.slow
-pytest.mark.network = pytest.mark.network
+# Test markers are defined in pytest_configure function above

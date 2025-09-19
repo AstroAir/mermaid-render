@@ -11,7 +11,7 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))
 
 
-def test_svg_rendering_with_mock():
+def test_svg_rendering_with_mock() -> None:
     """Test SVG rendering with mocked response."""
     print("Testing SVG rendering with mock...")
 
@@ -58,7 +58,7 @@ def test_svg_rendering_with_mock():
         renderer.close()
 
 
-def test_svg_validation():
+def test_svg_validation() -> None:
     """Test SVG validation functionality."""
     print("\nTesting SVG validation...")
 
@@ -82,7 +82,7 @@ def test_svg_validation():
     print("✓ Empty SVG validation passed")
 
 
-def test_svg_sanitization():
+def test_svg_sanitization() -> None:
     """Test SVG sanitization functionality."""
     print("\nTesting SVG sanitization...")
 
@@ -101,7 +101,7 @@ def test_svg_sanitization():
     print("✓ Event handler removal passed")
 
 
-def test_svg_optimization():
+def test_svg_optimization() -> None:
     """Test SVG optimization functionality."""
     print("\nTesting SVG optimization...")
 
@@ -115,7 +115,7 @@ def test_svg_optimization():
     print("✓ SVG optimization passed")
 
 
-def test_error_handling():
+def test_error_handling() -> None:
     """Test error handling scenarios."""
     print("\nTesting error handling...")
 
@@ -140,7 +140,7 @@ def test_error_handling():
         print("✓ Network timeout error handling passed")
 
 
-def test_file_output():
+def test_file_output() -> None:
     """Test file output functionality."""
     print("\nTesting file output...")
 

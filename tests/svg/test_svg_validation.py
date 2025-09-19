@@ -9,7 +9,7 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))
 
 
-def test_enhanced_svg_validation():
+def test_enhanced_svg_validation() -> None:
     """Test enhanced SVG validation."""
     print("Testing enhanced SVG validation...")
 
@@ -49,7 +49,7 @@ def test_enhanced_svg_validation():
     print("✓ Malformed SVG validation passed")
 
 
-def test_enhanced_svg_sanitization():
+def test_enhanced_svg_sanitization() -> None:
     """Test enhanced SVG sanitization."""
     print("\nTesting enhanced SVG sanitization...")
 
@@ -107,7 +107,7 @@ def test_enhanced_svg_sanitization():
     print("✓ Strict mode sanitization passed")
 
 
-def test_svg_security_scanner():
+def test_svg_security_scanner() -> None:
     """Test SVG security scanner."""
     print("\nTesting SVG security scanner...")
 
@@ -150,7 +150,7 @@ def test_svg_security_scanner():
     print("✓ Low-risk SVG detection passed")
 
 
-def test_svg_statistics():
+def test_svg_statistics() -> None:
     """Test SVG statistics generation."""
     print("\nTesting SVG statistics...")
 
@@ -178,7 +178,7 @@ def test_svg_statistics():
     print("✓ SVG statistics generation passed")
 
 
-def test_svg_report():
+def test_svg_report() -> None:
     """Test comprehensive SVG report generation."""
     print("\nTesting SVG report generation...")
 
@@ -203,7 +203,7 @@ def test_svg_report():
     print("✓ SVG report generation passed")
 
 
-def test_xml_structure_fixing():
+def test_xml_structure_fixing() -> None:
     """Test XML structure fixing."""
     print("\nTesting XML structure fixing...")
 

@@ -1,3 +1,4 @@
+from typing import Any
 #!/usr/bin/env python3
 """
 Cross-browser compatibility test suite for SVG rendering.
@@ -15,7 +16,7 @@ from pathlib import Path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))
 
 
-def create_test_svgs():
+def create_test_svgs() -> list[dict[str, str]]:
     """Create a comprehensive set of test SVGs for browser testing."""
     print("Creating test SVGs for cross-browser compatibility testing...")
 
@@ -108,7 +109,7 @@ def create_test_svgs():
     return test_results
 
 
-def get_test_description(test_name):
+def get_test_description(test_name: str) -> str:
     """Get description for each test case."""
     descriptions = {
         'basic_flowchart': 'Tests basic shapes, text rendering, and arrow markers',
@@ -120,7 +121,7 @@ def get_test_description(test_name):
     return descriptions.get(test_name, 'Test case')
 
 
-def create_browser_test_html():
+def create_browser_test_html() -> Path:
     """Create an HTML file for browser testing."""
     print("\nCreating browser test HTML...")
 
@@ -310,7 +311,7 @@ def create_browser_test_html():
     return html_path
 
 
-def create_compatibility_report():
+def create_compatibility_report() -> Path:
     """Create a compatibility testing guide."""
     print("\nCreating compatibility testing guide...")
 

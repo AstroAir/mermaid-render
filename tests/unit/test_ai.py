@@ -3,6 +3,7 @@ Unit tests for AI module.
 """
 
 import pytest
+from typing import Any
 from unittest.mock import Mock, patch, MagicMock
 
 from mermaid_render.ai import (
@@ -33,7 +34,7 @@ from mermaid_render.exceptions import MermaidRenderError, ValidationError
 class TestNLProcessor:
     """Test NLProcessor class."""
 
-    def test_init(self):
+    def test_init(self) -> None:
         """Test NL processor initialization."""
         processor = NLProcessor()
 
@@ -42,7 +43,7 @@ class TestNLProcessor:
         assert processor.entity_patterns is not None
         assert processor.stopwords is not None
 
-    def test_analyze_text(self):
+    def test_analyze_text(self) -> None:
         """Test complete text analysis."""
         processor = NLProcessor()
         text = "Create a flowchart showing user login process with authentication"
@@ -57,7 +58,7 @@ class TestNLProcessor:
         assert isinstance(result.complexity_score, float)
         assert isinstance(result.domain, str)
 
-    def test_extract_keywords(self):
+    def test_extract_keywords(self) -> None:
         """Test keyword extraction."""
         processor = NLProcessor()
         text = "Create a flowchart showing user login process"
@@ -72,7 +73,7 @@ class TestNLProcessor:
         # Stopwords should be filtered out
         assert "a" not in keywords
 
-    def test_extract_entities(self):
+    def test_extract_entities(self) -> None:
         """Test entity extraction."""
         processor = NLProcessor()
         text = "Create a flowchart with User, Database, and Authentication Service"
@@ -84,7 +85,7 @@ class TestNLProcessor:
         assert isinstance(entities.entity_types, dict)
         assert isinstance(entities.relationships, list)
 
-    def test_classify_intent(self):
+    def test_classify_intent(self) -> None:
         """Test intent classification."""
         processor = NLProcessor()
 
@@ -101,7 +102,7 @@ class TestNLProcessor:
         assert isinstance(intent.intent, str)
         assert intent.confidence >= 0.0
 
-    def test_calculate_complexity(self):
+    def test_calculate_complexity(self) -> None:
         """Test complexity calculation."""
         processor = NLProcessor()
 
@@ -117,7 +118,7 @@ class TestNLProcessor:
         assert 0 <= complex_score <= 1
         assert complex_score > simple_score
 
-    def test_determine_domain(self):
+    def test_determine_domain(self) -> None:
         """Test domain determination."""
         processor = NLProcessor()
 
@@ -137,7 +138,7 @@ class TestNLProcessor:
 class TestDiagramGenerator:
     """Test DiagramGenerator class."""
 
-    def test_init_default(self):
+    def test_init_default(self) -> None:
         """Test diagram generator initialization with defaults."""
         with patch('mermaid_render.ai.diagram_generator.OpenAIProvider') as mock_provider, \
                 patch('mermaid_render.ai.diagram_generator.NLProcessor') as mock_processor:
@@ -149,7 +150,7 @@ class TestDiagramGenerator:
             assert generator.templates is not None
             assert generator.prompts is not None
 
-    def test_init_custom(self):
+    def test_init_custom(self) -> None:
         """Test diagram generator initialization with custom providers."""
         mock_provider = Mock()
         mock_processor = Mock()
@@ -160,7 +161,7 @@ class TestDiagramGenerator:
         assert generator.ai_provider is mock_provider
         assert generator.nl_processor is mock_processor
 
-    def test_from_text_basic(self):
+    def test_from_text_basic(self) -> None:
         """Test basic diagram generation from text."""
         mock_provider = Mock()
         mock_processor = Mock()
@@ -195,7 +196,7 @@ class TestDiagramGenerator:
         mock_processor.analyze_text.assert_called_once()
         mock_provider.generate_text.assert_called_once()
 
-    def test_from_text_with_config(self):
+    def test_from_text_with_config(self) -> None:
         """Test diagram generation with custom config."""
         mock_provider = Mock()
         mock_processor = Mock()
@@ -224,9 +225,9 @@ class TestDiagramGenerator:
         result = generator.from_text("Create a sequence diagram", config)
 
         assert result.diagram_type == AIdiagramType.SEQUENCE
-        assert result.config.include_styling is True
+        assert result.config is not None and result.config.include_styling is True
 
-    def test_from_data(self):
+    def test_from_data(self) -> None:
         """Test diagram generation from data."""
         mock_provider = Mock()
         mock_processor = Mock()
@@ -256,7 +257,7 @@ class TestDiagramGenerator:
         assert isinstance(result, GenerationResult)
         assert "pie title" in result.diagram_code
 
-    def test_improve_diagram(self):
+    def test_improve_diagram(self) -> None:
         """Test diagram improvement."""
         mock_provider = Mock()
         mock_processor = Mock()
@@ -281,7 +282,7 @@ class TestDiagramGenerator:
         assert "B[End]" in result.diagram_code or "B" in result.diagram_code
         assert "classDef" in result.diagram_code
 
-    def test_get_suggestions(self):
+    def test_get_suggestions(self) -> None:
         """Test getting suggestions for diagram."""
         mock_provider = Mock()
         mock_processor = Mock()
@@ -296,7 +297,7 @@ class TestDiagramGenerator:
         # Should have at least some basic suggestions
         assert len(suggestions) > 0
 
-    def test_ai_provider_error_handling(self):
+    def test_ai_provider_error_handling(self) -> None:
         """Test handling of AI provider errors."""
         mock_provider = Mock()
         mock_processor = Mock()
@@ -323,7 +324,7 @@ class TestDiagramGenerator:
         with pytest.raises(Exception, match="API Error"):
             generator.from_text("Create a flowchart")
 
-    def test_determine_diagram_type(self):
+    def test_determine_diagram_type(self) -> None:
         """Test automatic diagram type determination."""
         mock_provider = Mock()
         mock_processor = Mock()
@@ -352,13 +353,13 @@ class TestDiagramGenerator:
 class TestDiagramAnalyzer:
     """Test DiagramAnalyzer class."""
 
-    def test_init(self):
+    def test_init(self) -> None:
         """Test analyzer initialization."""
         analyzer = DiagramAnalyzer()
 
         assert analyzer.quality_rules is not None
 
-    def test_analyze(self):
+    def test_analyze(self) -> None:
         """Test complete diagram analysis."""
         analyzer = DiagramAnalyzer()
         diagram_code = "flowchart TD\n    A --> B\n    B --> C"
@@ -371,7 +372,7 @@ class TestDiagramAnalyzer:
         assert isinstance(result.issues, list)
         assert isinstance(result.recommendations, list)
 
-    def test_analyze_complexity(self):
+    def test_analyze_complexity(self) -> None:
         """Test complexity analysis."""
         analyzer = DiagramAnalyzer()
 
@@ -400,7 +401,7 @@ class TestDiagramAnalyzer:
         assert isinstance(complexity.node_count, int)
         assert complexity.node_count >= 0
 
-    def test_assess_quality(self):
+    def test_assess_quality(self) -> None:
         """Test quality assessment."""
         analyzer = DiagramAnalyzer()
 
@@ -422,14 +423,14 @@ class TestDiagramAnalyzer:
 class TestDiagramOptimizer:
     """Test DiagramOptimizer class."""
 
-    def test_init(self):
+    def test_init(self) -> None:
         """Test optimizer initialization."""
         optimizer = DiagramOptimizer()
 
         assert optimizer.layout_optimizer is not None
         assert optimizer.style_optimizer is not None
 
-    def test_optimize_layout(self):
+    def test_optimize_layout(self) -> None:
         """Test layout optimization."""
         optimizer = DiagramOptimizer()
         diagram_code = "flowchart TD\nA-->B\nB-->C"
@@ -443,7 +444,7 @@ class TestDiagramOptimizer:
         assert isinstance(result.improvements, list)
         assert result.confidence_score > 0
 
-    def test_optimize_style(self):
+    def test_optimize_style(self) -> None:
         """Test style optimization."""
         optimizer = DiagramOptimizer()
         diagram_code = "flowchart TD\n    A --> B\n    B --> C"
@@ -456,7 +457,7 @@ class TestDiagramOptimizer:
         assert isinstance(result.improvements, list)
         assert result.confidence_score > 0
 
-    def test_optimize_all(self):
+    def test_optimize_all(self) -> None:
         """Test full optimization."""
         optimizer = DiagramOptimizer()
         diagram_code = "flowchart TD\nA-->B\nB-->C"
@@ -473,13 +474,13 @@ class TestDiagramOptimizer:
 class TestSuggestionEngine:
     """Test SuggestionEngine class."""
 
-    def test_init(self):
+    def test_init(self) -> None:
         """Test suggestion engine initialization."""
         engine = SuggestionEngine()
 
         assert engine.suggestion_rules is not None
 
-    def test_get_suggestions(self):
+    def test_get_suggestions(self) -> None:
         """Test getting suggestions."""
         engine = SuggestionEngine()
         diagram_code = "flowchart TD\n    A --> B"
@@ -489,7 +490,7 @@ class TestSuggestionEngine:
         assert isinstance(suggestions, list)
         assert all(isinstance(s, Suggestion) for s in suggestions)
 
-    def test_get_suggestions_by_type(self):
+    def test_get_suggestions_by_type(self) -> None:
         """Test getting suggestions by type."""
         engine = SuggestionEngine()
         diagram_code = "flowchart TD\n    A --> B"
@@ -508,7 +509,7 @@ class TestSuggestionEngine:
                    SuggestionType.LAYOUT for s in layout_suggestions)
         assert all(s.suggestion_type == SuggestionType.STYLE for s in style_suggestions)
 
-    def test_get_suggestions_by_priority(self):
+    def test_get_suggestions_by_priority(self) -> None:
         """Test getting suggestions by priority."""
         engine = SuggestionEngine()
         diagram_code = "flowchart TD\n    A --> B"
@@ -524,7 +525,7 @@ class TestSuggestionEngine:
             for s in high_priority
         )
 
-    def test_suggest_improvements(self):
+    def test_suggest_improvements(self) -> None:
         """Test improvement suggestions."""
         engine = SuggestionEngine()
 
@@ -540,7 +541,7 @@ class TestSuggestionEngine:
         assert any("styling" in text.lower() or "comment" in text.lower()
                    for text in suggestion_texts)
 
-    def test_suggest_styling(self):
+    def test_suggest_styling(self) -> None:
         """Test styling suggestions."""
         engine = SuggestionEngine()
 
@@ -555,7 +556,7 @@ class TestSuggestionEngine:
         suggestion_texts = [s.description for s in suggestions]
         assert any("styl" in text.lower() for text in suggestion_texts)
 
-    def test_suggest_layout(self):
+    def test_suggest_layout(self) -> None:
         """Test layout suggestions."""
         engine = SuggestionEngine()
 
@@ -575,21 +576,21 @@ class TestSuggestionEngine:
 class TestAIProviders:
     """Test AI provider classes."""
 
-    def test_openai_provider_init(self):
+    def test_openai_provider_init(self) -> None:
         """Test OpenAI provider initialization."""
         with patch.dict('os.environ', {'OPENAI_API_KEY': 'test-key'}):
             provider = OpenAIProvider()
             assert provider.api_key == 'test-key'
             assert provider.model == 'gpt-3.5-turbo'
 
-    def test_openai_provider_custom_model(self):
+    def test_openai_provider_custom_model(self) -> None:
         """Test OpenAI provider with custom model."""
         with patch.dict('os.environ', {'OPENAI_API_KEY': 'test-key'}):
             provider = OpenAIProvider(model='gpt-4')
             assert provider.model == 'gpt-4'
 
     @patch('openai.OpenAI')
-    def test_openai_provider_generate_text(self, mock_openai):
+    def test_openai_provider_generate_text(self, mock_openai: Any) -> None:
         """Test OpenAI text generation."""
         # Mock OpenAI client
         mock_client = Mock()
@@ -607,20 +608,20 @@ class TestAIProviders:
             assert result.provider == "openai"
             mock_client.chat.completions.create.assert_called_once()
 
-    def test_anthropic_provider_init(self):
+    def test_anthropic_provider_init(self) -> None:
         """Test Anthropic provider initialization."""
         with patch.dict('os.environ', {'ANTHROPIC_API_KEY': 'test-key'}):
             provider = AnthropicProvider()
             assert provider.api_key == 'test-key'
             assert provider.model == 'claude-3-5-sonnet-20241022'
 
-    def test_local_model_provider_init(self):
+    def test_local_model_provider_init(self) -> None:
         """Test Local model provider initialization."""
         provider = LocalModelProvider()
         assert provider.model_path is not None
         assert provider.model_name is not None
 
-    def test_local_model_provider_generate_text(self):
+    def test_local_model_provider_generate_text(self) -> None:
         """Test Local model text generation."""
         provider = LocalModelProvider()
 
@@ -639,7 +640,7 @@ class TestAIUtilities:
     """Test AI utility functions."""
 
     @patch('mermaid_render.ai.utils.DiagramGenerator')
-    def test_generate_from_text(self, mock_generator_class):
+    def test_generate_from_text(self, mock_generator_class: Any) -> None:
         """Test generate_from_text utility function."""
         from mermaid_render.ai.utils import generate_from_text
 
@@ -659,7 +660,7 @@ class TestAIUtilities:
         assert call_args[0][1] is not None  # Second argument is GenerationConfig
 
     @patch('mermaid_render.ai.utils.DiagramOptimizer')
-    def test_optimize_diagram(self, mock_optimizer_class):
+    def test_optimize_diagram(self, mock_optimizer_class: Any) -> None:
         """Test optimize_diagram utility function."""
         from mermaid_render.ai.utils import optimize_diagram
 
@@ -686,7 +687,7 @@ class TestAIUtilities:
         mock_optimizer.optimize_style.assert_called_once()
 
     @patch('mermaid_render.ai.utils.DiagramAnalyzer')
-    def test_analyze_diagram(self, mock_analyzer_class):
+    def test_analyze_diagram(self, mock_analyzer_class: Any) -> None:
         """Test analyze_diagram utility function."""
         from mermaid_render.ai.utils import analyze_diagram
 
@@ -702,7 +703,7 @@ class TestAIUtilities:
         mock_analyzer.analyze.assert_called_once()
 
     @patch('mermaid_render.ai.utils.SuggestionEngine')
-    def test_get_suggestions(self, mock_engine_class):
+    def test_get_suggestions(self, mock_engine_class: Any) -> None:
         """Test get_suggestions utility function."""
         from mermaid_render.ai.utils import get_suggestions
 
@@ -721,7 +722,7 @@ class TestAIUtilities:
 class TestAIDataClasses:
     """Test AI data classes and enums."""
 
-    def test_generation_config(self):
+    def test_generation_config(self) -> None:
         """Test GenerationConfig data class."""
         config = GenerationConfig(
             diagram_type=AIdiagramType.FLOWCHART,
@@ -735,7 +736,7 @@ class TestAIDataClasses:
         assert config.max_nodes == 10
         assert config.style_preference == "modern"
 
-    def test_generation_result(self):
+    def test_generation_result(self) -> None:
         """Test GenerationResult data class."""
         config = GenerationConfig(
             diagram_type=AIdiagramType.FLOWCHART,
@@ -761,7 +762,7 @@ class TestAIDataClasses:
         assert isinstance(result_dict, dict)
         assert result_dict["diagram_code"] == "flowchart TD\n    A --> B"
 
-    def test_suggestion(self):
+    def test_suggestion(self) -> None:
         """Test Suggestion data class."""
         suggestion = Suggestion(
             suggestion_id="test_001",

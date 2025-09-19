@@ -1,15 +1,15 @@
-# AI Module Enhancement Guide
+# AI Module Improvement Guide
 
-This document describes the enhanced AI module features in mermaid-render, including new providers, custom provider support, and utility functions.
+This document describes the improved AI module features in mermaid-render, including new providers, custom provider support, and utility functions.
 
 ## Overview
 
-The enhanced AI module provides:
+The improved AI module provides:
 
 1. **Optimized Core Providers**: Improved OpenAI and Anthropic providers with better error handling
 2. **OpenRouter Integration**: Access to hundreds of AI models through OpenRouter's unified API
 3. **Custom Provider Architecture**: Flexible framework for integrating any AI API
-4. **Enhanced Utilities**: New functions for batch processing, performance comparison, and validation
+4. **Improved Utilities**: New functions for batch processing, performance comparison, and validation
 5. **Provider Management**: Automatic fallback and multi-provider support
 
 ## Quick Start

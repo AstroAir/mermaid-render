@@ -11,7 +11,7 @@ import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
-import jsonschema
+import jsonschema  # type: ignore[import-untyped]
 
 
 class RendererConfigManager:

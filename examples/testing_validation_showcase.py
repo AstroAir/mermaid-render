@@ -115,7 +115,7 @@ class TestDiagramCreation(unittest.TestCase):
         result = validate_mermaid_syntax(mermaid_code)
         self.assertTrue(result.is_valid, f"Validation errors: {result.errors}")
     
-    def test_class_diagram_creation(self):
+    def test_class_diagram_creation(self) -> None:
         """Test creating a valid class diagram (string-based)."""
         mermaid_code = build_class_diagram_code("Test Class Diagram")
         
@@ -128,11 +128,11 @@ class TestDiagramCreation(unittest.TestCase):
         result = validate_mermaid_syntax(mermaid_code)
         self.assertTrue(result.is_valid, f"Validation errors: {result.errors}")
     
-    def test_invalid_diagram_creation(self):
+    def test_invalid_diagram_creation(self) -> None:
         """Test error handling for invalid diagrams with simple logical checks."""
         # Simulate a diagram API raising DiagramError for missing nodes in edges.
         # Since we build strings directly, emulate with a helper.
-        def add_edge(nodes: set[str], src: str, dst: str):
+        def add_edge(nodes: set[str], src: str, dst: str) -> None:
             if src not in nodes or dst not in nodes:
                 raise DiagramError(f"edge requires existing nodes: {src} -> {dst}")
         
@@ -141,7 +141,7 @@ class TestDiagramCreation(unittest.TestCase):
             add_edge(nodes, "nonexistent1", "nonexistent2")
         
         # Duplicate node IDs simulated
-        def add_node(nodes: set[str], node_id: str):
+        def add_node(nodes: set[str], node_id: str) -> None:
             if node_id in nodes:
                 raise DiagramError(f"duplicate node id: {node_id}")
             nodes.add(node_id)
@@ -150,7 +150,7 @@ class TestDiagramCreation(unittest.TestCase):
         with self.assertRaises(DiagramError):
             add_node(nodes, "test")
     
-    def test_validation_errors(self):
+    def test_validation_errors(self) -> None:
         """Test validation of invalid Mermaid syntax."""
         invalid_syntax = """
         flowchart TD
@@ -166,12 +166,12 @@ class TestDiagramCreation(unittest.TestCase):
 class TestRenderingWithMocks(unittest.TestCase):
     """Test rendering functionality with mocked dependencies."""
     
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test fixtures."""
         self.output_dir = create_output_dir()
     
     @patch('mermaid_render.core.requests.post')
-    def test_successful_rendering(self, mock_post):
+    def test_successful_rendering(self, mock_post: Any) -> None:
         """Test successful rendering with mocked HTTP request."""
         # Mock successful response
         mock_response = Mock()
@@ -191,7 +191,7 @@ class TestRenderingWithMocks(unittest.TestCase):
         mock_post.assert_called_once()
     
     @patch('mermaid_render.core.requests.post')
-    def test_rendering_failure(self, mock_post):
+    def test_rendering_failure(self, mock_post: Any) -> None:
         """Test rendering failure handling."""
         # Mock failed response
         mock_response = Mock()
@@ -206,7 +206,7 @@ class TestRenderingWithMocks(unittest.TestCase):
         with self.assertRaises(RenderingError):
             renderer.render_raw(code, format="svg")
     
-    def test_unsupported_format(self):
+    def test_unsupported_format(self) -> None:
         """Test handling of unsupported formats."""
         renderer = MermaidRenderer()
         code = "flowchart TD\n    A[Test]"
@@ -218,15 +218,15 @@ class TestRenderingWithMocks(unittest.TestCase):
 class TestApplicationIntegration(unittest.TestCase):
     """Test integration patterns for applications using the library."""
     
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test fixtures."""
         self.output_dir = create_output_dir()
     
-    def test_diagram_generation_service(self):
+    def test_diagram_generation_service(self) -> None:
         """Test a service that generates diagrams from data."""
         
         class DiagramService:
-            def __init__(self):
+            def __init__(self) -> None:
                 self.renderer = MermaidRenderer()
             
             def create_process_flow(self, steps: List[Dict[str, Any]]) -> str:
@@ -290,14 +290,14 @@ class TestApplicationIntegration(unittest.TestCase):
             self.assertEqual(result, '<svg>test</svg>')
             mock_render.assert_called_once_with(diagram_code, format="svg")
     
-    def test_batch_diagram_processor(self):
+    def test_batch_diagram_processor(self) -> None:
         """Test a batch processor for multiple diagrams."""
         
         class BatchProcessor:
-            def __init__(self):
+            def __init__(self) -> None:
                 self.renderer = MermaidRenderer()
-                self.results = []
-                self.errors = []
+                self.results: List[Any] = []
+                self.errors: List[str] = []
             
             def process_diagrams(self, diagrams: Dict[str, str]) -> Dict[str, Any]:
                 """Process multiple diagrams and return results."""
@@ -353,7 +353,7 @@ class TestApplicationIntegration(unittest.TestCase):
         self.assertIn("Validation failed", results["invalid"]["error"])
 
 
-def validation_patterns_example(output_dir: Path):
+def validation_patterns_example(output_dir: Path) -> None:
     """Demonstrate validation patterns and error handling."""
     print("Validation patterns example...")
     
@@ -429,7 +429,7 @@ flowchart TD
     print(f"📁 Validation results saved to {results_path}")
 
 
-def error_handling_patterns_example(output_dir: Path):
+def error_handling_patterns_example(output_dir: Path) -> None:
     """Demonstrate comprehensive error handling patterns."""
     print("Error handling patterns example...")
     
@@ -547,7 +547,7 @@ def error_handling_patterns_example(output_dir: Path):
     print(f"📁 Error handling results saved to {error_path}")
 
 
-def main():
+def main() -> None:
     """Run all testing and validation examples."""
     print("=== Mermaid Render Testing & Validation Showcase ===\n")
     

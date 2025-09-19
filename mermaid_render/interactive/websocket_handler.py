@@ -6,6 +6,7 @@ and collaborative editing capabilities.
 """
 
 import json
+import time
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Set
@@ -13,6 +14,13 @@ from typing import Any, Dict, List, Optional, Set
 from fastapi import WebSocket
 
 from .builder import DiagramBuilder
+from .security import InputSanitizer, SecurityValidator, websocket_rate_limiter
+from .performance import (
+    default_debouncer,
+    default_connection_pool,
+    default_performance_monitor,
+    DebounceConfig
+)
 
 
 @dataclass
@@ -59,6 +67,7 @@ class WebSocketHandler:
         """Initialize WebSocket handler."""
         self.sessions: Dict[str, DiagramSession] = {}
         self.client_sessions: Dict[WebSocket, str] = {}
+        self.broadcast_debouncer = default_debouncer
 
     async def connect(self, websocket: WebSocket, session_id: str) -> None:
         """
@@ -68,25 +77,97 @@ class WebSocketHandler:
             websocket: WebSocket connection
             session_id: Session ID to join
         """
-        await websocket.accept()
+        try:
+            # Validate session ID
+            session_id = InputSanitizer.sanitize_session_id(session_id)
 
-        # Create session if it doesn't exist
+            # Check rate limit
+            client_ip = websocket.client.host if websocket.client else "unknown"
+            if not websocket_rate_limiter.is_allowed(client_ip):
+                await websocket.close(code=1008, reason="Rate limit exceeded")
+                return
+
+            # Validate origin if present
+            origin = websocket.headers.get("origin")
+            if not SecurityValidator.validate_websocket_origin(origin):
+                await websocket.close(code=1008, reason="Invalid origin")
+                return
+
+            await websocket.accept()
+
+            # Create session if it doesn't exist
+            if session_id not in self.sessions:
+                from .builder import DiagramBuilder, DiagramType
+
+                builder = DiagramBuilder(DiagramType.FLOWCHART)
+                self.sessions[session_id] = DiagramSession(session_id, builder)
+
+            # Add client to session
+            session = self.sessions[session_id]
+            session.add_client(websocket)
+            self.client_sessions[websocket] = session_id
+
+            # Send current state to new client
+            await self._send_current_state(websocket, session)
+
+            # Notify other clients about new connection
+            await self._broadcast_client_update(session_id)
+
+        except ValueError as e:
+            # Invalid session ID or other validation error
+            await websocket.close(code=1008, reason=str(e))
+        except Exception as e:
+            # Unexpected error during connection
+            await websocket.close(code=1011, reason="Internal server error")
+
+    async def broadcast_debounced(self, session_id: str, message: Dict[str, Any], debounce_key: Optional[str] = None) -> None:
+        """
+        Broadcast message with debouncing to reduce excessive updates.
+
+        Args:
+            session_id: Session to broadcast to
+            message: Message to broadcast
+            debounce_key: Optional key for debouncing (defaults to session_id + message type)
+        """
+        if debounce_key is None:
+            debounce_key = f"{session_id}_{message.get('type', 'unknown')}"
+
+        await self.broadcast_debouncer.debounce(
+            debounce_key,
+            self._do_broadcast,
+            session_id,
+            message
+        )
+
+    async def _do_broadcast(self, session_id: str, message: Dict[str, Any]) -> None:
+        """Internal method to perform the actual broadcast."""
         if session_id not in self.sessions:
-            from .builder import DiagramBuilder, DiagramType
+            return
 
-            builder = DiagramBuilder(DiagramType.FLOWCHART)
-            self.sessions[session_id] = DiagramSession(session_id, builder)
-
-        # Add client to session
         session = self.sessions[session_id]
-        session.add_client(websocket)
-        self.client_sessions[websocket] = session_id
+        message_json = json.dumps(message)
 
-        # Send current state to new client
-        await self._send_current_state(websocket, session)
+        # Track performance
+        start_time = time.time()
 
-        # Notify other clients about new connection
-        await self._broadcast_client_update(session_id)
+        # Send to all clients in session
+        disconnected_clients = []
+        for client in session.connected_clients:
+            try:
+                await client.send_text(message_json)
+            except Exception:
+                # Client disconnected, mark for removal
+                disconnected_clients.append(client)
+
+        # Clean up disconnected clients
+        for client in disconnected_clients:
+            session.remove_client(client)
+            if client in self.client_sessions:
+                del self.client_sessions[client]
+
+        # Record performance
+        duration = time.time() - start_time
+        default_performance_monitor.record_operation("websocket_broadcast", duration)
 
     def disconnect(self, websocket: WebSocket, session_id: str) -> None:
         """

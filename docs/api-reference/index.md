@@ -9,10 +9,15 @@ Mermaid Render is organized into several key modules:
 - **[Core](core.md)** - Main classes for rendering and configuration
 - **[Models](models.md)** - Diagram model classes for all diagram types
 - **[Renderers](renderers.md)** - Backend rendering engines
-- **[Utilities](utilities.md)** - Helper functions and utilities
+- **[Utils](utils.md)** - Helper functions and utilities
 - **[Validators](validators.md)** - Validation and error checking
-- **[Configuration](configuration.md)** - Configuration and theme management
+- **[Config](config.md)** - Configuration and theme management
 - **[Exceptions](exceptions.md)** - Exception classes and error handling
+- **[AI Features](ai.md)** - AI-powered diagram generation and optimization
+- **[Cache System](cache.md)** - Caching with multiple backends
+- **[Collaboration](collaboration.md)** - Multi-user editing and version control
+- **[Interactive](interactive.md)** - Web interface and diagram builder
+- **[Templates](templates.md)** - Template system for data-driven diagrams
 
 ## Quick Reference
 
@@ -44,11 +49,11 @@ Mermaid Render is organized into several key modules:
 
 | Function                                                          | Description              |
 | ----------------------------------------------------------------- | ------------------------ |
-| [`quick_render`](utilities.md#quick_render)                       | Quick diagram rendering  |
-| [`validate_mermaid_syntax`](utilities.md#validate_mermaid_syntax) | Syntax validation        |
-| [`export_to_file`](utilities.md#export_to_file)                   | Export diagrams to files |
-| [`get_supported_formats`](utilities.md#get_supported_formats)     | List supported formats   |
-| [`get_available_themes`](utilities.md#get_available_themes)       | List available themes    |
+| [`quick_render`](utils.md#quick_render)                       | Quick diagram rendering  |
+| [`validate_mermaid_syntax`](utils.md#validate_mermaid_syntax) | Syntax validation        |
+| [`export_to_file`](utils.md#export_to_file)                   | Export diagrams to files |
+| [`get_supported_formats`](utils.md#get_supported_formats)     | List supported formats   |
+| [`get_available_themes`](utils.md#get_available_themes)       | List available themes    |
 
 ## Usage Patterns
 
@@ -117,7 +122,7 @@ def render_diagram(
 
 ## Module Structure
 
-```
+```txt
 mermaid_render/
 ├── __init__.py          # Main exports
 ├── core.py              # Core classes

@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 try:
-    import mermaid as md  # type: ignore[import-untyped]  # noqa: F401
+    import mermaid as md  # noqa: F401
     _MERMAID_AVAILABLE = True
 except ImportError:
     md = None
@@ -844,6 +844,51 @@ class MermaidRenderer:
 
         # Render the diagram
         content = self.render(diagram, format, **options)
+
+        # Create output directory if it doesn't exist
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+
+        # Write to file
+        mode = "w" if format == "svg" else "wb"
+        with open(output_path, mode) as f:
+            if format == "svg":
+                f.write(content)
+            else:
+                # For binary formats, content should be bytes
+                if isinstance(content, str):
+                    f.write(content.encode())
+                else:
+                    f.write(content)
+
+    def save_raw(
+        self,
+        mermaid_code: str,
+        output_path: Union[str, Path],
+        format: Optional[str] = None,
+        **options: Any,
+    ) -> None:
+        """
+        Render and save raw Mermaid code to file.
+
+        Args:
+            mermaid_code: Raw Mermaid diagram syntax
+            output_path: Output file path
+            format: Output format (inferred from extension if not provided)
+            **options: Additional rendering options
+        """
+        output_path = Path(output_path)
+
+        # Infer format from extension if not provided
+        if format is None:
+            format = output_path.suffix.lstrip(".").lower()
+            if not format:
+                format = self.config.get("default_format", "svg")
+
+        # Ensure format is not None at this point
+        assert format is not None, "Format should not be None after inference"
+
+        # Render the raw Mermaid code
+        content = self.render_raw(mermaid_code, format, **options)
 
         # Create output directory if it doesn't exist
         output_path.parent.mkdir(parents=True, exist_ok=True)

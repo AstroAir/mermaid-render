@@ -44,7 +44,7 @@ pip install mermaid-render[pdf]           # PDF export support
 pip install mermaid-render[cache]         # Redis caching support
 pip install mermaid-render[ai]            # AI-powered features
 pip install mermaid-render[interactive]   # Interactive web interface
-pip install mermaid-render[collaboration] # Collaboration features
+
 
 # Development installation
 pip install mermaid-render[dev]           # Development dependencies
@@ -235,13 +235,13 @@ Mermaid Render now features a powerful plugin-based architecture that supports m
 | **Node.js** | Local Mermaid CLI renderer | SVG, PNG, PDF | Node.js + @mermaid-js/mermaid-cli |
 | **Graphviz** | Alternative renderer for flowcharts | SVG, PNG, PDF | graphviz |
 
-### Using the Enhanced Renderer
+### Using the Plugin-Based Renderer
 
 ```python
-from mermaid_render import EnhancedMermaidRenderer
+from mermaid_render import PluginMermaidRenderer
 
-# Create enhanced renderer with plugin system
-renderer = EnhancedMermaidRenderer()
+# Create plugin-based renderer with advanced features
+renderer = PluginMermaidRenderer()
 
 # Render with automatic renderer selection
 svg_content = renderer.render("graph TD\n    A --> B", format="svg")
@@ -472,7 +472,7 @@ The Mermaid Render library is designed with a modular, plugin-based architecture
 
 - **`ai/`** - AI-powered diagram generation and optimization
 - **`interactive/`** - Web-based interactive diagram builder
-- **`collaboration/`** - Real-time collaboration and version control
+
 - **`templates/`** - Template system for generating diagrams from data
 - **`cache/`** - Caching system with multiple backends
 

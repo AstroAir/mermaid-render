@@ -14,7 +14,7 @@ from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Union, cast
 from urllib.parse import urljoin
 
-import requests
+import requests  # type: ignore
 
 # Configure logging
 logger = logging.getLogger(__name__)

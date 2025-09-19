@@ -9,7 +9,7 @@ import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from ..exceptions import DiagramError
 
@@ -512,11 +512,38 @@ class DiagramBuilder:
         Args:
             code: Mermaid diagram code to parse
         """
-        # This would parse Mermaid code and create visual elements
-        # For now, this is a placeholder for the parsing logic
-        # Mark parameter as intentionally unused to satisfy linters/type-checkers.
-        _ = code
-        pass
+        # Clear existing elements and connections
+        self.elements.clear()
+        self.connections.clear()
+
+        # Parse the code
+        lines = [line.strip() for line in code.strip().split('\n') if line.strip()]
+        if not lines:
+            return
+
+        # Determine diagram type from first line
+        first_line = lines[0].lower()
+        if first_line.startswith('flowchart') or first_line.startswith('graph'):
+            self.diagram_type = DiagramType.FLOWCHART
+            self._parse_flowchart(lines)
+        elif first_line.startswith('sequencediagram'):
+            self.diagram_type = DiagramType.SEQUENCE
+            self._parse_sequence_diagram(lines)
+        elif first_line.startswith('classdiagram'):
+            self.diagram_type = DiagramType.CLASS
+            self._parse_class_diagram(lines)
+        elif first_line.startswith('statediagram'):
+            self.diagram_type = DiagramType.STATE
+            self._parse_state_diagram(lines)
+        elif first_line.startswith('erdiagram'):
+            self.diagram_type = DiagramType.ER
+            self._parse_er_diagram(lines)
+        else:
+            # Default to flowchart
+            self.diagram_type = DiagramType.FLOWCHART
+            self._parse_flowchart(lines)
+
+        self._update_metadata()
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert builder state to dictionary."""
@@ -614,13 +641,359 @@ class DiagramBuilder:
 
     def _generate_sequence_code(self) -> str:
         """Generate sequence diagram Mermaid code."""
-        # Placeholder for sequence diagram generation
-        return "sequenceDiagram\n    %% Generated from interactive builder"
+        lines = ["sequenceDiagram"]
+
+        # Add title if present
+        if self.metadata.get("title"):
+            lines.append(f"    title {self.metadata['title']}")
+            lines.append("")
+
+        # Collect participants
+        participants: set[str] = set()
+        messages: list[str] = []
+
+        # Process elements to find participants
+        for element in self.elements.values():
+            if element.properties.get("type") == "participant":
+                participants.add(element.id)
+
+        # Add participant declarations
+        for participant in sorted(participants):
+            participant_element: Optional[DiagramElement] = next((e for e in self.elements.values() if e.id == participant), None)
+            if participant_element and participant_element.label != participant_element.id:
+                lines.append(f"    participant {participant} as {participant_element.label}")
+            else:
+                lines.append(f"    participant {participant}")
+
+        if participants:
+            lines.append("")
+
+        # Process connections as messages
+        for connection in self.connections.values():
+            source = connection.source_id
+            target = connection.target_id
+            label = connection.label or "message"
+
+            # Determine message type based on connection type
+            arrow = self._get_sequence_arrow(connection.connection_type)
+
+            if connection.label:
+                lines.append(f"    {source}{arrow}{target}: {label}")
+            else:
+                lines.append(f"    {source}{arrow}{target}: ")
+
+        return "\n".join(lines)
 
     def _generate_class_code(self) -> str:
         """Generate class diagram Mermaid code."""
-        # Placeholder for class diagram generation
-        return "classDiagram\n    %% Generated from interactive builder"
+        lines = ["classDiagram"]
+
+        # Add title if present
+        if self.metadata.get("title"):
+            lines.append(f"    title {self.metadata['title']}")
+            lines.append("")
+
+        # Process elements as classes
+        for element in self.elements.values():
+            if element.properties.get("type") == "class":
+                class_name = element.id
+
+                # Basic class declaration
+                lines.append(f"    class {class_name} {{")
+
+                # Add attributes and methods if stored in properties
+                attributes = element.properties.get("attributes", [])
+                methods = element.properties.get("methods", [])
+
+                for attr in attributes:
+                    lines.append(f"        {attr}")
+
+                for method in methods:
+                    lines.append(f"        {method}")
+
+                lines.append("    }")
+                lines.append("")
+
+        # Process connections as relationships
+        for connection in self.connections.values():
+            source = connection.source_id
+            target = connection.target_id
+
+            # Determine relationship type
+            relationship = self._get_class_relationship(connection.connection_type)
+
+            if connection.label:
+                lines.append(f"    {source} {relationship} {target} : {connection.label}")
+            else:
+                lines.append(f"    {source} {relationship} {target}")
+
+        return "\n".join(lines)
+
+    def _get_sequence_arrow(self, connection_type: str) -> str:
+        """Get sequence diagram arrow syntax for connection type."""
+        arrow_map = {
+            "default": "->>",
+            "sync": "->>",
+            "async": "-->>",
+            "dotted": "-->>",
+            "return": "-->>"
+        }
+        return arrow_map.get(connection_type, "->>")
+
+    def _get_class_relationship(self, connection_type: str) -> str:
+        """Get class diagram relationship syntax for connection type."""
+        relationship_map = {
+            "default": "-->",
+            "inheritance": "--|>",
+            "composition": "--*",
+            "aggregation": "--o",
+            "association": "-->",
+            "dependency": "..>",
+            "realization": "..|>"
+        }
+        return relationship_map.get(connection_type, "-->")
+
+    def _parse_flowchart(self, lines: List[str]) -> None:
+        """Parse flowchart Mermaid code and create elements."""
+        import re
+
+        # Skip the first line (diagram declaration)
+        content_lines = lines[1:] if len(lines) > 1 else []
+
+        # Track positions for auto-layout
+        current_y = 50
+        node_positions = {}
+
+        for line in content_lines:
+            line = line.strip()
+            if not line or line.startswith('%'):
+                continue
+
+            # Parse node definitions (e.g., "A[Start]", "B(Process)", "C{Decision}")
+            node_match = re.match(r'^\s*([A-Za-z0-9_]+)(\[.*?\]|\(.*?\)|\{.*?\}|\(\(.*?\)\)|{{.*?}})', line)
+            if node_match:
+                node_id = node_match.group(1)
+                node_def = node_match.group(2)
+
+                # Determine shape and label from definition
+                shape, label = self._parse_node_definition(node_def)
+
+                # Create position if not exists
+                if node_id not in node_positions:
+                    node_positions[node_id] = Position(100, current_y)
+                    current_y += 100
+
+                # Create element
+                element = DiagramElement(
+                    id=node_id,
+                    element_type=ElementType.NODE,
+                    label=label,
+                    position=node_positions[node_id],
+                    size=self._get_default_size(ElementType.NODE),
+                    properties={"shape": shape}
+                )
+                self.elements[node_id] = element
+                continue
+
+            # Parse connections (e.g., "A --> B", "A -->|label| B")
+            connection_match = re.match(r'^\s*([A-Za-z0-9_]+)\s*(-->|---|-\.-|==>|~~~)\s*(?:\|([^|]+)\|\s*)?([A-Za-z0-9_]+)', line)
+            if connection_match:
+                source_id = connection_match.group(1)
+                arrow_type = connection_match.group(2)
+                label = connection_match.group(3) or ""
+                target_id = connection_match.group(4)
+
+                # Map arrow types to connection types
+                connection_type_map = {
+                    "-->": "default",
+                    "---": "line",
+                    "-.-": "dotted",
+                    "==>": "thick",
+                    "~~~": "invisible"
+                }
+                connection_type = connection_type_map.get(arrow_type, "default")
+
+                # Ensure both nodes exist
+                for node_id in [source_id, target_id]:
+                    if node_id not in self.elements:
+                        if node_id not in node_positions:
+                            node_positions[node_id] = Position(100, current_y)
+                            current_y += 100
+
+                        element = DiagramElement(
+                            id=node_id,
+                            element_type=ElementType.NODE,
+                            label=node_id,
+                            position=node_positions[node_id],
+                            size=self._get_default_size(ElementType.NODE),
+                            properties={"shape": "rectangle"}
+                        )
+                        self.elements[node_id] = element
+
+                # Create connection
+                connection = DiagramConnection(
+                    id=f"conn_{source_id}_{target_id}_{len(self.connections)}",
+                    source_id=source_id,
+                    target_id=target_id,
+                    label=label,
+                    connection_type=connection_type
+                )
+                self.connections[connection.id] = connection
+
+    def _parse_node_definition(self, node_def: str) -> Tuple[str, str]:
+        """Parse node definition to extract shape and label."""
+        node_def = node_def.strip()
+
+        if node_def.startswith('[') and node_def.endswith(']'):
+            # Rectangle: [label]
+            return "rectangle", node_def[1:-1]
+        elif node_def.startswith('(') and node_def.endswith(')'):
+            if node_def.startswith('((') and node_def.endswith('))'):
+                # Circle: ((label))
+                return "circle", node_def[2:-2]
+            else:
+                # Rounded rectangle: (label)
+                return "rounded", node_def[1:-1]
+        elif node_def.startswith('{') and node_def.endswith('}'):
+            if node_def.startswith('{{') and node_def.endswith('}}'):
+                # Hexagon: {{label}}
+                return "hexagon", node_def[2:-2]
+            else:
+                # Diamond: {label}
+                return "diamond", node_def[1:-1]
+        else:
+            # Default to rectangle
+            return "rectangle", node_def
+
+    def _parse_sequence_diagram(self, lines: List[str]) -> None:
+        """Parse sequence diagram Mermaid code and create elements."""
+        # Placeholder implementation for sequence diagrams
+        # This would parse participant declarations and message flows
+        current_y = 50
+        participant_x = 100
+
+        for line in lines[1:]:  # Skip first line
+            line = line.strip()
+            if not line or line.startswith('%'):
+                continue
+
+            # Simple participant parsing (participant A as Alice)
+            if line.startswith('participant'):
+                parts = line.split()
+                if len(parts) >= 2:
+                    participant_id = parts[1]
+                    label = participant_id
+                    if 'as' in parts:
+                        as_index = parts.index('as')
+                        if as_index + 1 < len(parts):
+                            label = ' '.join(parts[as_index + 1:])
+
+                    element = DiagramElement(
+                        id=participant_id,
+                        element_type=ElementType.NODE,
+                        label=label,
+                        position=Position(participant_x, current_y),
+                        size=Size(120, 60),
+                        properties={"shape": "rectangle", "type": "participant"}
+                    )
+                    self.elements[participant_id] = element
+                    participant_x += 200
+
+    def _parse_class_diagram(self, lines: List[str]) -> None:
+        """Parse class diagram Mermaid code and create elements."""
+        # Placeholder implementation for class diagrams
+        # This would parse class definitions and relationships
+        current_y = 50
+        current_x = 100
+
+        for line in lines[1:]:  # Skip first line
+            line = line.strip()
+            if not line or line.startswith('%'):
+                continue
+
+            # Simple class parsing (class ClassName)
+            if line.startswith('class'):
+                parts = line.split()
+                if len(parts) >= 2:
+                    class_name = parts[1]
+
+                    element = DiagramElement(
+                        id=class_name,
+                        element_type=ElementType.NODE,
+                        label=class_name,
+                        position=Position(current_x, current_y),
+                        size=Size(150, 100),
+                        properties={"shape": "rectangle", "type": "class"}
+                    )
+                    self.elements[class_name] = element
+                    current_x += 200
+                    if current_x > 600:
+                        current_x = 100
+                        current_y += 150
+
+    def _parse_state_diagram(self, lines: List[str]) -> None:
+        """Parse state diagram Mermaid code and create elements."""
+        # Placeholder implementation for state diagrams
+        current_y = 50
+        current_x = 100
+
+        for line in lines[1:]:  # Skip first line
+            line = line.strip()
+            if not line or line.startswith('%'):
+                continue
+
+            # Simple state parsing
+            if '-->' in line:
+                parts = line.split('-->')
+                if len(parts) == 2:
+                    source = parts[0].strip()
+                    target = parts[1].strip()
+
+                    # Create states if they don't exist
+                    for state_id in [source, target]:
+                        if state_id not in self.elements:
+                            element = DiagramElement(
+                                id=state_id,
+                                element_type=ElementType.NODE,
+                                label=state_id,
+                                position=Position(current_x, current_y),
+                                size=Size(120, 60),
+                                properties={"shape": "rounded", "type": "state"}
+                            )
+                            self.elements[state_id] = element
+                            current_x += 200
+                            if current_x > 600:
+                                current_x = 100
+                                current_y += 100
+
+    def _parse_er_diagram(self, lines: List[str]) -> None:
+        """Parse ER diagram Mermaid code and create elements."""
+        # Placeholder implementation for ER diagrams
+        current_y = 50
+        current_x = 100
+
+        for line in lines[1:]:  # Skip first line
+            line = line.strip()
+            if not line or line.startswith('%'):
+                continue
+
+            # Simple entity parsing
+            if '{' in line and '}' in line:
+                entity_match = line.split('{')[0].strip()
+                if entity_match:
+                    element = DiagramElement(
+                        id=entity_match,
+                        element_type=ElementType.NODE,
+                        label=entity_match,
+                        position=Position(current_x, current_y),
+                        size=Size(150, 100),
+                        properties={"shape": "rectangle", "type": "entity"}
+                    )
+                    self.elements[entity_match] = element
+                    current_x += 200
+                    if current_x > 600:
+                        current_x = 100
+                        current_y += 150
 
     # Event handler registration methods
     def on_element_added(self, handler: Callable[[DiagramElement], None]) -> None:

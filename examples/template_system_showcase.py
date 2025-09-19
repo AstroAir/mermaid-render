@@ -51,7 +51,7 @@ class _TemplateManagerShim:
         return "\n".join(lines)
 
 class _FlowchartGeneratorShim:
-    def from_steps(self, steps: List[Dict[str, Any]], title: Optional[str] = None, direction: str = "TD"):
+    def from_steps(self, steps: List[Dict[str, Any]], title: Optional[str] = None, direction: str = "TD") -> None:
         # Return a lightweight object with to_mermaid and add_edge
         class _Flow:
             def __init__(self, steps: List[Dict[str, Any]], title: Optional[str], direction: str):
@@ -59,7 +59,7 @@ class _FlowchartGeneratorShim:
                 self.title = title
                 self.direction = direction
                 self.edges: List[Dict[str, str]] = []
-            def add_edge(self, src: str, dst: str, label: Optional[str] = None):
+            def add_edge(self, src: str, dst: str, label: Optional[str] = None) -> None:
                 self.edges.append({"from": src, "to": dst, "label": label or ""})
             def to_mermaid(self) -> str:
                 lines = [f"flowchart {self.direction}"]
@@ -86,7 +86,7 @@ class _FlowchartGeneratorShim:
         return _Flow(steps, title, direction)
 
 class _SequenceGeneratorShim:
-    def from_interactions(self, interactions: List[Dict[str, Any]], title: Optional[str] = None, participants: Optional[Dict[str, str]] = None):
+    def from_interactions(self, interactions: List[Dict[str, Any]], title: Optional[str] = None, participants: Optional[Dict[str, str]] = None) -> None:
         lines = ["sequenceDiagram", "    autonumber"]
         if title:
             lines.append(f"    %% {title}")
@@ -104,7 +104,7 @@ class _SequenceGeneratorShim:
         return "\n".join(lines)
 
 class _ArchitectureGeneratorShim:
-    def from_components(self, components: Dict[str, Dict[str, Any]], connections: List[Dict[str, str]], title: Optional[str] = None):
+    def from_components(self, components: Dict[str, Dict[str, Any]], connections: List[Dict[str, str]], title: Optional[str] = None) -> None:
         lines = ["flowchart TD"]
         if title:
             lines.append(f"    %% {title}")
@@ -118,7 +118,7 @@ class _ArchitectureGeneratorShim:
 
 # Try to import real modules
 try:
-    from mermaid_render.templates import (  # type: ignore
+    from mermaid_render.templates import (
         TemplateManager as _TemplateManager,
         FlowchartGenerator as _FlowchartGenerator,
         SequenceGenerator as _SequenceGenerator,
@@ -142,13 +142,13 @@ try:
         tags: Optional[List[str]] = None,
     ) -> List[str]:
         try:
-            res: Any = _list_available_templates(  # type: ignore[misc]
+            res: Any = _list_available_templates(
                 template_manager=template_manager,
                 diagram_type=diagram_type,
                 tags=tags,
             )
         except TypeError:
-            res = _list_available_templates()  # type: ignore[misc]
+            res = _list_available_templates()
 
         # If already a list of strings, cast for type checkers
         if isinstance(res, list) and all(isinstance(x, str) for x in res):
@@ -176,9 +176,9 @@ try:
     # Normalize get_template_info to a stable signature: (template_name: str) -> Dict[str, Any]
     def get_template_info(template_name: str) -> Dict[str, Any]:
         try:
-            info: Any = _get_template_info(template_name)  # type: ignore[misc]
+            info: Any = _get_template_info(template_name)
         except TypeError:
-            info = _get_template_info(template_name)  # type: ignore[misc]
+            info = _get_template_info(template_name)
         if isinstance(info, dict):
             return info
         # Fallback to minimal dict if underlying returns None or unexpected type
@@ -257,7 +257,7 @@ except ImportError:
 
     print("⚠️  Template system not available. Install with: pip install mermaid-render[templates]")
 
-def create_output_dir():
+def create_output_dir() -> Path:
     """Create output directory for examples."""
     output_dir = Path("output/templates")
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -279,7 +279,7 @@ def _save_mermaid_code(renderer: MermaidRenderer, code: str, output_path: Path) 
         # Ensure content is a string for write_text
         output_path.write_text(str(content))
 
-def built_in_templates_example(output_dir: Path):
+def built_in_templates_example(output_dir: Path) -> None:
     """Demonstrate using built-in templates."""
     if not TEMPLATES_AVAILABLE:
         print("Skipping built-in templates (templates not available)")
@@ -333,7 +333,7 @@ def built_in_templates_example(output_dir: Path):
     except Exception as e:
         print(f"❌ Error with built-in templates: {e}")
 
-def custom_template_creation_example(output_dir: Path):
+def custom_template_creation_example(output_dir: Path) -> None:
     """Demonstrate creating custom templates."""
     if not TEMPLATES_AVAILABLE:
         print("Skipping custom template creation (templates not available)")
@@ -433,7 +433,7 @@ sequenceDiagram
     except Exception as e:
         print(f"❌ Error with custom template: {e}")
 
-def flowchart_generator_example(output_dir: Path):
+def flowchart_generator_example(output_dir: Path) -> None:
     """Demonstrate the FlowchartGenerator."""
     if not TEMPLATES_AVAILABLE:
         print("Skipping flowchart generator (templates not available)")
@@ -502,7 +502,7 @@ def flowchart_generator_example(output_dir: Path):
         # Use the appropriate method based on what's available
         if TEMPLATES_AVAILABLE:
             # Real FlowchartGenerator with generate method
-            diagram_code = generator.generate(flowchart_data)  # type: ignore
+            diagram_code = generator.generate(flowchart_data)
         else:
             # Shim with from_steps method - fallback to manual generation
             lines = [f"flowchart {flowchart_data['direction']}"]
@@ -540,7 +540,7 @@ def flowchart_generator_example(output_dir: Path):
     except Exception as e:
         print(f"❌ Error with flowchart generator: {e}")
 
-def sequence_generator_example(output_dir: Path):
+def sequence_generator_example(output_dir: Path) -> None:
     """Demonstrate the SequenceGenerator."""
     if not TEMPLATES_AVAILABLE:
         print("Skipping sequence generator (templates not available)")
@@ -596,7 +596,7 @@ def sequence_generator_example(output_dir: Path):
         # Use the appropriate method based on what's available
         if TEMPLATES_AVAILABLE:
             # Real SequenceGenerator with generate method
-            diagram_code = generator.generate(sequence_data)  # type: ignore
+            diagram_code = generator.generate(sequence_data)
         else:
             # Shim with from_interactions method - fallback to manual generation
             lines = ["sequenceDiagram", "    autonumber"]
@@ -627,7 +627,7 @@ def sequence_generator_example(output_dir: Path):
     except Exception as e:
         print(f"❌ Error with sequence generator: {e}")
 
-def architecture_generator_example(output_dir: Path):
+def architecture_generator_example(output_dir: Path) -> None:
     """Demonstrate the ArchitectureGenerator."""
     if not TEMPLATES_AVAILABLE:
         print("Skipping architecture generator (templates not available)")
@@ -683,7 +683,7 @@ def architecture_generator_example(output_dir: Path):
         # Use the appropriate method based on what's available
         if TEMPLATES_AVAILABLE:
             # Real ArchitectureGenerator with generate method
-            diagram_code = generator.generate(architecture_data)  # type: ignore
+            diagram_code = generator.generate(architecture_data)
         else:
             # Shim with from_components method - fallback to manual generation
             lines = ["flowchart TD"]
@@ -714,7 +714,7 @@ def architecture_generator_example(output_dir: Path):
     except Exception as e:
         print(f"❌ Error with architecture generator: {e}")
 
-def main():
+def main() -> None:
     """Run all template system examples."""
     print("=== Mermaid Render Template System Showcase ===\n")
 

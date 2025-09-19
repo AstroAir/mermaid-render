@@ -38,7 +38,7 @@ class MermaidRenderError(Exception):
         self.message = message
         self.error_code = error_code
         self.suggestions = suggestions or []
-        self.details = details or {}
+        self.details = details
 
     def __str__(self) -> str:
         """Return string representation of the error."""
@@ -106,7 +106,7 @@ class ValidationError(MermaidRenderError):
 
         super().__init__(
             message,
-            error_code=error_code or "VALIDATION_ERROR",
+            error_code=error_code,
             suggestions=all_suggestions,
         )
         self.errors = errors or []
@@ -205,7 +205,7 @@ class RenderingError(MermaidRenderError):
 
         super().__init__(
             message,
-            error_code=error_code or "RENDERING_ERROR",
+            error_code=error_code,
             suggestions=all_suggestions,
             details=details,
         )
@@ -331,7 +331,7 @@ class UnsupportedFormatError(MermaidRenderError):
 
         super().__init__(
             message,
-            error_code=error_code or "UNSUPPORTED_FORMAT",
+            error_code=error_code,
             suggestions=all_suggestions,
             details=details,
         )
@@ -404,7 +404,7 @@ class DiagramError(MermaidRenderError):
 
         super().__init__(
             message,
-            error_code=error_code or "DIAGRAM_ERROR",
+            error_code=error_code,
             suggestions=all_suggestions,
             details=details,
         )

@@ -2,25 +2,34 @@
 Web server for the interactive diagram builder.
 
 This module provides the FastAPI-based web server with WebSocket support
-for real-time collaboration and live updates.
+for real-time updates and live preview.
 """
 
 import json
 import logging
+import traceback
 import uuid
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Callable, Dict, Optional
 
 import uvicorn
 from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from fastapi.middleware.cors import CORSMiddleware
 
 from ..core import MermaidRenderer
 from .builder import DiagramBuilder, DiagramType, ElementType, Position, Size
 from .validation import LiveValidator
 from .websocket_handler import DiagramSession, WebSocketHandler
+from .security import InputSanitizer, SecurityValidator, api_rate_limiter
+from .performance import (
+    default_debouncer,
+    default_performance_monitor,
+    default_resource_manager,
+    performance_monitor
+)
 
 
 class InteractiveServer:
@@ -28,7 +37,7 @@ class InteractiveServer:
     Interactive diagram builder server.
 
     Provides a web-based interface for building Mermaid diagrams
-    with real-time collaboration and live preview capabilities.
+    with real-time updates and live preview capabilities.
     """
 
     def __init__(
@@ -37,7 +46,6 @@ class InteractiveServer:
         port: int = 8080,
         static_dir: Optional[Path] = None,
         templates_dir: Optional[Path] = None,
-        enable_collaboration: bool = True,
     ) -> None:
         """
         Initialize interactive server.
@@ -47,11 +55,9 @@ class InteractiveServer:
             port: Server port
             static_dir: Directory for static files
             templates_dir: Directory for templates
-            enable_collaboration: Whether to enable collaboration features
         """
         self.host = host
         self.port = port
-        self.enable_collaboration = enable_collaboration
 
         # Setup directories
         self.static_dir = static_dir or Path(__file__).parent / "static"
@@ -89,16 +95,74 @@ class InteractiveServer:
                 "/static", StaticFiles(directory=str(self.static_dir)), name="static"
             )
 
+        # Configure CORS
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=["*"],
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
+
+        # Add security middleware
+        @app.middleware("http")  # type: ignore[misc]
+        async def security_middleware(request: Request, call_next: Callable) -> Any:
+            """Security middleware for rate limiting and origin validation."""
+            # Get client IP for rate limiting
+            client_ip = request.client.host if request.client else "unknown"
+
+            # Check rate limit for API endpoints
+            if request.url.path.startswith("/api/"):
+                if not api_rate_limiter.is_allowed(client_ip):
+                    return JSONResponse(
+                        status_code=429,
+                        content={"error": "Rate limit exceeded", "message": "Too many requests"}
+                    )
+
+            # Validate origin for sensitive endpoints
+            origin = request.headers.get("origin")
+            if request.method in ["POST", "PUT", "DELETE"] and not SecurityValidator.validate_origin(origin):
+                return JSONResponse(
+                    status_code=403,
+                    content={"error": "Forbidden", "message": "Invalid origin"}
+                )
+
+            response = await call_next(request)
+
+            # Add security headers
+            response.headers["X-Content-Type-Options"] = "nosniff"
+            response.headers["X-Frame-Options"] = "DENY"
+            response.headers["X-XSS-Protection"] = "1; mode=block"
+            response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+
+            return response
+
+        # Add global exception handler
+        @app.exception_handler(Exception)  # type: ignore[misc]
+        async def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+            """Global exception handler for better error reporting."""
+            logging.error(f"Unhandled exception: {exc}")
+            logging.error(traceback.format_exc())
+
+            return JSONResponse(
+                status_code=500,
+                content={
+                    "error": "Internal server error",
+                    "message": str(exc),
+                    "type": type(exc).__name__
+                }
+            )
+
         # Setup templates
         templates = Jinja2Templates(directory=str(self.templates_dir))
 
         # Routes
-        @app.get("/", response_class=HTMLResponse)
+        @app.get("/", response_class=HTMLResponse)  # type: ignore
         async def index(request: Request) -> HTMLResponse:
             """Main builder interface."""
             return templates.TemplateResponse("index.html", {"request": request})
 
-        @app.get("/builder/{diagram_type}", response_class=HTMLResponse)
+        @app.get("/builder/{diagram_type}", response_class=HTMLResponse)  # type: ignore
         async def builder(
             request: Request, diagram_type: str
         ) -> HTMLResponse:
@@ -116,10 +180,18 @@ class InteractiveServer:
                 },
             )
 
-        @app.post("/api/sessions")
+        @app.post("/api/sessions")  # type: ignore
+        @performance_monitor("create_session", default_performance_monitor)
         async def create_session(diagram_type: str = "flowchart") -> Dict[str, Any]:
             """Create new diagram session."""
             try:
+                # Check resource limits
+                if not default_resource_manager.check_resource_limits("max_sessions", len(self.sessions)):
+                    raise HTTPException(
+                        status_code=503,
+                        detail="Maximum number of sessions reached"
+                    )
+
                 session_id = str(uuid.uuid4())
                 builder_obj = DiagramBuilder(DiagramType(diagram_type))
                 session = DiagramSession(session_id, builder_obj)
@@ -131,10 +203,19 @@ class InteractiveServer:
                     "diagram_type": diagram_type,
                     "created_at": session.created_at.isoformat(),
                 }
-            except ValueError:
-                raise HTTPException(status_code=400, detail="Invalid diagram type")
+            except ValueError as e:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Invalid diagram type '{diagram_type}': {str(e)}"
+                )
+            except Exception as e:
+                logging.error(f"Failed to create session: {e}")
+                raise HTTPException(
+                    status_code=500,
+                    detail="Failed to create session"
+                )
 
-        @app.get("/api/sessions/{session_id}")
+        @app.get("/api/sessions/{session_id}")  # type: ignore
         async def get_session(session_id: str) -> Dict[str, Any]:
             """Get session information."""
             if session_id not in self.sessions:
@@ -150,42 +231,61 @@ class InteractiveServer:
                 "metadata": session.builder.metadata,
             }
 
-        @app.post("/api/sessions/{session_id}/elements")
+        @app.post("/api/sessions/{session_id}/elements")  # type: ignore
         async def add_element(session_id: str, element_data: dict) -> Dict[str, Any]:
             """Add element to diagram."""
-            if session_id not in self.sessions:
-                raise HTTPException(status_code=404, detail="Session not found")
-
-            session = self.sessions[session_id]
-
             try:
+                # Sanitize session ID
+                session_id = InputSanitizer.sanitize_session_id(session_id)
+
+                if session_id not in self.sessions:
+                    raise HTTPException(status_code=404, detail="Session not found")
+
+                session = self.sessions[session_id]
+
+                # Sanitize and validate element data
+                sanitized_data = InputSanitizer.sanitize_element_data(element_data)
+
                 element = session.builder.add_element(
-                    element_type=ElementType(element_data["element_type"]),
-                    label=element_data["label"],
-                    position=Position.from_dict(element_data["position"]),
+                    element_type=ElementType(sanitized_data["element_type"]),
+                    label=sanitized_data["label"],
+                    position=Position.from_dict(sanitized_data["position"]),
                     size=Size.from_dict(
-                        element_data.get("size", {"width": 120, "height": 60})
+                        sanitized_data.get("size", {"width": 120, "height": 60})
                     ),
-                    properties=element_data.get("properties", {}),
-                    style=element_data.get("style", {}),
+                    properties=sanitized_data.get("properties", {}),
+                    style=sanitized_data.get("style", {}),
                 )
 
                 # Broadcast update to connected clients
-                if self.enable_collaboration:
-                    await self.websocket_handler.broadcast_to_session(
-                        session_id,
-                        {
-                            "type": "element_added",
-                            "element": element.to_dict(),
-                        },
-                    )
+                await self.websocket_handler.broadcast_to_session(
+                    session_id,
+                    {
+                        "type": "element_added",
+                        "element": element.to_dict(),
+                    },
+                )
 
                 return element.to_dict()
 
+            except ValueError as e:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Invalid element data: {str(e)}"
+                )
+            except KeyError as e:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Missing required field: {str(e)}"
+                )
             except Exception as e:
-                raise HTTPException(status_code=400, detail=str(e))
+                logging.error(f"Failed to add element: {e}")
+                raise HTTPException(
+                    status_code=500,
+                    detail="Failed to add element"
+                )
 
-        @app.put("/api/sessions/{session_id}/elements/{element_id}")
+        @app.put("/api/sessions/{session_id}/elements/{element_id}")  # type: ignore
         async def update_element(
             session_id: str, element_id: str, element_data: dict
         ) -> Dict[str, Any]:
@@ -214,19 +314,18 @@ class InteractiveServer:
                 raise HTTPException(status_code=404, detail="Element not found")
 
             # Broadcast update to connected clients
-            if self.enable_collaboration:
-                await self.websocket_handler.broadcast_to_session(
-                    session_id,
-                    {
-                        "type": "element_updated",
-                        "element_id": element_id,
-                        "updates": element_data,
-                    },
-                )
+            await self.websocket_handler.broadcast_to_session(
+                session_id,
+                {
+                    "type": "element_updated",
+                    "element_id": element_id,
+                    "updates": element_data,
+                },
+            )
 
             return {"success": True}
 
-        @app.delete("/api/sessions/{session_id}/elements/{element_id}")
+        @app.delete("/api/sessions/{session_id}/elements/{element_id}")  # type: ignore
         async def remove_element(session_id: str, element_id: str) -> Dict[str, Any]:
             """Remove element from diagram."""
             if session_id not in self.sessions:
@@ -239,18 +338,17 @@ class InteractiveServer:
                 raise HTTPException(status_code=404, detail="Element not found")
 
             # Broadcast update to connected clients
-            if self.enable_collaboration:
-                await self.websocket_handler.broadcast_to_session(
-                    session_id,
-                    {
-                        "type": "element_removed",
-                        "element_id": element_id,
-                    },
-                )
+            await self.websocket_handler.broadcast_to_session(
+                session_id,
+                {
+                    "type": "element_removed",
+                    "element_id": element_id,
+                },
+            )
 
             return {"success": True}
 
-        @app.post("/api/sessions/{session_id}/connections")
+        @app.post("/api/sessions/{session_id}/connections")  # type: ignore
         async def add_connection(
             session_id: str, connection_data: dict
         ) -> Dict[str, Any]:
@@ -273,18 +371,17 @@ class InteractiveServer:
                 raise HTTPException(status_code=400, detail="Invalid connection")
 
             # Broadcast update to connected clients
-            if self.enable_collaboration:
-                await self.websocket_handler.broadcast_to_session(
-                    session_id,
-                    {
-                        "type": "connection_added",
-                        "connection": connection.to_dict(),
-                    },
-                )
+            await self.websocket_handler.broadcast_to_session(
+                session_id,
+                {
+                    "type": "connection_added",
+                    "connection": connection.to_dict(),
+                },
+            )
 
             return connection.to_dict()
 
-        @app.get("/api/sessions/{session_id}/code")
+        @app.get("/api/sessions/{session_id}/code")  # type: ignore
         async def get_mermaid_code(session_id: str) -> Dict[str, Any]:
             """Get generated Mermaid code for session."""
             if session_id not in self.sessions:
@@ -314,7 +411,7 @@ class InteractiveServer:
                     },
                 }
 
-        @app.get("/api/sessions/{session_id}/preview")
+        @app.get("/api/sessions/{session_id}/preview")  # type: ignore
         async def get_preview(session_id: str, format: str = "svg") -> Dict[str, Any]:
             """Get rendered preview of diagram."""
             if session_id not in self.sessions:
@@ -337,13 +434,9 @@ class InteractiveServer:
                 )
 
         # WebSocket endpoint for real-time updates
-        @app.websocket("/ws/{session_id}")
+        @app.websocket("/ws/{session_id}")  # type: ignore
         async def websocket_endpoint(websocket: WebSocket, session_id: str) -> None:
-            """WebSocket endpoint for real-time collaboration."""
-            if not self.enable_collaboration:
-                await websocket.close(code=1000, reason="Collaboration disabled")
-                return
-
+            """WebSocket endpoint for real-time updates."""
             await self.websocket_handler.connect(websocket, session_id)
 
             try:
@@ -389,7 +482,6 @@ class InteractiveServer:
 def create_app(
     static_dir: Optional[Path] = None,
     templates_dir: Optional[Path] = None,
-    enable_collaboration: bool = True,
 ) -> FastAPI:
     """
     Create FastAPI application for interactive builder.
@@ -397,7 +489,6 @@ def create_app(
     Args:
         static_dir: Directory for static files
         templates_dir: Directory for templates
-        enable_collaboration: Whether to enable collaboration
 
     Returns:
         Configured FastAPI application
@@ -405,7 +496,6 @@ def create_app(
     server = InteractiveServer(
         static_dir=static_dir,
         templates_dir=templates_dir,
-        enable_collaboration=enable_collaboration,
     )
     return server.app
 
@@ -415,7 +505,6 @@ def start_server(
     port: int = 8080,
     static_dir: Optional[Path] = None,
     templates_dir: Optional[Path] = None,
-    enable_collaboration: bool = True,
     **kwargs: Any,
 ) -> None:
     """
@@ -426,7 +515,6 @@ def start_server(
         port: Server port
         static_dir: Directory for static files
         templates_dir: Directory for templates
-        enable_collaboration: Whether to enable collaboration
         **kwargs: Additional uvicorn options
 
     Example:
@@ -439,7 +527,6 @@ def start_server(
         port=port,
         static_dir=static_dir,
         templates_dir=templates_dir,
-        enable_collaboration=enable_collaboration,
     )
 
     server.run(**kwargs)

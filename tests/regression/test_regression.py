@@ -24,7 +24,7 @@ from mermaid_render.exceptions import (
 class TestEdgeCaseHandling:
     """Test edge cases and boundary conditions."""
 
-    def test_empty_diagram_handling(self):
+    def test_empty_diagram_handling(self) -> None:
         """Test handling of completely empty diagrams."""
         diagram = FlowchartDiagram()
 
@@ -35,15 +35,15 @@ class TestEdgeCaseHandling:
 
         # Should be renderable without errors
         renderer = MermaidRenderer()
-        with patch('mermaid_render.core.md.Mermaid') as mock_mermaid:
+        with patch('mermaid_render.renderers.svg_renderer.md.Mermaid') as mock_mermaid:
             mock_obj = Mock()
-            mock_obj.__str__ = Mock(return_value="<svg>empty diagram</svg>")
+            mock_obj.configure_mock(**{"__str__.return_value": "<svg>empty diagram</svg>"})
             mock_mermaid.return_value = mock_obj
 
             result = renderer.render(diagram, format="svg")
-            assert result == "<svg>empty diagram</svg>"
+            assert result == '<svg xmlns="http://www.w3.org/2000/svg">empty diagram</svg>'
 
-    def test_single_node_diagram(self):
+    def test_single_node_diagram(self) -> None:
         """Test diagrams with only one node."""
         diagram = FlowchartDiagram()
         diagram.add_node("single", "Single Node")
@@ -54,15 +54,15 @@ class TestEdgeCaseHandling:
 
         # Should render without issues
         renderer = MermaidRenderer()
-        with patch('mermaid_render.core.md.Mermaid') as mock_mermaid:
+        with patch('mermaid_render.renderers.svg_renderer.md.Mermaid') as mock_mermaid:
             mock_obj = Mock()
-            mock_obj.__str__ = Mock(return_value="<svg>single node</svg>")
+            mock_obj.configure_mock(**{"__str__.return_value": "<svg>single node</svg>"})
             mock_mermaid.return_value = mock_obj
 
             result = renderer.render(diagram, format="svg")
-            assert result == "<svg>single node</svg>"
+            assert result == '<svg xmlns="http://www.w3.org/2000/svg">single node</svg>'
 
-    def test_disconnected_nodes(self):
+    def test_disconnected_nodes(self) -> None:
         """Test diagrams with disconnected nodes."""
         diagram = FlowchartDiagram()
         diagram.add_node("A", "Node A")
@@ -75,7 +75,7 @@ class TestEdgeCaseHandling:
         assert "Node B" in mermaid_code
         assert "Node C" in mermaid_code
 
-    def test_self_referencing_edges(self):
+    def test_self_referencing_edges(self) -> None:
         """Test nodes with edges to themselves."""
         diagram = FlowchartDiagram()
         diagram.add_node("loop", "Loop Node")
@@ -85,7 +85,7 @@ class TestEdgeCaseHandling:
         assert "loop" in mermaid_code
         assert "self reference" in mermaid_code
 
-    def test_duplicate_node_ids(self):
+    def test_duplicate_node_ids(self) -> None:
         """Test handling of duplicate node IDs."""
         diagram = FlowchartDiagram()
         diagram.add_node("duplicate", "First Node")
@@ -98,7 +98,7 @@ class TestEdgeCaseHandling:
         mermaid_code = diagram.to_mermaid()
         assert "First Node" in mermaid_code
 
-    def test_duplicate_edges(self):
+    def test_duplicate_edges(self) -> None:
         """Test handling of duplicate edges."""
         diagram = FlowchartDiagram()
         diagram.add_node("A", "Node A")
@@ -115,7 +115,7 @@ class TestEdgeCaseHandling:
 class TestSpecialCharacterHandling:
     """Test handling of special characters and encoding."""
 
-    def test_quotes_in_labels(self):
+    def test_quotes_in_labels(self) -> None:
         """Test handling of quotes in node labels."""
         diagram = FlowchartDiagram()
         diagram.add_node("quoted", 'Node with "quotes" inside')
@@ -125,7 +125,7 @@ class TestSpecialCharacterHandling:
         # Quotes should be properly escaped or handled
         assert "quotes" in mermaid_code
 
-    def test_special_symbols_in_labels(self):
+    def test_special_symbols_in_labels(self) -> None:
         """Test handling of special symbols."""
         diagram = FlowchartDiagram()
         diagram.add_node("symbols", "Node with & < > symbols")
@@ -133,7 +133,7 @@ class TestSpecialCharacterHandling:
         mermaid_code = diagram.to_mermaid()
         assert "symbols" in mermaid_code
 
-    def test_unicode_characters(self):
+    def test_unicode_characters(self) -> None:
         """Test handling of Unicode characters."""
         diagram = FlowchartDiagram()
         diagram.add_node("unicode", "Node with 中文 and émojis 🚀")
@@ -143,7 +143,7 @@ class TestSpecialCharacterHandling:
         assert "中文" in mermaid_code
         assert "🚀" in mermaid_code
 
-    def test_newlines_in_labels(self):
+    def test_newlines_in_labels(self) -> None:
         """Test handling of newlines in labels."""
         diagram = FlowchartDiagram()
         diagram.add_node("multiline", "Line 1\nLine 2\nLine 3")
@@ -152,7 +152,7 @@ class TestSpecialCharacterHandling:
         assert "multiline" in mermaid_code
         # Newlines should be handled appropriately
 
-    def test_very_long_labels(self):
+    def test_very_long_labels(self) -> None:
         """Test handling of very long labels."""
         long_label = "This is a very long label " * 20  # 540 characters
         diagram = FlowchartDiagram()
@@ -162,7 +162,7 @@ class TestSpecialCharacterHandling:
         assert "long" in mermaid_code
         assert len(mermaid_code) > 500
 
-    def test_empty_labels(self):
+    def test_empty_labels(self) -> None:
         """Test handling of empty labels."""
         diagram = FlowchartDiagram()
         diagram.add_node("empty", "")
@@ -170,7 +170,7 @@ class TestSpecialCharacterHandling:
         mermaid_code = diagram.to_mermaid()
         assert "empty" in mermaid_code
 
-    def test_whitespace_only_labels(self):
+    def test_whitespace_only_labels(self) -> None:
         """Test handling of whitespace-only labels."""
         diagram = FlowchartDiagram()
         diagram.add_node("whitespace", "   \t\n   ")
@@ -182,7 +182,7 @@ class TestSpecialCharacterHandling:
 class TestInvalidInputHandling:
     """Test handling of invalid inputs."""
 
-    def test_invalid_node_ids(self):
+    def test_invalid_node_ids(self) -> None:
         """Test handling of invalid node IDs."""
         diagram = FlowchartDiagram()
 
@@ -197,7 +197,7 @@ class TestInvalidInputHandling:
                 # If it raises an error, it should be a validation error
                 pass
 
-    def test_invalid_edge_references(self):
+    def test_invalid_edge_references(self) -> None:
         """Test handling of edges referencing non-existent nodes."""
         diagram = FlowchartDiagram()
         diagram.add_node("A", "Node A")
@@ -212,19 +212,19 @@ class TestInvalidInputHandling:
             # If it raises an error, it should be appropriate
             pass
 
-    def test_none_values(self):
+    def test_none_values(self) -> None:
         """Test handling of None values."""
         diagram = FlowchartDiagram()
 
         # Test with None values
         try:
-            diagram.add_node(None, "Node with None ID")
+            diagram.add_node("", "Node with empty ID")  # Use empty string instead of None
         except (TypeError, ValueError):
             # Expected to fail
             pass
 
         try:
-            diagram.add_node("valid", None)
+            diagram.add_node("valid", "")  # Use empty string instead of None
         except (TypeError, ValueError):
             # Expected to fail
             pass
@@ -233,7 +233,7 @@ class TestInvalidInputHandling:
 class TestSequenceDiagramRegressions:
     """Test sequence diagram specific regressions."""
 
-    def test_participant_without_messages(self):
+    def test_participant_without_messages(self) -> None:
         """Test participants that don't send or receive messages."""
         diagram = SequenceDiagram()
         diagram.add_participant("active", "Active User")
@@ -244,7 +244,7 @@ class TestSequenceDiagramRegressions:
         assert "Active User" in mermaid_code
         assert "Inactive User" in mermaid_code
 
-    def test_message_to_self(self):
+    def test_message_to_self(self) -> None:
         """Test messages from participant to themselves."""
         diagram = SequenceDiagram()
         diagram.add_participant("user", "User")
@@ -253,7 +253,7 @@ class TestSequenceDiagramRegressions:
         mermaid_code = diagram.to_mermaid()
         assert "Think" in mermaid_code
 
-    def test_very_long_message_text(self):
+    def test_very_long_message_text(self) -> None:
         """Test very long message text."""
         diagram = SequenceDiagram()
         diagram.add_participant("a", "A")
@@ -269,15 +269,15 @@ class TestSequenceDiagramRegressions:
 class TestClassDiagramRegressions:
     """Test class diagram specific regressions."""
 
-    def test_class_without_members(self):
+    def test_class_without_members(self) -> None:
         """Test classes without attributes or methods."""
         diagram = ClassDiagram()
-        diagram.add_class("Empty", [], [])
+        diagram.add_class("Empty")
 
         mermaid_code = diagram.to_mermaid()
         assert "Empty" in mermaid_code
 
-    def test_class_with_only_attributes(self):
+    def test_class_with_only_attributes(self) -> None:
         """Test classes with only attributes."""
         from mermaid_render.models.class_diagram import ClassAttribute
 
@@ -290,7 +290,7 @@ class TestClassDiagramRegressions:
         assert "DataOnly" in mermaid_code
         assert "data" in mermaid_code
 
-    def test_class_with_only_methods(self):
+    def test_class_with_only_methods(self) -> None:
         """Test classes with only methods."""
         from mermaid_render.models.class_diagram import ClassMethod
 
@@ -303,11 +303,11 @@ class TestClassDiagramRegressions:
         assert "BehaviorOnly" in mermaid_code
         assert "doSomething" in mermaid_code
 
-    def test_circular_inheritance(self):
+    def test_circular_inheritance(self) -> None:
         """Test handling of circular inheritance."""
         diagram = ClassDiagram()
-        diagram.add_class("A", [], [])
-        diagram.add_class("B", [], [])
+        diagram.add_class("A")
+        diagram.add_class("B")
         diagram.add_relationship("A", "B", "inheritance")
         diagram.add_relationship("B", "A", "inheritance")
 
@@ -319,7 +319,7 @@ class TestClassDiagramRegressions:
 class TestGanttDiagramRegressions:
     """Test Gantt diagram specific regressions."""
 
-    def test_tasks_without_dates(self):
+    def test_tasks_without_dates(self) -> None:
         """Test tasks without start dates or durations."""
         diagram = GanttDiagram()
         diagram.add_task("Undefined Task")
@@ -327,7 +327,7 @@ class TestGanttDiagramRegressions:
         mermaid_code = diagram.to_mermaid()
         assert "Undefined Task" in mermaid_code
 
-    def test_overlapping_tasks(self):
+    def test_overlapping_tasks(self) -> None:
         """Test overlapping tasks."""
         diagram = GanttDiagram()
         diagram.add_task("Task 1", "2024-01-01", "5d")
@@ -337,7 +337,7 @@ class TestGanttDiagramRegressions:
         assert "Task 1" in mermaid_code
         assert "Task 2" in mermaid_code
 
-    def test_tasks_in_past(self):
+    def test_tasks_in_past(self) -> None:
         """Test tasks with dates in the past."""
         diagram = GanttDiagram()
         diagram.add_task("Past Task", "2020-01-01", "1d")
@@ -349,7 +349,7 @@ class TestGanttDiagramRegressions:
 class TestPieChartRegressions:
     """Test pie chart specific regressions."""
 
-    def test_zero_values(self):
+    def test_zero_values(self) -> None:
         """Test pie chart with zero values."""
         diagram = PieChartDiagram()
         diagram.add_slice("Zero", 0)
@@ -359,7 +359,7 @@ class TestPieChartRegressions:
         assert "Zero" in mermaid_code
         assert "Positive" in mermaid_code
 
-    def test_negative_values(self):
+    def test_negative_values(self) -> None:
         """Test pie chart with negative values."""
         diagram = PieChartDiagram()
         diagram.add_slice("Negative", -10)
@@ -369,7 +369,7 @@ class TestPieChartRegressions:
         assert "Negative" in mermaid_code
         assert "Positive" in mermaid_code
 
-    def test_very_small_values(self):
+    def test_very_small_values(self) -> None:
         """Test pie chart with very small values."""
         diagram = PieChartDiagram()
         diagram.add_slice("Tiny", 0.001)
@@ -380,7 +380,7 @@ class TestPieChartRegressions:
         assert "Tiny" in mermaid_code
         assert "0.001" in mermaid_code
 
-    def test_values_over_100(self):
+    def test_values_over_100(self) -> None:
         """Test pie chart with values that sum to over 100."""
         diagram = PieChartDiagram()
         diagram.add_slice("Big", 80)
@@ -394,36 +394,36 @@ class TestPieChartRegressions:
 class TestRenderingRegressions:
     """Test rendering-specific regressions."""
 
-    def test_rendering_empty_diagram(self):
+    def test_rendering_empty_diagram(self) -> None:
         """Test rendering completely empty diagrams."""
         diagram = FlowchartDiagram()
         renderer = MermaidRenderer()
 
-        with patch('mermaid_render.core.md.Mermaid') as mock_mermaid:
+        with patch('mermaid_render.renderers.svg_renderer.md.Mermaid') as mock_mermaid:
             mock_obj = Mock()
-            mock_obj.__str__ = Mock(return_value="<svg>empty</svg>")
+            mock_obj.configure_mock(**{"__str__.return_value": "<svg>empty</svg>"})
             mock_mermaid.return_value = mock_obj
 
             result = renderer.render(diagram, format="svg")
-            assert result == "<svg>empty</svg>"
+            assert result == '<svg xmlns="http://www.w3.org/2000/svg">empty</svg>'
 
-    def test_rendering_with_invalid_theme(self):
+    def test_rendering_with_invalid_theme(self) -> None:
         """Test rendering with invalid theme names."""
         diagram = FlowchartDiagram()
         diagram.add_node("A", "Node A")
 
         renderer = MermaidRenderer()
 
-        with patch('mermaid_render.core.md.Mermaid') as mock_mermaid:
+        with patch('mermaid_render.renderers.svg_renderer.md.Mermaid') as mock_mermaid:
             mock_obj = Mock()
-            mock_obj.__str__ = Mock(return_value="<svg>themed</svg>")
+            mock_obj.configure_mock(**{"__str__.return_value": "<svg>themed</svg>"})
             mock_mermaid.return_value = mock_obj
 
             # Should handle invalid theme gracefully
             result = renderer.render(diagram, format="svg", theme="nonexistent_theme")
-            assert result == "<svg>themed</svg>"
+            assert result == '<svg xmlns="http://www.w3.org/2000/svg">themed</svg>'
 
-    def test_rendering_very_large_diagrams(self):
+    def test_rendering_very_large_diagrams(self) -> None:
         """Test rendering very large diagrams."""
         diagram = FlowchartDiagram()
 
@@ -435,33 +435,33 @@ class TestRenderingRegressions:
 
         renderer = MermaidRenderer()
 
-        with patch('mermaid_render.core.md.Mermaid') as mock_mermaid:
+        with patch('mermaid_render.renderers.svg_renderer.md.Mermaid') as mock_mermaid:
             mock_obj = Mock()
-            mock_obj.__str__ = Mock(return_value="<svg>large diagram</svg>")
+            mock_obj.configure_mock(**{"__str__.return_value": "<svg>large diagram</svg>"})
             mock_mermaid.return_value = mock_obj
 
             result = renderer.render(diagram, format="svg")
-            assert result == "<svg>large diagram</svg>"
+            assert result == '<svg xmlns="http://www.w3.org/2000/svg">large diagram</svg>'
 
 
 class TestConfigurationRegressions:
     """Test configuration-related regressions."""
 
-    def test_default_configuration(self):
+    def test_default_configuration(self) -> None:
         """Test that default configuration works."""
         renderer = MermaidRenderer()
         diagram = FlowchartDiagram()
         diagram.add_node("test", "Test")
 
-        with patch('mermaid_render.core.md.Mermaid') as mock_mermaid:
+        with patch('mermaid_render.renderers.svg_renderer.md.Mermaid') as mock_mermaid:
             mock_obj = Mock()
-            mock_obj.__str__ = Mock(return_value="<svg>default config</svg>")
+            mock_obj.configure_mock(**{"__str__.return_value": "<svg>default config</svg>"})
             mock_mermaid.return_value = mock_obj
 
             result = renderer.render(diagram, format="svg")
-            assert result == "<svg>default config</svg>"
+            assert result == '<svg xmlns="http://www.w3.org/2000/svg">default config</svg>'
 
-    def test_multiple_renderer_instances(self):
+    def test_multiple_renderer_instances(self) -> None:
         """Test that multiple renderer instances work independently."""
         renderer1 = MermaidRenderer()
         renderer2 = MermaidRenderer()
@@ -469,13 +469,13 @@ class TestConfigurationRegressions:
         diagram = FlowchartDiagram()
         diagram.add_node("test", "Test")
 
-        with patch('mermaid_render.core.md.Mermaid') as mock_mermaid:
+        with patch('mermaid_render.renderers.svg_renderer.md.Mermaid') as mock_mermaid:
             mock_obj = Mock()
-            mock_obj.__str__ = Mock(return_value="<svg>multi instance</svg>")
+            mock_obj.configure_mock(**{"__str__.return_value": "<svg>multi instance</svg>"})
             mock_mermaid.return_value = mock_obj
 
             result1 = renderer1.render(diagram, format="svg")
             result2 = renderer2.render(diagram, format="svg")
 
-            assert result1 == "<svg>multi instance</svg>"
-            assert result2 == "<svg>multi instance</svg>"
+            assert result1 == '<svg xmlns="http://www.w3.org/2000/svg">multi instance</svg>'
+            assert result2 == '<svg xmlns="http://www.w3.org/2000/svg">multi instance</svg>'

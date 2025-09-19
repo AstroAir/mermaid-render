@@ -1,3 +1,4 @@
+from typing import Any
 #!/usr/bin/env python3
 """
 Real-world use cases for Mermaid Render.
@@ -19,14 +20,14 @@ from mermaid_render import (
 from mermaid_render.models.class_diagram import ClassMethod, ClassAttribute
 
 
-def create_output_dir():
+def create_output_dir() -> Path:
     """Create output directory for examples."""
     output_dir = Path("output/real_world")
     output_dir.mkdir(parents=True, exist_ok=True)
     return output_dir
 
 
-def software_architecture_documentation(output_dir: Path):
+def software_architecture_documentation(output_dir: Path) -> None:
     """Create comprehensive software architecture documentation."""
     print("Software architecture documentation example...")
     
@@ -119,7 +120,7 @@ def software_architecture_documentation(output_dir: Path):
     print(f"📁 Microservices flow saved to {seq_path}")
 
 
-def api_documentation_example(output_dir: Path):
+def api_documentation_example(output_dir: Path) -> None:
     """Create comprehensive API documentation diagrams."""
     print("API documentation example...")
     
@@ -229,7 +230,7 @@ def api_documentation_example(output_dir: Path):
     print(f"📁 Authentication flow saved to {auth_path}")
 
 
-def business_process_modeling(output_dir: Path):
+def business_process_modeling(output_dir: Path) -> None:
     """Create business process models."""
     print("Business process modeling example...")
     
@@ -316,7 +317,7 @@ def business_process_modeling(output_dir: Path):
     print(f"📁 Customer journey saved to {journey_path}")
 
 
-def database_design_example(output_dir: Path):
+def database_design_example(output_dir: Path) -> None:
     """Create database design documentation."""
     print("Database design example...")
     
@@ -431,7 +432,7 @@ def database_design_example(output_dir: Path):
     print(f"📁 Database schema saved to {er_path}")
 
 
-def main():
+def main() -> None:
     """Run all real-world use case examples."""
     print("=== Mermaid Render Real-World Use Cases ===\n")
     

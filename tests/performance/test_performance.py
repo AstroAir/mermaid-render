@@ -13,7 +13,7 @@ import time
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))
 
 
-def test_caching_functionality():
+def test_caching_functionality() -> None:
     """Test caching functionality."""
     print("Testing caching functionality...")
 
@@ -56,7 +56,7 @@ def test_caching_functionality():
             print("✓ Caching functionality passed")
 
 
-def test_cache_key_generation():
+def test_cache_key_generation() -> None:
     """Test cache key generation."""
     print("\nTesting cache key generation...")
 
@@ -83,7 +83,7 @@ def test_cache_key_generation():
     print("✓ Theme-based cache key generation passed")
 
 
-def test_cache_management():
+def test_cache_management() -> None:
     """Test cache management operations."""
     print("\nTesting cache management...")
 
@@ -125,7 +125,7 @@ def test_cache_management():
             print("✓ Cache management passed")
 
 
-def test_performance_metrics():
+def test_performance_metrics() -> None:
     """Test performance metrics tracking."""
     print("\nTesting performance metrics...")
 
@@ -157,7 +157,7 @@ def test_performance_metrics():
         print("✓ Performance metrics tracking passed")
 
 
-def test_large_diagram_optimization():
+def test_large_diagram_optimization() -> None:
     """Test large diagram optimization analysis."""
     print("\nTesting large diagram optimization...")
 
@@ -182,7 +182,7 @@ def test_large_diagram_optimization():
     print("✓ Large diagram analysis passed")
 
 
-def test_cache_preloading():
+def test_cache_preloading() -> None:
     """Test cache preloading functionality."""
     print("\nTesting cache preloading...")
 
@@ -222,7 +222,7 @@ def test_cache_preloading():
             print("✓ Cache preloading passed")
 
 
-def test_session_warmup():
+def test_session_warmup() -> None:
     """Test session warm-up functionality."""
     print("\nTesting session warm-up...")
 

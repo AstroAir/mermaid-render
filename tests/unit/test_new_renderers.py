@@ -1,3 +1,4 @@
+from typing import Any
 """
 Tests for the new renderer implementations.
 
@@ -17,7 +18,7 @@ from mermaid_render.renderers.graphviz_renderer import GraphvizRenderer
 class TestPlaywrightRenderer:
     """Test the PlaywrightRenderer class."""
     
-    def test_renderer_info(self):
+    def test_renderer_info(self) -> None:
         """Test renderer information."""
         renderer = PlaywrightRenderer()
         info = renderer.get_info()
@@ -28,7 +29,7 @@ class TestPlaywrightRenderer:
         assert "pdf" in info.supported_formats
         assert RendererCapability.LOCAL_RENDERING in info.capabilities
     
-    def test_config_validation(self):
+    def test_config_validation(self) -> None:
         """Test configuration validation."""
         renderer = PlaywrightRenderer()
         
@@ -46,7 +47,7 @@ class TestPlaywrightRenderer:
         assert renderer_with_config.browser_type == "chromium"
     
     @patch('mermaid_render.renderers.playwright_renderer.sync_playwright')
-    def test_is_available_with_playwright(self, mock_playwright):
+    def test_is_available_with_playwright(self, mock_playwright: Any) -> None:
         """Test availability check when Playwright is available."""
         # Mock Playwright components
         mock_p = Mock()
@@ -60,14 +61,14 @@ class TestPlaywrightRenderer:
         mock_p.chromium.launch.assert_called_once()
         mock_browser.close.assert_called_once()
     
-    def test_is_available_without_playwright(self):
+    def test_is_available_without_playwright(self) -> None:
         """Test availability check when Playwright is not available."""
         with patch('mermaid_render.renderers.playwright_renderer.sync_playwright', side_effect=ImportError):
             renderer = PlaywrightRenderer()
             assert not renderer.is_available()
     
     @patch('mermaid_render.renderers.playwright_renderer.sync_playwright')
-    def test_render_svg(self, mock_playwright):
+    def test_render_svg(self, mock_playwright: Any) -> None:
         """Test SVG rendering."""
         # Mock Playwright components
         mock_page = Mock()
@@ -101,7 +102,7 @@ class TestPlaywrightRenderer:
 class TestNodeJSRenderer:
     """Test the NodeJSRenderer class."""
     
-    def test_renderer_info(self):
+    def test_renderer_info(self) -> None:
         """Test renderer information."""
         renderer = NodeJSRenderer()
         info = renderer.get_info()
@@ -112,7 +113,7 @@ class TestNodeJSRenderer:
         assert "pdf" in info.supported_formats
         assert RendererCapability.LOCAL_RENDERING in info.capabilities
     
-    def test_config_validation(self):
+    def test_config_validation(self) -> None:
         """Test configuration validation."""
         renderer = NodeJSRenderer()
         
@@ -128,7 +129,7 @@ class TestNodeJSRenderer:
         assert not renderer.validate_config(invalid_config)
     
     @patch('subprocess.run')
-    def test_is_available_with_dependencies(self, mock_run):
+    def test_is_available_with_dependencies(self, mock_run: Any) -> None:
         """Test availability when Node.js and mmdc are available."""
         mock_run.return_value.returncode = 0
         
@@ -139,7 +140,7 @@ class TestNodeJSRenderer:
         assert mock_run.call_count == 2
     
     @patch('subprocess.run')
-    def test_is_available_without_dependencies(self, mock_run):
+    def test_is_available_without_dependencies(self, mock_run: Any) -> None:
         """Test availability when dependencies are missing."""
         mock_run.side_effect = FileNotFoundError()
         
@@ -151,7 +152,7 @@ class TestNodeJSRenderer:
     @patch('pathlib.Path.write_text')
     @patch('pathlib.Path.read_text')
     @patch('pathlib.Path.exists')
-    def test_render_svg(self, mock_exists, mock_read_text, mock_write_text, mock_temp_dir, mock_run):
+    def test_render_svg(self, mock_exists: Any, mock_read_text: Any, mock_write_text: Any, mock_temp_dir: Any, mock_run: Any) -> None:
         """Test SVG rendering with Node.js."""
         # Mock successful subprocess execution
         mock_run.return_value.returncode = 0
@@ -176,7 +177,7 @@ class TestNodeJSRenderer:
 class TestGraphvizRenderer:
     """Test the GraphvizRenderer class."""
     
-    def test_renderer_info(self):
+    def test_renderer_info(self) -> None:
         """Test renderer information."""
         renderer = GraphvizRenderer()
         info = renderer.get_info()
@@ -185,7 +186,7 @@ class TestGraphvizRenderer:
         assert "svg" in info.supported_formats
         assert RendererCapability.LOCAL_RENDERING in info.capabilities
     
-    def test_config_validation(self):
+    def test_config_validation(self) -> None:
         """Test configuration validation."""
         renderer = GraphvizRenderer()
         
@@ -205,7 +206,7 @@ class TestGraphvizRenderer:
         invalid_config = {"rankdir": "INVALID"}
         assert not renderer.validate_config(invalid_config)
     
-    def test_diagram_support_detection(self):
+    def test_diagram_support_detection(self) -> None:
         """Test diagram type support detection."""
         renderer = GraphvizRenderer()
         
@@ -217,7 +218,7 @@ class TestGraphvizRenderer:
         assert not renderer._is_diagram_supported("sequenceDiagram\n    A->>B: Hello")
         assert not renderer._is_diagram_supported("classDiagram\n    class A")
     
-    def test_mermaid_to_dot_conversion(self):
+    def test_mermaid_to_dot_conversion(self) -> None:
         """Test conversion from Mermaid to DOT format."""
         renderer = GraphvizRenderer()
         
@@ -234,21 +235,21 @@ class TestGraphvizRenderer:
         assert "B -> C" in dot_code
     
     @patch('graphviz.Source')
-    def test_is_available_with_graphviz(self, mock_source):
+    def test_is_available_with_graphviz(self, mock_source: Any) -> None:
         """Test availability when Graphviz is available."""
         mock_source.return_value.pipe.return_value = "<svg>test</svg>"
         
         renderer = GraphvizRenderer()
         assert renderer.is_available()
     
-    def test_is_available_without_graphviz(self):
+    def test_is_available_without_graphviz(self) -> None:
         """Test availability when Graphviz is not available."""
         with patch('mermaid_render.renderers.graphviz_renderer.graphviz', side_effect=ImportError):
             renderer = GraphvizRenderer()
             assert not renderer.is_available()
     
     @patch('graphviz.Source')
-    def test_render_svg(self, mock_source):
+    def test_render_svg(self, mock_source: Any) -> None:
         """Test SVG rendering with Graphviz."""
         mock_source.return_value.pipe.return_value = "<svg>graphviz content</svg>"
         
@@ -260,11 +261,11 @@ class TestGraphvizRenderer:
         assert result.renderer_name == "graphviz"
         assert "graphviz content" in result.content
     
-    def test_render_unsupported_diagram(self):
+    def test_render_unsupported_diagram(self) -> None:
         """Test rendering unsupported diagram type."""
         renderer = GraphvizRenderer()
         
         result = renderer.render("sequenceDiagram\n    A->>B: Hello", "svg")
         
         assert not result.success
-        assert "not supported" in result.error
+        assert result.error is not None and "not supported" in result.error

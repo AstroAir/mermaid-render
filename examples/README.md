@@ -117,16 +117,7 @@ python ai_features_showcase.py
 
 **Key Concepts**: Testing methodologies, validation, error handling
 
-### 10. [Interactive & Collaboration Showcase](interactive_collaboration_showcase.py)
-**Real-time collaboration and interactive features**
-- Interactive diagram building
-- Collaborative editing simulation
-- Version control for diagrams
-- Real-time synchronization
 
-**Key Concepts**: Collaboration, version control, real-time features
-
-**Dependencies**: `pip install mermaid-render[interactive,collaboration]`
 
 ## 📁 Output Structure
 
@@ -163,7 +154,7 @@ output/
 - **Templates**: `pip install mermaid-render[templates]`
 - **Caching**: `pip install mermaid-render[cache]`
 - **Interactive**: `pip install mermaid-render[interactive]`
-- **Collaboration**: `pip install mermaid-render[collaboration]`
+
 - **All Features**: `pip install mermaid-render[all]`
 
 ## 🎯 Learning Path
@@ -182,7 +173,6 @@ output/
 1. Explore `ai_features_showcase.py` for AI capabilities
 2. Study `template_system_showcase.py` for automation
 3. Investigate `performance_caching_showcase.py` for optimization
-4. Try `interactive_collaboration_showcase.py` for advanced features
 
 ## 🤝 Contributing
 

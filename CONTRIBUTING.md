@@ -48,7 +48,7 @@ python -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 
 # Install development dependencies
-pip install -e ".[dev,cache,interactive,ai,collaboration,docs]"
+pip install -e ".[dev,cache,interactive,ai,docs]"
 
 # Or using UV (recommended)
 uv sync --all-extras
