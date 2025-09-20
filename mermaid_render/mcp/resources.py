@@ -23,7 +23,7 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
-def register_all_resources(mcp) -> None:
+def register_all_resources(mcp: Any) -> None:
     """
     Register all MCP resources with the FastMCP server.
     

@@ -2280,8 +2280,12 @@ test = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "mypy" },
     { name = "pytest" },
+    { name = "types-jsonschema" },
+    { name = "types-redis" },
     { name = "types-requests" },
+    { name = "types-setuptools" },
 ]
 
 [package.metadata]
@@ -2401,8 +2405,12 @@ provides-extras = ["ai", "all", "build", "cache", "dev", "docker", "docs", "inte
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "mypy", specifier = ">=1.17.1" },
     { name = "pytest", specifier = ">=8.4.1" },
+    { name = "types-jsonschema", specifier = ">=4.25.0.20250809" },
+    { name = "types-redis", specifier = ">=4.6.0.20241004" },
     { name = "types-requests", specifier = ">=2.32.4.20250611" },
+    { name = "types-setuptools", specifier = ">=80.9.0.20250801" },
 ]
 
 [[package]]

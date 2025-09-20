@@ -13,12 +13,14 @@ The MCP server exposes the following categories of tools:
 - Analysis tools (analyze_diagram, get_suggestions)
 """
 
+from typing import Any, Callable, Optional
+
 try:
     from .server import create_mcp_server, main
     _SERVER_AVAILABLE = True
 except ImportError:
-    create_mcp_server = None
-    main = None
+    create_mcp_server: Optional[Callable[[str, str, Optional[str]], Any]] = None  # type: ignore[no-redef]
+    main: Optional[Callable[[], None]] = None  # type: ignore[no-redef]
     _SERVER_AVAILABLE = False
 
 from .tools import (

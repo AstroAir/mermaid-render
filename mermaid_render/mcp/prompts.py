@@ -24,7 +24,7 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
-def register_all_prompts(mcp) -> None:
+def register_all_prompts(mcp: Any) -> None:
     """
     Register all MCP prompts with the FastMCP server.
     
@@ -301,7 +301,7 @@ Provide a detailed analysis with specific recommendations for improvement."""
 def simplify_diagram_prompt(
     diagram_code: str,
     target_complexity: str = "simple",
-    preserve_elements: List[str] = None,
+    preserve_elements: Optional[List[str]] = None,
     ctx: Optional[Context] = None,
 ) -> str:
     """
