@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -m pytest:*)",
+      "Bash(py -3 -m mypy:*)",
+      "Bash(py -3 -c:*)",
+      "Bash(fi)",
+      "Bash(done)",
+      "Bash(py -3 -m py_compile:*)",
+      "Bash(py -3 -m pytest tests/unit/models/ -v --tb=short)",
+      "Bash(py -3 -m pytest:*)",
+      "Bash(pre-commit run:*)",
+      "Bash(black:*)",
+      "Bash(ruff check:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

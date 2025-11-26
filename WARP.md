@@ -9,6 +9,7 @@ Mermaid Render is a comprehensive, production-ready Python library for generatin
 ## Development Commands
 
 ### Environment Setup
+
 ```bash
 # Complete development environment setup
 make setup-dev
@@ -21,6 +22,7 @@ pip install -e ".[all]"  # Full installation with all features
 ```
 
 ### Testing
+
 ```bash
 # Run all tests
 make test
@@ -47,6 +49,7 @@ pytest --cov=mermaid_render --cov-report=html
 ```
 
 ### Code Quality
+
 ```bash
 # Format code
 make format
@@ -65,6 +68,7 @@ make check-all
 ```
 
 ### Build and Release
+
 ```bash
 # Clean build artifacts
 make clean
@@ -78,6 +82,7 @@ make release
 ```
 
 ### Utilities
+
 ```bash
 # Run demo script
 make demo
@@ -104,6 +109,7 @@ make env-info
 ### Core Components
 
 #### Plugin-Based Renderer System
+
 The library features a sophisticated plugin-based architecture located in `mermaid_render/renderers/`:
 
 - **SVG Renderer** (`svg_renderer.py`) - Default web-based renderer using mermaid.ink
@@ -114,13 +120,16 @@ The library features a sophisticated plugin-based architecture located in `merma
 - **Graphviz Renderer** (`graphviz_renderer.py`) - Alternative renderer for flowcharts
 
 #### Core Classes (`core.py`)
+
 - **MermaidRenderer** - Main rendering engine with fallback support
 - **EnhancedMermaidRenderer** - Advanced renderer with plugin system integration
 - **MermaidConfig** - Centralized configuration management
 - **MermaidTheme** - Theme configuration and management
 
 #### Diagram Models (`models/`)
+
 Object-oriented diagram models for type-safe diagram creation:
+
 - `FlowchartDiagram` - Process flows and decision trees
 - `SequenceDiagram` - Interaction sequences between actors
 - `ClassDiagram` - UML class relationships
@@ -129,6 +138,7 @@ Object-oriented diagram models for type-safe diagram creation:
 - And 6 more diagram types
 
 #### Optional Feature Modules
+
 - **AI Module** (`ai/`) - AI-powered diagram generation and optimization
 - **Interactive Module** (`interactive/`) - Web-based interactive diagram builder
 
@@ -146,7 +156,9 @@ Object-oriented diagram models for type-safe diagram creation:
 ## Development Workflow
 
 ### Setting Up New Features
+
 When adding new diagram types or renderers:
+
 1. Follow the base class patterns in `models/` or `renderers/base.py`
 2. Add comprehensive type hints
 3. Include validation logic
@@ -154,21 +166,27 @@ When adding new diagram types or renderers:
 5. Update the `__init__.py` exports
 
 ### Testing Strategy
+
 The project uses pytest with comprehensive test markers:
+
 - `@pytest.mark.unit` - Fast, isolated unit tests
 - `@pytest.mark.integration` - Integration tests with external dependencies
 - `@pytest.mark.slow` - Time-intensive tests
 - `@pytest.mark.network` - Tests requiring network access
 
 ### Configuration Management
+
 The configuration system follows a hierarchical approach:
+
 1. Default values (in `MermaidConfig.__init__`)
 2. Environment variables (prefix: `MERMAID_`)
 3. Configuration files
 4. Runtime parameters (highest priority)
 
 ### Plugin System Development
+
 When developing new renderers:
+
 - Inherit from `BaseRenderer` in `renderers/base.py`
 - Implement health checks and performance metrics
 - Support graceful fallback mechanisms
@@ -177,17 +195,20 @@ When developing new renderers:
 ## Entry Points
 
 ### Command Line Interface
+
 ```bash
 mermaid-render input.mmd -o output.svg -f svg -t dark
 ```
 
 ### Python API Entry Points
+
 - `quick_render()` - Simple rendering function
 - `MermaidRenderer` - Standard renderer with basic plugin support
 - `EnhancedMermaidRenderer` - Full plugin system with advanced features
 - Diagram classes in `mermaid_render.models`
 
 ### Library Integration Points
+
 - CLI: `mermaid_render.cli:main`
 - Convenience functions: `mermaid_render.convenience`
 - Plugin system: `mermaid_render.plugin_renderer`
@@ -195,6 +216,7 @@ mermaid-render input.mmd -o output.svg -f svg -t dark
 ## Common Development Tasks
 
 ### Adding a New Diagram Type
+
 1. Create new module in `models/` following existing patterns
 2. Inherit from `MermaidDiagram` base class
 3. Implement `to_mermaid()` method for code generation
@@ -202,6 +224,7 @@ mermaid-render input.mmd -o output.svg -f svg -t dark
 5. Export in `models/__init__.py` and main `__init__.py`
 
 ### Adding a New Renderer
+
 1. Create renderer in `renderers/` inheriting from `BaseRenderer`
 2. Implement required methods: `render()`, `health_check()`, `get_capabilities()`
 3. Register in `RendererRegistry`
@@ -209,6 +232,7 @@ mermaid-render input.mmd -o output.svg -f svg -t dark
 5. Include comprehensive error handling
 
 ### Performance Optimization
+
 - Use the caching system for expensive operations
 - Implement batch operations for multiple diagrams
 - Monitor performance with the built-in `PerformanceMonitor`

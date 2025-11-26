@@ -12,7 +12,7 @@ class WebSocketClient {
         this.reconnectDelay = 1000;
         this.messageQueue = [];
         this.eventHandlers = new Map();
-        
+
         this.initializeConnection();
         this.setupEventHandlers();
     }
@@ -25,7 +25,7 @@ class WebSocketClient {
         // Get session ID from URL or generate one
         const urlParams = new URLSearchParams(window.location.search);
         this.sessionId = urlParams.get('session') || this.generateSessionId();
-        
+
         this.connect();
     }
 
@@ -37,10 +37,10 @@ class WebSocketClient {
         try {
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
             const wsUrl = `${protocol}//${window.location.host}/ws/${this.sessionId}`;
-            
+
             this.ws = new WebSocket(wsUrl);
             this.setupWebSocketHandlers();
-            
+
             console.log('Connecting to WebSocket:', wsUrl);
         } catch (error) {
             console.error('Failed to create WebSocket connection:', error);
@@ -53,10 +53,10 @@ class WebSocketClient {
             console.log('WebSocket connected');
             this.isConnected = true;
             this.reconnectAttempts = 0;
-            
+
             // Process queued messages
             this.processMessageQueue();
-            
+
             // Notify connection status
             this.emit('connected', { sessionId: this.sessionId, clientId: this.clientId });
             this.updateConnectionStatus(true);
@@ -75,11 +75,11 @@ class WebSocketClient {
             console.log('WebSocket disconnected:', event.code, event.reason);
             this.isConnected = false;
             this.updateConnectionStatus(false);
-            
+
             if (!event.wasClean && this.reconnectAttempts < this.maxReconnectAttempts) {
                 this.scheduleReconnect();
             }
-            
+
             this.emit('disconnected', { code: event.code, reason: event.reason });
         };
 
@@ -91,7 +91,7 @@ class WebSocketClient {
 
     handleMessage(message) {
         const { type } = message;
-        
+
         switch (type) {
             case 'state_sync':
                 this.handleStateSync(message);
@@ -120,44 +120,44 @@ class WebSocketClient {
             default:
                 console.warn('Unknown message type:', type, message);
         }
-        
+
         // Emit generic message event
         this.emit('message', message);
     }
 
     handleStateSync(message) {
         console.log('Received state sync:', message);
-        
+
         // Update diagram builder with synchronized state
         if (window.diagramBuilder) {
             window.diagramBuilder.loadFromState(message);
         }
-        
+
         // Update client count
         this.updateClientCount(message.client_count);
-        
+
         this.emit('state_sync', message);
     }
 
     handleElementUpdate(message) {
         console.log('Element updated:', message);
-        
+
         // Update local diagram builder
         if (window.diagramBuilder) {
             window.diagramBuilder.updateElementFromRemote(message.element_id, message.updates);
         }
-        
+
         this.emit('element_update', message);
     }
 
     handleConnectionUpdate(message) {
         console.log('Connection updated:', message);
-        
+
         // Update local diagram builder
         if (window.diagramBuilder) {
             window.diagramBuilder.updateConnectionFromRemote(message.connection_id, message.updates);
         }
-        
+
         this.emit('connection_update', message);
     }
 
@@ -172,7 +172,7 @@ class WebSocketClient {
         if (message.client_id !== this.clientId) {
             this.showRemoteCursor(message.client_id, message.position);
         }
-        
+
         this.emit('cursor_update', message);
     }
 
@@ -181,7 +181,7 @@ class WebSocketClient {
         if (message.client_id !== this.clientId) {
             this.showRemoteSelection(message.client_id, message.selected_elements);
         }
-        
+
         this.emit('selection_update', message);
     }
 
@@ -261,9 +261,9 @@ class WebSocketClient {
     scheduleReconnect() {
         this.reconnectAttempts++;
         const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
-        
+
         console.log(`Scheduling reconnect attempt ${this.reconnectAttempts} in ${delay}ms`);
-        
+
         setTimeout(() => {
             if (!this.isConnected) {
                 this.connect();
@@ -359,7 +359,7 @@ class WebSocketClient {
         let cursorThrottle = null;
         document.addEventListener('mousemove', (e) => {
             if (cursorThrottle) return;
-            
+
             cursorThrottle = setTimeout(() => {
                 const canvas = document.getElementById('diagram-canvas');
                 if (canvas) {
@@ -388,7 +388,7 @@ class WebSocketClient {
 document.addEventListener('DOMContentLoaded', function() {
     if (document.getElementById('diagram-canvas')) {
         window.wsClient = new WebSocketClient();
-        
+
         // Integrate with diagram builder if it exists
         if (window.diagramBuilder) {
             // Set up integration between WebSocket and diagram builder

@@ -9,7 +9,7 @@ import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional, Set, Union
+from typing import Any
 
 
 class RendererCapability(Enum):
@@ -20,7 +20,6 @@ class RendererCapability(Enum):
     BATCH_PROCESSING = "batch_processing"
     THEME_SUPPORT = "theme_support"
     CUSTOM_CONFIG = "custom_config"
-    PERFORMANCE_METRICS = "performance_metrics"
     FALLBACK_SUPPORT = "fallback_support"
     LOCAL_RENDERING = "local_rendering"
     REMOTE_RENDERING = "remote_rendering"
@@ -42,27 +41,27 @@ class RendererInfo:
 
     name: str
     description: str
-    supported_formats: Set[str]
-    capabilities: Set[RendererCapability]
+    supported_formats: set[str]
+    capabilities: set[RendererCapability]
     priority: RendererPriority = RendererPriority.NORMAL
     version: str = "1.0.0"
     author: str = "Unknown"
-    dependencies: List[str] = field(default_factory=list)
-    config_schema: Optional[Dict[str, Any]] = None
+    dependencies: list[str] = field(default_factory=list)
+    config_schema: dict[str, Any] | None = None
 
 
 @dataclass
 class RenderResult:
     """Result of a rendering operation."""
 
-    content: Union[str, bytes]
+    content: str | bytes
     format: str
     renderer_name: str
     render_time: float
     success: bool = True
-    error: Optional[str] = None
-    warnings: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    error: str | None = None
+    warnings: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class BaseRenderer(ABC):
@@ -88,7 +87,7 @@ class BaseRenderer(ABC):
         """
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
         self._config = config
-        self._info: Optional[RendererInfo] = None
+        self._info: RendererInfo | None = None
 
     @abstractmethod
     def get_info(self) -> RendererInfo:
@@ -105,8 +104,8 @@ class BaseRenderer(ABC):
         self,
         mermaid_code: str,
         format: str,
-        theme: Optional[str] = None,
-        config: Optional[Dict[str, Any]] = None,
+        theme: str | None = None,
+        config: dict[str, Any] | None = None,
         **options: Any,
     ) -> RenderResult:
         """
@@ -154,7 +153,7 @@ class BaseRenderer(ABC):
         info = self.get_info()
         return capability in info.capabilities
 
-    def get_supported_formats(self) -> Set[str]:
+    def get_supported_formats(self) -> set[str]:
         """
         Get set of supported output formats.
 
@@ -164,7 +163,7 @@ class BaseRenderer(ABC):
         info = self.get_info()
         return info.supported_formats.copy()
 
-    def get_capabilities(self) -> Set[RendererCapability]:
+    def get_capabilities(self) -> set[RendererCapability]:
         """
         Get set of renderer capabilities.
 
@@ -174,7 +173,7 @@ class BaseRenderer(ABC):
         info = self.get_info()
         return info.capabilities.copy()
 
-    def validate_config(self, config: Dict[str, Any]) -> bool:
+    def validate_config(self, config: dict[str, Any]) -> bool:
         """
         Validate renderer-specific configuration.
 
@@ -187,7 +186,7 @@ class BaseRenderer(ABC):
         # Default implementation - subclasses can override
         return True
 
-    def get_config_schema(self) -> Optional[Dict[str, Any]]:
+    def get_config_schema(self) -> dict[str, Any] | None:
         """
         Get JSON schema for renderer configuration.
 
@@ -197,34 +196,7 @@ class BaseRenderer(ABC):
         info = self.get_info()
         return info.config_schema
 
-    def is_available(self) -> bool:
-        """
-        Check if renderer is available and ready to use.
-
-        This method should check for required dependencies, network connectivity,
-        or any other prerequisites needed for the renderer to function.
-
-        Returns:
-            True if renderer is available, False otherwise
-        """
-        # Default implementation - subclasses should override
-        return True
-
-    def get_health_status(self) -> Dict[str, Any]:
-        """
-        Get detailed health status of the renderer.
-
-        Returns:
-            Dictionary with health status information
-        """
-        return {
-            "available": self.is_available(),
-            "name": self.get_info().name,
-            "supported_formats": list(self.get_supported_formats()),
-            "capabilities": [cap.value for cap in self.get_capabilities()],
-        }
-
-    def cleanup(self) -> None:
+    def cleanup(self) -> None:  # noqa: B027
         """
         Clean up renderer resources.
 
@@ -249,8 +221,8 @@ class RendererError(Exception):
     def __init__(
         self,
         message: str,
-        renderer_name: Optional[str] = None,
-        context: Optional[Dict[str, Any]] = None,
+        renderer_name: str | None = None,
+        context: dict[str, Any] | None = None,
     ) -> None:
         super().__init__(message)
         self.renderer_name = renderer_name
@@ -259,9 +231,11 @@ class RendererError(Exception):
 
 class RendererNotAvailableError(RendererError):
     """Raised when a renderer is not available."""
+
     pass
 
 
 class RendererConfigurationError(RendererError):
     """Raised when renderer configuration is invalid."""
+
     pass

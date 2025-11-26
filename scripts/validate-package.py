@@ -12,22 +12,18 @@ This script provides comprehensive validation of:
 
 import importlib
 import json
-import os
 import subprocess
 import sys
-import tempfile
 import time
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
 import zipfile
-import tarfile
+from pathlib import Path
 
 # Add project root to path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 
-def test_import(module_name: str) -> Tuple[bool, str]:
+def test_import(module_name: str) -> tuple[bool, str]:
     """Test if a module can be imported successfully."""
     try:
         importlib.import_module(module_name)
@@ -38,7 +34,7 @@ def test_import(module_name: str) -> Tuple[bool, str]:
         return False, f"⚠️  {module_name}: {e}"
 
 
-def validate_core_imports() -> List[Tuple[bool, str]]:
+def validate_core_imports() -> list[tuple[bool, str]]:
     """Validate core package imports."""
     core_modules = [
         "mermaid_render",
@@ -58,7 +54,7 @@ def validate_core_imports() -> List[Tuple[bool, str]]:
     return results
 
 
-def validate_optional_imports() -> List[Tuple[bool, str]]:
+def validate_optional_imports() -> list[tuple[bool, str]]:
     """Validate optional feature imports."""
     optional_modules = [
         "mermaid_render.ai",
@@ -80,7 +76,7 @@ def validate_optional_imports() -> List[Tuple[bool, str]]:
     return results
 
 
-def validate_diagram_models() -> List[Tuple[bool, str]]:
+def validate_diagram_models() -> list[tuple[bool, str]]:
     """Validate diagram model imports."""
     diagram_models = [
         "mermaid_render.models.flowchart",
@@ -102,7 +98,7 @@ def validate_diagram_models() -> List[Tuple[bool, str]]:
     return results
 
 
-def validate_public_api() -> List[Tuple[bool, str]]:
+def validate_public_api() -> list[tuple[bool, str]]:
     """Validate that public API classes can be imported."""
     try:
         import mermaid_render
@@ -130,7 +126,7 @@ def validate_public_api() -> List[Tuple[bool, str]]:
         return [(False, f"❌ Failed to validate public API: {e}")]
 
 
-def validate_quick_render() -> Tuple[bool, str]:
+def validate_quick_render() -> tuple[bool, str]:
     """Test the quick_render function."""
     try:
         from mermaid_render import quick_render
@@ -156,7 +152,7 @@ def validate_quick_render() -> Tuple[bool, str]:
         return True, f"⚠️  quick_render import works (runtime error expected): {e}"
 
 
-def validate_version_info() -> Tuple[bool, str]:
+def validate_version_info() -> tuple[bool, str]:
     """Validate version and metadata."""
     try:
         import mermaid_render
@@ -174,7 +170,7 @@ def validate_version_info() -> Tuple[bool, str]:
         return False, f"❌ Failed to get version info: {e}"
 
 
-def validate_package_structure() -> List[Tuple[bool, str]]:
+def validate_package_structure() -> list[tuple[bool, str]]:
     """Validate package directory structure."""
     required_files = [
         "mermaid_render/__init__.py",
@@ -198,7 +194,7 @@ def validate_package_structure() -> List[Tuple[bool, str]]:
     return results
 
 
-def validate_build_system() -> List[Tuple[bool, str]]:
+def validate_build_system() -> list[tuple[bool, str]]:
     """Validate build system configuration."""
     results = []
 
@@ -207,6 +203,7 @@ def validate_build_system() -> List[Tuple[bool, str]]:
     if pyproject_path.exists():
         try:
             import toml
+
             config = toml.load(pyproject_path)
 
             # Check required sections
@@ -235,7 +232,7 @@ def validate_build_system() -> List[Tuple[bool, str]]:
     return results
 
 
-def validate_security() -> List[Tuple[bool, str]]:
+def validate_security() -> list[tuple[bool, str]]:
     """Run security validation checks."""
     results = []
 
@@ -259,7 +256,7 @@ def validate_security() -> List[Tuple[bool, str]]:
             capture_output=True,
             text=True,
             check=True,
-            cwd=project_root
+            cwd=project_root,
         )
         packages = json.loads(result.stdout)
 
@@ -282,7 +279,7 @@ def validate_security() -> List[Tuple[bool, str]]:
     return results
 
 
-def validate_distribution() -> List[Tuple[bool, str]]:
+def validate_distribution() -> list[tuple[bool, str]]:
     """Validate package distribution files."""
     results = []
 
@@ -298,7 +295,7 @@ def validate_distribution() -> List[Tuple[bool, str]]:
             # Validate wheel contents
             for wheel_file in wheel_files[:1]:  # Check first wheel
                 try:
-                    with zipfile.ZipFile(wheel_file, 'r') as zf:
+                    with zipfile.ZipFile(wheel_file, "r") as zf:
                         files = zf.namelist()
 
                         # Check for required files in wheel
@@ -307,9 +304,16 @@ def validate_distribution() -> List[Tuple[bool, str]]:
                         has_wheel = any("WHEEL" in f for f in files)
 
                         if has_init and has_metadata and has_wheel:
-                            results.append((True, f"✅ Wheel structure valid: {wheel_file.name}"))
+                            results.append(
+                                (True, f"✅ Wheel structure valid: {wheel_file.name}")
+                            )
                         else:
-                            results.append((False, f"❌ Invalid wheel structure: {wheel_file.name}"))
+                            results.append(
+                                (
+                                    False,
+                                    f"❌ Invalid wheel structure: {wheel_file.name}",
+                                )
+                            )
 
                 except Exception as e:
                     results.append((False, f"❌ Wheel validation failed: {e}"))
@@ -317,24 +321,28 @@ def validate_distribution() -> List[Tuple[bool, str]]:
             results.append((False, "❌ No wheel files found in dist/"))
 
         if sdist_files:
-            results.append((True, f"✅ Found {len(sdist_files)} source distribution(s)"))
+            results.append(
+                (True, f"✅ Found {len(sdist_files)} source distribution(s)")
+            )
         else:
             results.append((False, "❌ No source distribution found in dist/"))
 
     else:
-        results.append((False, "⚠️  No dist/ directory found (run 'python -m build' first)"))
+        results.append(
+            (False, "⚠️  No dist/ directory found (run 'python -m build' first)")
+        )
 
     return results
 
 
-def validate_performance() -> List[Tuple[bool, str]]:
+def validate_performance() -> list[tuple[bool, str]]:
     """Basic performance validation."""
     results = []
 
     try:
         # Test import time
         start_time = time.time()
-        import mermaid_render
+
         import_time = time.time() - start_time
 
         if import_time < 1.0:
@@ -347,13 +355,16 @@ def validate_performance() -> List[Tuple[bool, str]]:
         # Test memory usage (basic)
         try:
             import psutil
+
             process = psutil.Process()
             memory_mb = process.memory_info().rss / 1024 / 1024
 
             if memory_mb < 100:
                 results.append((True, f"✅ Memory usage: {memory_mb:.1f}MB"))
             elif memory_mb < 200:
-                results.append((True, f"⚠️  Memory usage: {memory_mb:.1f}MB (acceptable)"))
+                results.append(
+                    (True, f"⚠️  Memory usage: {memory_mb:.1f}MB (acceptable)")
+                )
             else:
                 results.append((False, f"❌ High memory usage: {memory_mb:.1f}MB"))
 
@@ -366,7 +377,7 @@ def validate_performance() -> List[Tuple[bool, str]]:
     return results
 
 
-def validate_documentation() -> List[Tuple[bool, str]]:
+def validate_documentation() -> list[tuple[bool, str]]:
     """Validate documentation structure."""
     results = []
 
@@ -393,13 +404,15 @@ def validate_documentation() -> List[Tuple[bool, str]]:
                 capture_output=True,
                 text=True,
                 cwd=project_root,
-                timeout=60
+                timeout=60,
             )
 
             if result.returncode == 0:
                 results.append((True, "✅ Documentation builds successfully"))
             else:
-                results.append((False, f"❌ Documentation build failed: {result.stderr}"))
+                results.append(
+                    (False, f"❌ Documentation build failed: {result.stderr}")
+                )
 
         except subprocess.TimeoutExpired:
             results.append((False, "❌ Documentation build timed out"))

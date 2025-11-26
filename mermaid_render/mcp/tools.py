@@ -7,13 +7,13 @@ mermaid-render functionality through the Model Context Protocol.
 
 import base64
 import logging
-import os
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 try:
-    from fastmcp import FastMCP, Context
+    from fastmcp import Context, FastMCP
     from pydantic import BaseModel, Field
+
     _FASTMCP_AVAILABLE = True
 except ImportError:
     # Allow importing tools for testing without FastMCP
@@ -21,19 +21,22 @@ except ImportError:
     Context = None
     _FASTMCP_AVAILABLE = False
 
-    # Create fallback classes
+    # Create fallback classes for when pydantic is not available
     class BaseModel:  # type: ignore[no-redef]
+        """Fallback BaseModel when pydantic is not available."""
+
         def __init__(self, **kwargs: Any) -> None:
             for key, value in kwargs.items():
                 setattr(self, key, value)
 
     def Field(**kwargs: Any) -> Any:
-        return kwargs.get('default')
+        """Fallback Field when pydantic is not available."""
+        return kwargs.get("default")
 
-from ..core import MermaidRenderer, MermaidConfig
-from ..convenience import quick_render, render_to_file
+
+from ..core import MermaidConfig, MermaidRenderer
+from ..exceptions import ValidationError
 from ..validators import MermaidValidator
-from ..exceptions import MermaidRenderError, ValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +44,7 @@ logger = logging.getLogger(__name__)
 # Enhanced error handling and response formatting
 class ErrorCategory:
     """Error categories for better error classification."""
+
     VALIDATION = "ValidationError"
     RENDERING = "RenderingError"
     CONFIGURATION = "ConfigurationError"
@@ -54,10 +58,10 @@ class ErrorCategory:
 
 def create_success_response(
     data: Any,
-    metadata: Optional[Dict[str, Any]] = None,
-    request_id: Optional[str] = None,
-    performance_metrics: Optional[Dict[str, Any]] = None
-) -> Dict[str, Any]:
+    metadata: dict[str, Any] | None = None,
+    request_id: str | None = None,
+    performance_metrics: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     """Create a standardized success response."""
     response = {
         "success": True,
@@ -80,10 +84,10 @@ def create_success_response(
 def create_error_response(
     error: Exception,
     error_category: str = ErrorCategory.SYSTEM,
-    context: Optional[Dict[str, Any]] = None,
-    request_id: Optional[str] = None,
-    suggestions: Optional[List[str]] = None
-) -> Dict[str, Any]:
+    context: dict[str, Any] | None = None,
+    request_id: str | None = None,
+    suggestions: list[str] | None = None,
+) -> dict[str, Any]:
     """Create a standardized error response."""
     response = {
         "success": False,
@@ -107,8 +111,8 @@ def create_error_response(
 
 def measure_performance(func: Any) -> Any:
     """Decorator to measure function performance."""
-    import time
     import functools
+    import time
 
     @functools.wraps(func)
     def wrapper(*args: Any, **kwargs: Any) -> Any:
@@ -121,16 +125,18 @@ def measure_performance(func: Any) -> Any:
             if isinstance(result, dict) and result.get("success"):
                 if "performance" not in result:
                     result["performance"] = {}
-                result["performance"]["execution_time_ms"] = round((end_time - start_time) * 1000, 2)
+                result["performance"]["execution_time_ms"] = round(
+                    (end_time - start_time) * 1000, 2
+                )
                 result["performance"]["function_name"] = func.__name__
 
             return result
         except Exception as e:
             end_time = time.time()
             # Add performance info to error context
-            context = {
+            {
                 "execution_time_ms": round((end_time - start_time) * 1000, 2),
-                "function_name": func.__name__
+                "function_name": func.__name__,
             }
             raise e
 
@@ -143,12 +149,14 @@ if _FASTMCP_AVAILABLE:
 
     class OutputFormat(str, Enum):
         """Supported output formats."""
+
         SVG = "svg"
         PNG = "png"
         PDF = "pdf"
 
     class ThemeName(str, Enum):
         """Available theme names."""
+
         DEFAULT = "default"
         DARK = "dark"
         FOREST = "forest"
@@ -157,6 +165,7 @@ if _FASTMCP_AVAILABLE:
 
     class DiagramType(str, Enum):
         """Supported diagram types."""
+
         AUTO = "auto"
         FLOWCHART = "flowchart"
         SEQUENCE = "sequence"
@@ -172,241 +181,234 @@ if _FASTMCP_AVAILABLE:
 
     class StylePreference(str, Enum):
         """Style preferences for diagram generation."""
+
         CLEAN = "clean"
         DETAILED = "detailed"
         MINIMAL = "minimal"
 
     class ComplexityLevel(str, Enum):
         """Complexity levels for diagram generation."""
+
         SIMPLE = "simple"
         MEDIUM = "medium"
         COMPLEX = "complex"
 
     class OptimizationType(str, Enum):
         """Types of diagram optimization."""
+
         LAYOUT = "layout"
         STYLE = "style"
         STRUCTURE = "structure"
         PERFORMANCE = "performance"
 
-    class RenderDiagramParams(BaseModel):
+    class RenderDiagramParams(BaseModel):  # type: ignore[misc]
         """Parameters for render_diagram tool."""
+
         diagram_code: str = Field(
             description="Mermaid diagram code to render",
             min_length=1,
             max_length=50000,
-            json_schema_extra={"example": "flowchart TD\n    A[Start] --> B[End]"}
+            json_schema_extra={"example": "flowchart TD\n    A[Start] --> B[End]"},
         )
         output_format: OutputFormat = Field(
             default=OutputFormat.SVG,
-            description="Output format for the rendered diagram"
+            description="Output format for the rendered diagram",
         )
-        theme: Optional[ThemeName] = Field(
-            default=None,
-            description="Theme to apply to the diagram"
+        theme: ThemeName | None = Field(
+            default=None, description="Theme to apply to the diagram"
         )
-        width: Optional[int] = Field(
-            default=None,
-            description="Output width in pixels",
-            ge=100,
-            le=4096
+        width: int | None = Field(
+            default=None, description="Output width in pixels", ge=100, le=4096
         )
-        height: Optional[int] = Field(
-            default=None,
-            description="Output height in pixels",
-            ge=100,
-            le=4096
+        height: int | None = Field(
+            default=None, description="Output height in pixels", ge=100, le=4096
         )
-        background_color: Optional[str] = Field(
+        background_color: str | None = Field(
             default=None,
             description="Background color (hex format like #ffffff or named color)",
-            pattern=r"^(#[0-9a-fA-F]{6}|#[0-9a-fA-F]{3}|[a-zA-Z]+)$"
+            pattern=r"^(#[0-9a-fA-F]{6}|#[0-9a-fA-F]{3}|[a-zA-Z]+)$",
         )
-        scale: Optional[float] = Field(
-            default=None,
-            description="Scale factor for output",
-            ge=0.1,
-            le=10.0
+        scale: float | None = Field(
+            default=None, description="Scale factor for output", ge=0.1, le=10.0
         )
 
-    class ValidateDiagramParams(BaseModel):
+    class ValidateDiagramParams(BaseModel):  # type: ignore[misc]
         """Parameters for validate_diagram tool."""
+
         diagram_code: str = Field(
             description="Mermaid diagram code to validate",
             min_length=1,
             max_length=50000,
-            json_schema_extra={"example": "flowchart TD\n    A[Start] --> B[End]"}
+            json_schema_extra={"example": "flowchart TD\n    A[Start] --> B[End]"},
         )
 
-    class ListThemesParams(BaseModel):
+    class ListThemesParams(BaseModel):  # type: ignore[misc]
         """Parameters for list_themes tool (no parameters needed)."""
+
         pass
 
-    class GenerateDiagramParams(BaseModel):
+    class GenerateDiagramParams(BaseModel):  # type: ignore[misc]
         """Parameters for generate_diagram_from_text tool."""
+
         text_description: str = Field(
             description="Natural language description of the diagram to generate",
             min_length=10,
             max_length=5000,
-            json_schema_extra={"example": "A user login process with authentication and error handling"}
+            json_schema_extra={
+                "example": "A user login process with authentication and error handling"
+            },
         )
         diagram_type: DiagramType = Field(
-            default=DiagramType.AUTO,
-            description="Type of diagram to generate"
+            default=DiagramType.AUTO, description="Type of diagram to generate"
         )
         style_preference: StylePreference = Field(
             default=StylePreference.CLEAN,
-            description="Style preference for the generated diagram"
+            description="Style preference for the generated diagram",
         )
         complexity_level: ComplexityLevel = Field(
             default=ComplexityLevel.MEDIUM,
-            description="Complexity level for the generated diagram"
+            description="Complexity level for the generated diagram",
         )
 
-    class OptimizeDiagramParams(BaseModel):
+    class OptimizeDiagramParams(BaseModel):  # type: ignore[misc]
         """Parameters for optimize_diagram tool."""
+
         diagram_code: str = Field(
             description="Mermaid diagram code to optimize",
             min_length=1,
             max_length=50000,
-            json_schema_extra={"example": "flowchart TD\n    A[Start] --> B[End]"}
+            json_schema_extra={"example": "flowchart TD\n    A[Start] --> B[End]"},
         )
         optimization_type: OptimizationType = Field(
             default=OptimizationType.LAYOUT,
-            description="Type of optimization to perform"
+            description="Type of optimization to perform",
         )
 
-    class AnalyzeDiagramParams(BaseModel):
+    class AnalyzeDiagramParams(BaseModel):  # type: ignore[misc]
         """Parameters for analyze_diagram tool."""
+
         diagram_code: str = Field(
             description="Mermaid diagram code to analyze",
             min_length=1,
             max_length=50000,
-            json_schema_extra={"example": "flowchart TD\n    A[Start] --> B[End]"}
+            json_schema_extra={"example": "flowchart TD\n    A[Start] --> B[End]"},
         )
         include_suggestions: bool = Field(
             default=True,
-            description="Include AI-powered improvement suggestions in the analysis"
+            description="Include AI-powered improvement suggestions in the analysis",
         )
 
-    class CreateFromTemplateParams(BaseModel):
+    class CreateFromTemplateParams(BaseModel):  # type: ignore[misc]
         """Parameters for create_from_template tool."""
+
         template_name: str = Field(
             description="Name or ID of the template to use",
             min_length=1,
             max_length=100,
-            json_schema_extra={"example": "software_architecture"}
+            json_schema_extra={"example": "software_architecture"},
         )
-        parameters: Dict[str, Any] = Field(
+        parameters: dict[str, Any] = Field(
             description="Template parameters as key-value pairs",
-            json_schema_extra={"example": {"title": "My System", "services": ["API", "Database"]}}
+            json_schema_extra={
+                "example": {"title": "My System", "services": ["API", "Database"]}
+            },
         )
         validate_params: bool = Field(
-            default=True,
-            description="Validate template parameters against schema"
+            default=True, description="Validate template parameters against schema"
         )
+
     # New parameter models for additional tools
-    class ConfigurationParams(BaseModel):
+    class ConfigurationParams(BaseModel):  # type: ignore[misc]
         """Parameters for configuration management tools."""
-        key: Optional[str] = Field(
+
+        key: str | None = Field(
             default=None,
             description="Configuration key to get/set (if None, returns all config)",
-            max_length=100
+            max_length=100,
         )
-        value: Optional[Any] = Field(
+        value: Any | None = Field(
             default=None,
-            description="Configuration value to set (only for update operations)"
+            description="Configuration value to set (only for update operations)",
         )
-        section: Optional[str] = Field(
+        section: str | None = Field(
             default=None,
             description="Configuration section to filter by",
-            max_length=50
+            max_length=50,
         )
 
-    class TemplateManagementParams(BaseModel):
+    class TemplateManagementParams(BaseModel):  # type: ignore[misc]
         """Parameters for template management tools."""
-        template_name: Optional[str] = Field(
-            default=None,
-            description="Template name to filter by",
-            max_length=100
+
+        template_name: str | None = Field(
+            default=None, description="Template name to filter by", max_length=100
         )
-        category: Optional[str] = Field(
-            default=None,
-            description="Template category to filter by",
-            max_length=50
+        category: str | None = Field(
+            default=None, description="Template category to filter by", max_length=50
         )
         include_builtin: bool = Field(
-            default=True,
-            description="Include built-in templates"
+            default=True, description="Include built-in templates"
         )
         include_custom: bool = Field(
-            default=True,
-            description="Include custom templates"
+            default=True, description="Include custom templates"
         )
 
-    class DiagramTypeParams(BaseModel):
+    class DiagramTypeParams(BaseModel):  # type: ignore[misc]
         """Parameters for diagram type information tools."""
-        diagram_type: Optional[DiagramType] = Field(
-            default=None,
-            description="Specific diagram type to get information for"
+
+        diagram_type: DiagramType | None = Field(
+            default=None, description="Specific diagram type to get information for"
         )
         include_examples: bool = Field(
-            default=True,
-            description="Include example code for each diagram type"
+            default=True, description="Include example code for each diagram type"
         )
 
-    class FileOperationParams(BaseModel):
+    class FileOperationParams(BaseModel):  # type: ignore[misc]
         """Parameters for file operation tools."""
+
         file_path: str = Field(
             description="File path for save/load operations",
             min_length=1,
-            max_length=500
+            max_length=500,
         )
         create_directories: bool = Field(
-            default=True,
-            description="Create parent directories if they don't exist"
+            default=True, description="Create parent directories if they don't exist"
         )
-        overwrite: bool = Field(
-            default=False,
-            description="Overwrite existing files"
-        )
+        overwrite: bool = Field(default=False, description="Overwrite existing files")
 
-    class BatchRenderParams(BaseModel):
+    class BatchRenderParams(BaseModel):  # type: ignore[misc]
         """Parameters for batch rendering operations."""
-        diagrams: List[Dict[str, Any]] = Field(
+
+        diagrams: list[dict[str, Any]] = Field(
             description="List of diagrams to render, each with 'code' and optional 'format', 'theme'",
             min_length=1,
-            max_length=50
+            max_length=50,
         )
         output_format: OutputFormat = Field(
             default=OutputFormat.SVG,
-            description="Default output format for all diagrams"
+            description="Default output format for all diagrams",
         )
-        theme: Optional[ThemeName] = Field(
-            default=None,
-            description="Default theme for all diagrams"
+        theme: ThemeName | None = Field(
+            default=None, description="Default theme for all diagrams"
         )
         parallel: bool = Field(
             default=True,
-            description="Process diagrams in parallel for better performance"
+            description="Process diagrams in parallel for better performance",
         )
         max_workers: int = Field(
-            default=4,
-            ge=1,
-            le=16,
-            description="Maximum number of parallel workers"
+            default=4, ge=1, le=16, description="Maximum number of parallel workers"
         )
 
-    class CacheManagementParams(BaseModel):
+    class CacheManagementParams(BaseModel):  # type: ignore[misc]
         """Parameters for cache management operations."""
+
         operation: str = Field(
             description="Cache operation to perform",
-            pattern=r"^(clear|stats|info|cleanup)$"
+            pattern=r"^(clear|stats|info|cleanup)$",
         )
-        cache_type: Optional[str] = Field(
+        cache_type: str | None = Field(
             default=None,
             description="Type of cache to operate on (render, template, config)",
-            pattern=r"^(render|template|config|all)$"
+            pattern=r"^(render|template|config|all)$",
         )
 
 else:
@@ -493,123 +495,123 @@ def register_all_tools(mcp: Any) -> None:
     # Core rendering tools
     mcp.tool(
         name="render_diagram",
-        description="Render a Mermaid diagram to the specified format (SVG, PNG, PDF)"
+        description="Render a Mermaid diagram to the specified format (SVG, PNG, PDF)",
     )(render_diagram)
 
     mcp.tool(
         name="validate_diagram",
-        description="Validate Mermaid diagram syntax and structure"
+        description="Validate Mermaid diagram syntax and structure",
     )(validate_diagram)
 
     mcp.tool(
         name="list_themes",
-        description="List available Mermaid themes and their descriptions"
+        description="List available Mermaid themes and their descriptions",
     )(list_themes)
 
     # AI-powered tools
     mcp.tool(
         name="generate_diagram_from_text",
         description="Generate a Mermaid diagram from natural language description using AI",
-        tags={"ai", "generation"}
+        tags={"ai", "generation"},
     )(generate_diagram_from_text)
 
     mcp.tool(
         name="optimize_diagram",
         description="Optimize a Mermaid diagram for better readability and performance using AI",
-        tags={"ai", "optimization"}
+        tags={"ai", "optimization"},
     )(optimize_diagram)
 
     mcp.tool(
         name="analyze_diagram",
         description="Analyze a Mermaid diagram and provide metrics, insights, and quality assessment",
-        tags={"ai", "analysis"}
+        tags={"ai", "analysis"},
     )(analyze_diagram)
 
     mcp.tool(
         name="get_diagram_suggestions",
         description="Get AI-powered suggestions for improving a Mermaid diagram",
-        tags={"ai", "suggestions"}
+        tags={"ai", "suggestions"},
     )(get_diagram_suggestions)
 
     # Template tools
     mcp.tool(
         name="create_from_template",
         description="Create a Mermaid diagram from a template with provided data",
-        tags={"templates", "generation"}
+        tags={"templates", "generation"},
     )(create_from_template)
 
     # Configuration management tools
     mcp.tool(
         name="get_configuration",
         description="Get current configuration settings with optional filtering by key or section",
-        tags={"configuration", "settings"}
+        tags={"configuration", "settings"},
     )(get_configuration)
 
     mcp.tool(
         name="update_configuration",
         description="Update configuration settings with validation and error handling",
-        tags={"configuration", "settings", "management"}
+        tags={"configuration", "settings", "management"},
     )(update_configuration)
 
     # Template management tools
     mcp.tool(
         name="list_available_templates",
         description="List all available diagram templates with filtering and categorization",
-        tags={"templates", "management"}
+        tags={"templates", "management"},
     )(list_available_templates)
 
     # Additional template and diagram tools
     mcp.tool(
         name="get_template_details",
         description="Get detailed information about a specific template including parameters and examples",
-        tags={"templates", "information"}
+        tags={"templates", "information"},
     )(get_template_details)
 
     mcp.tool(
         name="create_custom_template",
         description="Create a new custom template with validation and parameter schema",
-        tags={"templates", "creation", "management"}
+        tags={"templates", "creation", "management"},
     )(create_custom_template)
 
     # Diagram type information tools
     mcp.tool(
         name="list_diagram_types",
         description="List all supported diagram types with descriptions and capabilities",
-        tags={"diagrams", "types", "information"}
+        tags={"diagrams", "types", "information"},
     )(list_diagram_types)
 
     mcp.tool(
         name="get_diagram_examples",
         description="Get example code and documentation for specific diagram types",
-        tags={"diagrams", "examples", "documentation"}
+        tags={"diagrams", "examples", "documentation"},
     )(get_diagram_examples)
 
     # System information tools
     mcp.tool(
         name="get_system_information",
         description="Get system capabilities, version information, and available features",
-        tags={"system", "information", "capabilities"}
+        tags={"system", "information", "capabilities"},
     )(get_system_information)
 
     # File operation tools
     mcp.tool(
         name="save_diagram_to_file",
         description="Save rendered diagram content to a file with path validation and error handling",
-        tags={"files", "save", "export"}
+        tags={"files", "save", "export"},
     )(save_diagram_to_file)
 
     # Batch operation tools
     mcp.tool(
         name="batch_render_diagrams",
         description="Render multiple diagrams efficiently with parallel processing and progress tracking",
-        tags={"batch", "rendering", "performance"}
+        tags={"batch", "rendering", "performance"},
     )(batch_render_diagrams)
 
     # Cache management tools
     mcp.tool(
         name="manage_cache_operations",
         description="Manage cache operations including clear, stats, and cleanup with detailed reporting",
-        tags={"cache", "management", "performance"}
+        tags={"cache", "management", "performance"},
     )(manage_cache_operations)
 
     logger.info("Registered all MCP tools")
@@ -619,12 +621,12 @@ def register_all_tools(mcp: Any) -> None:
 def render_diagram(
     diagram_code: str,
     output_format: str = "svg",
-    theme: Optional[str] = None,
-    width: Optional[int] = None,
-    height: Optional[int] = None,
-    background_color: Optional[str] = None,
-    scale: Optional[float] = None,
-) -> Dict[str, Any]:
+    theme: str | None = None,
+    width: int | None = None,
+    height: int | None = None,
+    background_color: str | None = None,
+    scale: float | None = None,
+) -> dict[str, Any]:
     """
     Render a Mermaid diagram to the specified format.
 
@@ -662,14 +664,14 @@ def render_diagram(
             width=width,
             height=height,
             background_color=background_color,
-            scale=scale
+            scale=scale,
         )
 
         # Create configuration
         config = MermaidConfig()
 
         # Prepare rendering options
-        options: Dict[str, Any] = {}
+        options: dict[str, Any] = {}
         if params.width:
             options["width"] = params.width
         if params.height:
@@ -683,12 +685,14 @@ def render_diagram(
         renderer = MermaidRenderer(config=config, theme=params.theme)
 
         # Render diagram
-        result = renderer.render_raw(params.diagram_code, params.output_format.value, **options)
+        result = renderer.render_raw(
+            params.diagram_code, params.output_format.value, **options
+        )
 
         # Convert result to string if it's bytes (for consistent handling)
         if isinstance(result, bytes):
             # For binary formats, we'll encode as base64 for JSON serialization
-            data = base64.b64encode(result).decode('utf-8')
+            data = base64.b64encode(result).decode("utf-8")
             is_binary = True
         else:
             data = result
@@ -714,7 +718,7 @@ def render_diagram(
                 "content": data,
                 "is_binary": is_binary,
             },
-            metadata=metadata
+            metadata=metadata,
         )
 
     except ValidationError as e:
@@ -723,7 +727,10 @@ def render_diagram(
             e,
             ErrorCategory.VALIDATION,
             context={"diagram_code_length": len(diagram_code) if diagram_code else 0},
-            suggestions=["Check diagram syntax", "Verify parameter values are within valid ranges"]
+            suggestions=[
+                "Check diagram syntax",
+                "Verify parameter values are within valid ranges",
+            ],
         )
     except Exception as e:
         logger.error(f"Error rendering diagram: {e}")
@@ -733,13 +740,15 @@ def render_diagram(
             context={
                 "output_format": output_format,
                 "theme": theme,
-                "diagram_type": _detect_diagram_type(diagram_code) if diagram_code else None
-            }
+                "diagram_type": (
+                    _detect_diagram_type(diagram_code) if diagram_code else None
+                ),
+            },
         )
 
 
 @measure_performance
-def validate_diagram(diagram_code: str) -> Dict[str, Any]:
+def validate_diagram(diagram_code: str) -> dict[str, Any]:
     """
     Validate Mermaid diagram syntax and structure.
 
@@ -790,18 +799,17 @@ def validate_diagram(diagram_code: str) -> Dict[str, Any]:
         # Add suggestions for improvement if there are issues
         suggestions = []
         if not result.is_valid:
-            suggestions.extend([
-                "Check syntax against Mermaid documentation",
-                "Verify diagram type declaration",
-                "Ensure proper node and edge syntax"
-            ])
+            suggestions.extend(
+                [
+                    "Check syntax against Mermaid documentation",
+                    "Verify diagram type declaration",
+                    "Ensure proper node and edge syntax",
+                ]
+            )
         if result.warnings:
             suggestions.append("Review warnings for potential improvements")
 
-        return create_success_response(
-            data=validation_data,
-            metadata=metadata
-        )
+        return create_success_response(data=validation_data, metadata=metadata)
 
     except ValidationError as e:
         logger.error(f"Validation error in validate_diagram: {e}")
@@ -809,19 +817,26 @@ def validate_diagram(diagram_code: str) -> Dict[str, Any]:
             e,
             ErrorCategory.VALIDATION,
             context={"diagram_code_length": len(diagram_code) if diagram_code else 0},
-            suggestions=["Ensure diagram code is not empty", "Check for valid UTF-8 encoding"]
+            suggestions=[
+                "Ensure diagram code is not empty",
+                "Check for valid UTF-8 encoding",
+            ],
         )
     except Exception as e:
         logger.error(f"Error validating diagram: {e}")
         return create_error_response(
             e,
             ErrorCategory.SYSTEM,
-            context={"diagram_type": _detect_diagram_type(diagram_code) if diagram_code else None}
+            context={
+                "diagram_type": (
+                    _detect_diagram_type(diagram_code) if diagram_code else None
+                )
+            },
         )
 
 
 @measure_performance
-def list_themes() -> Dict[str, Any]:
+def list_themes() -> dict[str, Any]:
     """
     List all available Mermaid themes with detailed information.
 
@@ -846,7 +861,7 @@ def list_themes() -> Dict[str, Any]:
                 "background": "light",
                 "primary_color": "#0066cc",
                 "suitable_for": ["presentations", "documentation", "general use"],
-                "contrast": "high"
+                "contrast": "high",
             },
             "dark": {
                 "name": "Dark",
@@ -854,38 +869,51 @@ def list_themes() -> Dict[str, Any]:
                 "background": "dark",
                 "primary_color": "#66b3ff",
                 "suitable_for": ["night work", "dark interfaces", "reduced eye strain"],
-                "contrast": "high"
+                "contrast": "high",
             },
             "forest": {
                 "name": "Forest",
                 "description": "Forest theme with green color palette for nature-inspired designs",
                 "background": "light",
                 "primary_color": "#228B22",
-                "suitable_for": ["environmental topics", "organic processes", "natural systems"],
-                "contrast": "medium"
+                "suitable_for": [
+                    "environmental topics",
+                    "organic processes",
+                    "natural systems",
+                ],
+                "contrast": "medium",
             },
             "base": {
                 "name": "Base",
                 "description": "Minimal base theme with clean, simple styling",
                 "background": "light",
                 "primary_color": "#333333",
-                "suitable_for": ["minimalist designs", "technical documentation", "clean layouts"],
-                "contrast": "medium"
+                "suitable_for": [
+                    "minimalist designs",
+                    "technical documentation",
+                    "clean layouts",
+                ],
+                "contrast": "medium",
             },
             "neutral": {
                 "name": "Neutral",
                 "description": "Neutral theme with gray color palette for professional appearance",
                 "background": "light",
                 "primary_color": "#666666",
-                "suitable_for": ["business documents", "professional presentations", "formal reports"],
-                "contrast": "medium"
-            }
+                "suitable_for": [
+                    "business documents",
+                    "professional presentations",
+                    "formal reports",
+                ],
+                "contrast": "medium",
+            },
         }
 
         # Try to get custom themes from theme manager if available
         custom_themes = {}
         try:
             from ..config import ThemeManager
+
             theme_manager = ThemeManager()
             available_themes = theme_manager.get_available_themes()
 
@@ -897,10 +925,12 @@ def list_themes() -> Dict[str, Any]:
                             "name": theme_name.title(),
                             "description": f"Custom theme: {theme_name}",
                             "background": "unknown",
-                            "primary_color": theme_config.get("primaryColor", "#000000"),
+                            "primary_color": theme_config.get(
+                                "primaryColor", "#000000"
+                            ),
                             "suitable_for": ["custom use cases"],
                             "contrast": "unknown",
-                            "custom": True
+                            "custom": True,
                         }
                     except Exception:
                         pass  # Skip themes that can't be loaded
@@ -917,10 +947,22 @@ def list_themes() -> Dict[str, Any]:
             "custom_themes": len(custom_themes),
             "default_theme": "default",
             "theme_categories": {
-                "light_background": [name for name, info in all_themes.items() if info.get("background") == "light"],
-                "dark_background": [name for name, info in all_themes.items() if info.get("background") == "dark"],
-                "custom": [name for name, info in all_themes.items() if info.get("custom", False)]
-            }
+                "light_background": [
+                    name
+                    for name, info in all_themes.items()
+                    if info.get("background") == "light"
+                ],
+                "dark_background": [
+                    name
+                    for name, info in all_themes.items()
+                    if info.get("background") == "dark"
+                ],
+                "custom": [
+                    name
+                    for name, info in all_themes.items()
+                    if info.get("custom", False)
+                ],
+            },
         }
 
         return create_success_response(
@@ -932,10 +974,10 @@ def list_themes() -> Dict[str, Any]:
                     "dark_mode": ["dark"],
                     "nature_topics": ["forest"],
                     "minimal_design": ["base"],
-                    "professional": ["neutral", "base"]
-                }
+                    "professional": ["neutral", "base"],
+                },
             },
-            metadata=metadata
+            metadata=metadata,
         )
 
     except Exception as e:
@@ -943,11 +985,14 @@ def list_themes() -> Dict[str, Any]:
         return create_error_response(
             e,
             ErrorCategory.CONFIGURATION,
-            suggestions=["Check theme configuration", "Verify theme manager is properly initialized"]
+            suggestions=[
+                "Check theme configuration",
+                "Verify theme manager is properly initialized",
+            ],
         )
 
 
-def _detect_diagram_type(diagram_code: str) -> Optional[str]:
+def _detect_diagram_type(diagram_code: str) -> str | None:
     """
     Detect the type of Mermaid diagram from the code.
 
@@ -1002,8 +1047,13 @@ def _calculate_complexity_score(diagram_code: str) -> float:
 
     # Basic metrics
     line_count = len(non_empty_lines)
-    arrow_count = sum(line.count('-->') + line.count('->') + line.count('->>') for line in non_empty_lines)
-    node_count = sum(1 for line in non_empty_lines if '[' in line or '(' in line or '{' in line)
+    arrow_count = sum(
+        line.count("-->") + line.count("->") + line.count("->>")
+        for line in non_empty_lines
+    )
+    node_count = sum(
+        1 for line in non_empty_lines if "[" in line or "(" in line or "{" in line
+    )
 
     # Calculate complexity based on various factors
     complexity = 0.0
@@ -1012,9 +1062,11 @@ def _calculate_complexity_score(diagram_code: str) -> float:
     complexity += min(node_count * 0.15, 2.0)  # Node complexity (max 2.0)
 
     # Additional complexity factors
-    if 'subgraph' in diagram_code.lower():
+    if "subgraph" in diagram_code.lower():
         complexity += 1.0
-    if any(keyword in diagram_code.lower() for keyword in ['note', 'class', 'interface']):
+    if any(
+        keyword in diagram_code.lower() for keyword in ["note", "class", "interface"]
+    ):
         complexity += 0.5
 
     return min(complexity, 10.0)
@@ -1047,11 +1099,11 @@ def _calculate_quality_score(validation_result: Any, diagram_code: str) -> float
     for line in non_empty_lines:
         if len(line) > 100:
             score -= 0.1
-        elif len(line) < 5 and '-->' not in line:
+        elif len(line) < 5 and "-->" not in line:
             score -= 0.1
 
     # Bonus for good structure
-    if any(line.strip().startswith('%%') for line in lines):  # Has comments
+    if any(line.strip().startswith("%%") for line in lines):  # Has comments
         score += 0.5
 
     return max(score, 0.0)
@@ -1062,8 +1114,8 @@ def generate_diagram_from_text(
     diagram_type: str = "auto",
     style_preference: str = "clean",
     complexity_level: str = "medium",
-    ctx: Optional[Context] = None,
-) -> Dict[str, Any]:
+    ctx: Context | None = None,
+) -> dict[str, Any]:
     """
     Generate a Mermaid diagram from natural language text using AI.
 
@@ -1083,12 +1135,12 @@ def generate_diagram_from_text(
             text_description=text_description,
             diagram_type=diagram_type,
             style_preference=style_preference,
-            complexity_level=complexity_level
+            complexity_level=complexity_level,
         )
 
         # Check if AI module is available
         try:
-            from ..ai import DiagramGenerator, GenerationConfig, AIdiagramType
+            from ..ai import AIdiagramType, DiagramGenerator, GenerationConfig
         except ImportError:
             return {
                 "success": False,
@@ -1113,7 +1165,14 @@ def generate_diagram_from_text(
             "diagram_code": result.diagram_code,
             "diagram_type": result.diagram_type.value,
             "confidence_score": result.confidence_score,
-            "suggestions": [s.to_dict() if hasattr(s, 'to_dict') else str(s) for s in result.suggestions] if result.suggestions else [],
+            "suggestions": (
+                [
+                    s.to_dict() if hasattr(s, "to_dict") else str(s)
+                    for s in result.suggestions
+                ]
+                if result.suggestions
+                else []
+            ),
             "metadata": result.metadata,
             "request_id": ctx.request_id if ctx else None,
         }
@@ -1131,8 +1190,8 @@ def generate_diagram_from_text(
 def optimize_diagram(
     diagram_code: str,
     optimization_type: str = "layout",
-    ctx: Optional[Context] = None,
-) -> Dict[str, Any]:
+    ctx: Context | None = None,
+) -> dict[str, Any]:
     """
     Optimize a Mermaid diagram for better readability and performance using AI.
 
@@ -1147,13 +1206,12 @@ def optimize_diagram(
     try:
         # Validate parameters
         params = OptimizeDiagramParams(
-            diagram_code=diagram_code,
-            optimization_type=optimization_type
+            diagram_code=diagram_code, optimization_type=optimization_type
         )
 
         # Check if AI module is available
         try:
-            from ..ai import DiagramOptimizer, OptimizationType
+            from ..ai import DiagramOptimizer, OptimizationType  # noqa: F401
         except ImportError:
             return {
                 "success": False,
@@ -1199,8 +1257,8 @@ def optimize_diagram(
 def analyze_diagram(
     diagram_code: str,
     include_suggestions: bool = True,
-    ctx: Optional[Context] = None,
-) -> Dict[str, Any]:
+    ctx: Context | None = None,
+) -> dict[str, Any]:
     """
     Analyze a Mermaid diagram and provide metrics, insights, and quality assessment.
 
@@ -1215,8 +1273,7 @@ def analyze_diagram(
     try:
         # Validate parameters
         params = AnalyzeDiagramParams(
-            diagram_code=diagram_code,
-            include_suggestions=include_suggestions
+            diagram_code=diagram_code, include_suggestions=include_suggestions
         )
 
         # Check if AI module is available
@@ -1252,6 +1309,7 @@ def analyze_diagram(
 
         if params.include_suggestions:
             from ..ai import SuggestionEngine
+
             suggestion_engine = SuggestionEngine()
             suggestions = suggestion_engine.get_suggestions(params.diagram_code)
             response["suggestions"] = [s.to_dict() for s in suggestions]
@@ -1270,8 +1328,8 @@ def analyze_diagram(
 
 def get_diagram_suggestions(
     diagram_code: str,
-    ctx: Optional[Context] = None,
-) -> Dict[str, Any]:
+    ctx: Context | None = None,
+) -> dict[str, Any]:
     """
     Get AI-powered suggestions for improving a Mermaid diagram.
 
@@ -1302,7 +1360,15 @@ def get_diagram_suggestions(
             "success": True,
             "suggestions": [s.to_dict() for s in suggestions],
             "total_suggestions": len(suggestions),
-            "high_priority_count": len([s for s in suggestions if hasattr(s, 'priority') and hasattr(s.priority, 'value') and str(s.priority.value) == "high"]),
+            "high_priority_count": len(
+                [
+                    s
+                    for s in suggestions
+                    if hasattr(s, "priority")
+                    and hasattr(s.priority, "value")
+                    and str(s.priority.value) == "high"
+                ]
+            ),
             "diagram_type": _detect_diagram_type(diagram_code),
             "request_id": ctx.request_id if ctx else None,
         }
@@ -1319,10 +1385,10 @@ def get_diagram_suggestions(
 
 def create_from_template(
     template_name: str,
-    parameters: Dict[str, Any],
+    parameters: dict[str, Any],
     validate_params: bool = True,
-    ctx: Optional[Context] = None,
-) -> Dict[str, Any]:
+    ctx: Context | None = None,
+) -> dict[str, Any]:
     """
     Create a Mermaid diagram from a template with provided data.
 
@@ -1340,7 +1406,7 @@ def create_from_template(
         params = CreateFromTemplateParams(
             template_name=template_name,
             parameters=parameters,
-            validate_params=validate_params
+            validate_params=validate_params,
         )
 
         # Check if templates module is available
@@ -1359,7 +1425,7 @@ def create_from_template(
         diagram_code = template_manager.generate(
             params.template_name,
             params.parameters,
-            validate_params=params.validate_params
+            validate_params=params.validate_params,
         )
 
         # Get template info for metadata
@@ -1392,11 +1458,12 @@ def create_from_template(
 
 # New tool implementations
 
+
 @measure_performance
 def get_configuration(
-    key: Optional[str] = None,
-    section: Optional[str] = None,
-) -> Dict[str, Any]:
+    key: str | None = None,
+    section: str | None = None,
+) -> dict[str, Any]:
     """
     Get current configuration settings with optional filtering.
 
@@ -1432,30 +1499,35 @@ def get_configuration(
                     "key": params.key,
                     "value": all_config[params.key],
                     "type": type(all_config[params.key]).__name__,
-                    "description": _get_config_description(params.key)
+                    "description": _get_config_description(params.key),
                 }
             else:
                 return create_error_response(
                     ValueError(f"Configuration key '{params.key}' not found"),
                     ErrorCategory.CONFIGURATION,
                     context={"available_keys": list(all_config.keys())},
-                    suggestions=[f"Use one of the available keys: {', '.join(list(all_config.keys())[:5])}..."]
+                    suggestions=[
+                        f"Use one of the available keys: {', '.join(list(all_config.keys())[:5])}..."
+                    ],
                 )
         else:
             # Return all configuration or filtered by section
             if params.section:
                 # Filter by section (basic implementation)
                 section_keys = _get_section_keys(params.section)
-                filtered_config = {k: v for k, v in all_config.items() if k in section_keys}
+                filtered_config = {
+                    k: v for k, v in all_config.items() if k in section_keys
+                }
                 config_data = {
                     "section": params.section,
                     "settings": {
                         k: {
                             "value": v,
                             "type": type(v).__name__,
-                            "description": _get_config_description(k)
-                        } for k, v in filtered_config.items()
-                    }
+                            "description": _get_config_description(k),
+                        }
+                        for k, v in filtered_config.items()
+                    },
                 }
             else:
                 # Return all configuration
@@ -1464,30 +1536,30 @@ def get_configuration(
                         k: {
                             "value": v,
                             "type": type(v).__name__,
-                            "description": _get_config_description(k)
-                        } for k, v in all_config.items()
+                            "description": _get_config_description(k),
+                        }
+                        for k, v in all_config.items()
                     }
                 }
 
         # Enhanced metadata
         metadata = {
             "total_settings": len(all_config),
-            "filtered_settings": len(config_data.get("settings", {})) if "settings" in config_data else 1,
+            "filtered_settings": (
+                len(config_data.get("settings", {})) if "settings" in config_data else 1
+            ),
             "available_sections": ["rendering", "themes", "cache", "ai", "validation"],
             "config_source": "MermaidConfig",
         }
 
-        return create_success_response(
-            data=config_data,
-            metadata=metadata
-        )
+        return create_success_response(data=config_data, metadata=metadata)
 
     except Exception as e:
         logger.error(f"Error getting configuration: {e}")
         return create_error_response(
             e,
             ErrorCategory.CONFIGURATION,
-            suggestions=["Check configuration system is properly initialized"]
+            suggestions=["Check configuration system is properly initialized"],
         )
 
 
@@ -1504,36 +1576,46 @@ def _get_config_description(key: str) -> str:
         "cache_dir": "Directory path for storing cached files",
         "use_plugin_system": "Whether to use the plugin-based rendering system",
         "fallback_enabled": "Whether to enable fallback rendering methods",
-        "max_fallback_attempts": "Maximum number of fallback attempts"
+        "max_fallback_attempts": "Maximum number of fallback attempts",
     }
     return descriptions.get(key, f"Configuration setting: {key}")
 
 
-def _get_section_keys(section: str) -> List[str]:
+def _get_section_keys(section: str) -> list[str]:
     """Get configuration keys for a specific section."""
     sections = {
-        "rendering": ["server_url", "timeout", "retries", "default_format", "use_plugin_system"],
+        "rendering": [
+            "server_url",
+            "timeout",
+            "retries",
+            "default_format",
+            "use_plugin_system",
+        ],
         "themes": ["default_theme"],
         "cache": ["cache_enabled", "cache_dir"],
         "validation": ["validate_syntax"],
-        "fallback": ["fallback_enabled", "max_fallback_attempts"]
+        "fallback": ["fallback_enabled", "max_fallback_attempts"],
     }
     return sections.get(section, [])
 
 
 def _validate_config_value(key: str, value: Any) -> bool:
     """Validate a configuration value for a specific key."""
-    validations = {
+    from collections.abc import Callable
+
+    validations: dict[str, Callable[[Any], bool]] = {
         "timeout": lambda v: isinstance(v, (int, float)) and v > 0,
         "retries": lambda v: isinstance(v, int) and v >= 0,
-        "default_theme": lambda v: isinstance(v, str) and v in ["default", "dark", "forest", "neutral", "base"],
+        "default_theme": lambda v: isinstance(v, str)
+        and v in ["default", "dark", "forest", "neutral", "base"],
         "default_format": lambda v: isinstance(v, str) and v in ["svg", "png", "pdf"],
         "validate_syntax": lambda v: isinstance(v, bool),
         "cache_enabled": lambda v: isinstance(v, bool),
         "use_plugin_system": lambda v: isinstance(v, bool),
         "fallback_enabled": lambda v: isinstance(v, bool),
         "max_fallback_attempts": lambda v: isinstance(v, int) and v >= 0,
-        "server_url": lambda v: isinstance(v, str) and v.startswith(("http://", "https://"))
+        "server_url": lambda v: isinstance(v, str)
+        and v.startswith(("http://", "https://")),
     }
 
     validator = validations.get(key)
@@ -1546,27 +1628,28 @@ def _validate_config_value(key: str, value: Any) -> bool:
 
 # Helper functions from additional_tools.py
 
+
 def _generate_template_usage_instructions(template: Any) -> str:
     """Generate usage instructions for a template."""
     instructions = f"To use the '{template.name}' template:\n\n"
-    instructions += f"1. Call create_from_template with template_name='{template.name}'\n"
+    instructions += (
+        f"1. Call create_from_template with template_name='{template.name}'\n"
+    )
     instructions += "2. Provide the following parameters:\n"
 
     for param_name, param_info in template.parameters.items():
-        param_type = param_info.get('type', 'any') if isinstance(param_info, dict) else 'any'
+        param_type = (
+            param_info.get("type", "any") if isinstance(param_info, dict) else "any"
+        )
         instructions += f"   - {param_name} ({param_type})\n"
 
     instructions += f"\n3. The template will generate a {template.diagram_type} diagram"
     return instructions
 
 
-def _extract_parameter_schema(parameters: Dict[str, Any]) -> Dict[str, Any]:
+def _extract_parameter_schema(parameters: dict[str, Any]) -> dict[str, Any]:
     """Extract parameter schema from template parameters."""
-    schema: Dict[str, Any] = {
-        "type": "object",
-        "properties": {},
-        "required": []
-    }
+    schema: dict[str, Any] = {"type": "object", "properties": {}, "required": []}
 
     for param_name, param_info in parameters.items():
         if isinstance(param_info, dict):
@@ -1594,15 +1677,15 @@ def _assess_template_complexity(template: Any) -> str:
 
 def _generate_template_usage_example(template: Any) -> str:
     """Generate a usage example for a template."""
-    example_params: Dict[str, Any] = {}
+    example_params: dict[str, Any] = {}
     for param_name, param_info in template.parameters.items():
         if isinstance(param_info, dict):
-            param_type = param_info.get('type', 'string')
-            if param_type == 'string':
+            param_type = param_info.get("type", "string")
+            if param_type == "string":
                 example_params[param_name] = f"example_{param_name}"
-            elif param_type == 'list':
+            elif param_type == "list":
                 example_params[param_name] = ["item1", "item2"]
-            elif param_type == 'number':
+            elif param_type == "number":
                 example_params[param_name] = 42
             else:
                 example_params[param_name] = f"example_{param_name}"
@@ -1621,7 +1704,6 @@ def _get_diagram_example(diagram_type: str) -> str:
     B -->|No| D[Skip]
     C --> E[End]
     D --> E""",
-
         "sequence": """sequenceDiagram
     participant A as Alice
     participant B as Bob
@@ -1629,7 +1711,6 @@ def _get_diagram_example(diagram_type: str) -> str:
     B-->>A: Hello Alice!
     A->>B: How are you?
     B-->>A: I'm good, thanks!""",
-
         "class": """classDiagram
     class Animal {
         +String name
@@ -1641,7 +1722,6 @@ def _get_diagram_example(diagram_type: str) -> str:
         +bark()
     }
     Animal <|-- Dog""",
-
         "state": """stateDiagram-v2
     [*] --> Idle
     Idle --> Processing : start
@@ -1649,7 +1729,6 @@ def _get_diagram_example(diagram_type: str) -> str:
     Processing --> Error : fail
     Success --> [*]
     Error --> Idle : retry""",
-
         "er": """erDiagram
     CUSTOMER {
         int customer_id PK
@@ -1662,7 +1741,6 @@ def _get_diagram_example(diagram_type: str) -> str:
         date order_date
     }
     CUSTOMER ||--o{ ORDER : places""",
-
         "journey": """journey
     title User Shopping Journey
     section Discovery
@@ -1672,7 +1750,6 @@ def _get_diagram_example(diagram_type: str) -> str:
         Add to cart: 3: User
         Checkout: 2: User
         Payment: 1: User""",
-
         "gantt": """gantt
     title Project Timeline
     dateFormat YYYY-MM-DD
@@ -1682,13 +1759,11 @@ def _get_diagram_example(diagram_type: str) -> str:
     section Development
         Coding: 2024-01-09, 10d
         Testing: 2024-01-19, 5d""",
-
         "pie": """pie title Sample Data
     "Category A" : 42.5
     "Category B" : 30.0
     "Category C" : 17.5
     "Category D" : 10.0""",
-
         "gitgraph": """gitgraph
     commit
     branch develop
@@ -1698,7 +1773,6 @@ def _get_diagram_example(diagram_type: str) -> str:
     checkout main
     merge develop
     commit""",
-
         "mindmap": """mindmap
   root((Project))
     Planning
@@ -1710,7 +1784,6 @@ def _get_diagram_example(diagram_type: str) -> str:
     Testing
       Unit Tests
       Integration""",
-
         "timeline": """timeline
     title History of Programming
     1940s : ENIAC
@@ -1718,13 +1791,13 @@ def _get_diagram_example(diagram_type: str) -> str:
     1950s : FORTRAN
          : First High-level Language
     1970s : C Language
-         : System Programming"""
+         : System Programming""",
     }
 
     return examples.get(diagram_type, f"# Example for {diagram_type} not available")
 
 
-def _get_diagram_best_practices(diagram_type: str) -> List[str]:
+def _get_diagram_best_practices(diagram_type: str) -> list[str]:
     """Get best practices for a specific diagram type."""
     practices = {
         "flowchart": [
@@ -1732,40 +1805,43 @@ def _get_diagram_best_practices(diagram_type: str) -> List[str]:
             "Keep the flow direction consistent (top-down or left-right)",
             "Use appropriate shapes: rectangles for processes, diamonds for decisions",
             "Ensure all decision paths are clearly labeled",
-            "Group related processes using subgraphs when appropriate"
+            "Group related processes using subgraphs when appropriate",
         ],
         "sequence": [
             "Define all participants at the beginning",
             "Use consistent arrow types for different message types",
             "Add activation boxes for long-running operations",
             "Include notes for complex interactions",
-            "Keep message labels concise but descriptive"
+            "Keep message labels concise but descriptive",
         ],
         "class": [
             "Show only relevant attributes and methods",
             "Use proper visibility indicators (+, -, #)",
             "Group related classes together",
             "Use inheritance and composition relationships appropriately",
-            "Keep class names and method names clear and consistent"
+            "Keep class names and method names clear and consistent",
         ],
         "state": [
             "Use clear state names that describe the system condition",
             "Label transitions with triggering events",
             "Include guard conditions when necessary",
             "Use composite states for complex state hierarchies",
-            "Ensure all states have clear entry and exit paths"
-        ]
+            "Ensure all states have clear entry and exit paths",
+        ],
     }
 
-    return practices.get(diagram_type, [
-        "Use clear and descriptive labels",
-        "Keep the diagram simple and focused",
-        "Follow Mermaid syntax guidelines",
-        "Test the diagram for readability"
-    ])
+    return practices.get(
+        diagram_type,
+        [
+            "Use clear and descriptive labels",
+            "Keep the diagram simple and focused",
+            "Follow Mermaid syntax guidelines",
+            "Test the diagram for readability",
+        ],
+    )
 
 
-def _get_syntax_guide(diagram_type: str) -> Dict[str, str]:
+def _get_syntax_guide(diagram_type: str) -> dict[str, str]:
     """Get syntax guide for a specific diagram type."""
     guides = {
         "flowchart": {
@@ -1773,51 +1849,80 @@ def _get_syntax_guide(diagram_type: str) -> Dict[str, str]:
             "nodes": "[text] for rectangles, {text} for diamonds, ((text)) for circles",
             "connections": "--> for arrows, --- for lines, -.-> for dotted arrows",
             "labels": "A-->|label|B for labeled connections",
-            "subgraphs": "subgraph title ... end for grouping"
+            "subgraphs": "subgraph title ... end for grouping",
         },
         "sequence": {
             "start": "sequenceDiagram",
             "participants": "participant A as Alice",
             "messages": "A->>B for sync calls, A-->>B for responses",
             "activation": "activate A ... deactivate A",
-            "notes": "note over A: Note text"
+            "notes": "note over A: Note text",
         },
         "class": {
             "start": "classDiagram",
             "classes": "class ClassName { attributes methods }",
             "relationships": "<|-- inheritance, *-- composition, o-- aggregation",
             "visibility": "+ public, - private, # protected",
-            "types": ": type after attribute/method names"
-        }
+            "types": ": type after attribute/method names",
+        },
     }
 
-    return guides.get(diagram_type, {"info": "Syntax guide not available for this diagram type"})
+    return guides.get(
+        diagram_type, {"info": "Syntax guide not available for this diagram type"}
+    )
 
 
-def _get_common_patterns(diagram_type: str) -> List[Dict[str, str]]:
+def _get_common_patterns(diagram_type: str) -> list[dict[str, str]]:
     """Get common patterns for a specific diagram type."""
     patterns = {
         "flowchart": [
-            {"name": "Decision Tree", "description": "Branching logic with yes/no decisions"},
-            {"name": "Process Flow", "description": "Sequential steps with start and end points"},
-            {"name": "Parallel Processing", "description": "Multiple paths that converge later"}
+            {
+                "name": "Decision Tree",
+                "description": "Branching logic with yes/no decisions",
+            },
+            {
+                "name": "Process Flow",
+                "description": "Sequential steps with start and end points",
+            },
+            {
+                "name": "Parallel Processing",
+                "description": "Multiple paths that converge later",
+            },
         ],
         "sequence": [
-            {"name": "Request-Response", "description": "Simple client-server interaction"},
-            {"name": "Authentication Flow", "description": "Login process with validation"},
-            {"name": "Error Handling", "description": "Exception and error response patterns"}
+            {
+                "name": "Request-Response",
+                "description": "Simple client-server interaction",
+            },
+            {
+                "name": "Authentication Flow",
+                "description": "Login process with validation",
+            },
+            {
+                "name": "Error Handling",
+                "description": "Exception and error response patterns",
+            },
         ],
         "class": [
-            {"name": "Inheritance Hierarchy", "description": "Parent-child class relationships"},
-            {"name": "Composition Pattern", "description": "Classes containing other classes"},
-            {"name": "Interface Implementation", "description": "Classes implementing interfaces"}
-        ]
+            {
+                "name": "Inheritance Hierarchy",
+                "description": "Parent-child class relationships",
+            },
+            {
+                "name": "Composition Pattern",
+                "description": "Classes containing other classes",
+            },
+            {
+                "name": "Interface Implementation",
+                "description": "Classes implementing interfaces",
+            },
+        ],
     }
 
     return patterns.get(diagram_type, [])
 
 
-def _get_quick_reference_guide() -> Dict[str, str]:
+def _get_quick_reference_guide() -> dict[str, str]:
     """Get quick reference guide for all diagram types."""
     return {
         "flowchart": "flowchart TD; A[Start] --> B{Decision} --> C[End]",
@@ -1830,7 +1935,7 @@ def _get_quick_reference_guide() -> Dict[str, str]:
         "pie": "pie title: Data; 'A': 50; 'B': 30; 'C': 20",
         "gitgraph": "gitgraph; commit; branch dev; commit; merge dev",
         "mindmap": "mindmap; root((Topic)); Branch1; Branch2",
-        "timeline": "timeline; title: Events; 2024: Event1: Description"
+        "timeline": "timeline; title: Events; 2024: Event1: Description",
     }
 
 
@@ -1838,7 +1943,7 @@ def _get_quick_reference_guide() -> Dict[str, str]:
 def update_configuration(
     key: str,
     value: Any,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Update configuration settings with validation.
 
@@ -1871,7 +1976,9 @@ def update_configuration(
                 ValueError(f"Configuration key '{params.key}' not found"),
                 ErrorCategory.CONFIGURATION,
                 context={"available_keys": list(all_config.keys())},
-                suggestions=[f"Use one of the available keys: {', '.join(list(all_config.keys())[:5])}..."]
+                suggestions=[
+                    f"Use one of the available keys: {', '.join(list(all_config.keys())[:5])}..."
+                ],
             )
 
         # Store old value
@@ -1881,10 +1988,15 @@ def update_configuration(
         # Validate new value type compatibility
         if not _validate_config_value(params.key, params.value):
             return create_error_response(
-                ValueError(f"Invalid value type for '{params.key}'. Expected {old_type}, got {type(params.value).__name__}"),
+                ValueError(
+                    f"Invalid value type for '{params.key}'. Expected {old_type}, got {type(params.value).__name__}"
+                ),
                 ErrorCategory.VALIDATION,
-                context={"expected_type": old_type, "provided_type": type(params.value).__name__},
-                suggestions=[f"Provide a value of type {old_type}"]
+                context={
+                    "expected_type": old_type,
+                    "provided_type": type(params.value).__name__,
+                },
+                suggestions=[f"Provide a value of type {old_type}"],
             )
 
         # Update configuration
@@ -1897,7 +2009,7 @@ def update_configuration(
             "old_value": old_value,
             "new_value": params.value,
             "value_type": type(params.value).__name__,
-            "description": _get_config_description(params.key)
+            "description": _get_config_description(params.key),
         }
 
         # Enhanced metadata
@@ -1907,27 +2019,27 @@ def update_configuration(
             "validation_passed": True,
         }
 
-        return create_success_response(
-            data=update_data,
-            metadata=metadata
-        )
+        return create_success_response(data=update_data, metadata=metadata)
 
     except Exception as e:
         logger.error(f"Error updating configuration: {e}")
         return create_error_response(
             e,
             ErrorCategory.CONFIGURATION,
-            suggestions=["Check configuration key and value are valid", "Verify configuration system is writable"]
+            suggestions=[
+                "Check configuration key and value are valid",
+                "Verify configuration system is writable",
+            ],
         )
 
 
 @measure_performance
 def list_available_templates(
-    template_name: Optional[str] = None,
-    category: Optional[str] = None,
+    template_name: str | None = None,
+    category: str | None = None,
     include_builtin: bool = True,
     include_custom: bool = True,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     List all available diagram templates with filtering and categorization.
 
@@ -1956,7 +2068,7 @@ def list_available_templates(
             template_name=template_name,
             category=category,
             include_builtin=include_builtin,
-            include_custom=include_custom
+            include_custom=include_custom,
         )
 
         # Check if templates module is available
@@ -1966,7 +2078,9 @@ def list_available_templates(
             return create_error_response(
                 ImportError("Template functionality not available"),
                 ErrorCategory.TEMPLATE,
-                suggestions=["Install template support with: pip install mermaid-render[templates]"]
+                suggestions=[
+                    "Install template support with: pip install mermaid-render[templates]"
+                ],
             )
 
         # Get templates
@@ -1977,6 +2091,7 @@ def list_available_templates(
         if params.include_builtin:
             try:
                 from ..templates.library import BuiltInTemplates
+
                 builtin_lib = BuiltInTemplates()
                 builtin_templates = builtin_lib.get_all_templates()
                 for template in builtin_templates:
@@ -1990,7 +2105,7 @@ def list_available_templates(
             try:
                 custom_templates = template_manager.list_templates()
                 for template in custom_templates:  # type: ignore[assignment]
-                    if hasattr(template, 'to_dict'):
+                    if hasattr(template, "to_dict"):
                         template_dict = template.to_dict()
                         template_dict["source"] = "custom"
                         all_templates.append(template_dict)
@@ -2008,24 +2123,38 @@ def list_available_templates(
         filtered_templates = all_templates
 
         if params.template_name:
-            filtered_templates = [t for t in filtered_templates if params.template_name.lower() in t.get("name", "").lower()]
+            filtered_templates = [
+                t
+                for t in filtered_templates
+                if params.template_name.lower() in t.get("name", "").lower()
+            ]
 
         if params.category:
-            filtered_templates = [t for t in filtered_templates if t.get("diagram_type") == params.category]
+            filtered_templates = [
+                t
+                for t in filtered_templates
+                if t.get("diagram_type") == params.category
+            ]
 
         # Enhanced metadata
         metadata = {
             "total_templates": len(all_templates),
             "filtered_count": len(filtered_templates),
-            "builtin_count": len([t for t in all_templates if t.get("source") == "builtin"]),
-            "custom_count": len([t for t in all_templates if t.get("source") == "custom"]),
-            "categories": list(set(t.get("diagram_type", "unknown") for t in all_templates)),
+            "builtin_count": len(
+                [t for t in all_templates if t.get("source") == "builtin"]
+            ),
+            "custom_count": len(
+                [t for t in all_templates if t.get("source") == "custom"]
+            ),
+            "categories": list(
+                {t.get("diagram_type", "unknown") for t in all_templates}
+            ),
             "filters_applied": {
                 "template_name": params.template_name,
                 "category": params.category,
                 "include_builtin": params.include_builtin,
-                "include_custom": params.include_custom
-            }
+                "include_custom": params.include_custom,
+            },
         }
 
         return create_success_response(
@@ -2033,13 +2162,29 @@ def list_available_templates(
                 "templates": filtered_templates,
                 "summary": {
                     "total": len(filtered_templates),
-                    "by_category": {cat: len([t for t in filtered_templates if t.get("diagram_type") == cat])
-                                  for cat in set(t.get("diagram_type", "unknown") for t in filtered_templates)},
-                    "by_source": {src: len([t for t in filtered_templates if t.get("source") == src])
-                                for src in set(t.get("source", "unknown") for t in filtered_templates)}
-                }
+                    "by_category": {
+                        cat: len(
+                            [
+                                t
+                                for t in filtered_templates
+                                if t.get("diagram_type") == cat
+                            ]
+                        )
+                        for cat in {
+                            t.get("diagram_type", "unknown") for t in filtered_templates
+                        }
+                    },
+                    "by_source": {
+                        src: len(
+                            [t for t in filtered_templates if t.get("source") == src]
+                        )
+                        for src in {
+                            t.get("source", "unknown") for t in filtered_templates
+                        }
+                    },
+                },
             },
-            metadata=metadata
+            metadata=metadata,
         )
 
     except Exception as e:
@@ -2047,14 +2192,18 @@ def list_available_templates(
         return create_error_response(
             e,
             ErrorCategory.TEMPLATE,
-            suggestions=["Check template system is properly configured", "Verify template directories are accessible"]
+            suggestions=[
+                "Check template system is properly configured",
+                "Verify template directories are accessible",
+            ],
         )
 
 
 # Remaining tool implementations (basic versions)
 
+
 @measure_performance
-def get_system_information() -> Dict[str, Any]:
+def get_system_information() -> dict[str, Any]:
     """
     Get system capabilities, version information, and available features.
 
@@ -2071,8 +2220,9 @@ def get_system_information() -> Dict[str, Any]:
         >>> print(result["data"]["features"])  # Available features
     """
     try:
-        import sys
         import platform
+        import sys
+
         from .. import __version__ as mermaid_version
 
         # Collect system information
@@ -2097,27 +2247,31 @@ def get_system_information() -> Dict[str, Any]:
 
         # Check AI support
         try:
-            from ..ai import DiagramGenerator
+            from ..ai import DiagramGenerator  # noqa: F401
+
             features["ai_support"] = True
         except ImportError:
             pass
 
         # Check template support
         try:
-            from ..templates import TemplateManager
+            from ..templates import TemplateManager  # noqa: F401
+
             features["template_support"] = True
         except ImportError:
             pass
 
         # Check interactive support
         try:
-            from ..interactive import InteractiveServer
+            from ..interactive import InteractiveServer  # noqa: F401
+
             features["interactive_support"] = True
         except ImportError:
             pass
 
         # Get renderer capabilities
         from ..renderers import RendererRegistry
+
         registry = RendererRegistry()
         available_renderers = registry.list_renderers()
 
@@ -2138,10 +2292,10 @@ def get_system_information() -> Dict[str, Any]:
                     "max_diagram_size": "50KB",
                     "supported_formats": ["svg", "png", "pdf"],
                     "concurrent_renders": 10,
-                    "cache_enabled": True
-                }
+                    "cache_enabled": True,
+                },
             },
-            metadata=metadata
+            metadata=metadata,
         )
 
     except Exception as e:
@@ -2149,7 +2303,10 @@ def get_system_information() -> Dict[str, Any]:
         return create_error_response(
             e,
             ErrorCategory.SYSTEM,
-            suggestions=["Check system configuration", "Verify all dependencies are installed"]
+            suggestions=[
+                "Check system configuration",
+                "Verify all dependencies are installed",
+            ],
         )
 
 
@@ -2158,10 +2315,10 @@ def save_diagram_to_file(
     diagram_code: str,
     file_path: str,
     output_format: str = "svg",
-    theme: Optional[str] = None,
+    theme: str | None = None,
     create_directories: bool = True,
     overwrite: bool = False,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Save rendered diagram content to a file with path validation.
 
@@ -2193,7 +2350,7 @@ def save_diagram_to_file(
         params = FileOperationParams(
             file_path=file_path,
             create_directories=create_directories,
-            overwrite=overwrite
+            overwrite=overwrite,
         )
 
         # Validate file path
@@ -2205,7 +2362,10 @@ def save_diagram_to_file(
                 FileExistsError(f"File already exists: {params.file_path}"),
                 ErrorCategory.FILE_OPERATION,
                 context={"file_path": params.file_path, "exists": True},
-                suggestions=["Use overwrite=True to replace existing file", "Choose a different file path"]
+                suggestions=[
+                    "Use overwrite=True to replace existing file",
+                    "Choose a different file path",
+                ],
             )
 
         # Create directories if needed
@@ -2214,9 +2374,7 @@ def save_diagram_to_file(
 
         # Render the diagram first
         render_result = render_diagram(
-            diagram_code=diagram_code,
-            output_format=output_format,
-            theme=theme
+            diagram_code=diagram_code, output_format=output_format, theme=theme
         )
 
         if not render_result.get("success"):
@@ -2224,7 +2382,7 @@ def save_diagram_to_file(
                 RuntimeError("Failed to render diagram"),
                 ErrorCategory.RENDERING,
                 context={"render_error": render_result.get("error")},
-                suggestions=["Check diagram syntax", "Verify rendering parameters"]
+                suggestions=["Check diagram syntax", "Verify rendering parameters"],
             )
 
         # Get rendered content
@@ -2234,10 +2392,11 @@ def save_diagram_to_file(
         # Save to file
         if is_binary:
             import base64
-            with open(file_path_obj, 'wb') as f:
+
+            with open(file_path_obj, "wb") as f:
                 f.write(base64.b64decode(content))
         else:
-            with open(file_path_obj, 'w', encoding='utf-8') as f:
+            with open(file_path_obj, "w", encoding="utf-8") as f:
                 f.write(content)
 
         # Get file info
@@ -2259,9 +2418,9 @@ def save_diagram_to_file(
                 "file_path": str(file_path_obj.absolute()),
                 "file_size": file_size,
                 "format": output_format,
-                "encoding": "binary" if is_binary else "utf-8"
+                "encoding": "binary" if is_binary else "utf-8",
             },
-            metadata=metadata
+            metadata=metadata,
         )
 
     except Exception as e:
@@ -2270,16 +2429,20 @@ def save_diagram_to_file(
             e,
             ErrorCategory.FILE_OPERATION,
             context={"file_path": file_path, "format": output_format},
-            suggestions=["Check file path permissions", "Verify directory exists", "Check disk space"]
+            suggestions=[
+                "Check file path permissions",
+                "Verify directory exists",
+                "Check disk space",
+            ],
         )
 
 
 @measure_performance
 def batch_render_diagrams(
-    diagrams: List[Dict[str, Any]],
+    diagrams: list[dict[str, Any]],
     parallel: bool = True,
     max_workers: int = 4,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Render multiple diagrams efficiently with parallel processing.
 
@@ -2306,16 +2469,14 @@ def batch_render_diagrams(
     try:
         # Validate parameters
         params = BatchRenderParams(
-            diagrams=diagrams,
-            parallel=parallel,
-            max_workers=max_workers
+            diagrams=diagrams, parallel=parallel, max_workers=max_workers
         )
 
         if not params.diagrams:
             return create_error_response(
                 ValueError("No diagrams provided for batch rendering"),
                 ErrorCategory.VALIDATION,
-                suggestions=["Provide at least one diagram specification"]
+                suggestions=["Provide at least one diagram specification"],
             )
 
         results = []
@@ -2327,7 +2488,9 @@ def batch_render_diagrams(
             # Parallel processing
             import concurrent.futures
 
-            with concurrent.futures.ThreadPoolExecutor(max_workers=params.max_workers) as executor:
+            with concurrent.futures.ThreadPoolExecutor(
+                max_workers=params.max_workers
+            ) as executor:
                 # Submit all rendering tasks
                 future_to_diagram = {
                     executor.submit(
@@ -2335,8 +2498,9 @@ def batch_render_diagrams(
                         diagram_code=diagram.get("code", ""),
                         output_format=diagram.get("format", "svg"),
                         theme=diagram.get("theme"),
-                        validate_syntax=diagram.get("validate", True)
-                    ): i for i, diagram in enumerate(params.diagrams)
+                        validate_syntax=diagram.get("validate", True),
+                    ): i
+                    for i, diagram in enumerate(params.diagrams)
                 }
 
                 # Collect results
@@ -2344,23 +2508,27 @@ def batch_render_diagrams(
                     diagram_index = future_to_diagram[future]
                     try:
                         result = future.result()
-                        results.append({
-                            "index": diagram_index,
-                            "success": result.get("success", False),
-                            "result": result,
-                            "diagram_spec": params.diagrams[diagram_index]
-                        })
+                        results.append(
+                            {
+                                "index": diagram_index,
+                                "success": result.get("success", False),
+                                "result": result,
+                                "diagram_spec": params.diagrams[diagram_index],
+                            }
+                        )
                         if result.get("success"):
                             success_count += 1
                         else:
                             error_count += 1
                     except Exception as e:
-                        results.append({
-                            "index": diagram_index,
-                            "success": False,
-                            "error": str(e),
-                            "diagram_spec": params.diagrams[diagram_index]
-                        })
+                        results.append(
+                            {
+                                "index": diagram_index,
+                                "success": False,
+                                "error": str(e),
+                                "diagram_spec": params.diagrams[diagram_index],
+                            }
+                        )
                         error_count += 1
         else:
             # Sequential processing
@@ -2370,25 +2538,29 @@ def batch_render_diagrams(
                         diagram_code=diagram.get("code", ""),
                         output_format=diagram.get("format", "svg"),
                         theme=diagram.get("theme"),
-                        validate_syntax=diagram.get("validate", True)
+                        validate_syntax=diagram.get("validate", True),
                     )
-                    results.append({
-                        "index": i,
-                        "success": result.get("success", False),
-                        "result": result,
-                        "diagram_spec": diagram
-                    })
+                    results.append(
+                        {
+                            "index": i,
+                            "success": result.get("success", False),
+                            "result": result,
+                            "diagram_spec": diagram,
+                        }
+                    )
                     if result.get("success"):
                         success_count += 1
                     else:
                         error_count += 1
                 except Exception as e:
-                    results.append({
-                        "index": i,
-                        "success": False,
-                        "error": str(e),
-                        "diagram_spec": diagram
-                    })
+                    results.append(
+                        {
+                            "index": i,
+                            "success": False,
+                            "error": str(e),
+                            "diagram_spec": diagram,
+                        }
+                    )
                     error_count += 1
 
         # Sort results by index to maintain order
@@ -2404,7 +2576,9 @@ def batch_render_diagrams(
             "processing_mode": "parallel" if params.parallel else "sequential",
             "max_workers": params.max_workers if params.parallel else 1,
             "total_time_seconds": total_time,
-            "average_time_per_diagram": total_time / len(params.diagrams) if params.diagrams else 0,
+            "average_time_per_diagram": (
+                total_time / len(params.diagrams) if params.diagrams else 0
+            ),
         }
 
         return create_success_response(
@@ -2414,12 +2588,14 @@ def batch_render_diagrams(
                     "total": len(params.diagrams),
                     "success_count": success_count,
                     "error_count": error_count,
-                    "success_rate": success_count / len(params.diagrams) if params.diagrams else 0,
+                    "success_rate": (
+                        success_count / len(params.diagrams) if params.diagrams else 0
+                    ),
                     "total_time": total_time,
-                    "processing_mode": "parallel" if params.parallel else "sequential"
-                }
+                    "processing_mode": "parallel" if params.parallel else "sequential",
+                },
             },
-            metadata=metadata
+            metadata=metadata,
         )
 
     except Exception as e:
@@ -2428,15 +2604,19 @@ def batch_render_diagrams(
             e,
             ErrorCategory.RENDERING,
             context={"diagram_count": len(diagrams) if diagrams else 0},
-            suggestions=["Check diagram specifications", "Reduce batch size", "Try sequential processing"]
+            suggestions=[
+                "Check diagram specifications",
+                "Reduce batch size",
+                "Try sequential processing",
+            ],
         )
 
 
 @measure_performance
 def manage_cache_operations(
     operation: str,
-    cache_key: Optional[str] = None,
-) -> Dict[str, Any]:
+    cache_key: str | None = None,
+) -> dict[str, Any]:
     """
     Manage cache operations including clear, stats, and cleanup.
 
@@ -2464,12 +2644,13 @@ def manage_cache_operations(
         # Get cache manager
         try:
             from ..cache import CacheManager
+
             cache_manager = CacheManager()
         except ImportError:
             return create_error_response(
                 ImportError("Cache functionality not available"),
                 ErrorCategory.CACHE,
-                suggestions=["Check cache system configuration"]
+                suggestions=["Check cache system configuration"],
             )
 
         operation_result = {}
@@ -2479,14 +2660,19 @@ def manage_cache_operations(
             stats = cache_manager.get_stats()
             operation_result = {
                 "operation": "stats",
-                "cache_enabled": hasattr(cache_manager, 'backend') and cache_manager.backend is not None,
+                "cache_enabled": hasattr(cache_manager, "backend")
+                and cache_manager.backend is not None,
                 "cache_size": stats.get("size", 0),
                 "entry_count": stats.get("count", 0),
                 "hit_rate": stats.get("hit_rate", 0.0),
                 "miss_rate": stats.get("miss_rate", 0.0),
-                "cache_directory": str(cache_manager.cache_dir) if hasattr(cache_manager, 'cache_dir') else None,
+                "cache_directory": (
+                    str(cache_manager.cache_dir)
+                    if hasattr(cache_manager, "cache_dir")
+                    else None
+                ),
                 "max_size": stats.get("max_size", "unlimited"),
-                "last_cleanup": stats.get("last_cleanup", "never")
+                "last_cleanup": stats.get("last_cleanup", "never"),
             }
 
         elif params.operation == "clear":
@@ -2497,13 +2683,16 @@ def manage_cache_operations(
                     "operation": "clear",
                     "cache_key": params.cache_key,
                     "cleared": cleared,
-                    "message": f"Cache key '{params.cache_key}' {'cleared' if cleared else 'not found'}"
+                    "message": f"Cache key '{params.cache_key}' {'cleared' if cleared else 'not found'}",
                 }
             else:
                 return create_error_response(
                     ValueError("cache_key required for clear operation"),
                     ErrorCategory.VALIDATION,
-                    suggestions=["Provide cache_key parameter", "Use clear_all to clear entire cache"]
+                    suggestions=[
+                        "Provide cache_key parameter",
+                        "Use clear_all to clear entire cache",
+                    ],
                 )
 
         elif params.operation == "clear_all":
@@ -2512,7 +2701,7 @@ def manage_cache_operations(
             operation_result = {
                 "operation": "clear_all",
                 "cleared_entries": cleared_count,
-                "message": f"Cleared {cleared_count} cache entries"
+                "message": f"Cleared {cleared_count} cache entries",
             }
 
         elif params.operation == "cleanup":
@@ -2522,15 +2711,17 @@ def manage_cache_operations(
             operation_result = {
                 "operation": "cleanup",
                 "cleaned_entries": cleaned_count,
-                "message": f"Cleaned up {cleaned_count} expired cache entries"
+                "message": f"Cleaned up {cleaned_count} expired cache entries",
             }
 
         else:
             return create_error_response(
                 ValueError(f"Unknown cache operation: {params.operation}"),
                 ErrorCategory.VALIDATION,
-                context={"supported_operations": ["stats", "clear", "clear_all", "cleanup"]},
-                suggestions=["Use one of: stats, clear, clear_all, cleanup"]
+                context={
+                    "supported_operations": ["stats", "clear", "clear_all", "cleanup"]
+                },
+                suggestions=["Use one of: stats, clear, clear_all, cleanup"],
             )
 
         # Enhanced metadata
@@ -2538,13 +2729,14 @@ def manage_cache_operations(
             "operation_timestamp": __import__("datetime").datetime.now().isoformat(),
             "cache_system": "CacheManager",
             "operation_type": params.operation,
-            "cache_enabled": cache_manager.is_enabled() if hasattr(cache_manager, 'is_enabled') else True,
+            "cache_enabled": (
+                cache_manager.is_enabled()
+                if hasattr(cache_manager, "is_enabled")
+                else True
+            ),
         }
 
-        return create_success_response(
-            data=operation_result,
-            metadata=metadata
-        )
+        return create_success_response(data=operation_result, metadata=metadata)
 
     except Exception as e:
         logger.error(f"Error in cache management: {e}")
@@ -2552,16 +2744,20 @@ def manage_cache_operations(
             e,
             ErrorCategory.CACHE,
             context={"operation": operation, "cache_key": cache_key},
-            suggestions=["Check cache system is properly configured", "Verify cache permissions"]
+            suggestions=[
+                "Check cache system is properly configured",
+                "Verify cache permissions",
+            ],
         )
 
 
 # Additional tools from additional_tools.py
 
+
 @measure_performance
 def get_template_details(
     template_name: str,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Get detailed information about a specific template.
 
@@ -2587,7 +2783,9 @@ def get_template_details(
             return create_error_response(
                 ImportError("Template functionality not available"),
                 ErrorCategory.TEMPLATE,
-                suggestions=["Install template support with: pip install mermaid-render[templates]"]
+                suggestions=[
+                    "Install template support with: pip install mermaid-render[templates]"
+                ],
             )
 
         # Get template details
@@ -2603,13 +2801,17 @@ def get_template_details(
                 ValueError(f"Template '{template_name}' not found"),
                 ErrorCategory.TEMPLATE,
                 context={"requested_template": template_name},
-                suggestions=["Check template name spelling", "Use list_available_templates to see available templates"]
+                suggestions=[
+                    "Check template name spelling",
+                    "Use list_available_templates to see available templates",
+                ],
             )
 
         # Get template examples if available
         examples = []
         try:
             from ..templates.utils import get_template_examples
+
             examples = get_template_examples(template_name, template_manager)
         except Exception as e:
             logger.warning(f"Could not load template examples: {e}")
@@ -2626,33 +2828,36 @@ def get_template_details(
             "version": template.version,
             "author": template.author,
             "tags": template.tags or [],
-            "created_at": template.created_at.isoformat() if template.created_at else None,
-            "updated_at": template.updated_at.isoformat() if template.updated_at else None,
+            "created_at": (
+                template.created_at.isoformat() if template.created_at else None
+            ),
+            "updated_at": (
+                template.updated_at.isoformat() if template.updated_at else None
+            ),
             "examples": examples,
             "usage_instructions": _generate_template_usage_instructions(template),
-            "parameter_schema": _extract_parameter_schema(template.parameters)
+            "parameter_schema": _extract_parameter_schema(template.parameters),
         }
 
         # Enhanced metadata
         metadata = {
-            "template_source": "custom" if hasattr(template, 'id') and template.id.startswith('custom') else "builtin",
+            "template_source": (
+                "custom"
+                if hasattr(template, "id") and template.id.startswith("custom")
+                else "builtin"
+            ),
             "parameter_count": len(template.parameters),
             "example_count": len(examples),
             "complexity_level": _assess_template_complexity(template),
-            "last_accessed": __import__("datetime").datetime.now().isoformat()
+            "last_accessed": __import__("datetime").datetime.now().isoformat(),
         }
 
-        return create_success_response(
-            data=template_data,
-            metadata=metadata
-        )
+        return create_success_response(data=template_data, metadata=metadata)
 
     except Exception as e:
         logger.error(f"Error getting template details: {e}")
         return create_error_response(
-            e,
-            ErrorCategory.TEMPLATE,
-            context={"template_name": template_name}
+            e, ErrorCategory.TEMPLATE, context={"template_name": template_name}
         )
 
 
@@ -2661,11 +2866,11 @@ def create_custom_template(
     name: str,
     diagram_type: str,
     template_content: str,
-    parameters: Dict[str, Any],
+    parameters: dict[str, Any],
     description: str = "",
-    author: Optional[str] = None,
-    tags: Optional[List[str]] = None,
-) -> Dict[str, Any]:
+    author: str | None = None,
+    tags: list[str] | None = None,
+) -> dict[str, Any]:
     """
     Create a new custom template with validation.
 
@@ -2702,7 +2907,9 @@ def create_custom_template(
             return create_error_response(
                 ImportError("Template functionality not available"),
                 ErrorCategory.TEMPLATE,
-                suggestions=["Install template support with: pip install mermaid-render[templates]"]
+                suggestions=[
+                    "Install template support with: pip install mermaid-render[templates]"
+                ],
             )
 
         # Validate template content
@@ -2710,7 +2917,9 @@ def create_custom_template(
             return create_error_response(
                 ValueError("Template content cannot be empty"),
                 ErrorCategory.VALIDATION,
-                suggestions=["Provide valid Jinja2 template content with Mermaid syntax"]
+                suggestions=[
+                    "Provide valid Jinja2 template content with Mermaid syntax"
+                ],
             )
 
         # Create template
@@ -2722,7 +2931,7 @@ def create_custom_template(
             parameters=parameters,
             description=description,
             author=author,
-            tags=tags or []
+            tags=tags or [],
         )
 
         # Prepare response data
@@ -2736,7 +2945,7 @@ def create_custom_template(
             "tags": template.tags,
             "created_at": template.created_at.isoformat(),
             "validation_status": "passed",
-            "usage_example": _generate_template_usage_example(template)
+            "usage_example": _generate_template_usage_example(template),
         }
 
         # Enhanced metadata
@@ -2745,13 +2954,10 @@ def create_custom_template(
             "parameter_count": len(parameters),
             "template_size_bytes": len(template_content),
             "complexity_score": _assess_template_complexity(template),
-            "validation_passed": True
+            "validation_passed": True,
         }
 
-        return create_success_response(
-            data=template_data,
-            metadata=metadata
-        )
+        return create_success_response(data=template_data, metadata=metadata)
 
     except Exception as e:
         logger.error(f"Error creating custom template: {e}")
@@ -2761,17 +2967,21 @@ def create_custom_template(
             context={
                 "template_name": name,
                 "diagram_type": diagram_type,
-                "content_length": len(template_content) if template_content else 0
+                "content_length": len(template_content) if template_content else 0,
             },
-            suggestions=["Check template syntax", "Verify parameter definitions", "Ensure diagram type is valid"]
+            suggestions=[
+                "Check template syntax",
+                "Verify parameter definitions",
+                "Ensure diagram type is valid",
+            ],
         )
 
 
 @measure_performance
 def list_diagram_types(
-    diagram_type: Optional[str] = None,
+    diagram_type: str | None = None,
     include_examples: bool = True,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     List all supported diagram types with descriptions and capabilities.
 
@@ -2793,39 +3003,75 @@ def list_diagram_types(
     """
     try:
         # Validate parameters
-        params = DiagramTypeParams(diagram_type=diagram_type, include_examples=include_examples)
+        params = DiagramTypeParams(
+            diagram_type=diagram_type, include_examples=include_examples
+        )
 
         # Define comprehensive diagram type information
         diagram_types = {
             "flowchart": {
                 "name": "Flowchart",
                 "description": "Process flow diagrams showing steps, decisions, and connections",
-                "syntax_start": ["flowchart TD", "flowchart LR", "graph TD", "graph LR"],
-                "use_cases": ["Process documentation", "Decision trees", "Workflow visualization"],
+                "syntax_start": [
+                    "flowchart TD",
+                    "flowchart LR",
+                    "graph TD",
+                    "graph LR",
+                ],
+                "use_cases": [
+                    "Process documentation",
+                    "Decision trees",
+                    "Workflow visualization",
+                ],
                 "complexity": "simple",
-                "node_types": ["rectangles", "diamonds", "circles", "rounded rectangles"],
+                "node_types": [
+                    "rectangles",
+                    "diamonds",
+                    "circles",
+                    "rounded rectangles",
+                ],
                 "supports_subgraphs": True,
-                "supports_styling": True
+                "supports_styling": True,
             },
             "sequence": {
                 "name": "Sequence Diagram",
                 "description": "Interaction diagrams showing message exchanges between participants",
                 "syntax_start": ["sequenceDiagram"],
-                "use_cases": ["API interactions", "System communications", "Protocol documentation"],
+                "use_cases": [
+                    "API interactions",
+                    "System communications",
+                    "Protocol documentation",
+                ],
                 "complexity": "medium",
-                "features": ["participants", "messages", "activation boxes", "notes", "loops"],
+                "features": [
+                    "participants",
+                    "messages",
+                    "activation boxes",
+                    "notes",
+                    "loops",
+                ],
                 "supports_subgraphs": False,
-                "supports_styling": True
+                "supports_styling": True,
             },
             "class": {
                 "name": "Class Diagram",
                 "description": "UML class diagrams showing classes, attributes, methods, and relationships",
                 "syntax_start": ["classDiagram"],
-                "use_cases": ["Software architecture", "Object modeling", "System design"],
+                "use_cases": [
+                    "Software architecture",
+                    "Object modeling",
+                    "System design",
+                ],
                 "complexity": "complex",
-                "features": ["classes", "attributes", "methods", "relationships", "interfaces"],
+                "features": [
+                    "classes",
+                    "attributes",
+                    "methods",
+                    "relationships",
+                    "interfaces",
+                ],
                 "supports_subgraphs": False,
-                "supports_styling": True
+                "supports_styling": True,
             },
             "state": {
                 "name": "State Diagram",
@@ -2833,39 +3079,56 @@ def list_diagram_types(
                 "syntax_start": ["stateDiagram", "stateDiagram-v2"],
                 "use_cases": ["State machines", "Workflow states", "System behavior"],
                 "complexity": "medium",
-                "features": ["states", "transitions", "composite states", "choice points"],
+                "features": [
+                    "states",
+                    "transitions",
+                    "composite states",
+                    "choice points",
+                ],
                 "supports_subgraphs": True,
-                "supports_styling": True
+                "supports_styling": True,
             },
             "er": {
                 "name": "Entity Relationship Diagram",
                 "description": "Database entity relationship diagrams",
                 "syntax_start": ["erDiagram"],
-                "use_cases": ["Database design", "Data modeling", "Schema documentation"],
+                "use_cases": [
+                    "Database design",
+                    "Data modeling",
+                    "Schema documentation",
+                ],
                 "complexity": "medium",
                 "features": ["entities", "attributes", "relationships", "cardinality"],
                 "supports_subgraphs": False,
-                "supports_styling": True
+                "supports_styling": True,
             },
             "journey": {
                 "name": "User Journey",
                 "description": "User journey mapping diagrams",
                 "syntax_start": ["journey"],
-                "use_cases": ["User experience design", "Customer journey mapping", "Process analysis"],
+                "use_cases": [
+                    "User experience design",
+                    "Customer journey mapping",
+                    "Process analysis",
+                ],
                 "complexity": "simple",
                 "features": ["sections", "tasks", "actors", "satisfaction scores"],
                 "supports_subgraphs": False,
-                "supports_styling": True
+                "supports_styling": True,
             },
             "gantt": {
                 "name": "Gantt Chart",
                 "description": "Project timeline and task scheduling diagrams",
                 "syntax_start": ["gantt"],
-                "use_cases": ["Project management", "Timeline visualization", "Task scheduling"],
+                "use_cases": [
+                    "Project management",
+                    "Timeline visualization",
+                    "Task scheduling",
+                ],
                 "complexity": "medium",
                 "features": ["tasks", "dependencies", "milestones", "sections"],
                 "supports_subgraphs": False,
-                "supports_styling": True
+                "supports_styling": True,
             },
             "pie": {
                 "name": "Pie Chart",
@@ -2875,50 +3138,66 @@ def list_diagram_types(
                 "complexity": "simple",
                 "features": ["data values", "labels", "percentages"],
                 "supports_subgraphs": False,
-                "supports_styling": True
+                "supports_styling": True,
             },
             "gitgraph": {
                 "name": "Git Graph",
                 "description": "Git branching and merging visualization",
                 "syntax_start": ["gitgraph"],
-                "use_cases": ["Git workflow documentation", "Branch visualization", "Version control"],
+                "use_cases": [
+                    "Git workflow documentation",
+                    "Branch visualization",
+                    "Version control",
+                ],
                 "complexity": "medium",
                 "features": ["branches", "commits", "merges", "tags"],
                 "supports_subgraphs": False,
-                "supports_styling": True
+                "supports_styling": True,
             },
             "mindmap": {
                 "name": "Mind Map",
                 "description": "Hierarchical mind maps for idea organization",
                 "syntax_start": ["mindmap"],
-                "use_cases": ["Brainstorming", "Idea organization", "Knowledge mapping"],
+                "use_cases": [
+                    "Brainstorming",
+                    "Idea organization",
+                    "Knowledge mapping",
+                ],
                 "complexity": "simple",
                 "features": ["root node", "branches", "sub-branches", "icons"],
                 "supports_subgraphs": False,
-                "supports_styling": True
+                "supports_styling": True,
             },
             "timeline": {
                 "name": "Timeline",
                 "description": "Timeline diagrams for chronological events",
                 "syntax_start": ["timeline"],
-                "use_cases": ["Historical timelines", "Project milestones", "Event sequences"],
+                "use_cases": [
+                    "Historical timelines",
+                    "Project milestones",
+                    "Event sequences",
+                ],
                 "complexity": "simple",
                 "features": ["periods", "events", "sections"],
                 "supports_subgraphs": False,
-                "supports_styling": True
-            }
+                "supports_styling": True,
+            },
         }
 
         # Filter by specific diagram type if requested
         if params.diagram_type:
             if params.diagram_type.value in diagram_types:
-                filtered_types = {params.diagram_type.value: diagram_types[params.diagram_type.value]}
+                filtered_types = {
+                    params.diagram_type.value: diagram_types[params.diagram_type.value]
+                }
             else:
                 return create_error_response(
-                    ValueError(f"Diagram type '{params.diagram_type.value}' not supported"),
+                    ValueError(
+                        f"Diagram type '{params.diagram_type.value}' not supported"
+                    ),
                     ErrorCategory.VALIDATION,
                     context={"supported_types": list(diagram_types.keys())},
-                    suggestions=[f"Use one of: {', '.join(diagram_types.keys())}"]
+                    suggestions=[f"Use one of: {', '.join(diagram_types.keys())}"],
                 )
         else:
             filtered_types = diagram_types
@@ -2933,14 +3212,44 @@ def list_diagram_types(
             "total_types": len(diagram_types),
             "filtered_count": len(filtered_types),
             "complexity_distribution": {
-                "simple": len([t for t in diagram_types.values() if t.get("complexity") == "simple"]),
-                "medium": len([t for t in diagram_types.values() if t.get("complexity") == "medium"]),
-                "complex": len([t for t in diagram_types.values() if t.get("complexity") == "complex"])
+                "simple": len(
+                    [
+                        t
+                        for t in diagram_types.values()
+                        if t.get("complexity") == "simple"
+                    ]
+                ),
+                "medium": len(
+                    [
+                        t
+                        for t in diagram_types.values()
+                        if t.get("complexity") == "medium"
+                    ]
+                ),
+                "complex": len(
+                    [
+                        t
+                        for t in diagram_types.values()
+                        if t.get("complexity") == "complex"
+                    ]
+                ),
             },
             "features_summary": {
-                "supports_subgraphs": len([t for t in diagram_types.values() if t.get("supports_subgraphs", False)]),
-                "supports_styling": len([t for t in diagram_types.values() if t.get("supports_styling", False)])
-            }
+                "supports_subgraphs": len(
+                    [
+                        t
+                        for t in diagram_types.values()
+                        if t.get("supports_subgraphs", False)
+                    ]
+                ),
+                "supports_styling": len(
+                    [
+                        t
+                        for t in diagram_types.values()
+                        if t.get("supports_styling", False)
+                    ]
+                ),
+            },
         }
 
         return create_success_response(
@@ -2949,28 +3258,29 @@ def list_diagram_types(
                 "summary": {
                     "total_supported": len(filtered_types),
                     "by_complexity": {
-                        complexity: [name for name, info in filtered_types.items()
-                                   if info.get("complexity") == complexity]
+                        complexity: [
+                            name
+                            for name, info in filtered_types.items()
+                            if info.get("complexity") == complexity
+                        ]
                         for complexity in ["simple", "medium", "complex"]
-                    }
-                }
+                    },
+                },
             },
-            metadata=metadata
+            metadata=metadata,
         )
 
     except Exception as e:
         logger.error(f"Error listing diagram types: {e}")
         return create_error_response(
-            e,
-            ErrorCategory.SYSTEM,
-            suggestions=["Check system configuration"]
+            e, ErrorCategory.SYSTEM, suggestions=["Check system configuration"]
         )
 
 
 @measure_performance
 def get_diagram_examples(
-    diagram_type: Optional[str] = None,
-) -> Dict[str, Any]:
+    diagram_type: str | None = None,
+) -> dict[str, Any]:
     """
     Get example code and documentation for specific diagram types.
 
@@ -3002,39 +3312,52 @@ def get_diagram_examples(
                 "example_code": example_code,
                 "best_practices": best_practices,
                 "syntax_guide": _get_syntax_guide(params.diagram_type.value),
-                "common_patterns": _get_common_patterns(params.diagram_type.value)
+                "common_patterns": _get_common_patterns(params.diagram_type.value),
             }
         else:
             # Get examples for all diagram types
-            all_examples: Dict[str, Dict[str, str]] = {}
-            for dtype in ["flowchart", "sequence", "class", "state", "er", "journey", "gantt", "pie", "gitgraph", "mindmap", "timeline"]:
+            all_examples: dict[str, dict[str, str]] = {}
+            for dtype in [
+                "flowchart",
+                "sequence",
+                "class",
+                "state",
+                "er",
+                "journey",
+                "gantt",
+                "pie",
+                "gitgraph",
+                "mindmap",
+                "timeline",
+            ]:
                 all_examples[dtype] = {
                     "example_code": _get_diagram_example(dtype),
-                    "description": f"Example {dtype} diagram"
+                    "description": f"Example {dtype} diagram",
                 }
 
             example_data = {
                 "all_examples": all_examples,  # type: ignore[dict-item]
-                "quick_reference": _get_quick_reference_guide()
+                "quick_reference": _get_quick_reference_guide(),
             }
 
         # Enhanced metadata
         metadata = {
-            "examples_provided": 1 if params.diagram_type else len(all_examples) if 'all_examples' in locals() else 0,
+            "examples_provided": (
+                1
+                if params.diagram_type
+                else len(all_examples)
+                if "all_examples" in locals()
+                else 0
+            ),
             "includes_best_practices": bool(params.diagram_type),
             "includes_syntax_guide": bool(params.diagram_type),
-            "last_updated": "2024-01-01"  # Would be dynamic in real implementation
+            "last_updated": "2024-01-01",  # Would be dynamic in real implementation
         }
 
-        return create_success_response(
-            data=example_data,
-            metadata=metadata
-        )
+        return create_success_response(data=example_data, metadata=metadata)
 
     except Exception as e:
         logger.error(f"Error getting diagram examples: {e}")
         return create_error_response(
-            e,
-            ErrorCategory.SYSTEM,
-            suggestions=["Check diagram type is valid"]
+            e, ErrorCategory.SYSTEM, suggestions=["Check diagram type is valid"]
         )

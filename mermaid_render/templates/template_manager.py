@@ -6,17 +6,25 @@ template storage, validation, generation, and lifecycle management.
 """
 
 import json
+import logging
 import uuid
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
-from jinja2 import BaseLoader, Environment, TemplateError  # type: ignore[import-not-found]
+from jinja2 import (
+    BaseLoader,
+    Environment,
+    TemplateError,
+)
 
 from ..exceptions import TemplateError as MermaidTemplateError
 from ..exceptions import ValidationError
 from .schema import validate_template
+
+# Configure logger for template management
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -33,19 +41,19 @@ class Template:
     description: str
     diagram_type: str
     template_content: str
-    parameters: Dict[str, Any]
-    metadata: Dict[str, Any]
+    parameters: dict[str, Any]
+    metadata: dict[str, Any]
     created_at: datetime
     updated_at: datetime
     version: str = "1.0.0"
-    author: Optional[str] = None
-    tags: Optional[List[str]] = None
+    author: str | None = None
+    tags: list[str] | None = None
 
     def __post_init__(self) -> None:
         if self.tags is None:
             self.tags = []
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert template to dictionary for serialization."""
         data = asdict(self)
         data["created_at"] = self.created_at.isoformat()
@@ -53,7 +61,7 @@ class Template:
         return data
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "Template":
+    def from_dict(cls, data: dict[str, Any]) -> "Template":
         """Create template from dictionary."""
         data = data.copy()
         data["created_at"] = datetime.fromisoformat(data["created_at"])
@@ -89,7 +97,7 @@ class TemplateManager:
 
     def __init__(
         self,
-        templates_dir: Optional[Path] = None,
+        templates_dir: Path | None = None,
         auto_load_builtin: bool = True,
         auto_load_community: bool = False,
     ):
@@ -104,7 +112,7 @@ class TemplateManager:
         self.templates_dir = templates_dir or Path.home() / ".mermaid_render_templates"
         self.templates_dir.mkdir(parents=True, exist_ok=True)
 
-        self._templates: Dict[str, Template] = {}
+        self._templates: dict[str, Template] = {}
         self._jinja_env = Environment(
             loader=BaseLoader(),
             autoescape=False,
@@ -126,11 +134,11 @@ class TemplateManager:
         name: str,
         diagram_type: str,
         template_content: str,
-        parameters: Dict[str, Any],
+        parameters: dict[str, Any],
         description: str = "",
-        author: Optional[str] = None,
-        tags: Optional[List[str]] = None,
-        metadata: Optional[Dict[str, Any]] = None,
+        author: str | None = None,
+        tags: list[str] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> Template:
         """
         Create a new template.
@@ -177,11 +185,11 @@ class TemplateManager:
 
         return template
 
-    def get_template(self, template_id: str) -> Optional[Template]:
+    def get_template(self, template_id: str) -> Template | None:
         """Get template by ID."""
         return self._templates.get(template_id)
 
-    def get_template_by_name(self, name: str) -> Optional[Template]:
+    def get_template_by_name(self, name: str) -> Template | None:
         """Get template by name."""
         for template in self._templates.values():
             if template.name == name:
@@ -190,10 +198,10 @@ class TemplateManager:
 
     def list_templates(
         self,
-        diagram_type: Optional[str] = None,
-        tags: Optional[List[str]] = None,
-        author: Optional[str] = None,
-    ) -> List[Template]:
+        diagram_type: str | None = None,
+        tags: list[str] | None = None,
+        author: str | None = None,
+    ) -> list[Template]:
         """
         List templates with optional filtering.
 
@@ -211,8 +219,9 @@ class TemplateManager:
             templates = [t for t in templates if t.diagram_type == diagram_type]
 
         if tags:
-            templates = [t for t in templates if t.tags and any(
-                tag in t.tags for tag in tags)]
+            templates = [
+                t for t in templates if t.tags and any(tag in t.tags for tag in tags)
+            ]
 
         if author:
             templates = [t for t in templates if t.author == author]
@@ -222,7 +231,7 @@ class TemplateManager:
     def generate(
         self,
         template_id: str,
-        parameters: Dict[str, Any],
+        parameters: dict[str, Any],
         validate_params: bool = True,
     ) -> str:
         """
@@ -262,18 +271,90 @@ class TemplateManager:
             raise MermaidTemplateError(f"Template rendering failed: {str(e)}") from e
 
     def delete_template(self, template_id: str) -> bool:
-        """Delete a template."""
-        if template_id in self._templates:
-            # template = self._templates[template_id]  # TODO: Use for logging/validation
+        """
+        Delete a template.
+
+        Args:
+            template_id: Unique identifier of the template to delete
+
+        Returns:
+            True if template was deleted, False if template not found
+
+        Raises:
+            MermaidTemplateError: If template deletion fails
+        """
+        if template_id not in self._templates:
+            logger.warning(f"Attempted to delete non-existent template: {template_id}")
+            return False
+
+        # Get template for logging and validation
+        template = self._templates[template_id]
+
+        # Log deletion attempt
+        logger.info(
+            f"Deleting template: {template_id} "
+            f"(name: {template.name}, type: {template.diagram_type})"
+        )
+
+        # Validate: Check if other templates depend on this one
+        dependent_templates = self._check_template_dependencies(template_id)
+        if dependent_templates:
+            logger.warning(
+                f"Template {template_id} has {len(dependent_templates)} "
+                f"dependent template(s): {', '.join(dependent_templates)}"
+            )
+            # Note: We log but don't prevent deletion - let user decide
+
+        try:
+            # Remove from memory
             del self._templates[template_id]
 
             # Remove file if it exists
             template_file = self.templates_dir / f"{template_id}.json"
             if template_file.exists():
                 template_file.unlink()
+                logger.debug(f"Deleted template file: {template_file}")
 
+            logger.info(f"Successfully deleted template: {template_id}")
             return True
-        return False
+
+        except Exception as e:
+            # Restore template if deletion failed
+            self._templates[template_id] = template
+            error_msg = f"Failed to delete template {template_id}: {str(e)}"
+            logger.error(error_msg)
+            raise MermaidTemplateError(error_msg) from e
+
+    def _check_template_dependencies(self, template_id: str) -> list[str]:
+        """
+        Check if other templates depend on the given template.
+
+        Args:
+            template_id: Template ID to check for dependencies
+
+        Returns:
+            List of template IDs that depend on this template
+        """
+        dependent_templates = []
+
+        # Check if template is referenced in other templates' content
+        for tid, template in self._templates.items():
+            if tid == template_id:
+                continue
+
+            # Check if template content references this template
+            # (e.g., through inheritance or composition)
+            content = template.template_content.lower()
+            if template_id.lower() in content:
+                dependent_templates.append(tid)
+
+            # Check metadata for explicit dependencies
+            if "dependencies" in template.metadata:
+                deps = template.metadata["dependencies"]
+                if isinstance(deps, list) and template_id in deps:
+                    dependent_templates.append(tid)
+
+        return dependent_templates
 
     def export_template(self, template_id: str, output_path: Path) -> None:
         """Export template to file."""
@@ -301,16 +382,16 @@ class TemplateManager:
         return template
 
     def _validate_parameters(
-        self, template: Template, parameters: Dict[str, Any]
+        self, template: Template, parameters: dict[str, Any]
     ) -> None:
         """Validate parameters against template schema."""
-        # This is a simplified validation - in a full implementation,
-        # you'd use jsonschema or similar for comprehensive validation
-        required_params = template.parameters.get("required", [])
+        from .schema import validate_template_parameters
 
-        for param in required_params:
-            if param not in parameters:
-                raise MermaidTemplateError(f"Missing required parameter: {param}")
+        errors = validate_template_parameters(template.parameters, parameters)
+        if errors:
+            raise MermaidTemplateError(
+                f"Parameter validation failed: {'; '.join(errors)}"
+            )
 
     def _save_template(self, template: Template) -> None:
         """Save template to file."""

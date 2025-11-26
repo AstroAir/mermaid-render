@@ -6,11 +6,12 @@ that provide reusable templates for diagram generation and analysis.
 """
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 try:
-    from fastmcp import FastMCP, Context
+    from fastmcp import Context, FastMCP
     from fastmcp.prompts.prompt import Message, PromptMessage, TextContent
+
     _FASTMCP_AVAILABLE = True
 except ImportError:
     # Allow importing for testing without FastMCP
@@ -27,7 +28,7 @@ logger = logging.getLogger(__name__)
 def register_all_prompts(mcp: Any) -> None:
     """
     Register all MCP prompts with the FastMCP server.
-    
+
     Args:
         mcp: FastMCP server instance
     """
@@ -36,65 +37,65 @@ def register_all_prompts(mcp: Any) -> None:
             "FastMCP is required for MCP server functionality. "
             "Install it with: pip install fastmcp"
         )
-    
+
     # Diagram generation prompts
     mcp.prompt(
         name="generate_flowchart",
         description="Generate a flowchart diagram from a process description",
-        tags={"generation", "flowchart"}
+        tags={"generation", "flowchart"},
     )(generate_flowchart_prompt)
-    
+
     mcp.prompt(
         name="generate_sequence",
         description="Generate a sequence diagram from an interaction description",
-        tags={"generation", "sequence"}
+        tags={"generation", "sequence"},
     )(generate_sequence_prompt)
-    
+
     mcp.prompt(
         name="generate_class_diagram",
         description="Generate a class diagram from a system description",
-        tags={"generation", "class"}
+        tags={"generation", "class"},
     )(generate_class_diagram_prompt)
-    
+
     # Analysis prompts
     mcp.prompt(
         name="analyze_diagram_quality",
         description="Analyze a diagram for quality and best practices",
-        tags={"analysis", "quality"}
+        tags={"analysis", "quality"},
     )(analyze_diagram_quality_prompt)
-    
+
     mcp.prompt(
         name="suggest_improvements",
         description="Suggest improvements for a diagram",
-        tags={"analysis", "suggestions"}
+        tags={"analysis", "suggestions"},
     )(suggest_improvements_prompt)
-    
+
     # Optimization prompts
     mcp.prompt(
         name="optimize_layout",
         description="Optimize diagram layout for better readability",
-        tags={"optimization", "layout"}
+        tags={"optimization", "layout"},
     )(optimize_layout_prompt)
-    
+
     mcp.prompt(
         name="simplify_diagram",
         description="Simplify a complex diagram while preserving key information",
-        tags={"optimization", "simplification"}
+        tags={"optimization", "simplification"},
     )(simplify_diagram_prompt)
-    
+
     # Documentation prompts
     mcp.prompt(
         name="explain_diagram",
         description="Generate an explanation of what a diagram represents",
-        tags={"documentation", "explanation"}
+        tags={"documentation", "explanation"},
     )(explain_diagram_prompt)
-    
+
     mcp.prompt(
         name="create_diagram_documentation",
         description="Create comprehensive documentation for a diagram",
-        tags={"documentation", "comprehensive"}
+        tags={"documentation", "comprehensive"},
     )(create_diagram_documentation_prompt)
-    
+
     logger.info("Registered all MCP prompts")
 
 
@@ -102,17 +103,17 @@ def generate_flowchart_prompt(
     process_description: str,
     complexity_level: str = "medium",
     include_decision_points: bool = True,
-    ctx: Optional[Context] = None,
+    ctx: Context | None = None,
 ) -> str:
     """
     Generate a prompt for creating a flowchart diagram.
-    
+
     Args:
         process_description: Description of the process to diagram
         complexity_level: Complexity level (simple, medium, complex)
         include_decision_points: Whether to include decision points
         ctx: MCP context (optional)
-        
+
     Returns:
         Formatted prompt for flowchart generation
     """
@@ -122,13 +123,13 @@ def generate_flowchart_prompt(
 - Include decision points (diamond shapes) where the process branches
 - Use clear Yes/No or condition-based labels on decision branches
 - Ensure all decision paths lead to appropriate outcomes"""
-    
+
     complexity_guidance = {
         "simple": "Keep the flowchart simple with 3-7 main steps",
         "medium": "Include 5-12 steps with some decision points and parallel processes",
-        "complex": "Create a detailed flowchart with multiple decision points, parallel processes, and sub-processes"
+        "complex": "Create a detailed flowchart with multiple decision points, parallel processes, and sub-processes",
     }
-    
+
     prompt = f"""Create a Mermaid flowchart diagram for the following process:
 
 **Process Description:** {process_description}
@@ -145,36 +146,36 @@ def generate_flowchart_prompt(
 - Ensure the flow is logical and easy to follow
 
 Please generate only the Mermaid code without additional explanation."""
-    
+
     return prompt
 
 
 def generate_sequence_prompt(
     interaction_description: str,
-    participants: List[str],
+    participants: list[str],
     include_notes: bool = False,
-    ctx: Optional[Context] = None,
+    ctx: Context | None = None,
 ) -> str:
     """
     Generate a prompt for creating a sequence diagram.
-    
+
     Args:
         interaction_description: Description of the interactions
         participants: List of participants/actors
         include_notes: Whether to include explanatory notes
         ctx: MCP context (optional)
-        
+
     Returns:
         Formatted prompt for sequence diagram generation
     """
     participants_list = "\n".join([f"- {p}" for p in participants])
-    
+
     notes_guidance = ""
     if include_notes:
         notes_guidance = """
 - Add notes to explain complex interactions or important details
 - Use 'note over' or 'note left/right of' as appropriate"""
-    
+
     prompt = f"""Create a Mermaid sequence diagram for the following interaction:
 
 **Interaction Description:** {interaction_description}
@@ -195,7 +196,7 @@ def generate_sequence_prompt(
 - Use clear, descriptive message labels
 
 Please generate only the Mermaid code without additional explanation."""
-    
+
     return prompt
 
 
@@ -203,17 +204,17 @@ def generate_class_diagram_prompt(
     system_description: str,
     include_methods: bool = True,
     include_relationships: bool = True,
-    ctx: Optional[Context] = None,
+    ctx: Context | None = None,
 ) -> str:
     """
     Generate a prompt for creating a class diagram.
-    
+
     Args:
         system_description: Description of the system to model
         include_methods: Whether to include methods in classes
         include_relationships: Whether to show relationships between classes
         ctx: MCP context (optional)
-        
+
     Returns:
         Formatted prompt for class diagram generation
     """
@@ -222,7 +223,7 @@ def generate_class_diagram_prompt(
         methods_guidance = """
 - Include key methods for each class
 - Use appropriate visibility indicators: + (public), - (private), # (protected)"""
-    
+
     relationships_guidance = ""
     if include_relationships:
         relationships_guidance = """
@@ -232,7 +233,7 @@ def generate_class_diagram_prompt(
   - o-- for aggregation
   - --> for association
   - ..> for dependency"""
-    
+
     prompt = f"""Create a Mermaid class diagram for the following system:
 
 **System Description:** {system_description}
@@ -245,23 +246,23 @@ def generate_class_diagram_prompt(
 - Group related classes logically
 
 Please generate only the Mermaid code without additional explanation."""
-    
+
     return prompt
 
 
 def analyze_diagram_quality_prompt(
     diagram_code: str,
     diagram_type: str,
-    ctx: Optional[Context] = None,
+    ctx: Context | None = None,
 ) -> str:
     """
     Generate a prompt for analyzing diagram quality.
-    
+
     Args:
         diagram_code: The Mermaid diagram code to analyze
         diagram_type: Type of diagram (flowchart, sequence, class, etc.)
         ctx: MCP context (optional)
-        
+
     Returns:
         Formatted prompt for diagram quality analysis
     """
@@ -294,15 +295,15 @@ Please evaluate the diagram on the following criteria:
 - Missing connections or relationships
 
 Provide a detailed analysis with specific recommendations for improvement."""
-    
+
     return prompt
 
 
 def simplify_diagram_prompt(
     diagram_code: str,
     target_complexity: str = "simple",
-    preserve_elements: Optional[List[str]] = None,
-    ctx: Optional[Context] = None,
+    preserve_elements: list[str] | None = None,
+    ctx: Context | None = None,
 ) -> str:
     """
     Generate a prompt for simplifying a complex diagram.
@@ -324,7 +325,7 @@ def simplify_diagram_prompt(
 
     complexity_guidance = {
         "simple": "Reduce to 3-5 main elements, combine related steps, remove non-essential details",
-        "moderate": "Reduce to 5-8 main elements, group related processes, simplify complex relationships"
+        "moderate": "Reduce to 5-8 main elements, group related processes, simplify complex relationships",
     }
 
     prompt = f"""Simplify the following Mermaid diagram while preserving its core meaning:
@@ -351,7 +352,7 @@ The goal is to make the diagram easier to understand at a glance while retaining
 def explain_diagram_prompt(
     diagram_code: str,
     audience_level: str = "general",
-    ctx: Optional[Context] = None,
+    ctx: Context | None = None,
 ) -> str:
     """
     Generate a prompt for explaining what a diagram represents.
@@ -368,7 +369,7 @@ def explain_diagram_prompt(
         "beginner": "Use simple language, explain technical terms, provide context for concepts",
         "intermediate": "Use standard terminology, focus on key relationships and processes",
         "expert": "Use technical language, focus on implementation details and nuances",
-        "general": "Use accessible language, balance detail with clarity"
+        "general": "Use accessible language, balance detail with clarity",
     }
 
     prompt = f"""Explain what the following Mermaid diagram represents:
@@ -397,7 +398,7 @@ def create_diagram_documentation_prompt(
     diagram_code: str,
     diagram_title: str,
     context: str = "",
-    ctx: Optional[Context] = None,
+    ctx: Context | None = None,
 ) -> str:
     """
     Generate a prompt for creating comprehensive diagram documentation.
@@ -442,22 +443,22 @@ Format the documentation in a clear, professional manner suitable for technical 
 
 def suggest_improvements_prompt(
     diagram_code: str,
-    current_issues: List[str],
-    ctx: Optional[Context] = None,
+    current_issues: list[str],
+    ctx: Context | None = None,
 ) -> str:
     """
     Generate a prompt for suggesting diagram improvements.
-    
+
     Args:
         diagram_code: The Mermaid diagram code
         current_issues: List of identified issues
         ctx: MCP context (optional)
-        
+
     Returns:
         Formatted prompt for improvement suggestions
     """
     issues_list = "\n".join([f"- {issue}" for issue in current_issues])
-    
+
     prompt = f"""Suggest specific improvements for the following Mermaid diagram:
 
 ```mermaid
@@ -475,28 +476,28 @@ Please provide:
 4. **Alternative Approaches:** If applicable, suggest alternative ways to represent the same information
 
 Focus on making the diagram clearer, more accurate, and easier to understand while maintaining its core purpose."""
-    
+
     return prompt
 
 
 def optimize_layout_prompt(
     diagram_code: str,
-    optimization_goals: List[str],
-    ctx: Optional[Context] = None,
+    optimization_goals: list[str],
+    ctx: Context | None = None,
 ) -> str:
     """
     Generate a prompt for optimizing diagram layout.
-    
+
     Args:
         diagram_code: The Mermaid diagram code
         optimization_goals: List of optimization goals
         ctx: MCP context (optional)
-        
+
     Returns:
         Formatted prompt for layout optimization
     """
     goals_list = "\n".join([f"- {goal}" for goal in optimization_goals])
-    
+
     prompt = f"""Optimize the layout of the following Mermaid diagram:
 
 ```mermaid
@@ -514,5 +515,5 @@ Please provide:
 4. **Visual Improvements:** Describe how the changes improve visual clarity
 
 Focus on creating a more visually appealing and easier to read diagram while preserving all information."""
-    
+
     return prompt

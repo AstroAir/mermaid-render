@@ -5,7 +5,7 @@ This module provides PDF rendering functionality by converting SVG to PDF.
 """
 
 import re
-from typing import Any, Dict, Optional
+from typing import Any
 
 from ..exceptions import RenderingError, UnsupportedFormatError
 from .svg_renderer import SVGRenderer
@@ -21,7 +21,7 @@ class PDFRenderer:
 
     def __init__(
         self,
-        svg_renderer: Optional[SVGRenderer] = None,
+        svg_renderer: SVGRenderer | None = None,
         page_size: str = "A4",
         orientation: str = "portrait",
     ) -> None:
@@ -40,8 +40,8 @@ class PDFRenderer:
     def render(
         self,
         mermaid_code: str,
-        theme: Optional[str] = None,
-        config: Optional[Dict[str, Any]] = None,
+        theme: str | None = None,
+        config: dict[str, Any] | None = None,
     ) -> bytes:
         """
         Render Mermaid code to PDF.
@@ -183,7 +183,7 @@ class PDFRenderer:
             from io import BytesIO
             from tempfile import NamedTemporaryFile
 
-            from reportlab.graphics import renderPDF  # type: ignore[import-untyped]
+            from reportlab.graphics import renderPDF
 
             # svglib converts SVG to a ReportLab drawing
             from svglib.svglib import svg2rlg
@@ -212,8 +212,8 @@ class PDFRenderer:
         self,
         mermaid_code: str,
         output_path: str,
-        theme: Optional[str] = None,
-        config: Optional[Dict[str, Any]] = None,
+        theme: str | None = None,
+        config: dict[str, Any] | None = None,
     ) -> None:
         """
         Render Mermaid code to PDF file.

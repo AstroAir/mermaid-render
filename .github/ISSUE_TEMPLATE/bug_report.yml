@@ -64,7 +64,7 @@ body:
       render: python
       placeholder: |
         from mermaid_render import MermaidRenderer
-        
+
         # Your code here
     validations:
       required: false

@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 # Import EnhancementResult and EnhancementType from analysis module
 from .analysis import EnhancementResult, EnhancementType
@@ -40,15 +40,15 @@ class Suggestion:
     description: str
     rationale: str
     implementation: str
-    example: Optional[str] = None
+    example: str | None = None
     confidence: float = 0.8
-    created_at: Optional[datetime] = None
+    created_at: datetime | None = None
 
     def __post_init__(self) -> None:
         if self.created_at is None:
             self.created_at = datetime.now()
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         # Map numeric priority back to string for API compatibility
         priority_map = {1: "low", 2: "medium", 3: "high", 4: "critical"}
         return {
@@ -75,10 +75,10 @@ class SuggestionEngine:
     def get_suggestions(
         self,
         diagram_code: str,
-        context: Optional[Dict[str, Any]] = None,
-        suggestion_types: Optional[List[SuggestionType]] = None,
-        priority_filter: Optional[SuggestionPriority] = None,
-    ) -> List[Suggestion]:
+        context: dict[str, Any] | None = None,
+        suggestion_types: list[SuggestionType] | None = None,
+        priority_filter: SuggestionPriority | None = None,
+    ) -> list[Suggestion]:
         """
         Get suggestions for improving a diagram.
 
@@ -123,8 +123,8 @@ class SuggestionEngine:
         return suggestions
 
     def suggest_improvements(
-        self, diagram_code: str, context: Optional[Dict[str, Any]] = None
-    ) -> List[Suggestion]:
+        self, diagram_code: str, context: dict[str, Any] | None = None
+    ) -> list[Suggestion]:
         """
         Get improvement suggestions for a diagram.
 
@@ -138,8 +138,8 @@ class SuggestionEngine:
         return self.get_suggestions(diagram_code, context)
 
     def suggest_styling(
-        self, diagram_code: str, context: Optional[Dict[str, Any]] = None
-    ) -> List[Suggestion]:
+        self, diagram_code: str, context: dict[str, Any] | None = None
+    ) -> list[Suggestion]:
         """
         Get styling suggestions for a diagram.
 
@@ -154,8 +154,8 @@ class SuggestionEngine:
         return [s for s in all_suggestions if s.suggestion_type == SuggestionType.STYLE]
 
     def suggest_layout(
-        self, diagram_code: str, context: Optional[Dict[str, Any]] = None
-    ) -> List[Suggestion]:
+        self, diagram_code: str, context: dict[str, Any] | None = None
+    ) -> list[Suggestion]:
         """
         Get layout suggestions for a diagram.
 
@@ -175,8 +175,8 @@ class SuggestionEngine:
         self,
         diagram_code: str,
         suggestion_type: SuggestionType,
-        context: Optional[Dict[str, Any]] = None,
-    ) -> List[Suggestion]:
+        context: dict[str, Any] | None = None,
+    ) -> list[Suggestion]:
         """Get suggestions of a specific type."""
         all_suggestions = self.get_suggestions(diagram_code, context)
         return [s for s in all_suggestions if s.suggestion_type == suggestion_type]
@@ -184,8 +184,8 @@ class SuggestionEngine:
     def get_high_priority_suggestions(
         self,
         diagram_code: str,
-        context: Optional[Dict[str, Any]] = None,
-    ) -> List[Suggestion]:
+        context: dict[str, Any] | None = None,
+    ) -> list[Suggestion]:
         """Get high priority suggestions only."""
         all_suggestions = self.get_suggestions(diagram_code, context)
         return [
@@ -244,7 +244,7 @@ class SuggestionEngine:
         enhanced = enhanced.replace("#00ff00", "#4caf50")  # Softer green
         return enhanced
 
-    def _analyze_diagram(self, diagram_code: str) -> Dict[str, Any]:
+    def _analyze_diagram(self, diagram_code: str) -> dict[str, Any]:
         """Analyze diagram for suggestion generation."""
         lines = diagram_code.split("\n")
 
@@ -263,7 +263,7 @@ class SuggestionEngine:
         return analysis
 
     def _create_suggestion(
-        self, rule: Dict[str, Any], diagram_code: str, analysis: Dict[str, Any]
+        self, rule: dict[str, Any], diagram_code: str, analysis: dict[str, Any]
     ) -> Suggestion:
         """Create a suggestion from a rule."""
         self.suggestion_counter += 1
@@ -313,7 +313,7 @@ class SuggestionEngine:
         else:
             return "complex"
 
-    def _load_suggestion_rules(self) -> List[Dict[str, Any]]:
+    def _load_suggestion_rules(self) -> list[dict[str, Any]]:
         """Load suggestion rules."""
         return [
             {

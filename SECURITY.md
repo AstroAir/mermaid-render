@@ -70,7 +70,7 @@ def safe_render(user_diagram_code):
         result = validate_mermaid_syntax(user_diagram_code)
         if not result.is_valid:
             raise ValidationError(f"Invalid diagram: {result.errors}")
-        
+
         # Proceed with rendering only if validation passes
         return render_diagram(user_diagram_code)
     except ValidationError as e:

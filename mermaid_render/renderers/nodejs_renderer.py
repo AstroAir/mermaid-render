@@ -6,12 +6,11 @@ via Node.js subprocess for local, high-quality diagram rendering.
 """
 
 import json
-import shutil
 import subprocess
 import tempfile
 import time
 from pathlib import Path
-from typing import Any, Dict, Optional, Set, Union
+from typing import Any
 
 from .base import (
     BaseRenderer,
@@ -65,7 +64,6 @@ class NodeJSRenderer(BaseRenderer):
                 RendererCapability.THEME_SUPPORT,
                 RendererCapability.CUSTOM_CONFIG,
                 RendererCapability.LOCAL_RENDERING,
-                RendererCapability.PERFORMANCE_METRICS,
             },
             priority=RendererPriority.HIGH,
             version="1.0.0",
@@ -87,8 +85,8 @@ class NodeJSRenderer(BaseRenderer):
         self,
         mermaid_code: str,
         format: str,
-        theme: Optional[str] = None,
-        config: Optional[Dict[str, Any]] = None,
+        theme: str | None = None,
+        config: dict[str, Any] | None = None,
         **options: Any,
     ) -> RenderResult:
         """
@@ -108,7 +106,8 @@ class NodeJSRenderer(BaseRenderer):
 
         if format.lower() not in {"svg", "png", "pdf"}:
             raise UnsupportedFormatError(
-                f"Node.js renderer doesn't support format '{format}'")
+                f"Node.js renderer doesn't support format '{format}'"
+            )
 
         start_time = time.time()
 
@@ -131,9 +130,12 @@ class NodeJSRenderer(BaseRenderer):
                 # Build mmdc command
                 cmd = [
                     self.mmdc_path,
-                    "-i", str(input_file),
-                    "-o", str(output_file),
-                    "-t", theme or "default",
+                    "-i",
+                    str(input_file),
+                    "-o",
+                    str(output_file),
+                    "-t",
+                    theme or "default",
                 ]
 
                 # Add configuration file if created
@@ -171,7 +173,7 @@ class NodeJSRenderer(BaseRenderer):
                     raise RenderingError(f"Output file not created: {output_file}")
 
                 if format.lower() == "svg":
-                    content: Union[str, bytes] = output_file.read_text(encoding="utf-8")
+                    content: str | bytes = output_file.read_text(encoding="utf-8")
                 else:
                     content = output_file.read_bytes()
 
@@ -219,10 +221,10 @@ class NodeJSRenderer(BaseRenderer):
 
     def _create_mermaid_config(
         self,
-        theme: Optional[str],
-        config: Optional[Dict[str, Any]],
-        options: Dict[str, Any],
-    ) -> Optional[Dict[str, Any]]:
+        theme: str | None,
+        config: dict[str, Any] | None,
+        options: dict[str, Any],
+    ) -> dict[str, Any] | None:
         """Create Mermaid configuration for CLI."""
         mermaid_config = {}
 
@@ -244,15 +246,17 @@ class NodeJSRenderer(BaseRenderer):
         """Validate that Node.js and mmdc are available."""
         # Check Node.js
         try:
-            subprocess.run([self.node_path, "--version"],
-                           capture_output=True, check=True)
+            subprocess.run(
+                [self.node_path, "--version"], capture_output=True, check=True
+            )
         except (subprocess.CalledProcessError, FileNotFoundError):
             self.logger.warning("Node.js not found or not working")
 
         # Check mmdc
         try:
-            subprocess.run([self.mmdc_path, "--version"],
-                           capture_output=True, check=True)
+            subprocess.run(
+                [self.mmdc_path, "--version"], capture_output=True, check=True
+            )
         except (subprocess.CalledProcessError, FileNotFoundError):
             self.logger.warning("mmdc (Mermaid CLI) not found or not working")
 
@@ -297,6 +301,64 @@ class NodeJSRenderer(BaseRenderer):
 
         except Exception:
             return False
+
+    def validate_config(self, config: dict[str, Any]) -> bool:
+        """
+        Validate Node.js renderer configuration.
+
+        Args:
+            config: Configuration dictionary to validate
+
+        Returns:
+            True if configuration is valid, False otherwise
+        """
+        # Basic validation for Node.js renderer config
+        valid_keys = {
+            "mmdc_path",
+            "node_path",
+            "timeout",
+            "puppeteer_config",
+            "temp_dir",
+        }
+
+        # Check for unknown keys
+        unknown_keys = set(config.keys()) - valid_keys
+        if unknown_keys:
+            self.logger.warning(
+                f"Unknown config keys for Node.js renderer: {unknown_keys}"
+            )
+
+        # Validate specific values
+        if "timeout" in config:
+            if (
+                not isinstance(config["timeout"], (int, float))
+                or config["timeout"] <= 0
+            ):
+                return False
+
+        if "mmdc_path" in config:
+            if (
+                not isinstance(config["mmdc_path"], str)
+                or not config["mmdc_path"].strip()
+            ):
+                return False
+
+        if "node_path" in config:
+            if (
+                not isinstance(config["node_path"], str)
+                or not config["node_path"].strip()
+            ):
+                return False
+
+        if "puppeteer_config" in config:
+            if not isinstance(config["puppeteer_config"], dict):
+                return False
+
+        if "temp_dir" in config:
+            if not isinstance(config["temp_dir"], str):
+                return False
+
+        return True
 
     def cleanup(self) -> None:
         """Clean up Node.js renderer resources."""

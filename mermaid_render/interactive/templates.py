@@ -1,9 +1,9 @@
 """Interactive templates for quick diagram creation."""
 
 import json
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from .builder import DiagramBuilder, DiagramType, ElementType, Position, Size
 
@@ -16,16 +16,16 @@ class InteractiveTemplate:
     name: str
     description: str
     diagram_type: str
-    elements: List[Dict[str, Any]]
-    connections: List[Dict[str, Any]]
-    metadata: Dict[str, Any]
+    elements: list[dict[str, Any]]
+    connections: list[dict[str, Any]]
+    metadata: dict[str, Any]
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert template to dictionary."""
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "InteractiveTemplate":
+    def from_dict(cls, data: dict[str, Any]) -> "InteractiveTemplate":
         """Create template from dictionary."""
         return cls(**data)
 
@@ -44,7 +44,9 @@ class InteractiveTemplate:
         for element_data in self.elements:
             element_type = ElementType(element_data.get("element_type", "node"))
             position = Position.from_dict(element_data["position"])
-            size = Size.from_dict(element_data.get("size", {"width": 120, "height": 60}))
+            size = Size.from_dict(
+                element_data.get("size", {"width": 120, "height": 60})
+            )
 
             builder.add_element(
                 element_type=element_type,
@@ -52,7 +54,7 @@ class InteractiveTemplate:
                 position=position,
                 size=size,
                 properties=element_data.get("properties", {}),
-                style=element_data.get("style", {})
+                style=element_data.get("style", {}),
             )
 
         # Add connections
@@ -63,7 +65,7 @@ class InteractiveTemplate:
                 label=connection_data.get("label", ""),
                 connection_type=connection_data.get("connection_type", "default"),
                 style=connection_data.get("style", {}),
-                properties=connection_data.get("properties", {})
+                properties=connection_data.get("properties", {}),
             )
 
         return builder
@@ -72,7 +74,7 @@ class InteractiveTemplate:
 class TemplateLibrary:
     """Library of interactive templates."""
 
-    def __init__(self, template_dir: Optional[Union[str, Path]] = None) -> None:
+    def __init__(self, template_dir: str | Path | None = None) -> None:
         """
         Initialize template library.
 
@@ -80,14 +82,14 @@ class TemplateLibrary:
             template_dir: Directory containing template files (optional)
         """
         self.template_dir = Path(template_dir) if template_dir else None
-        self.templates: Dict[str, InteractiveTemplate] = {}
+        self.templates: dict[str, InteractiveTemplate] = {}
         self._load_templates()
 
-    def get_template(self, template_id: str) -> Optional[InteractiveTemplate]:
+    def get_template(self, template_id: str) -> InteractiveTemplate | None:
         """Get template by ID."""
         return self.templates.get(template_id)
 
-    def list_templates(self, category: Optional[str] = None) -> List[InteractiveTemplate]:
+    def list_templates(self, category: str | None = None) -> list[InteractiveTemplate]:
         """
         List all templates, optionally filtered by category.
 
@@ -100,14 +102,11 @@ class TemplateLibrary:
         templates = list(self.templates.values())
 
         if category:
-            templates = [
-                t for t in templates
-                if t.metadata.get("category") == category
-            ]
+            templates = [t for t in templates if t.metadata.get("category") == category]
 
         return sorted(templates, key=lambda t: t.name)
 
-    def get_categories(self) -> List[str]:
+    def get_categories(self) -> list[str]:
         """Get list of all template categories."""
         categories = set()
         for template in self.templates.values():
@@ -135,7 +134,9 @@ class TemplateLibrary:
             return True
         return False
 
-    def save_template(self, template: InteractiveTemplate, filepath: Optional[Union[str, Path]] = None) -> None:
+    def save_template(
+        self, template: InteractiveTemplate, filepath: str | Path | None = None
+    ) -> None:
         """
         Save template to file.
 
@@ -145,16 +146,18 @@ class TemplateLibrary:
         """
         if filepath is None:
             if self.template_dir is None:
-                raise ValueError("No template directory configured and no filepath provided")
+                raise ValueError(
+                    "No template directory configured and no filepath provided"
+                )
             filepath = self.template_dir / f"{template.id}.json"
 
         filepath = Path(filepath)
         filepath.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(filepath, 'w', encoding='utf-8') as f:
+        with open(filepath, "w", encoding="utf-8") as f:
             json.dump(template.to_dict(), f, indent=2)
 
-    def load_template_from_file(self, filepath: Union[str, Path]) -> InteractiveTemplate:
+    def load_template_from_file(self, filepath: str | Path) -> InteractiveTemplate:
         """
         Load template from file.
 
@@ -166,7 +169,7 @@ class TemplateLibrary:
         """
         filepath = Path(filepath)
 
-        with open(filepath, 'r', encoding='utf-8') as f:
+        with open(filepath, encoding="utf-8") as f:
             data = json.load(f)
 
         return InteractiveTemplate.from_dict(data)
@@ -192,7 +195,7 @@ class TemplateLibrary:
             except Exception as e:
                 print(f"Warning: Failed to load template from {template_file}: {e}")
 
-    def _load_default_templates(self) -> Dict[str, InteractiveTemplate]:
+    def _load_default_templates(self) -> dict[str, InteractiveTemplate]:
         """Load default built-in templates."""
         return {
             "simple_flow": InteractiveTemplate(
@@ -208,7 +211,7 @@ class TemplateLibrary:
                         "position": {"x": 100, "y": 50},
                         "size": {"width": 120, "height": 60},
                         "properties": {"shape": "circle"},
-                        "style": {}
+                        "style": {},
                     },
                     {
                         "id": "process",
@@ -217,7 +220,7 @@ class TemplateLibrary:
                         "position": {"x": 100, "y": 150},
                         "size": {"width": 120, "height": 60},
                         "properties": {"shape": "rectangle"},
-                        "style": {}
+                        "style": {},
                     },
                     {
                         "id": "end",
@@ -226,7 +229,7 @@ class TemplateLibrary:
                         "position": {"x": 100, "y": 250},
                         "size": {"width": 120, "height": 60},
                         "properties": {"shape": "circle"},
-                        "style": {}
+                        "style": {},
                     },
                 ],
                 connections=[
@@ -236,7 +239,7 @@ class TemplateLibrary:
                         "label": "",
                         "connection_type": "default",
                         "style": {},
-                        "properties": {}
+                        "properties": {},
                     },
                     {
                         "source_id": "process",
@@ -244,7 +247,7 @@ class TemplateLibrary:
                         "label": "",
                         "connection_type": "default",
                         "style": {},
-                        "properties": {}
+                        "properties": {},
                     },
                 ],
                 metadata={"category": "basic", "tags": ["flowchart", "simple"]},
@@ -262,7 +265,7 @@ class TemplateLibrary:
                         "position": {"x": 200, "y": 50},
                         "size": {"width": 120, "height": 60},
                         "properties": {"shape": "circle"},
-                        "style": {}
+                        "style": {},
                     },
                     {
                         "id": "decision",
@@ -271,7 +274,7 @@ class TemplateLibrary:
                         "position": {"x": 200, "y": 150},
                         "size": {"width": 120, "height": 60},
                         "properties": {"shape": "diamond"},
-                        "style": {}
+                        "style": {},
                     },
                     {
                         "id": "yes_path",
@@ -280,7 +283,7 @@ class TemplateLibrary:
                         "position": {"x": 100, "y": 250},
                         "size": {"width": 120, "height": 60},
                         "properties": {"shape": "rectangle"},
-                        "style": {}
+                        "style": {},
                     },
                     {
                         "id": "no_path",
@@ -289,7 +292,7 @@ class TemplateLibrary:
                         "position": {"x": 300, "y": 250},
                         "size": {"width": 120, "height": 60},
                         "properties": {"shape": "rectangle"},
-                        "style": {}
+                        "style": {},
                     },
                     {
                         "id": "end",
@@ -298,7 +301,7 @@ class TemplateLibrary:
                         "position": {"x": 200, "y": 350},
                         "size": {"width": 120, "height": 60},
                         "properties": {"shape": "circle"},
-                        "style": {}
+                        "style": {},
                     },
                 ],
                 connections=[
@@ -308,7 +311,7 @@ class TemplateLibrary:
                         "label": "",
                         "connection_type": "default",
                         "style": {},
-                        "properties": {}
+                        "properties": {},
                     },
                     {
                         "source_id": "decision",
@@ -316,7 +319,7 @@ class TemplateLibrary:
                         "label": "Yes",
                         "connection_type": "default",
                         "style": {},
-                        "properties": {}
+                        "properties": {},
                     },
                     {
                         "source_id": "decision",
@@ -324,7 +327,7 @@ class TemplateLibrary:
                         "label": "No",
                         "connection_type": "default",
                         "style": {},
-                        "properties": {}
+                        "properties": {},
                     },
                     {
                         "source_id": "yes_path",
@@ -332,7 +335,7 @@ class TemplateLibrary:
                         "label": "",
                         "connection_type": "default",
                         "style": {},
-                        "properties": {}
+                        "properties": {},
                     },
                     {
                         "source_id": "no_path",
@@ -340,7 +343,7 @@ class TemplateLibrary:
                         "label": "",
                         "connection_type": "default",
                         "style": {},
-                        "properties": {}
+                        "properties": {},
                     },
                 ],
                 metadata={"category": "basic", "tags": ["flowchart", "decision"]},
@@ -358,7 +361,7 @@ class TemplateLibrary:
                         "position": {"x": 100, "y": 50},
                         "size": {"width": 120, "height": 60},
                         "properties": {"type": "participant"},
-                        "style": {}
+                        "style": {},
                     },
                     {
                         "id": "bob",
@@ -367,7 +370,7 @@ class TemplateLibrary:
                         "position": {"x": 300, "y": 50},
                         "size": {"width": 120, "height": 60},
                         "properties": {"type": "participant"},
-                        "style": {}
+                        "style": {},
                     },
                 ],
                 connections=[
@@ -377,7 +380,7 @@ class TemplateLibrary:
                         "label": "Hello Bob",
                         "connection_type": "sync",
                         "style": {},
-                        "properties": {}
+                        "properties": {},
                     },
                     {
                         "source_id": "bob",
@@ -385,7 +388,7 @@ class TemplateLibrary:
                         "label": "Hello Alice",
                         "connection_type": "return",
                         "style": {},
-                        "properties": {}
+                        "properties": {},
                     },
                 ],
                 metadata={"category": "sequence", "tags": ["sequence", "basic"]},

@@ -7,7 +7,7 @@ custom theme support, and theme validation.
 
 import json
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from ..exceptions import ThemeError
 
@@ -113,7 +113,7 @@ class ThemeManager:
         },
     }
 
-    def __init__(self, custom_themes_dir: Optional[Path] = None) -> None:
+    def __init__(self, custom_themes_dir: Path | None = None) -> None:
         """
         Initialize theme manager.
 
@@ -140,10 +140,10 @@ class ThemeManager:
             >>> #   └── presentation.json
         """
         self.custom_themes_dir = custom_themes_dir
-        self._custom_themes: Dict[str, Dict[str, Any]] = {}
+        self._custom_themes: dict[str, dict[str, Any]] = {}
         self._load_custom_themes()
 
-    def get_theme(self, theme_name: str) -> Dict[str, Any]:
+    def get_theme(self, theme_name: str) -> dict[str, Any]:
         """
         Get theme configuration by name.
 
@@ -168,17 +168,17 @@ class ThemeManager:
                 available_themes=available,
             )
 
-    def get_available_themes(self) -> List[str]:
+    def get_available_themes(self) -> list[str]:
         """Get list of all available theme names."""
         built_in = list(self.BUILT_IN_THEMES.keys())
         custom = list(self._custom_themes.keys())
         return sorted(built_in + custom)
 
-    def get_built_in_themes(self) -> List[str]:
+    def get_built_in_themes(self) -> list[str]:
         """Get list of built-in theme names."""
         return list(self.BUILT_IN_THEMES.keys())
 
-    def get_custom_themes(self) -> List[str]:
+    def get_custom_themes(self) -> list[str]:
         """Get list of custom theme names."""
         return list(self._custom_themes.keys())
 
@@ -189,7 +189,7 @@ class ThemeManager:
     def add_custom_theme(
         self,
         theme_name: str,
-        theme_config: Dict[str, Any],
+        theme_config: dict[str, Any],
         save_to_file: bool = True,
     ) -> None:
         """
@@ -246,7 +246,7 @@ class ThemeManager:
         self,
         base_theme: str,
         variant_name: str,
-        modifications: Dict[str, Any],
+        modifications: dict[str, Any],
         save_to_file: bool = True,
     ) -> None:
         """
@@ -264,7 +264,7 @@ class ThemeManager:
 
         self.add_custom_theme(variant_name, variant_config, save_to_file)
 
-    def _validate_theme_config(self, config: Dict[str, Any]) -> None:
+    def _validate_theme_config(self, config: dict[str, Any]) -> None:
         """
         Validate theme configuration.
 
@@ -275,25 +275,49 @@ class ThemeManager:
             ThemeError: If configuration is invalid
         """
         required_fields = ["theme"]
-        # optional_fields = [  # TODO: Use optional_fields for validation
-        #     "primaryColor",
-        #     "primaryTextColor",
-        #     "primaryBorderColor",
-        #     "lineColor",
-        #     "secondaryColor",
-        #     "tertiaryColor",
-        #     "background",
-        #     "mainBkg",
-        #     "secondBkg",
-        #     "tertiaryBkg",
-        # ]
+        optional_fields = [
+            "primaryColor",
+            "primaryTextColor",
+            "primaryBorderColor",
+            "lineColor",
+            "secondaryColor",
+            "tertiaryColor",
+            "background",
+            "mainBkg",
+            "secondBkg",
+            "tertiaryBkg",
+            "fontFamily",
+            "fontSize",
+            "nodeBorder",
+            "clusterBkg",
+            "clusterBorder",
+            "defaultLinkColor",
+            "titleColor",
+            "edgeLabelBackground",
+            "actorBorder",
+            "actorBkg",
+            "actorTextColor",
+            "actorLineColor",
+            "signalColor",
+            "signalTextColor",
+            "labelBoxBkgColor",
+            "labelBoxBorderColor",
+            "labelTextColor",
+            "loopTextColor",
+            "noteBorderColor",
+            "noteBkgColor",
+            "noteTextColor",
+            "activationBorderColor",
+            "activationBkgColor",
+            "sequenceNumberColor",
+        ]
 
         # Check for required fields
         for field in required_fields:
             if field not in config:
                 raise ThemeError(f"Missing required theme field: {field}")
 
-        # Validate color values (basic validation)
+        # Validate color values for both required and optional color fields
         color_fields = [
             f for f in config.keys() if "color" in f.lower() or "bkg" in f.lower()
         ]
@@ -301,6 +325,37 @@ class ThemeManager:
             value = config[field]
             if isinstance(value, str) and not self._is_valid_color(value):
                 raise ThemeError(f"Invalid color value for {field}: {value}")
+
+        # Validate optional fields if present
+        all_known_fields = set(required_fields + optional_fields)
+        for field in config.keys():
+            # Skip validation for 'theme' field and themeVariables
+            if field in ["theme", "themeVariables"]:
+                continue
+            # Warn about unknown fields but don't fail
+            if field not in all_known_fields:
+                # Unknown fields are allowed for extensibility
+                pass
+
+        # Validate font family if provided
+        if "fontFamily" in config:
+            if not isinstance(config["fontFamily"], str):
+                raise ThemeError("fontFamily must be a string")
+
+        # Validate font size if provided
+        if "fontSize" in config:
+            font_size = config["fontSize"]
+            if isinstance(font_size, str):
+                # Allow strings like "14px", "1.2em", etc.
+                if not any(
+                    font_size.endswith(unit) for unit in ["px", "em", "rem", "pt", "%"]
+                ):
+                    raise ThemeError(f"Invalid fontSize format: {font_size}")
+            elif isinstance(font_size, (int, float)):
+                if font_size <= 0:
+                    raise ThemeError("fontSize must be positive")
+            else:
+                raise ThemeError("fontSize must be a string or number")
 
     def _is_valid_color(self, color: str) -> bool:
         """
@@ -360,7 +415,7 @@ class ThemeManager:
                 print(f"Warning: Failed to load theme from {theme_file}: {e}")
 
     def _save_theme_to_file(
-        self, theme_name: str, theme_config: Dict[str, Any]
+        self, theme_name: str, theme_config: dict[str, Any]
     ) -> None:
         """Save theme configuration to file."""
         if not self.custom_themes_dir:
@@ -385,7 +440,7 @@ class ThemeManager:
         with open(output_path, "w", encoding="utf-8") as f:
             json.dump(theme_config, f, indent=2)
 
-    def import_theme(self, theme_file: Path, theme_name: Optional[str] = None) -> str:
+    def import_theme(self, theme_file: Path, theme_name: str | None = None) -> str:
         """
         Import theme from file.
 

@@ -55,22 +55,22 @@ renderer_config = RendererConfig(
     # Output format
     default_format="svg",
     supported_formats=["svg", "png", "pdf"],
-    
+
     # Dimensions
     default_width=800,
     default_height=600,
     max_width=4000,
     max_height=4000,
-    
+
     # Quality settings
     dpi=300,
     quality=95,
-    
+
     # Rendering options
     background_color="transparent",
     scale=1.0,
     timeout=30,  # seconds
-    
+
     # Error handling
     strict_mode=False,
     fallback_renderer="svg"
@@ -85,10 +85,10 @@ from mermaid_render.config import ThemeConfig
 theme_config = ThemeConfig(
     # Default theme
     default_theme="default",
-    
+
     # Theme directory
     theme_directory="./themes",
-    
+
     # Custom themes
     custom_themes={
         "corporate": {
@@ -97,7 +97,7 @@ theme_config = ThemeConfig(
             "font_family": "Arial, sans-serif"
         }
     },
-    
+
     # Theme caching
     cache_themes=True,
     theme_cache_ttl=3600
@@ -115,16 +115,16 @@ performance_config = PerformanceConfig(
     cache_backend="memory",  # memory, file, redis, database
     cache_ttl=3600,
     max_cache_size=1000,
-    
+
     # Concurrency
     max_concurrent_renders=10,
     worker_threads=4,
-    
+
     # Resource limits
     max_diagram_size=1024 * 1024,  # 1MB
     max_render_time=60,  # seconds
     memory_limit=512 * 1024 * 1024,  # 512MB
-    
+
     # Optimization
     enable_optimization=True,
     minify_output=False,
@@ -217,18 +217,18 @@ security_config = SecurityConfig(
     validate_input=True,
     sanitize_input=True,
     max_input_size=1024 * 1024,  # 1MB
-    
+
     # Resource limits
     max_nodes=1000,
     max_edges=2000,
     max_nesting_depth=10,
-    
+
     # Allowed features
     allowed_diagram_types=["flowchart", "sequence", "class"],
     allowed_formats=["svg", "png"],
     allow_external_links=False,
     allow_javascript=False,
-    
+
     # Rate limiting
     rate_limit_enabled=True,
     requests_per_minute=60,
@@ -244,20 +244,20 @@ from mermaid_render.config import LoggingConfig
 logging_config = LoggingConfig(
     # Log level
     level="INFO",  # DEBUG, INFO, WARNING, ERROR, CRITICAL
-    
+
     # Output
     console_output=True,
     file_output=True,
     log_file="mermaid_render.log",
-    
+
     # Format
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     date_format="%Y-%m-%d %H:%M:%S",
-    
+
     # Rotation
     max_file_size=10 * 1024 * 1024,  # 10MB
     backup_count=5,
-    
+
     # Structured logging
     structured_logging=True,
     json_format=False
@@ -275,12 +275,12 @@ database_config = DatabaseConfig(
     pool_size=10,
     max_overflow=20,
     pool_timeout=30,
-    
+
     # Tables
     cache_table="mermaid_cache",
     session_table="mermaid_sessions",
     user_table="mermaid_users",
-    
+
     # Options
     echo_sql=False,
     auto_create_tables=True,
@@ -376,23 +376,23 @@ web_config = WebConfig(
     host="0.0.0.0",
     port=8080,
     debug=False,
-    
+
     # SSL
     ssl_enabled=True,
     ssl_cert="path/to/cert.pem",
     ssl_key="path/to/key.pem",
-    
+
     # CORS
     cors_enabled=True,
     cors_origins=["https://example.com"],
-    
+
     # Authentication
     auth_enabled=True,
     auth_provider="oauth2",
-    
+
     # Rate limiting
     rate_limit="100/hour",
-    
+
     # File uploads
     max_upload_size=10 * 1024 * 1024,  # 10MB
     allowed_extensions=[".mmd", ".txt"]
@@ -408,19 +408,19 @@ api_config = APIConfig(
     # Versioning
     version="v1",
     base_path="/api/v1",
-    
+
     # Documentation
     enable_docs=True,
     docs_path="/docs",
-    
+
     # Response format
     default_response_format="json",
     include_metadata=True,
-    
+
     # Pagination
     default_page_size=20,
     max_page_size=100,
-    
+
     # Caching
     cache_responses=True,
     cache_headers=True

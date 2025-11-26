@@ -4,7 +4,7 @@ import re
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class EnhancementType(Enum):
@@ -23,10 +23,10 @@ class EnhancementResult:
     original_diagram: str
     enhanced_diagram: str
     enhancement_type: EnhancementType
-    improvements: List[str]
+    improvements: list[str]
     confidence_score: float
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "original_diagram": self.original_diagram,
             "enhanced_diagram": self.enhanced_diagram,
@@ -47,7 +47,7 @@ class ComplexityAnalysis:
     complexity_score: float
     complexity_level: str  # simple, medium, complex
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "node_count": self.node_count,
             "connection_count": self.connection_count,
@@ -68,7 +68,7 @@ class QualityMetrics:
     accessibility_score: float
     overall_score: float
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "readability_score": self.readability_score,
             "consistency_score": self.consistency_score,
@@ -85,12 +85,12 @@ class AnalysisReport:
     diagram_code: str
     complexity: ComplexityAnalysis
     quality: QualityMetrics
-    issues: List[str] = field(default_factory=list)
-    recommendations: List[str] = field(default_factory=list)
-    strengths: List[str] = field(default_factory=list)
+    issues: list[str] = field(default_factory=list)
+    recommendations: list[str] = field(default_factory=list)
+    strengths: list[str] = field(default_factory=list)
     analyzed_at: datetime = field(default_factory=datetime.now)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "diagram_code": self.diagram_code,
             "complexity": self.complexity.to_dict(),
@@ -109,7 +109,7 @@ class DiagramAnalyzer:
         self.quality_rules = self._load_quality_rules()
 
     def analyze(
-        self, diagram_code: str, context: Optional[Dict[str, Any]] = None
+        self, diagram_code: str, context: dict[str, Any] | None = None
     ) -> AnalysisReport:
         """
         Perform comprehensive analysis of a diagram.
@@ -362,7 +362,7 @@ class DiagramAnalyzer:
         diagram_code: str,
         complexity: ComplexityAnalysis,
         quality: QualityMetrics,
-    ) -> List[str]:
+    ) -> list[str]:
         """Identify issues in the diagram."""
         issues = []
 
@@ -388,8 +388,8 @@ class DiagramAnalyzer:
         diagram_code: str,
         complexity: ComplexityAnalysis,
         quality: QualityMetrics,
-        issues: List[str],
-    ) -> List[str]:
+        issues: list[str],
+    ) -> list[str]:
         """Generate recommendations for improvement."""
         recommendations = []
 
@@ -423,7 +423,7 @@ class DiagramAnalyzer:
         diagram_code: str,
         complexity: ComplexityAnalysis,
         quality: QualityMetrics,
-    ) -> List[str]:
+    ) -> list[str]:
         """Identify strengths of the diagram."""
         strengths = []
 
@@ -522,7 +522,7 @@ class DiagramAnalyzer:
             return True
 
         # Check if naming follows a pattern
-        return len(set(len(node_id) for node_id in node_ids)) <= 2
+        return len({len(node_id) for node_id in node_ids}) <= 2
 
     def _has_consistent_styling(self, code: str) -> bool:
         """Check for consistent styling."""
@@ -564,7 +564,7 @@ class DiagramAnalyzer:
         # Simple check for light colors on light backgrounds
         return "#fff" in code and "#f" in code
 
-    def _load_quality_rules(self) -> List[Dict[str, Any]]:
+    def _load_quality_rules(self) -> list[dict[str, Any]]:
         """Load quality assessment rules."""
         return [
             {

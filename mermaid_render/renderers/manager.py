@@ -8,14 +8,13 @@ handling, and error recovery.
 
 import logging
 import time
-from typing import Any, Dict, List, Optional, Set, Union
+from typing import Any
 
 from ..exceptions import RenderingError, UnsupportedFormatError
+from ..validators.validator import MermaidValidator
 from .base import BaseRenderer, RendererCapability, RenderResult
-from .registry import RendererRegistry, get_global_registry
 from .error_handler import ErrorContext, get_global_error_handler
-from .validation import get_global_validator
-from .logging_config import PerformanceLogger, LoggingContext
+from .registry import RendererRegistry, get_global_registry
 
 
 class RendererManager:
@@ -29,7 +28,7 @@ class RendererManager:
 
     def __init__(
         self,
-        registry: Optional[RendererRegistry] = None,
+        registry: RendererRegistry | None = None,
         default_fallback_enabled: bool = True,
         max_fallback_attempts: int = 3,
         fallback_timeout: float = 30.0,
@@ -50,26 +49,17 @@ class RendererManager:
         self.fallback_timeout = fallback_timeout
 
         # Active renderer instances (for cleanup)
-        self._active_renderers: Dict[str, BaseRenderer] = {}
-
-        # Performance tracking
-        self._stats: Dict[str, Any] = {
-            "total_renders": 0,
-            "successful_renders": 0,
-            "failed_renders": 0,
-            "fallback_uses": 0,
-            "renderer_usage": {},
-        }
+        self._active_renderers: dict[str, BaseRenderer] = {}
 
     def render(
         self,
         mermaid_code: str,
         format: str,
-        theme: Optional[str] = None,
-        config: Optional[Dict[str, Any]] = None,
-        preferred_renderer: Optional[str] = None,
-        fallback_enabled: Optional[bool] = None,
-        required_capabilities: Optional[Set[RendererCapability]] = None,
+        theme: str | None = None,
+        config: dict[str, Any] | None = None,
+        preferred_renderer: str | None = None,
+        fallback_enabled: bool | None = None,
+        required_capabilities: set[RendererCapability] | None = None,
         **options: Any,
     ) -> RenderResult:
         """
@@ -92,7 +82,6 @@ class RendererManager:
             UnsupportedFormatError: If no renderer supports the format
             RenderingError: If all renderers fail
         """
-        self._stats["total_renders"] += 1
         start_time = time.time()
 
         # Create error context
@@ -102,29 +91,13 @@ class RendererManager:
             input_size=len(mermaid_code),
         )
 
-        # Validate input
-        validator = get_global_validator()
-        validation_result = validator.validate(
-            mermaid_code=mermaid_code,
-            format=format,
-            renderer_name=preferred_renderer,
-            strict=False,  # Use warnings instead of errors for flexibility
-        )
-
+        # Validate input with core validator
+        validator = MermaidValidator()
+        validation_result = validator.validate(mermaid_code)
         if not validation_result.is_valid:
-            error_handler = get_global_error_handler()
-            validation_error = RenderingError(
-                f"Validation failed: {validation_result.errors}")
-            error_details = error_handler.handle_error(validation_error, error_context)
-            raise validation_error
-
-        # Use sanitized input if available
-        if validation_result.sanitized_input:
-            mermaid_code = validation_result.sanitized_input
-
-        # Log validation warnings
-        if validation_result.warnings:
-            self.logger.warning(f"Validation warnings: {validation_result.warnings}")
+            raise RenderingError(
+                f"Invalid Mermaid syntax: {'', ''.join(validation_result.errors)}"
+            )
 
         # Determine fallback setting
         use_fallback = (
@@ -160,8 +133,8 @@ class RendererManager:
             )
 
         # Try each renderer in the chain
-        last_error: Optional[Exception] = None
-        attempts: List[Dict[str, Any]] = []
+        last_error: Exception | None = None
+        attempts: list[dict[str, Any]] = []
 
         for i, renderer_name in enumerate(renderer_chain):
             # Update error context for this attempt
@@ -169,91 +142,84 @@ class RendererManager:
             error_context.attempt_number = i + 1
             error_context.total_attempts = len(renderer_chain)
 
-            with LoggingContext(self.logger, renderer_name=renderer_name, format=format):
-                try:
-                    # Get or create renderer instance
-                    renderer = self._get_renderer_instance(renderer_name, config or {})
-                    if renderer is None:
-                        self.logger.warning(
-                            f"Could not create renderer instance: {renderer_name}")
+            try:
+                # Get or create renderer instance
+                renderer = self._get_renderer_instance(renderer_name, config or {})
+                if renderer is None:
+                    self.logger.warning(
+                        f"Could not create renderer instance: {renderer_name}"
+                    )
+                    continue
+
+                # Check capabilities if required
+                if required_capabilities:
+                    missing_caps = required_capabilities - renderer.get_capabilities()
+                    if missing_caps:
+                        self.logger.debug(
+                            f"Renderer '{renderer_name}' missing required capabilities: {missing_caps}"
+                        )
                         continue
 
-                    # Check capabilities if required
-                    if required_capabilities:
-                        missing_caps = required_capabilities - renderer.get_capabilities()
-                        if missing_caps:
-                            self.logger.debug(
-                                f"Renderer '{renderer_name}' missing required capabilities: {missing_caps}"
-                            )
-                            continue
+                # Attempt rendering with performance tracking
+                self.logger.debug(
+                    f"Attempting render with '{renderer_name}' (attempt {i+1})"
+                )
 
-                    # Attempt rendering with performance tracking
-                    self.logger.debug(
-                        f"Attempting render with '{renderer_name}' (attempt {i+1})")
+                render_start = time.time()
+                result = renderer.render(
+                    mermaid_code=mermaid_code,
+                    format=format,
+                    theme=theme,
+                    config=config,
+                    **options,
+                )
+                time.time() - render_start
 
-                    render_start = time.time()
-                    result = renderer.render(
-                        mermaid_code=mermaid_code,
-                        format=format,
-                        theme=theme,
-                        config=config,
-                        **options,
-                    )
-                    render_time = time.time() - render_start
+                # Add timing information
+                result.metadata["total_render_time"] = time.time() - start_time
+                result.metadata["attempts"] = attempts + [
+                    {"renderer": renderer_name, "success": True}
+                ]
 
-                    # Track success
-                    self._stats["successful_renders"] += 1
-                    self._stats["renderer_usage"][renderer_name] = (
-                        self._stats["renderer_usage"].get(renderer_name, 0) + 1
-                    )
+                self.logger.info(
+                    f"Successfully rendered with '{renderer_name}' "
+                    f"(format: {format}, time: {result.render_time:.3f}s)"
+                )
 
-                    if i > 0:
-                        self._stats["fallback_uses"] += 1
+                return result
 
-                    # Add timing information
-                    result.metadata["total_render_time"] = time.time() - start_time
-                    result.metadata["attempts"] = attempts + \
-                        [{"renderer": renderer_name, "success": True}]
+            except Exception as e:
+                # Handle error with enhanced error handling
+                error_context.elapsed_time = time.time() - render_start
+                error_handler = get_global_error_handler()
+                error_details = error_handler.handle_error(e, error_context)
 
-                    self.logger.info(
-                        f"Successfully rendered with '{renderer_name}' "
-                        f"(format: {format}, time: {result.render_time:.3f}s)"
-                    )
-
-                    return result
-
-                except Exception as e:
-                    # Handle error with enhanced error handling
-                    error_context.elapsed_time = time.time() - render_start
-                    error_handler = get_global_error_handler()
-                    error_details = error_handler.handle_error(e, error_context)
-
-                    last_error = e
-                    attempts.append({
+                last_error = e
+                attempts.append(
+                    {
                         "renderer": renderer_name,
                         "success": False,
                         "error": str(e),
                         "error_code": error_details.error_code,
                         "category": error_details.category.value,
                         "severity": error_details.severity.value,
-                    })
+                    }
+                )
 
-                    self.logger.warning(
-                        f"Renderer '{renderer_name}' failed: {e} [{error_details.error_code}]"
-                    )
+                self.logger.warning(
+                    f"Renderer '{renderer_name}' failed: {e} [{error_details.error_code}]"
+                )
 
-                    # Continue to next renderer in fallback chain
-                    continue
+                # Continue to next renderer in fallback chain
+                continue
 
         # All renderers failed
-        self._stats["failed_renders"] += 1
-
         error_msg = f"All renderers failed for format '{format}'"
         if last_error:
             error_msg += f". Last error: {last_error}"
 
         # Create detailed error result
-        failed_result = RenderResult(
+        RenderResult(
             content="",
             format=format,
             renderer_name="none",
@@ -268,8 +234,8 @@ class RendererManager:
     def _get_renderer_instance(
         self,
         name: str,
-        config: Dict[str, Any],
-    ) -> Optional[BaseRenderer]:
+        config: dict[str, Any],
+    ) -> BaseRenderer | None:
         """
         Get or create a renderer instance.
 
@@ -291,14 +257,14 @@ class RendererManager:
 
         return renderer
 
-    def get_available_formats(self) -> Set[str]:
+    def get_available_formats(self) -> set[str]:
         """
         Get all formats supported by available renderers.
 
         Returns:
             Set of supported format strings
         """
-        formats: Set[str] = set()
+        formats: set[str] = set()
 
         for name in self.registry.list_renderers(available_only=True):
             info = self.registry.get_renderer_info(name)
@@ -306,48 +272,6 @@ class RendererManager:
                 formats.update(info.supported_formats)
 
         return formats
-
-    def get_renderer_status(self) -> Dict[str, Any]:
-        """
-        Get status of all registered renderers.
-
-        Returns:
-            Dictionary with renderer status information
-        """
-        status = {}
-
-        for name in self.registry.list_renderers():
-            renderer_class = self.registry.get_renderer_class(name)
-            info = self.registry.get_renderer_info(name)
-
-            if renderer_class and info:
-                try:
-                    temp_instance = renderer_class()
-                    health = temp_instance.get_health_status()
-                    temp_instance.cleanup()
-                except Exception as e:
-                    health = {"available": False, "error": str(e)}
-
-                status[name] = {
-                    "info": {
-                        "description": info.description,
-                        "supported_formats": list(info.supported_formats),
-                        "capabilities": [cap.value for cap in info.capabilities],
-                        "priority": info.priority.value,
-                    },
-                    "health": health,
-                }
-
-        return status
-
-    def get_performance_stats(self) -> Dict[str, Any]:
-        """
-        Get performance statistics.
-
-        Returns:
-            Dictionary with performance statistics
-        """
-        return self._stats.copy()
 
     def cleanup(self) -> None:
         """

@@ -2,20 +2,18 @@
 Unit tests for exception classes.
 """
 
-import pytest
-
 from mermaid_render.exceptions import (
-    MermaidRenderError,
-    ValidationError,
-    RenderingError,
-    ConfigurationError,
-    UnsupportedFormatError,
-    NetworkError,
-    ThemeError,
-    DiagramError,
-    TemplateError,
-    DataSourceError,
     CacheError,
+    ConfigurationError,
+    DataSourceError,
+    DiagramError,
+    MermaidRenderError,
+    NetworkError,
+    RenderingError,
+    TemplateError,
+    ThemeError,
+    UnsupportedFormatError,
+    ValidationError,
 )
 
 
@@ -179,7 +177,8 @@ class TestUnsupportedFormatError:
         """Test unsupported format error with supported formats list."""
         supported = ["svg", "png", "pdf"]
         error = UnsupportedFormatError(
-            "Format not supported", supported_formats=supported)
+            "Format not supported", supported_formats=supported
+        )
 
         assert error.supported_formats == supported
         assert "svg" in str(error)
@@ -434,5 +433,5 @@ class TestExceptionHierarchy:
             raise RenderingError("Test error", format="svg", status_code=500)
         except MermaidRenderError as e:
             assert e.message == "Test error"
-            assert hasattr(e, 'format')
-            assert hasattr(e, 'status_code')
+            assert hasattr(e, "format")
+            assert hasattr(e, "status_code")

@@ -7,7 +7,7 @@ Mermaid diagrams to Graphviz DOT format for alternative rendering.
 
 import re
 import time
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any
 
 from ..exceptions import RenderingError, UnsupportedFormatError
 from .base import (
@@ -57,7 +57,6 @@ class GraphvizRenderer(BaseRenderer):
             capabilities={
                 RendererCapability.CUSTOM_CONFIG,
                 RendererCapability.LOCAL_RENDERING,
-                RendererCapability.PERFORMANCE_METRICS,
             },
             priority=RendererPriority.LOW,  # Lower priority as it's limited in diagram type support
             version="1.0.0",
@@ -66,9 +65,17 @@ class GraphvizRenderer(BaseRenderer):
             config_schema={
                 "type": "object",
                 "properties": {
-                    "engine": {"type": "string", "enum": ["dot", "neato", "fdp", "sfdp", "circo"], "default": "dot"},
+                    "engine": {
+                        "type": "string",
+                        "enum": ["dot", "neato", "fdp", "sfdp", "circo"],
+                        "default": "dot",
+                    },
                     "dpi": {"type": "integer", "default": 96},
-                    "rankdir": {"type": "string", "enum": ["TB", "BT", "LR", "RL"], "default": "TB"},
+                    "rankdir": {
+                        "type": "string",
+                        "enum": ["TB", "BT", "LR", "RL"],
+                        "default": "TB",
+                    },
                     "node_shape": {"type": "string", "default": "box"},
                     "edge_style": {"type": "string", "default": "solid"},
                 },
@@ -79,8 +86,8 @@ class GraphvizRenderer(BaseRenderer):
         self,
         mermaid_code: str,
         format: str,
-        theme: Optional[str] = None,
-        config: Optional[Dict[str, Any]] = None,
+        theme: str | None = None,
+        config: dict[str, Any] | None = None,
         **options: Any,
     ) -> RenderResult:
         """
@@ -98,7 +105,8 @@ class GraphvizRenderer(BaseRenderer):
         """
         if format.lower() not in {"svg", "png", "pdf"}:
             raise UnsupportedFormatError(
-                f"Graphviz renderer doesn't support format '{format}'")
+                f"Graphviz renderer doesn't support format '{format}'"
+            )
 
         start_time = time.time()
 
@@ -143,16 +151,13 @@ class GraphvizRenderer(BaseRenderer):
     def _is_diagram_supported(self, mermaid_code: str) -> bool:
         """Check if the diagram type is supported by Graphviz renderer."""
         # Currently only support flowcharts
-        return (
-            "flowchart" in mermaid_code.lower() or
-            "graph" in mermaid_code.lower()
-        )
+        return "flowchart" in mermaid_code.lower() or "graph" in mermaid_code.lower()
 
     def _convert_to_dot(
         self,
         mermaid_code: str,
-        theme: Optional[str],
-        config: Optional[Dict[str, Any]],
+        theme: str | None,
+        config: dict[str, Any] | None,
     ) -> str:
         """Convert Mermaid flowchart to Graphviz DOT format."""
         lines = mermaid_code.strip().split("\n")
@@ -172,14 +177,26 @@ class GraphvizRenderer(BaseRenderer):
 
             # Parse node definitions and edges
             if "-->" in line or "---" in line:
-                # Edge definition
+                # Edge definition with possible inline node definitions
+                # Pattern: A[Label] --> B[Label] or A --> B
                 edge_match = re.match(
-                    r"(\w+)\s*(-->|---)\s*(\w+)(?:\s*\|\s*(.+?)\s*\|)?", line)
+                    r"(\w+)(?:\[(.+?)\])?\s*(-->|---)\s*(\w+)(?:\[(.+?)\])?(?:\s*\|\s*(.+?)\s*\|)?",
+                    line,
+                )
                 if edge_match:
-                    from_node, edge_type, to_node, label = edge_match.groups()
-                    edges.append((from_node, to_node, label))
+                    from_node, from_label, edge_type, to_node, to_label, edge_label = (
+                        edge_match.groups()
+                    )
+
+                    # Store node labels if provided
+                    if from_label:
+                        nodes[from_node] = from_label
+                    if to_label:
+                        nodes[to_node] = to_label
+
+                    edges.append((from_node, to_node, edge_label))
             else:
-                # Node definition
+                # Standalone node definition
                 node_match = re.match(r"(\w+)\[(.+?)\]", line)
                 if node_match:
                     node_id, node_label = node_match.groups()
@@ -187,23 +204,27 @@ class GraphvizRenderer(BaseRenderer):
 
         # Generate DOT code
         dot_lines = [
-            f"digraph G {{",
+            "digraph G {",
             f"    rankdir={self.rankdir};",
             f"    node [shape={self.node_shape}];",
         ]
 
         # Add theme-based styling
         if theme == "dark":
-            dot_lines.extend([
-                "    bgcolor=\"#1f2937\";",
-                "    node [style=filled, fillcolor=\"#374151\", fontcolor=white];",
-                "    edge [color=white];",
-            ])
+            dot_lines.extend(
+                [
+                    '    bgcolor="#1f2937";',
+                    '    node [style=filled, fillcolor="#374151", fontcolor=white];',
+                    "    edge [color=white];",
+                ]
+            )
         elif theme == "forest":
-            dot_lines.extend([
-                "    node [style=filled, fillcolor=\"#22c55e\", fontcolor=white];",
-                "    edge [color=\"#15803d\"];",
-            ])
+            dot_lines.extend(
+                [
+                    '    node [style=filled, fillcolor="#22c55e", fontcolor=white];',
+                    '    edge [color="#15803d"];',
+                ]
+            )
 
         # Add nodes
         for node_id, label in nodes.items():
@@ -214,7 +235,7 @@ class GraphvizRenderer(BaseRenderer):
             if label:
                 dot_lines.append(f'    {from_node} -> {to_node} [label="{label}"];')
             else:
-                dot_lines.append(f'    {from_node} -> {to_node};')
+                dot_lines.append(f"    {from_node} -> {to_node};")
 
         dot_lines.append("}")
 
@@ -224,7 +245,7 @@ class GraphvizRenderer(BaseRenderer):
         self,
         dot_code: str,
         format: str,
-        options: Dict[str, Any],
+        options: dict[str, Any],
     ) -> Any:
         """Render DOT code using Graphviz."""
         try:
@@ -269,7 +290,7 @@ class GraphvizRenderer(BaseRenderer):
         except Exception:
             return False
 
-    def validate_config(self, config: Dict[str, Any]) -> bool:
+    def validate_config(self, config: dict[str, Any]) -> bool:
         """
         Validate Graphviz renderer configuration.
 

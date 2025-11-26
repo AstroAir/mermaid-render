@@ -4,8 +4,6 @@ Provides a simple interface to define entities, their attributes, and relationsh
 and to emit Mermaid-compatible ER diagram syntax.
 """
 
-from typing import Dict, List, Optional
-
 from ..core import MermaidDiagram
 
 
@@ -16,23 +14,21 @@ class ERDiagram(MermaidDiagram):
     and renders them to Mermaid ER diagram syntax.
     """
 
-    def __init__(self, title: Optional[str] = None) -> None:
+    def __init__(self, title: str | None = None) -> None:
         """Initialize an empty ER diagram.
 
         Args:
             title: Optional diagram title.
         """
         super().__init__(title)
-        self.entities: Dict[str, Dict[str, str]] = {}
-        self.relationships: List[tuple] = []
+        self.entities: dict[str, dict[str, str]] = {}
+        self.relationships: list[tuple[str, str, str]] = []
 
     def get_diagram_type(self) -> str:
         """Return the Mermaid diagram type identifier."""
         return "erDiagram"
 
-    def add_entity(
-        self, name: str, attributes: Optional[Dict[str, str]] = None
-    ) -> None:
+    def add_entity(self, name: str, attributes: dict[str, str] | None = None) -> None:
         """Add or replace an entity with optional attributes.
 
         Args:

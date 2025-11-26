@@ -7,39 +7,36 @@ new plugin-based architecture.
 """
 
 # Original renderers (for backward compatibility)
-from .pdf_renderer import PDFRenderer
-from .png_renderer import PNGRenderer
-from .svg_renderer import SVGRenderer
-
 # Plugin architecture components
 from .base import (
     BaseRenderer,
     RendererCapability,
+    RendererConfigurationError,
+    RendererError,
     RendererInfo,
+    RendererNotAvailableError,
     RendererPriority,
     RenderResult,
-    RendererError,
-    RendererNotAvailableError,
-    RendererConfigurationError,
 )
-from .registry import RendererRegistry, get_global_registry, register_renderer
-from .manager import RendererManager
+from .config_manager import RendererConfigManager, get_global_config_manager
 
-# Plugin adapters for existing renderers
-from .svg_renderer_plugin import SVGRendererPlugin
-from .png_renderer_plugin import PNGRendererPlugin
-from .pdf_renderer_plugin import PDFRendererPlugin
+# Enhanced architecture components
+from .error_handler import (
+    ErrorContext,
+    ErrorDetails,
+    ErrorHandler,
+    get_global_error_handler,
+)
+from .graphviz_renderer import GraphvizRenderer
+from .manager import RendererManager
+from .nodejs_renderer import NodeJSRenderer
+from .pdf_renderer import PDFRenderer
 
 # New renderer implementations
 from .playwright_renderer import PlaywrightRenderer
-from .nodejs_renderer import NodeJSRenderer
-from .graphviz_renderer import GraphvizRenderer
-
-# Enhanced architecture components
-from .error_handler import ErrorHandler, ErrorContext, ErrorDetails, get_global_error_handler
-from .validation import InputValidator, ValidationResult, get_global_validator
-from .config_manager import RendererConfigManager, get_global_config_manager
-from .logging_config import setup_logging, PerformanceLogger, LoggingContext
+from .png_renderer import PNGRenderer
+from .registry import RendererRegistry, get_global_registry, register_renderer
+from .svg_renderer import SVGRenderer
 
 __all__ = [
     # Original renderers
@@ -59,10 +56,6 @@ __all__ = [
     "RendererManager",
     "get_global_registry",
     "register_renderer",
-    # Plugin adapters
-    "SVGRendererPlugin",
-    "PNGRendererPlugin",
-    "PDFRendererPlugin",
     # New renderers
     "PlaywrightRenderer",
     "NodeJSRenderer",
@@ -72,12 +65,6 @@ __all__ = [
     "ErrorContext",
     "ErrorDetails",
     "get_global_error_handler",
-    "InputValidator",
-    "ValidationResult",
-    "get_global_validator",
     "RendererConfigManager",
     "get_global_config_manager",
-    "setup_logging",
-    "PerformanceLogger",
-    "LoggingContext",
 ]

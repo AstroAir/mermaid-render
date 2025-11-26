@@ -12,7 +12,7 @@ class DiagramBuilder {
         this.dragStart = { x: 0, y: 0 };
         this.zoom = 1;
         this.pan = { x: 0, y: 0 };
-        
+
         this.initializeEventListeners();
         this.initializeTools();
         this.loadTemplates();
@@ -115,12 +115,12 @@ class DiagramBuilder {
 
     setTool(toolName) {
         this.currentTool = toolName;
-        
+
         // Update tool button states
         document.querySelectorAll('.tool-btn, .tool-item').forEach(btn => {
             btn.classList.remove('active');
         });
-        
+
         const activeBtn = document.querySelector(`[data-tool="${toolName}"]`);
         if (activeBtn) {
             activeBtn.classList.add('active');
@@ -211,7 +211,7 @@ class DiagramBuilder {
     }
 
     updateTransform() {
-        this.canvasGroup.setAttribute('transform', 
+        this.canvasGroup.setAttribute('transform',
             `translate(${this.pan.x}, ${this.pan.y}) scale(${this.zoom})`);
     }
 
@@ -323,7 +323,7 @@ class DiagramBuilder {
 
     updatePropertiesPanel() {
         const propertiesContent = document.getElementById('properties-content');
-        
+
         if (this.selectedElements.size === 0) {
             propertiesContent.innerHTML = '<div class="no-selection"><p>Select an element to edit its properties</p></div>';
             return;
@@ -331,7 +331,7 @@ class DiagramBuilder {
 
         const elementId = Array.from(this.selectedElements)[0];
         const element = this.elements.get(elementId);
-        
+
         if (!element) return;
 
         propertiesContent.innerHTML = `
@@ -426,7 +426,7 @@ class DiagramBuilder {
 
     generateMermaidCode() {
         let code = `${window.DIAGRAM_TYPE || 'flowchart'} TD\n`;
-        
+
         // Add nodes
         this.elements.forEach(element => {
             const shape = this.getNodeShape(element.type, element.label);
@@ -459,7 +459,7 @@ class DiagramBuilder {
     updatePreview() {
         const code = document.getElementById('code-editor').value;
         const previewContent = document.getElementById('preview-content');
-        
+
         try {
             // Use Mermaid to render the diagram
             mermaid.render('preview-diagram', code).then(result => {
@@ -519,7 +519,7 @@ class DiagramBuilder {
     exportDiagram() {
         const format = document.querySelector('input[name="export-format"]:checked').value;
         const filename = document.getElementById('export-filename').value || 'diagram';
-        
+
         console.log('Exporting diagram:', format, filename);
         // This would integrate with the export API
     }

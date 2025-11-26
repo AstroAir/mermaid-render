@@ -1,7 +1,5 @@
 """Pie chart diagram model for the Mermaid Render library."""
 
-from typing import Dict, Optional
-
 from ..core import MermaidDiagram
 
 
@@ -11,7 +9,7 @@ class PieChartDiagram(MermaidDiagram):
     Supports adding labeled numeric slices and rendering Mermaid pie syntax.
     """
 
-    def __init__(self, title: Optional[str] = None, show_data: bool = True) -> None:
+    def __init__(self, title: str | None = None, show_data: bool = True) -> None:
         """Initialize an empty pie chart.
 
         Args:
@@ -20,7 +18,7 @@ class PieChartDiagram(MermaidDiagram):
         """
         super().__init__(title)
         self.show_data = show_data
-        self.data: Dict[str, float] = {}
+        self.data: dict[str, float] = {}
 
     def get_diagram_type(self) -> str:
         """Return the Mermaid diagram type identifier."""

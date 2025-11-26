@@ -8,19 +8,19 @@ functionality through the Model Context Protocol.
 import argparse
 import asyncio
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
 
 try:
     from fastmcp import FastMCP
-except ImportError:
-    raise ImportError(
-        "FastMCP is required for MCP server functionality. "
-        "Install it with: pip install fastmcp"
-    )
 
-from .tools import register_all_tools
-from .resources import register_all_resources
+    _FASTMCP_AVAILABLE = True
+except ImportError:
+    FastMCP = None
+    _FASTMCP_AVAILABLE = False
+
 from .prompts import register_all_prompts
+from .resources import register_all_resources
+from .tools import register_all_tools
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -30,54 +30,71 @@ logger = logging.getLogger(__name__)
 def create_mcp_server(
     name: str = "mermaid-render",
     version: str = "1.0.0",
-    description: Optional[str] = None,
-) -> FastMCP:
+    description: str | None = None,
+) -> Any:
     """
     Create and configure the MCP server for mermaid-render.
-    
+
     Args:
         name: Server name
         version: Server version
         description: Server description
-        
+
     Returns:
         Configured FastMCP server instance
+
+    Raises:
+        ImportError: If FastMCP is not available
     """
+    if not _FASTMCP_AVAILABLE:
+        raise ImportError(
+            "FastMCP is required for MCP server functionality. "
+            "Install it with: pip install fastmcp"
+        )
+
     if description is None:
         description = (
             "MCP server for mermaid-render: Generate, validate, and manipulate "
             "Mermaid diagrams with AI-powered features"
         )
-    
+
     # Create FastMCP server instance (description not supported in current version)
     mcp = FastMCP(name=name, version=version)
-    
+
     # Register all MCP components
     register_all_tools(mcp)
     register_all_resources(mcp)
     register_all_prompts(mcp)
 
-    logger.info(f"Created MCP server '{name}' v{version} with tools, resources, and prompts")
+    logger.info(
+        f"Created MCP server '{name}' v{version} with tools, resources, and prompts"
+    )
     return mcp
 
 
 async def run_server(
-    transport: str = "stdio",
-    host: str = "localhost", 
-    port: int = 8000,
-    **kwargs: Any
+    transport: str = "stdio", host: str = "localhost", port: int = 8000, **kwargs: Any
 ) -> None:
     """
     Run the MCP server with the specified transport.
-    
+
     Args:
         transport: Transport type ("stdio", "sse", "websocket")
         host: Host address for network transports
         port: Port number for network transports
         **kwargs: Additional server configuration
+
+    Raises:
+        ImportError: If FastMCP is not available
     """
+    if not _FASTMCP_AVAILABLE:
+        raise ImportError(
+            "FastMCP is required for MCP server functionality. "
+            "Install it with: pip install fastmcp"
+        )
+
     mcp = create_mcp_server(**kwargs)
-    
+
     if transport == "stdio":
         logger.info("Starting MCP server with stdio transport")
         await mcp.run_stdio()
@@ -102,15 +119,15 @@ def main() -> None:
 Examples:
   # Run with stdio transport (default)
   mermaid-render-mcp
-  
+
   # Run with SSE transport
   mermaid-render-mcp --transport sse --port 8080
-  
+
   # Run with WebSocket transport
   mermaid-render-mcp --transport websocket --host 0.0.0.0 --port 9000
         """,
     )
-    
+
     parser.add_argument(
         "--transport",
         choices=["stdio", "sse", "websocket"],
@@ -148,12 +165,12 @@ Examples:
         default="INFO",
         help="Logging level (default: INFO)",
     )
-    
+
     args = parser.parse_args()
-    
+
     # Configure logging level
     logging.getLogger().setLevel(getattr(logging, args.log_level))
-    
+
     # Run the server
     try:
         asyncio.run(

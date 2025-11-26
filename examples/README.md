@@ -5,12 +5,14 @@ This directory contains comprehensive examples demonstrating all features of the
 ## 🚀 Quick Start
 
 ### Run All Examples
+
 ```bash
 # Execute all examples and generate comprehensive reports
 python run_all_examples.py
 ```
 
 ### Run Individual Examples
+
 ```bash
 # Basic features
 python basic_usage.py
@@ -27,7 +29,9 @@ python ai_features_showcase.py
 ## 📋 Available Examples
 
 ### 1. [Basic Usage](basic_usage.py)
+
 **Fundamental features and simple diagrams**
+
 - Flowchart and sequence diagram creation
 - Theme application and customization
 - File export and validation
@@ -36,7 +40,9 @@ python ai_features_showcase.py
 **Key Concepts**: Basic API usage, diagram creation, rendering pipeline
 
 ### 2. [Advanced Usage](advanced_usage.py)
+
 **Complex features and configurations**
+
 - Custom theme creation and management
 - Configuration management
 - Batch processing and export
@@ -46,7 +52,9 @@ python ai_features_showcase.py
 **Key Concepts**: Advanced configuration, batch operations, custom styling
 
 ### 3. [Diagram Types Showcase](diagram_types_showcase.py)
+
 **All supported diagram types with practical examples**
+
 - State diagrams (authentication systems)
 - ER diagrams (database schemas)
 - User journey maps (customer experiences)
@@ -58,7 +66,9 @@ python ai_features_showcase.py
 **Key Concepts**: Diagram type diversity, real-world applications
 
 ### 4. [AI Features Showcase](ai_features_showcase.py)
+
 **AI-powered diagram generation and optimization**
+
 - Natural language to diagram generation
 - Code analysis and diagram creation
 - Diagram optimization and suggestions
@@ -69,7 +79,9 @@ python ai_features_showcase.py
 **Dependencies**: `pip install mermaid-render[ai]`
 
 ### 5. [Template System Showcase](template_system_showcase.py)
+
 **Template-based diagram generation**
+
 - Built-in template usage
 - Custom template creation
 - Diagram generators (Flowchart, Sequence, Architecture)
@@ -80,7 +92,9 @@ python ai_features_showcase.py
 **Dependencies**: `pip install mermaid-render[templates]`
 
 ### 6. [Integration Examples](integration_examples.py)
+
 **Web frameworks and application integration**
+
 - Flask web application with diagram editor
 - FastAPI REST API service
 - Advanced CLI tool development
@@ -89,7 +103,9 @@ python ai_features_showcase.py
 **Key Concepts**: Web integration, API development, automation
 
 ### 7. [Real-World Use Cases](real_world_use_cases.py)
+
 **Practical applications and professional scenarios**
+
 - Software architecture documentation
 - API documentation generation
 - Business process modeling
@@ -98,7 +114,9 @@ python ai_features_showcase.py
 **Key Concepts**: Professional applications, documentation automation
 
 ### 8. [Performance & Caching Showcase](performance_caching_showcase.py)
+
 **Performance optimization and caching strategies**
+
 - Memory and file-based caching
 - Performance monitoring and metrics
 - Cache optimization techniques
@@ -109,15 +127,15 @@ python ai_features_showcase.py
 **Dependencies**: `pip install mermaid-render[cache]`
 
 ### 9. [Testing & Validation Showcase](testing_validation_showcase.py)
+
 **Testing patterns and validation strategies**
+
 - Unit testing with mocks
 - Integration testing patterns
 - Validation and error handling
 - Application testing strategies
 
 **Key Concepts**: Testing methodologies, validation, error handling
-
-
 
 ## 📁 Output Structure
 
@@ -142,6 +160,7 @@ output/
 ## 🔧 Dependencies
 
 ### Core Examples (No additional dependencies)
+
 - `basic_usage.py`
 - `advanced_usage.py`
 - `diagram_types_showcase.py`
@@ -150,6 +169,7 @@ output/
 - `testing_validation_showcase.py`
 
 ### Optional Dependencies
+
 - **AI Features**: `pip install mermaid-render[ai]`
 - **Templates**: `pip install mermaid-render[templates]`
 - **Caching**: `pip install mermaid-render[cache]`
@@ -160,16 +180,19 @@ output/
 ## 🎯 Learning Path
 
 ### Beginner
+
 1. Start with `basic_usage.py` to understand fundamentals
 2. Explore `diagram_types_showcase.py` to see all diagram types
 3. Try `real_world_use_cases.py` for practical applications
 
 ### Intermediate
+
 1. Study `advanced_usage.py` for complex configurations
 2. Examine `integration_examples.py` for application patterns
 3. Review `testing_validation_showcase.py` for robust development
 
 ### Advanced
+
 1. Explore `ai_features_showcase.py` for AI capabilities
 2. Study `template_system_showcase.py` for automation
 3. Investigate `performance_caching_showcase.py` for optimization
@@ -185,6 +208,7 @@ To contribute new examples:
 5. **Update Documentation**: Add your example to this README
 
 ### Example Template
+
 ```python
 #!/usr/bin/env python3
 """
@@ -205,18 +229,18 @@ def create_output_dir():
 def your_example_function(output_dir: Path):
     """Demonstrate specific functionality."""
     print("Your example description...")
-    
+
     # Your example code here
-    
+
     print(f"✅ Example completed")
 
 def main():
     """Run all examples in this script."""
     print("=== Your Example Title ===\n")
-    
+
     output_dir = create_output_dir()
     print(f"Output directory: {output_dir.absolute()}\n")
-    
+
     try:
         your_example_function(output_dir)
         print("✅ All examples completed successfully!")

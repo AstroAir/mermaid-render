@@ -21,7 +21,7 @@ The plugin-based renderer system consists of several key components:
 #### Legacy Renderer Adapters
 
 - **`svg_renderer_plugin.py`**: Plugin adapter for the original SVGRenderer
-- **`png_renderer_plugin.py`**: Plugin adapter for the original PNGRenderer  
+- **`png_renderer_plugin.py`**: Plugin adapter for the original PNGRenderer
 - **`pdf_renderer_plugin.py`**: Plugin adapter for the original PDFRenderer
 
 #### New Renderer Backends
@@ -124,11 +124,11 @@ class MyCustomRenderer(BaseRenderer):
             supported_formats={"svg"},
             capabilities={RendererCapability.LOCAL_RENDERING},
         )
-    
+
     def render(self, mermaid_code, format, theme=None, config=None, **options):
         # Your custom rendering logic here
         content = f"<svg>Custom render of: {mermaid_code}</svg>"
-        
+
         return RenderResult(
             content=content,
             format=format,
@@ -136,7 +136,7 @@ class MyCustomRenderer(BaseRenderer):
             render_time=0.1,
             success=True,
         )
-    
+
     def is_available(self):
         return True  # Check if your renderer dependencies are available
 

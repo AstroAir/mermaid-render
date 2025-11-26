@@ -370,13 +370,13 @@
         grid-template-columns: 1fr;
         grid-template-rows: auto 1fr auto;
     }
-    
+
     .toolbox-panel,
     .properties-panel {
         height: 200px;
         overflow-y: auto;
     }
-    
+
     .bottom-panel {
         height: 250px;
     }

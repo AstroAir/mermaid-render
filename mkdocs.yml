@@ -142,51 +142,51 @@ plugins:
 nav:
   - Home: index.md
   - Getting Started:
-    - getting-started/index.md
-    - Installation: getting-started/installation.md
-    - Quick Start: getting-started/quick-start.md
-    - Basic Usage: getting-started/basic-usage.md
+      - getting-started/index.md
+      - Installation: getting-started/installation.md
+      - Quick Start: getting-started/quick-start.md
+      - Basic Usage: getting-started/basic-usage.md
   - User Guide:
-    - user-guide/index.md
-    - Diagram Types: user-guide/diagram-types.md
-    - Rendering: user-guide/rendering.md
-    - Themes: user-guide/themes.md
-    - Configuration: user-guide/configuration.md
-    - Validation: user-guide/validation.md
-    - Export Formats: user-guide/export-formats.md
-    - Advanced Features: user-guide/advanced-features.md
-    - AI Features: user-guide/ai-features.md
-    - Caching: user-guide/caching.md
-    - Collaboration: user-guide/collaboration.md
-    - Interactive Features: user-guide/interactive.md
-    - Templates: user-guide/templates.md
+      - user-guide/index.md
+      - Diagram Types: user-guide/diagram-types.md
+      - Rendering: user-guide/rendering.md
+      - Themes: user-guide/themes.md
+      - Configuration: user-guide/configuration.md
+      - Validation: user-guide/validation.md
+      - Export Formats: user-guide/export-formats.md
+      - Advanced Features: user-guide/advanced-features.md
+      - AI Features: user-guide/ai-features.md
+      - Caching: user-guide/caching.md
+      - Collaboration: user-guide/collaboration.md
+      - Interactive Features: user-guide/interactive.md
+      - Templates: user-guide/templates.md
   - Examples:
-    - examples/index.md
-    - Flowcharts: examples/flowcharts.md
-    - Sequence Diagrams: examples/sequence-diagrams.md
-    - Class Diagrams: examples/class-diagrams.md
-    - State Diagrams: examples/state-diagrams.md
-    - Other Types: examples/other-types.md
+      - examples/index.md
+      - Flowcharts: examples/flowcharts.md
+      - Sequence Diagrams: examples/sequence-diagrams.md
+      - Class Diagrams: examples/class-diagrams.md
+      - State Diagrams: examples/state-diagrams.md
+      - Other Types: examples/other-types.md
   - API Reference:
-    - api-reference/index.md
-    - Core: api-reference/core.md
-    - Models: api-reference/models.md
-    - Renderers: api-reference/renderers.md
-    - Utils: api-reference/utils.md
-    - Validators: api-reference/validators.md
-    - Config: api-reference/config.md
-    - Exceptions: api-reference/exceptions.md
-    - AI Features: api-reference/ai.md
-    - Cache System: api-reference/cache.md
-    - Collaboration: api-reference/collaboration.md
-    - Interactive: api-reference/interactive.md
-    - Templates: api-reference/templates.md
+      - api-reference/index.md
+      - Core: api-reference/core.md
+      - Models: api-reference/models.md
+      - Renderers: api-reference/renderers.md
+      - Utils: api-reference/utils.md
+      - Validators: api-reference/validators.md
+      - Config: api-reference/config.md
+      - Exceptions: api-reference/exceptions.md
+      - AI Features: api-reference/ai.md
+      - Cache System: api-reference/cache.md
+      - Collaboration: api-reference/collaboration.md
+      - Interactive: api-reference/interactive.md
+      - Templates: api-reference/templates.md
   - Development:
-    - development/index.md
-    - Contributing: development/contributing.md
-    - Development Setup: development/setup.md
-    - Testing: development/testing.md
-    - Release Process: development/release.md
+      - development/index.md
+      - Contributing: development/contributing.md
+      - Development Setup: development/setup.md
+      - Testing: development/testing.md
+      - Release Process: development/release.md
 
 # Extra
 extra:

@@ -5,10 +5,9 @@ This module provides an object-oriented interface for creating UML class diagram
 with support for classes, interfaces, relationships, and methods.
 """
 
-from typing import Dict, List, Optional
-
 from ..core import MermaidDiagram
 from ..exceptions import DiagramError
+from .constants import VISIBILITY_SYMBOLS
 
 
 class ClassMethod:
@@ -27,8 +26,8 @@ class ClassMethod:
         self,
         name: str,
         visibility: str = "public",
-        return_type: Optional[str] = None,
-        parameters: Optional[List[str]] = None,
+        return_type: str | None = None,
+        parameters: list[str] | None = None,
         is_static: bool = False,
         is_abstract: bool = False,
     ) -> None:
@@ -42,13 +41,7 @@ class ClassMethod:
 
     def to_mermaid(self) -> str:
         """Return the Mermaid syntax fragment for this method."""
-        visibility_map = {
-            "public": "+",
-            "private": "-",
-            "protected": "#",
-            "package": "~",
-        }
-        vis_symbol = visibility_map.get(self.visibility, "+")
+        vis_symbol = VISIBILITY_SYMBOLS.get(self.visibility, "+")
 
         params_str = ", ".join(self.parameters)
         method_str = f"{vis_symbol}{self.name}({params_str})"
@@ -77,7 +70,7 @@ class ClassAttribute:
     def __init__(
         self,
         name: str,
-        type: Optional[str] = None,
+        type: str | None = None,
         visibility: str = "public",
         is_static: bool = False,
     ) -> None:
@@ -89,13 +82,7 @@ class ClassAttribute:
 
     def to_mermaid(self) -> str:
         """Return the Mermaid syntax fragment for this attribute."""
-        visibility_map = {
-            "public": "+",
-            "private": "-",
-            "protected": "#",
-            "package": "~",
-        }
-        vis_symbol = visibility_map.get(self.visibility, "+")
+        vis_symbol = VISIBILITY_SYMBOLS.get(self.visibility, "+")
 
         attr_str = f"{vis_symbol}{self.name}"
         if self.type:
@@ -123,15 +110,15 @@ class ClassDefinition:
         name: str,
         is_abstract: bool = False,
         is_interface: bool = False,
-        stereotype: Optional[str] = None,
+        stereotype: str | None = None,
     ) -> None:
         """Create a new ClassDefinition with optional flags and stereotype."""
         self.name = name
         self.is_abstract = is_abstract
         self.is_interface = is_interface
         self.stereotype = stereotype
-        self.attributes: List[ClassAttribute] = []
-        self.methods: List[ClassMethod] = []
+        self.attributes: list[ClassAttribute] = []
+        self.methods: list[ClassMethod] = []
 
     def add_attribute(self, attribute: ClassAttribute) -> None:
         """Append an attribute to this class definition."""
@@ -141,7 +128,7 @@ class ClassDefinition:
         """Append a method to this class definition."""
         self.methods.append(method)
 
-    def to_mermaid(self) -> List[str]:
+    def to_mermaid(self) -> list[str]:
         """Build and return the Mermaid class block as a list of lines."""
         lines = []
 
@@ -205,9 +192,9 @@ class ClassRelationship:
         from_class: str,
         to_class: str,
         relationship_type: str,
-        label: Optional[str] = None,
-        from_cardinality: Optional[str] = None,
-        to_cardinality: Optional[str] = None,
+        label: str | None = None,
+        from_cardinality: str | None = None,
+        to_cardinality: str | None = None,
     ) -> None:
         """Initialize a ClassRelationship and validate the relationship type."""
         self.from_class = from_class
@@ -250,11 +237,11 @@ class ClassDiagram(MermaidDiagram):
     to generate the final Mermaid diagram text.
     """
 
-    def __init__(self, title: Optional[str] = None) -> None:
+    def __init__(self, title: str | None = None) -> None:
         """Initialize an empty class diagram with an optional title."""
         super().__init__(title)
-        self.classes: Dict[str, ClassDefinition] = {}
-        self.relationships: List[ClassRelationship] = []
+        self.classes: dict[str, ClassDefinition] = {}
+        self.relationships: list[ClassRelationship] = []
 
     def get_diagram_type(self) -> str:
         """Return the Mermaid diagram header keyword ('classDiagram')."""
@@ -265,7 +252,7 @@ class ClassDiagram(MermaidDiagram):
         name: str,
         is_abstract: bool = False,
         is_interface: bool = False,
-        stereotype: Optional[str] = None,
+        stereotype: str | None = None,
     ) -> ClassDefinition:
         """Create and register a new class; raises if the name already exists."""
         if name in self.classes:
@@ -280,9 +267,9 @@ class ClassDiagram(MermaidDiagram):
         from_class: str,
         to_class: str,
         relationship_type: str,
-        label: Optional[str] = None,
-        from_cardinality: Optional[str] = None,
-        to_cardinality: Optional[str] = None,
+        label: str | None = None,
+        from_cardinality: str | None = None,
+        to_cardinality: str | None = None,
     ) -> ClassRelationship:
         """Create and register a new relationship; raises if classes are missing."""
         if from_class not in self.classes:

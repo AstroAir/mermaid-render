@@ -9,9 +9,7 @@ import logging
 import traceback
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional, Type, Union
-
-from ..exceptions import RenderingError
+from typing import Any
 
 
 class ErrorSeverity(Enum):
@@ -40,15 +38,15 @@ class ErrorCategory(Enum):
 class ErrorContext:
     """Context information for an error."""
 
-    renderer_name: Optional[str] = None
-    format: Optional[str] = None
-    diagram_type: Optional[str] = None
-    config: Optional[Dict[str, Any]] = None
-    input_size: Optional[int] = None
+    renderer_name: str | None = None
+    format: str | None = None
+    diagram_type: str | None = None
+    config: dict[str, Any] | None = None
+    input_size: int | None = None
     attempt_number: int = 1
     total_attempts: int = 1
     elapsed_time: float = 0.0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -60,10 +58,10 @@ class ErrorDetails:
     severity: ErrorSeverity
     error_code: str
     context: ErrorContext
-    original_exception: Optional[Exception] = None
-    stack_trace: Optional[str] = None
-    recovery_suggestions: List[str] = field(default_factory=list)
-    related_errors: List["ErrorDetails"] = field(default_factory=list)
+    original_exception: Exception | None = None
+    stack_trace: str | None = None
+    recovery_suggestions: list[str] = field(default_factory=list)
+    related_errors: list["ErrorDetails"] = field(default_factory=list)
 
 
 class ErrorHandler:
@@ -196,7 +194,7 @@ class ErrorHandler:
         exception: Exception,
         category: ErrorCategory,
         context: ErrorContext,
-    ) -> List[str]:
+    ) -> list[str]:
         """Get recovery suggestions for an error."""
         suggestions = []
         message = str(exception).lower()
@@ -204,65 +202,80 @@ class ErrorHandler:
         # Category-specific suggestions
         if category == ErrorCategory.DEPENDENCY:
             if "playwright" in message:
-                suggestions.extend([
-                    "Install Playwright: pip install playwright",
-                    "Install browser: playwright install chromium",
-                    "Try using a different renderer (svg, png, pdf)",
-                ])
+                suggestions.extend(
+                    [
+                        "Install Playwright: pip install playwright",
+                        "Install browser: playwright install chromium",
+                        "Try using a different renderer (svg, png, pdf)",
+                    ]
+                )
             elif "graphviz" in message:
-                suggestions.extend([
-                    "Install Graphviz: pip install graphviz",
-                    "Install Graphviz system binary from https://graphviz.org/download/",
-                    "Use alternative renderers for flowcharts",
-                ])
+                suggestions.extend(
+                    [
+                        "Install Graphviz: pip install graphviz",
+                        "Install Graphviz system binary from https://graphviz.org/download/",
+                        "Use alternative renderers for flowcharts",
+                    ]
+                )
             elif "mmdc" in message or "node" in message:
-                suggestions.extend([
-                    "Install Node.js from https://nodejs.org/",
-                    "Install Mermaid CLI: npm install -g @mermaid-js/mermaid-cli",
-                    "Use alternative renderers (svg, playwright)",
-                ])
+                suggestions.extend(
+                    [
+                        "Install Node.js from https://nodejs.org/",
+                        "Install Mermaid CLI: npm install -g @mermaid-js/mermaid-cli",
+                        "Use alternative renderers (svg, playwright)",
+                    ]
+                )
 
         elif category == ErrorCategory.NETWORK:
-            suggestions.extend([
-                "Check internet connection",
-                "Verify server URL is accessible",
-                "Try using local renderers (playwright, nodejs)",
-                "Check firewall settings",
-            ])
+            suggestions.extend(
+                [
+                    "Check internet connection",
+                    "Verify server URL is accessible",
+                    "Try using local renderers (playwright, nodejs)",
+                    "Check firewall settings",
+                ]
+            )
 
         elif category == ErrorCategory.TIMEOUT:
-            suggestions.extend([
-                "Increase timeout value in configuration",
-                "Simplify the diagram",
-                "Try a different renderer",
-                "Check system resources",
-            ])
+            suggestions.extend(
+                [
+                    "Increase timeout value in configuration",
+                    "Simplify the diagram",
+                    "Try a different renderer",
+                    "Check system resources",
+                ]
+            )
 
         elif category == ErrorCategory.SYNTAX:
-            suggestions.extend([
-                "Validate Mermaid syntax using online editor",
-                "Check for unsupported diagram features",
-                "Verify diagram type is supported by the renderer",
-                "Try a different renderer that supports more features",
-            ])
+            suggestions.extend(
+                [
+                    "Validate Mermaid syntax using online editor",
+                    "Check for unsupported diagram features",
+                    "Verify diagram type is supported by the renderer",
+                    "Try a different renderer that supports more features",
+                ]
+            )
 
         elif category == ErrorCategory.CONFIGURATION:
-            suggestions.extend([
-                "Check configuration values are valid",
-                "Verify required configuration keys are present",
-                "Reset to default configuration",
-                "Check configuration schema documentation",
-            ])
+            suggestions.extend(
+                [
+                    "Check configuration values are valid",
+                    "Verify required configuration keys are present",
+                    "Reset to default configuration",
+                    "Check configuration schema documentation",
+                ]
+            )
 
         # Renderer-specific suggestions
         if context.renderer_name:
             renderer_suggestions = self._recovery_strategies.get(
-                context.renderer_name, [])
+                context.renderer_name, []
+            )
             suggestions.extend(renderer_suggestions)
 
         return suggestions
 
-    def _initialize_error_patterns(self) -> Dict[str, ErrorCategory]:
+    def _initialize_error_patterns(self) -> dict[str, ErrorCategory]:
         """Initialize error pattern mappings."""
         return {
             "timeout": ErrorCategory.TIMEOUT,
@@ -285,7 +298,7 @@ class ErrorHandler:
             "disk": ErrorCategory.SYSTEM,
         }
 
-    def _initialize_recovery_strategies(self) -> Dict[str, List[str]]:
+    def _initialize_recovery_strategies(self) -> dict[str, list[str]]:
         """Initialize renderer-specific recovery strategies."""
         return {
             "svg": [
@@ -376,14 +389,17 @@ class ErrorHandler:
             )
         if error_details.context.elapsed_time > 0:
             report_lines.append(
-                f"  Elapsed Time: {error_details.context.elapsed_time:.2f}s")
+                f"  Elapsed Time: {error_details.context.elapsed_time:.2f}s"
+            )
 
         # Add recovery suggestions
         if error_details.recovery_suggestions:
-            report_lines.extend([
-                "",
-                "Recovery Suggestions:",
-            ])
+            report_lines.extend(
+                [
+                    "",
+                    "Recovery Suggestions:",
+                ]
+            )
             for i, suggestion in enumerate(error_details.recovery_suggestions, 1):
                 report_lines.append(f"  {i}. {suggestion}")
 
@@ -391,7 +407,7 @@ class ErrorHandler:
 
 
 # Global error handler instance
-_global_error_handler: Optional[ErrorHandler] = None
+_global_error_handler: ErrorHandler | None = None
 
 
 def get_global_error_handler() -> ErrorHandler:

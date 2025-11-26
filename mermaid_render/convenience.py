@@ -7,18 +7,18 @@ simple to use and require minimal configuration.
 """
 
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import Any
 
 from .core import MermaidConfig, MermaidRenderer
 
 
 def quick_render(
     diagram_code: str,
-    output_path: Optional[Union[str, Path]] = None,
+    output_path: str | Path | None = None,
     format: str = "svg",
-    theme: Optional[str] = None,
-    config: Optional[Dict[str, Any]] = None,
-) -> Union[str, bytes]:
+    theme: str | None = None,
+    config: dict[str, Any] | None = None,
+) -> str | bytes:
     """
     Quick utility function to render Mermaid diagram code.
 
@@ -96,8 +96,8 @@ def quick_render(
         ... except ValidationError as e:
         ...     print(f"Invalid diagram: {e}")
     """
-    from .validators import MermaidValidator
     from .exceptions import ValidationError
+    from .validators import MermaidValidator
 
     # Validate the diagram code
     validator = MermaidValidator()
@@ -131,10 +131,10 @@ def quick_render(
 
 def render_to_file(
     diagram_code: str,
-    output_path: Union[str, Path],
-    format: Optional[str] = None,
-    theme: Optional[str] = None,
-    config: Optional[Dict[str, Any]] = None,
+    output_path: str | Path,
+    format: str | None = None,
+    theme: str | None = None,
+    config: dict[str, Any] | None = None,
 ) -> bool:
     """
     Render diagram directly to file.
@@ -159,8 +159,8 @@ def render_to_file(
     try:
         # Auto-detect format from file extension if not provided
         if format is None:
-            output_path = Path(output_path)
-            format = output_path.suffix.lstrip('.').lower()
+            path_obj = Path(output_path)
+            format = path_obj.suffix.lstrip(".").lower()
             if format not in ["svg", "png", "pdf"]:
                 format = "svg"
 

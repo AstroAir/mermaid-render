@@ -8,18 +8,18 @@ natural language descriptions for diagram generation.
 import re
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Set
+from typing import Any
 
 
 @dataclass
 class EntityExtraction:
     """Result of entity extraction from text."""
 
-    entities: List[str]
-    entity_types: Dict[str, str]
-    relationships: List[Dict[str, str]]
+    entities: list[str]
+    entity_types: dict[str, str]
+    relationships: list[dict[str, str]]
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "entities": self.entities,
             "entity_types": self.entity_types,
@@ -33,9 +33,9 @@ class IntentClassification:
 
     intent: str
     confidence: float
-    sub_intents: List[str] = field(default_factory=list)
+    sub_intents: list[str] = field(default_factory=list)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "intent": self.intent,
             "confidence": self.confidence,
@@ -48,15 +48,15 @@ class TextAnalysis:
     """Complete analysis of input text."""
 
     text: str
-    keywords: List[str]
-    entities: Optional[EntityExtraction]
-    intent: Optional[IntentClassification]
+    keywords: list[str]
+    entities: EntityExtraction | None
+    intent: IntentClassification | None
     complexity_score: float
     domain: str
     language: str = "en"
     processed_at: datetime = field(default_factory=datetime.now)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "text": self.text,
             "keywords": self.keywords,
@@ -79,10 +79,10 @@ class NLProcessor:
 
     def __init__(self) -> None:
         """Initialize NL processor."""
-        self.domain_keywords: Dict[str, List[str]] = self._load_domain_keywords()
-        self.intent_patterns: Dict[str, List[str]] = self._load_intent_patterns()
-        self.entity_patterns: Dict[str, List[str]] = self._load_entity_patterns()
-        self.stopwords: Set[str] = self._load_stopwords()
+        self.domain_keywords: dict[str, list[str]] = self._load_domain_keywords()
+        self.intent_patterns: dict[str, list[str]] = self._load_intent_patterns()
+        self.entity_patterns: dict[str, list[str]] = self._load_entity_patterns()
+        self.stopwords: set[str] = self._load_stopwords()
 
     def analyze_text(self, text: str) -> TextAnalysis:
         """
@@ -118,7 +118,7 @@ class NLProcessor:
             domain=domain,
         )
 
-    def extract_keywords(self, text: str) -> List[str]:
+    def extract_keywords(self, text: str) -> list[str]:
         """
         Extract keywords from text.
 
@@ -135,8 +135,8 @@ class NLProcessor:
         keywords = [word for word in words if word not in self.stopwords]
 
         # Remove duplicates while preserving order
-        seen: Set[str] = set()
-        unique_keywords: List[str] = []
+        seen: set[str] = set()
+        unique_keywords: list[str] = []
         for keyword in keywords:
             if keyword not in seen:
                 seen.add(keyword)
@@ -164,9 +164,9 @@ class NLProcessor:
         Returns:
             Entity extraction result
         """
-        entities: List[str] = []
-        entity_types: Dict[str, str] = {}
-        relationships: List[Dict[str, str]] = []
+        entities: list[str] = []
+        entity_types: dict[str, str] = {}
+        relationships: list[dict[str, str]] = []
 
         # Extract using patterns
         for entity_type, patterns in self.entity_patterns.items():
@@ -202,7 +202,7 @@ class NLProcessor:
         text_lower = text.lower()
 
         # Score each intent based on patterns
-        intent_scores: Dict[str, float] = {}
+        intent_scores: dict[str, float] = {}
 
         for intent, patterns in self.intent_patterns.items():
             score = 0.0
@@ -301,7 +301,7 @@ class NLProcessor:
 
         return min(score, 1.0)
 
-    def determine_domain(self, text: str, keywords: List[str]) -> str:
+    def determine_domain(self, text: str, keywords: list[str]) -> str:
         """
         Determine the domain/field of the text.
 
@@ -313,7 +313,7 @@ class NLProcessor:
             Determined domain
         """
         text_lower = text.lower()
-        domain_scores: Dict[str, float] = {}
+        domain_scores: dict[str, float] = {}
 
         # Score domains based on keyword matches
         for domain, domain_keywords in self.domain_keywords.items():
@@ -335,9 +335,9 @@ class NLProcessor:
 
         return max(domain_scores.items(), key=lambda x: x[1])[0]
 
-    def _score_keywords(self, keywords: List[str], text: str) -> Dict[str, float]:
+    def _score_keywords(self, keywords: list[str], text: str) -> dict[str, float]:
         """Score keywords by importance."""
-        scores: Dict[str, float] = {}
+        scores: dict[str, float] = {}
         text_lower = text.lower()
 
         for keyword in keywords:
@@ -365,10 +365,10 @@ class NLProcessor:
         return scores
 
     def _extract_relationships(
-        self, text: str, entities: List[str]
-    ) -> List[Dict[str, str]]:
+        self, text: str, entities: list[str]
+    ) -> list[dict[str, str]]:
         """Extract relationships between entities."""
-        relationships: List[Dict[str, str]] = []
+        relationships: list[dict[str, str]] = []
 
         # Simple relationship patterns
         relationship_patterns = [
@@ -395,7 +395,7 @@ class NLProcessor:
 
         return relationships
 
-    def _load_domain_keywords(self) -> Dict[str, List[str]]:
+    def _load_domain_keywords(self) -> dict[str, list[str]]:
         """Load domain-specific keywords."""
         return {
             "technical": [
@@ -479,7 +479,7 @@ class NLProcessor:
             ],
         }
 
-    def _load_intent_patterns(self) -> Dict[str, List[str]]:
+    def _load_intent_patterns(self) -> dict[str, list[str]]:
         """Load intent classification patterns."""
         return {
             "create_diagram": [
@@ -522,7 +522,7 @@ class NLProcessor:
             ],
         }
 
-    def _load_entity_patterns(self) -> Dict[str, List[str]]:
+    def _load_entity_patterns(self) -> dict[str, list[str]]:
         """Load entity extraction patterns."""
         return {
             "actor": [
@@ -543,7 +543,7 @@ class NLProcessor:
             ],
         }
 
-    def _load_stopwords(self) -> Set[str]:
+    def _load_stopwords(self) -> set[str]:
         """Load stopwords for keyword extraction."""
         return {
             "a",

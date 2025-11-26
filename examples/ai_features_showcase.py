@@ -7,7 +7,7 @@ diagram generation, code analysis, optimization, and intelligent suggestions.
 """
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Protocol, TypedDict, runtime_checkable
+from typing import Any, TypedDict
 
 from mermaid_render import (
     FlowchartDiagram,
@@ -18,58 +18,82 @@ from mermaid_render import (
 # AI features (optional imports with fallbacks)
 AI_AVAILABLE = False
 
+
 # Minimal type shims to satisfy static analysis about returned attributes
 class GenerationSuggestion(TypedDict, total=False):
     description: str
 
+
 class GenerationResult(TypedDict, total=False):
     confidence_score: float
     diagram_code: str
-    suggestions: List[GenerationSuggestion]
-    metadata: Dict[str, Any]
+    suggestions: list[GenerationSuggestion]
+    metadata: dict[str, Any]
+
 
 class OptimizationItem(TypedDict, total=False):
     description: str
 
+
 class OptimizationResult(TypedDict, total=False):
     optimized_code: str
-    improvements: List[OptimizationItem]
+    improvements: list[OptimizationItem]
+
 
 class ScoreInfo(TypedDict, total=False):
     overall_score: float
     readability: float
     maintainability: float
 
+
 class RecommendationItem(TypedDict, total=False):
     description: str
     priority: Any  # could be Enum
 
+
 class AnalysisResult(TypedDict, total=False):
     complexity_analysis: ScoreInfo
     quality_metrics: ScoreInfo
-    recommendations: List[RecommendationItem]
+    recommendations: list[RecommendationItem]
+
 
 # Optional AI symbols
-DiagramAnalyzer: Optional[Any] = None
-DiagramGenerator: Optional[Any] = None
-DiagramOptimizer: Optional[Any] = None
-NLProcessor: Optional[Any] = None
-SuggestionEngine: Optional[Any] = None
-analyze_diagram: Optional[Any] = None
-generate_from_text: Optional[Any] = None
-get_suggestions: Optional[Any] = None
-optimize_diagram: Optional[Any] = None
+DiagramAnalyzer: Any | None = None
+DiagramGenerator: Any | None = None
+DiagramOptimizer: Any | None = None
+NLProcessor: Any | None = None
+SuggestionEngine: Any | None = None
+analyze_diagram: Any | None = None
+generate_from_text: Any | None = None
+get_suggestions: Any | None = None
+optimize_diagram: Any | None = None
 
 try:
     from mermaid_render.ai import (
         DiagramAnalyzer as _DiagramAnalyzer,
+    )
+    from mermaid_render.ai import (
         DiagramGenerator as _DiagramGenerator,
+    )
+    from mermaid_render.ai import (
         DiagramOptimizer as _DiagramOptimizer,
+    )
+    from mermaid_render.ai import (
         NLProcessor as _NLProcessor,
+    )
+    from mermaid_render.ai import (
         SuggestionEngine as _SuggestionEngine,
+    )
+    from mermaid_render.ai import (
         analyze_diagram as _analyze_diagram,
+    )
+    from mermaid_render.ai import (
         generate_from_text as _generate_from_text,
+    )
+    from mermaid_render.ai import (
         get_suggestions as _get_suggestions,
+    )
+    from mermaid_render.ai import (
         optimize_diagram as _optimize_diagram,
     )
 
@@ -96,7 +120,9 @@ def create_output_dir() -> Path:
     return output_dir
 
 
-def _save_mermaid_code(renderer: MermaidRenderer, mermaid_code: str, path: Path) -> None:
+def _save_mermaid_code(
+    renderer: MermaidRenderer, mermaid_code: str, path: Path
+) -> None:
     """
     Helper to save raw Mermaid code when renderer has no save_raw().
     Use MermaidRenderer.save on a minimal diagram wrapper if needed.
@@ -125,14 +151,18 @@ def _save_mermaid_code(renderer: MermaidRenderer, mermaid_code: str, path: Path)
             render_method(code, path)
         else:
             # If no viable method, raise a clear error
-            raise RuntimeError("Renderer cannot save raw Mermaid code on this platform.")
+            raise RuntimeError(
+                "Renderer cannot save raw Mermaid code on this platform."
+            )
     else:
         # Attempt Flowchart save as a diagram if renderer can only save diagram objects
         # This still won't help without parsing; thus rely on render_to_file above.
         if callable(render_method):
             render_method(code, path)
         else:
-            raise RuntimeError("Renderer cannot save raw Mermaid code on this platform.")
+            raise RuntimeError(
+                "Renderer cannot save raw Mermaid code on this platform."
+            )
 
 
 def natural_language_generation_example(output_dir: Path) -> None:
@@ -209,16 +239,16 @@ class UserService:
         self.db.save(user)
         self.send_welcome_email(user)
         return user
-    
+
     def authenticate(self, email, password):
         user = self.db.find_by_email(email)
         if user and user.check_password(password):
             return self.generate_token(user)
         raise AuthenticationError("Invalid credentials")
-    
+
     def send_welcome_email(self, user):
         EmailService.send(user.email, "Welcome!")
-    
+
     def generate_token(self, user):
         return JWTService.create_token(user.id)
 
@@ -252,7 +282,7 @@ class JWTService:
                 raise ValueError("No diagram code returned by code analysis.")
             _save_mermaid_code(renderer, code, output_path)
 
-            print(f"✅ Generated class diagram from code analysis")
+            print("✅ Generated class diagram from code analysis")
             print(f"📁 Saved to {output_path}")
             print(f"🎯 Confidence: {confidence:.2f}")
 
@@ -330,7 +360,7 @@ def diagram_optimization_example(output_dir: Path) -> None:
                 raise ValueError("No optimized code returned by optimizer.")
             _save_mermaid_code(renderer, code, optimized_path)
 
-            print(f"✅ Diagram optimized successfully")
+            print("✅ Diagram optimized successfully")
             print(f"📁 Optimized diagram saved to {optimized_path}")
             print(f"🔧 Improvements applied: {len(improvements)}")
 
@@ -399,7 +429,7 @@ def diagram_analysis_example(output_dir: Path) -> None:
         print(f"📁 Analyzed diagram saved to {diagram_path}")
 
         # Display analysis results
-        print(f"📊 Diagram Analysis Results:")
+        print("📊 Diagram Analysis Results:")
 
         complexity = analysis.get("complexity_analysis", {}) or {}
         quality = analysis.get("quality_metrics", {}) or {}
@@ -453,7 +483,7 @@ def suggestion_engine_example(output_dir: Path) -> None:
         engine = SuggestionEngine()
 
         if callable(get_suggestions):
-            suggestions: List[Dict[str, Any]] = get_suggestions(flowchart)
+            suggestions: list[dict[str, Any]] = get_suggestions(flowchart)
         elif hasattr(engine, "suggest"):
             suggestions = engine.suggest(flowchart)
         else:
@@ -470,10 +500,16 @@ def suggestion_engine_example(output_dir: Path) -> None:
             print(f"💡 AI Suggestions ({len(suggestions)}):")
 
             for i, suggestion in enumerate(suggestions[:5], 1):  # Show top 5
-                desc = getattr(suggestion, "description", None) or suggestion.get("description", "")
-                st = getattr(suggestion, "suggestion_type", None) or suggestion.get("suggestion_type")
+                desc = getattr(suggestion, "description", None) or suggestion.get(
+                    "description", ""
+                )
+                st = getattr(suggestion, "suggestion_type", None) or suggestion.get(
+                    "suggestion_type"
+                )
                 pr = getattr(suggestion, "priority", None) or suggestion.get("priority")
-                hint = getattr(suggestion, "implementation_hint", None) or suggestion.get("implementation_hint")
+                hint = getattr(
+                    suggestion, "implementation_hint", None
+                ) or suggestion.get("implementation_hint")
 
                 st_val = getattr(st, "value", st)
                 pr_val = getattr(pr, "value", pr)

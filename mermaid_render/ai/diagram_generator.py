@@ -9,7 +9,7 @@ import re
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from .nl_processor import NLProcessor, TextAnalysis
 from .providers import AIProvider, OpenAIProvider
@@ -42,7 +42,7 @@ class GenerationConfig:
     complexity_level: str = "medium"  # simple, medium, complex
     target_audience: str = "general"  # technical, business, general
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return {
             "diagram_type": self.diagram_type.value,
@@ -63,12 +63,12 @@ class GenerationResult:
     diagram_code: str
     diagram_type: DiagramType
     confidence_score: float
-    config: Optional[GenerationConfig] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    suggestions: List[str] = field(default_factory=list)
+    config: GenerationConfig | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
+    suggestions: list[str] = field(default_factory=list)
     generated_at: datetime = field(default_factory=datetime.now)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return {
             "diagram_code": self.diagram_code,
@@ -91,8 +91,8 @@ class DiagramGenerator:
 
     def __init__(
         self,
-        ai_provider: Optional[AIProvider] = None,
-        nl_processor: Optional[NLProcessor] = None,
+        ai_provider: AIProvider | None = None,
+        nl_processor: NLProcessor | None = None,
     ):
         """
         Initialize diagram generator.
@@ -111,7 +111,7 @@ class DiagramGenerator:
     def from_text(
         self,
         text: str,
-        config: Optional[GenerationConfig] = None,
+        config: GenerationConfig | None = None,
     ) -> GenerationResult:
         """
         Generate diagram from natural language text.
@@ -159,9 +159,9 @@ class DiagramGenerator:
 
     def from_data(
         self,
-        data: Dict[str, Any],
+        data: dict[str, Any],
         data_type: str,
-        config: Optional[GenerationConfig] = None,
+        config: GenerationConfig | None = None,
     ) -> GenerationResult:
         """
         Generate diagram from structured data.
@@ -187,7 +187,7 @@ class DiagramGenerator:
         self,
         code: str,
         language: str,
-        config: Optional[GenerationConfig] = None,
+        config: GenerationConfig | None = None,
     ) -> GenerationResult:
         """
         Generate diagram from source code.
@@ -216,7 +216,7 @@ class DiagramGenerator:
         self,
         existing_diagram: str,
         improvement_request: str,
-        config: Optional[GenerationConfig] = None,
+        config: GenerationConfig | None = None,
     ) -> GenerationResult:
         """
         Improve an existing diagram based on feedback.
@@ -266,8 +266,8 @@ class DiagramGenerator:
         )
 
     def get_suggestions(
-        self, diagram_code: str, context: Optional[Dict[str, Any]] = None
-    ) -> List[Dict[str, Any]]:
+        self, diagram_code: str, context: dict[str, Any] | None = None
+    ) -> list[dict[str, Any]]:
         """
         Get AI-powered suggestions for improving a diagram.
 
@@ -287,10 +287,43 @@ class DiagramGenerator:
 
     def _determine_diagram_type(self, analysis: TextAnalysis) -> DiagramType:
         """Determine the best diagram type for the given analysis."""
-        # Simple heuristics based on keywords and intent
+        # Use both keywords and intent for better diagram type determination
         keywords = analysis.keywords
-        # intent = analysis.intent.intent if analysis.intent else ""  # TODO: Use intent in future
+        intent = analysis.intent.intent if analysis.intent else ""
 
+        # First, check intent for explicit diagram type requests
+        if intent:
+            intent_lower = intent.lower()
+            if any(
+                word in intent_lower
+                for word in ["flowchart", "flow chart", "process flow"]
+            ):
+                return DiagramType.FLOWCHART
+            elif any(
+                word in intent_lower
+                for word in ["sequence", "interaction", "communication"]
+            ):
+                return DiagramType.SEQUENCE
+            elif any(
+                word in intent_lower
+                for word in ["class diagram", "uml", "object model"]
+            ):
+                return DiagramType.CLASS
+            elif any(
+                word in intent_lower for word in ["state", "state machine", "lifecycle"]
+            ):
+                return DiagramType.STATE
+            elif any(
+                word in intent_lower
+                for word in ["entity relationship", "er diagram", "database"]
+            ):
+                return DiagramType.ER
+            elif any(
+                word in intent_lower for word in ["gantt", "timeline", "schedule"]
+            ):
+                return DiagramType.GANTT
+
+        # Fallback to keyword-based heuristics if intent doesn't match
         # Process-related keywords suggest flowchart
         process_keywords = ["process", "flow", "step", "procedure", "workflow"]
         if any(keyword in keywords for keyword in process_keywords):
@@ -504,7 +537,7 @@ Include only the diagram code, no additional explanation.
         diagram_code: str,
         analysis: TextAnalysis,
         config: GenerationConfig,
-    ) -> List[str]:
+    ) -> list[str]:
         """Generate suggestions for diagram improvement."""
         suggestions = []
 
@@ -591,7 +624,7 @@ Include only the diagram code, no additional explanation.
         else:
             return DiagramType.FLOWCHART
 
-    def _load_generation_templates(self) -> Dict[str, str]:
+    def _load_generation_templates(self) -> dict[str, str]:
         """Load generation templates."""
         return {
             "flowchart": "Generate a flowchart diagram",
@@ -600,7 +633,7 @@ Include only the diagram code, no additional explanation.
             "default": "Generate an appropriate diagram",
         }
 
-    def _load_generation_prompts(self) -> Dict[str, str]:
+    def _load_generation_prompts(self) -> dict[str, str]:
         """Load generation prompts."""
         return {
             "flowchart": """
@@ -632,12 +665,12 @@ Choose the best diagram type and create clear, well-structured output.
 """,
         }
 
-    def _data_to_description(self, data: Dict[str, Any], data_type: str) -> str:
+    def _data_to_description(self, data: dict[str, Any], data_type: str) -> str:
         """Convert structured data to natural language description."""
         # Simplified implementation
         return f"Create a diagram representing the {data_type} data structure with the following elements: {list(data.keys())}"
 
-    def _analyze_code_structure(self, code: str, language: str) -> Dict[str, Any]:
+    def _analyze_code_structure(self, code: str, language: str) -> dict[str, Any]:
         """Analyze code structure."""
         # Simplified implementation
         return {
@@ -647,7 +680,7 @@ Choose the best diagram type and create clear, well-structured output.
             "imports": [],
         }
 
-    def _code_to_description(self, analysis: Dict[str, Any], language: str) -> str:
+    def _code_to_description(self, analysis: dict[str, Any], language: str) -> str:
         """Convert code analysis to description."""
         # Simplified implementation
         return f"Create a diagram showing the structure of this {language} code"

@@ -9,27 +9,32 @@ The enhanced MCP server exposes the full mermaid-render functionality through th
 ## Features
 
 ### Core Functionality
+
 - **Diagram Rendering**: Render Mermaid diagrams to various formats (SVG, PNG, PDF)
 - **Diagram Validation**: Validate Mermaid diagram syntax and structure
 - **Theme Management**: List and apply different themes to diagrams
 
 ### AI-Powered Features
+
 - **AI Diagram Generation**: Generate diagrams from natural language descriptions
 - **Diagram Analysis**: Analyze diagram quality, complexity, and best practices
 - **Diagram Optimization**: Optimize diagrams for better readability and structure
 - **Smart Suggestions**: Get AI-powered suggestions for diagram improvements
 
 ### Template System
+
 - **Template-Based Creation**: Create diagrams from predefined templates
 - **Parameter Validation**: Validate template parameters for consistency
 
 ### MCP Resources
+
 - **Theme Information**: Access detailed theme specifications and colors
 - **Configuration Schema**: Get JSON schema for configuration validation
 - **Documentation**: Access comprehensive diagram type documentation
 - **Examples**: Browse example diagrams for each diagram type
 
 ### MCP Prompts
+
 - **Generation Prompts**: Reusable prompts for diagram generation
 - **Analysis Prompts**: Prompts for diagram quality analysis
 - **Optimization Prompts**: Prompts for diagram improvement suggestions
@@ -37,16 +42,19 @@ The enhanced MCP server exposes the full mermaid-render functionality through th
 ## Installation
 
 1. Install FastMCP (required for MCP functionality):
+
 ```bash
 pip install fastmcp>=2.0.0
 ```
 
 2. Install optional AI features:
+
 ```bash
 pip install mermaid-render[ai]
 ```
 
 3. Install optional template features:
+
 ```bash
 pip install mermaid-render[templates]
 ```
@@ -81,7 +89,7 @@ async def main():
         version="1.0.0",
         description="Mermaid diagram generation and validation"
     )
-    
+
     # Run with stdio transport
     await mcp.run_stdio()
 
@@ -177,13 +185,17 @@ assert result["success"] is True
 ## Troubleshooting
 
 ### FastMCP Not Found
+
 ```
 ImportError: FastMCP is required for MCP server functionality
 ```
+
 Install FastMCP: `pip install fastmcp>=2.0.0`
 
 ### Rendering Errors
+
 Check that the underlying mermaid-render dependencies are properly installed and configured.
 
 ### Network Transport Issues
+
 Ensure the specified host and port are available and not blocked by firewalls.

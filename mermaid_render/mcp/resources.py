@@ -7,18 +7,25 @@ that expose mermaid-render data and configurations through the MCP protocol.
 
 import json
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 try:
-    from fastmcp import FastMCP, Context
-    from fastmcp.resources import ResourceError
+    from fastmcp import Context, FastMCP
+
     _FASTMCP_AVAILABLE = True
 except ImportError:
     # Allow importing for testing without FastMCP
     FastMCP = None
     Context = None
-    ResourceError = Exception
     _FASTMCP_AVAILABLE = False
+
+
+# ResourceError doesn't exist in fastmcp, use generic Exception
+class ResourceError(Exception):
+    """Resource error for MCP operations."""
+
+    pass
+
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +33,7 @@ logger = logging.getLogger(__name__)
 def register_all_resources(mcp: Any) -> None:
     """
     Register all MCP resources with the FastMCP server.
-    
+
     Args:
         mcp: FastMCP server instance
     """
@@ -35,77 +42,77 @@ def register_all_resources(mcp: Any) -> None:
             "FastMCP is required for MCP server functionality. "
             "Install it with: pip install fastmcp"
         )
-    
+
     # Theme resources
     mcp.resource(
         uri="mermaid://themes",
         name="Available Themes",
         description="List of all available Mermaid themes with descriptions",
-        mimeType="application/json"
+        mime_type="application/json",
     )(get_themes_resource)
-    
+
     mcp.resource(
         uri="mermaid://themes/{theme_name}",
         name="Theme Details",
         description="Detailed information about a specific theme",
-        mimeType="application/json"
+        mime_type="application/json",
     )(get_theme_details)
-    
+
     # Template resources
     mcp.resource(
         uri="mermaid://templates",
         name="Available Templates",
         description="List of all available diagram templates",
-        mimeType="application/json"
+        mime_type="application/json",
     )(get_templates_resource)
-    
+
     mcp.resource(
         uri="mermaid://templates/{template_name}",
         name="Template Details",
         description="Detailed information about a specific template",
-        mimeType="application/json"
+        mime_type="application/json",
     )(get_template_details)
-    
+
     # Configuration resources
     mcp.resource(
         uri="mermaid://config/schema",
         name="Configuration Schema",
         description="JSON schema for mermaid-render configuration",
-        mimeType="application/json"
+        mime_type="application/json",
     )(get_config_schema)
-    
+
     mcp.resource(
         uri="mermaid://config/defaults",
         name="Default Configuration",
         description="Default configuration values",
-        mimeType="application/json"
+        mime_type="application/json",
     )(get_default_config)
-    
+
     # Documentation resources
     mcp.resource(
         uri="mermaid://docs/diagram-types",
         name="Diagram Types",
         description="Documentation for all supported diagram types",
-        mimeType="application/json"
+        mime_type="application/json",
     )(get_diagram_types_docs)
-    
+
     mcp.resource(
         uri="mermaid://examples/{diagram_type}",
         name="Diagram Examples",
         description="Example diagrams for each type",
-        mimeType="application/json"
+        mime_type="application/json",
     )(get_diagram_examples)
-    
+
     logger.info("Registered all MCP resources")
 
 
 async def get_themes_resource(ctx: Context) -> str:
     """
     Get all available themes resource.
-    
+
     Args:
         ctx: MCP context
-        
+
     Returns:
         JSON string containing themes data
     """
@@ -119,8 +126,8 @@ async def get_themes_resource(ctx: Context) -> str:
                     "colors": {
                         "primary": "#0066cc",
                         "secondary": "#ffffff",
-                        "background": "#ffffff"
-                    }
+                        "background": "#ffffff",
+                    },
                 },
                 "dark": {
                     "name": "dark",
@@ -128,8 +135,8 @@ async def get_themes_resource(ctx: Context) -> str:
                     "colors": {
                         "primary": "#58a6ff",
                         "secondary": "#f0f6fc",
-                        "background": "#0d1117"
-                    }
+                        "background": "#0d1117",
+                    },
                 },
                 "forest": {
                     "name": "forest",
@@ -137,8 +144,8 @@ async def get_themes_resource(ctx: Context) -> str:
                     "colors": {
                         "primary": "#1f7a1f",
                         "secondary": "#ffffff",
-                        "background": "#f0fff0"
-                    }
+                        "background": "#f0fff0",
+                    },
                 },
                 "neutral": {
                     "name": "neutral",
@@ -146,8 +153,8 @@ async def get_themes_resource(ctx: Context) -> str:
                     "colors": {
                         "primary": "#666666",
                         "secondary": "#ffffff",
-                        "background": "#f8f9fa"
-                    }
+                        "background": "#f8f9fa",
+                    },
                 },
                 "base": {
                     "name": "base",
@@ -155,17 +162,17 @@ async def get_themes_resource(ctx: Context) -> str:
                     "colors": {
                         "primary": "#000000",
                         "secondary": "#ffffff",
-                        "background": "#ffffff"
-                    }
-                }
+                        "background": "#ffffff",
+                    },
+                },
             },
             "default_theme": "default",
             "total_count": 5,
-            "custom_themes_supported": True
+            "custom_themes_supported": True,
         }
-        
+
         return json.dumps(themes_data, indent=2)
-        
+
     except Exception as e:
         logger.error(f"Error getting themes resource: {e}")
         raise ResourceError(f"Failed to get themes: {e}")
@@ -174,11 +181,11 @@ async def get_themes_resource(ctx: Context) -> str:
 async def get_theme_details(ctx: Context, theme_name: str) -> str:
     """
     Get details for a specific theme.
-    
+
     Args:
         ctx: MCP context
         theme_name: Name of the theme
-        
+
     Returns:
         JSON string containing theme details
     """
@@ -193,10 +200,10 @@ async def get_theme_details(ctx: Context, theme_name: str) -> str:
                     "secondary": "#ffffff",
                     "background": "#ffffff",
                     "text": "#000000",
-                    "border": "#cccccc"
+                    "border": "#cccccc",
                 },
                 "usage": "Best for general purpose diagrams and documentation",
-                "compatibility": "All diagram types"
+                "compatibility": "All diagram types",
             },
             "dark": {
                 "name": "dark",
@@ -206,10 +213,10 @@ async def get_theme_details(ctx: Context, theme_name: str) -> str:
                     "secondary": "#f0f6fc",
                     "background": "#0d1117",
                     "text": "#f0f6fc",
-                    "border": "#30363d"
+                    "border": "#30363d",
                 },
                 "usage": "Ideal for dark mode applications and presentations",
-                "compatibility": "All diagram types"
+                "compatibility": "All diagram types",
             },
             "forest": {
                 "name": "forest",
@@ -219,10 +226,10 @@ async def get_theme_details(ctx: Context, theme_name: str) -> str:
                     "secondary": "#ffffff",
                     "background": "#f0fff0",
                     "text": "#000000",
-                    "border": "#90ee90"
+                    "border": "#90ee90",
                 },
                 "usage": "Great for environmental, growth, or nature-related diagrams",
-                "compatibility": "All diagram types"
+                "compatibility": "All diagram types",
             },
             "neutral": {
                 "name": "neutral",
@@ -232,10 +239,10 @@ async def get_theme_details(ctx: Context, theme_name: str) -> str:
                     "secondary": "#ffffff",
                     "background": "#f8f9fa",
                     "text": "#000000",
-                    "border": "#dee2e6"
+                    "border": "#dee2e6",
                 },
                 "usage": "Perfect for business and professional documentation",
-                "compatibility": "All diagram types"
+                "compatibility": "All diagram types",
             },
             "base": {
                 "name": "base",
@@ -245,18 +252,18 @@ async def get_theme_details(ctx: Context, theme_name: str) -> str:
                     "secondary": "#ffffff",
                     "background": "#ffffff",
                     "text": "#000000",
-                    "border": "#000000"
+                    "border": "#000000",
                 },
                 "usage": "Minimal styling for custom theme development",
-                "compatibility": "All diagram types"
-            }
+                "compatibility": "All diagram types",
+            },
         }
-        
+
         if theme_name not in theme_details:
             raise ResourceError(f"Theme '{theme_name}' not found")
-        
+
         return json.dumps(theme_details[theme_name], indent=2)
-        
+
     except Exception as e:
         logger.error(f"Error getting theme details for {theme_name}: {e}")
         raise ResourceError(f"Failed to get theme details: {e}")
@@ -265,10 +272,10 @@ async def get_theme_details(ctx: Context, theme_name: str) -> str:
 async def get_templates_resource(ctx: Context) -> str:
     """
     Get all available templates resource.
-    
+
     Args:
         ctx: MCP context
-        
+
     Returns:
         JSON string containing templates data
     """
@@ -276,9 +283,10 @@ async def get_templates_resource(ctx: Context) -> str:
         # Check if templates module is available
         try:
             from ..templates import TemplateManager
+
             template_manager = TemplateManager()
             templates = template_manager.list_templates()
-            
+
             templates_data = {
                 "templates": [
                     {
@@ -288,27 +296,35 @@ async def get_templates_resource(ctx: Context) -> str:
                         "diagram_type": template.diagram_type,
                         "author": template.author,
                         "tags": template.tags,
-                        "created_at": template.created_at.isoformat() if template.created_at else None,
-                        "parameters": template.parameters
+                        "created_at": (
+                            template.created_at.isoformat()
+                            if template.created_at
+                            else None
+                        ),
+                        "parameters": template.parameters,
                     }
                     for template in templates
                 ],
                 "total_count": len(templates),
-                "builtin_count": len([t for t in templates if t.author == "mermaid-render"]),
-                "custom_count": len([t for t in templates if t.author != "mermaid-render"])
+                "builtin_count": len(
+                    [t for t in templates if t.author == "mermaid-render"]
+                ),
+                "custom_count": len(
+                    [t for t in templates if t.author != "mermaid-render"]
+                ),
             }
-            
+
         except ImportError:
             templates_data = {
                 "templates": [],
                 "total_count": 0,
                 "builtin_count": 0,
                 "custom_count": 0,
-                "error": "Template functionality not available. Install with: pip install mermaid-render[templates]"
+                "error": "Template functionality not available. Install with: pip install mermaid-render[templates]",
             }
-        
+
         return json.dumps(templates_data, indent=2)
-        
+
     except Exception as e:
         logger.error(f"Error getting templates resource: {e}")
         raise ResourceError(f"Failed to get templates: {e}")
@@ -329,6 +345,7 @@ async def get_template_details(ctx: Context, template_name: str) -> str:
         # Check if templates module is available
         try:
             from ..templates import TemplateManager
+
             template_manager = TemplateManager()
             template = template_manager.get_template_by_name(template_name)
 
@@ -345,13 +362,21 @@ async def get_template_details(ctx: Context, template_name: str) -> str:
                 "metadata": template.metadata,
                 "author": template.author,
                 "tags": template.tags,
-                "created_at": template.created_at.isoformat() if template.created_at else None,
-                "updated_at": template.updated_at.isoformat() if template.updated_at else None,
-                "usage_examples": template.metadata.get("examples", []) if template.metadata else []
+                "created_at": (
+                    template.created_at.isoformat() if template.created_at else None
+                ),
+                "updated_at": (
+                    template.updated_at.isoformat() if template.updated_at else None
+                ),
+                "usage_examples": (
+                    template.metadata.get("examples", []) if template.metadata else []
+                ),
             }
 
         except ImportError:
-            raise ResourceError("Template functionality not available. Install with: pip install mermaid-render[templates]")
+            raise ResourceError(
+                "Template functionality not available. Install with: pip install mermaid-render[templates]"
+            )
 
         return json.dumps(template_data, indent=2)
 
@@ -379,89 +404,89 @@ async def get_config_schema(ctx: Context) -> str:
                 "server_url": {
                     "type": "string",
                     "description": "Mermaid.ink server URL",
-                    "default": "https://mermaid.ink"
+                    "default": "https://mermaid.ink",
                 },
                 "timeout": {
                     "type": "number",
                     "description": "Request timeout in seconds",
                     "default": 30.0,
                     "minimum": 1,
-                    "maximum": 300
+                    "maximum": 300,
                 },
                 "retries": {
                     "type": "integer",
                     "description": "Number of retry attempts",
                     "default": 3,
                     "minimum": 0,
-                    "maximum": 10
+                    "maximum": 10,
                 },
                 "default_theme": {
                     "type": "string",
                     "description": "Default theme name",
                     "default": "default",
-                    "enum": ["default", "dark", "forest", "neutral", "base"]
+                    "enum": ["default", "dark", "forest", "neutral", "base"],
                 },
                 "default_format": {
                     "type": "string",
                     "description": "Default output format",
                     "default": "svg",
-                    "enum": ["svg", "png", "pdf"]
+                    "enum": ["svg", "png", "pdf"],
                 },
                 "validate_syntax": {
                     "type": "boolean",
                     "description": "Enable syntax validation",
-                    "default": True
+                    "default": True,
                 },
                 "cache_enabled": {
                     "type": "boolean",
                     "description": "Enable caching",
-                    "default": True
+                    "default": True,
                 },
                 "cache_dir": {
                     "type": "string",
                     "description": "Cache directory path",
-                    "default": "~/.mermaid_render_cache"
+                    "default": "~/.mermaid_render_cache",
                 },
                 "max_cache_size": {
                     "type": "integer",
                     "description": "Maximum cache size in MB",
                     "default": 100,
                     "minimum": 1,
-                    "maximum": 10000
+                    "maximum": 10000,
                 },
                 "cache_ttl": {
                     "type": "integer",
                     "description": "Cache TTL in seconds",
                     "default": 3600,
                     "minimum": 60,
-                    "maximum": 86400
+                    "maximum": 86400,
                 },
                 "default_width": {
                     "type": "integer",
                     "description": "Default output width in pixels",
                     "default": 800,
                     "minimum": 100,
-                    "maximum": 4000
+                    "maximum": 4000,
                 },
                 "default_height": {
                     "type": "integer",
                     "description": "Default output height in pixels",
                     "default": 600,
                     "minimum": 100,
-                    "maximum": 4000
+                    "maximum": 4000,
                 },
                 "use_local_rendering": {
                     "type": "boolean",
                     "description": "Use local rendering when available",
-                    "default": True
+                    "default": True,
                 },
                 "log_level": {
                     "type": "string",
                     "description": "Logging level",
                     "default": "INFO",
-                    "enum": ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
-                }
-            }
+                    "enum": ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+                },
+            },
         }
 
         return json.dumps(schema, indent=2)
@@ -512,8 +537,20 @@ async def get_diagram_types_docs(ctx: Context) -> str:
                 "syntax": "flowchart TD\n    A[Start] --> B{Decision}\n    B -->|Yes| C[Process]\n    B -->|No| D[End]",
                 "keywords": ["flowchart", "graph"],
                 "directions": ["TD", "TB", "BT", "RL", "LR"],
-                "node_types": ["rectangle", "rounded", "circle", "rhombus", "hexagon", "parallelogram"],
-                "use_cases": ["Process flows", "Decision trees", "Algorithms", "Workflows"]
+                "node_types": [
+                    "rectangle",
+                    "rounded",
+                    "circle",
+                    "rhombus",
+                    "hexagon",
+                    "parallelogram",
+                ],
+                "use_cases": [
+                    "Process flows",
+                    "Decision trees",
+                    "Algorithms",
+                    "Workflows",
+                ],
             },
             "sequence": {
                 "name": "Sequence Diagram",
@@ -522,16 +559,36 @@ async def get_diagram_types_docs(ctx: Context) -> str:
                 "keywords": ["sequenceDiagram"],
                 "elements": ["participant", "actor", "note", "loop", "alt", "opt"],
                 "arrow_types": ["->", "->>", "-->>", "-x", "--x"],
-                "use_cases": ["API interactions", "System communications", "User flows", "Protocol diagrams"]
+                "use_cases": [
+                    "API interactions",
+                    "System communications",
+                    "User flows",
+                    "Protocol diagrams",
+                ],
             },
             "class": {
                 "name": "Class Diagram",
                 "description": "Class diagrams show the structure of classes and their relationships",
                 "syntax": "classDiagram\n    class Animal {\n        +name: string\n        +makeSound()\n    }\n    Animal <|-- Dog",
                 "keywords": ["classDiagram"],
-                "relationships": ["inheritance", "composition", "aggregation", "association"],
-                "visibility": ["public (+)", "private (-)", "protected (#)", "package (~)"],
-                "use_cases": ["Object-oriented design", "Database schemas", "System architecture", "Code documentation"]
+                "relationships": [
+                    "inheritance",
+                    "composition",
+                    "aggregation",
+                    "association",
+                ],
+                "visibility": [
+                    "public (+)",
+                    "private (-)",
+                    "protected (#)",
+                    "package (~)",
+                ],
+                "use_cases": [
+                    "Object-oriented design",
+                    "Database schemas",
+                    "System architecture",
+                    "Code documentation",
+                ],
             },
             "state": {
                 "name": "State Diagram",
@@ -539,7 +596,12 @@ async def get_diagram_types_docs(ctx: Context) -> str:
                 "syntax": "stateDiagram-v2\n    [*] --> Still\n    Still --> [*]\n    Still --> Moving\n    Moving --> Still",
                 "keywords": ["stateDiagram", "stateDiagram-v2"],
                 "elements": ["state", "transition", "choice", "fork", "join"],
-                "use_cases": ["State machines", "Workflow states", "System behavior", "Protocol states"]
+                "use_cases": [
+                    "State machines",
+                    "Workflow states",
+                    "System behavior",
+                    "Protocol states",
+                ],
             },
             "er": {
                 "name": "Entity Relationship Diagram",
@@ -548,7 +610,12 @@ async def get_diagram_types_docs(ctx: Context) -> str:
                 "keywords": ["erDiagram"],
                 "relationships": ["one-to-one", "one-to-many", "many-to-many"],
                 "cardinality": ["||--||", "||--o{", "}o--||", "}o--o{"],
-                "use_cases": ["Database design", "Data modeling", "System architecture", "Documentation"]
+                "use_cases": [
+                    "Database design",
+                    "Data modeling",
+                    "System architecture",
+                    "Documentation",
+                ],
             },
             "journey": {
                 "name": "User Journey",
@@ -556,7 +623,12 @@ async def get_diagram_types_docs(ctx: Context) -> str:
                 "syntax": "journey\n    title My working day\n    section Go to work\n      Make tea: 5: Me\n      Go upstairs: 3: Me",
                 "keywords": ["journey"],
                 "elements": ["title", "section", "task"],
-                "use_cases": ["User experience design", "Customer journey mapping", "Process improvement", "Service design"]
+                "use_cases": [
+                    "User experience design",
+                    "Customer journey mapping",
+                    "Process improvement",
+                    "Service design",
+                ],
             },
             "gantt": {
                 "name": "Gantt Chart",
@@ -564,15 +636,25 @@ async def get_diagram_types_docs(ctx: Context) -> str:
                 "syntax": "gantt\n    title Project Timeline\n    dateFormat YYYY-MM-DD\n    section Planning\n    Task 1: 2023-01-01, 30d",
                 "keywords": ["gantt"],
                 "elements": ["title", "dateFormat", "section", "task"],
-                "use_cases": ["Project management", "Timeline planning", "Resource allocation", "Progress tracking"]
+                "use_cases": [
+                    "Project management",
+                    "Timeline planning",
+                    "Resource allocation",
+                    "Progress tracking",
+                ],
             },
             "pie": {
                 "name": "Pie Chart",
                 "description": "Pie charts show proportional data as slices of a circle",
-                "syntax": "pie title Survey Results\n    \"Option A\" : 42\n    \"Option B\" : 30\n    \"Option C\" : 28",
+                "syntax": 'pie title Survey Results\n    "Option A" : 42\n    "Option B" : 30\n    "Option C" : 28',
                 "keywords": ["pie"],
                 "elements": ["title", "data"],
-                "use_cases": ["Data visualization", "Survey results", "Market share", "Budget allocation"]
+                "use_cases": [
+                    "Data visualization",
+                    "Survey results",
+                    "Market share",
+                    "Budget allocation",
+                ],
             },
             "gitgraph": {
                 "name": "Git Graph",
@@ -580,7 +662,12 @@ async def get_diagram_types_docs(ctx: Context) -> str:
                 "syntax": "gitgraph\n    commit\n    branch develop\n    checkout develop\n    commit\n    checkout main\n    merge develop",
                 "keywords": ["gitgraph"],
                 "elements": ["commit", "branch", "checkout", "merge"],
-                "use_cases": ["Version control visualization", "Release planning", "Development workflows", "Code review"]
+                "use_cases": [
+                    "Version control visualization",
+                    "Release planning",
+                    "Development workflows",
+                    "Code review",
+                ],
             },
             "mindmap": {
                 "name": "Mind Map",
@@ -588,8 +675,13 @@ async def get_diagram_types_docs(ctx: Context) -> str:
                 "syntax": "mindmap\n  root((Central Topic))\n    Branch 1\n      Sub-branch 1\n      Sub-branch 2\n    Branch 2",
                 "keywords": ["mindmap"],
                 "elements": ["root", "branch", "sub-branch"],
-                "use_cases": ["Brainstorming", "Knowledge organization", "Planning", "Learning"]
-            }
+                "use_cases": [
+                    "Brainstorming",
+                    "Knowledge organization",
+                    "Planning",
+                    "Learning",
+                ],
+            },
         }
 
         return json.dumps(diagram_types, indent=2)
@@ -616,37 +708,36 @@ async def get_diagram_examples(ctx: Context, diagram_type: str) -> str:
                 {
                     "title": "Simple Process Flow",
                     "description": "Basic flowchart showing a simple process",
-                    "code": "flowchart TD\n    A[Start] --> B{Is it working?}\n    B -->|Yes| C[Great!]\n    B -->|No| D[Fix it]\n    D --> B\n    C --> E[End]"
+                    "code": "flowchart TD\n    A[Start] --> B{Is it working?}\n    B -->|Yes| C[Great!]\n    B -->|No| D[Fix it]\n    D --> B\n    C --> E[End]",
                 },
                 {
                     "title": "Decision Tree",
                     "description": "Flowchart representing a decision-making process",
-                    "code": "flowchart LR\n    A[Problem] --> B{Can we solve it?}\n    B -->|Yes| C[Solve it]\n    B -->|No| D{Can we learn from it?}\n    D -->|Yes| E[Learn from it]\n    D -->|No| F[Let it go]\n    C --> G[Success]\n    E --> G\n    F --> G"
-                }
+                    "code": "flowchart LR\n    A[Problem] --> B{Can we solve it?}\n    B -->|Yes| C[Solve it]\n    B -->|No| D{Can we learn from it?}\n    D -->|Yes| E[Learn from it]\n    D -->|No| F[Let it go]\n    C --> G[Success]\n    E --> G\n    F --> G",
+                },
             ],
             "sequence": [
                 {
                     "title": "API Authentication",
                     "description": "Sequence diagram showing API authentication flow",
-                    "code": "sequenceDiagram\n    participant C as Client\n    participant A as Auth Server\n    participant R as Resource Server\n    \n    C->>A: Login Request\n    A-->>C: Access Token\n    C->>R: API Request + Token\n    R->>A: Validate Token\n    A-->>R: Token Valid\n    R-->>C: API Response"
+                    "code": "sequenceDiagram\n    participant C as Client\n    participant A as Auth Server\n    participant R as Resource Server\n    \n    C->>A: Login Request\n    A-->>C: Access Token\n    C->>R: API Request + Token\n    R->>A: Validate Token\n    A-->>R: Token Valid\n    R-->>C: API Response",
                 }
             ],
             "class": [
                 {
                     "title": "Animal Hierarchy",
                     "description": "Class diagram showing inheritance",
-                    "code": "classDiagram\n    class Animal {\n        +String name\n        +int age\n        +makeSound()\n        +move()\n    }\n    \n    class Dog {\n        +String breed\n        +bark()\n    }\n    \n    class Cat {\n        +boolean indoor\n        +meow()\n    }\n    \n    Animal <|-- Dog\n    Animal <|-- Cat"
+                    "code": "classDiagram\n    class Animal {\n        +String name\n        +int age\n        +makeSound()\n        +move()\n    }\n    \n    class Dog {\n        +String breed\n        +bark()\n    }\n    \n    class Cat {\n        +boolean indoor\n        +meow()\n    }\n    \n    Animal <|-- Dog\n    Animal <|-- Cat",
                 }
-            ]
+            ],
         }
 
         if diagram_type not in examples:
             raise ResourceError(f"No examples found for diagram type '{diagram_type}'")
 
-        return json.dumps({
-            "diagram_type": diagram_type,
-            "examples": examples[diagram_type]
-        }, indent=2)
+        return json.dumps(
+            {"diagram_type": diagram_type, "examples": examples[diagram_type]}, indent=2
+        )
 
     except Exception as e:
         logger.error(f"Error getting diagram examples for {diagram_type}: {e}")

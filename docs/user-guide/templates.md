@@ -83,7 +83,7 @@ sequenceDiagram
     participant Client
     participant API
     participant Database
-    
+
 {% for endpoint in endpoints %}
     Client->>API: {{ endpoint.method }} {{ endpoint.path }}
     {% if endpoint.requires_auth %}
@@ -302,7 +302,7 @@ components = {
     {{ node_id }}_error --> End
     {% endmacro %}
     """,
-    
+
     "logging": """
     {% macro add_logging(node_id, message) %}
     {{ node_id }}_log[Log: {{ message }}]

@@ -2,22 +2,22 @@ name: CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
     paths-ignore:
-      - 'docs/**'
-      - '*.md'
-      - '*.rst'
-      - '*.txt'
+      - "docs/**"
+      - "*.md"
+      - "*.rst"
+      - "*.txt"
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
     paths-ignore:
-      - 'docs/**'
-      - '*.md'
-      - '*.rst'
-      - '*.txt'
+      - "docs/**"
+      - "*.md"
+      - "*.rst"
+      - "*.txt"
   schedule:
     # Run tests daily at 2 AM UTC
-    - cron: '0 2 * * *'
+    - cron: "0 2 * * *"
 
 # Cancel in-progress runs for the same workflow
 concurrency:
@@ -35,25 +35,25 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.11"
-        cache: 'pip'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
 
-    - name: Install pre-commit
-      run: pip install pre-commit
+      - name: Install pre-commit
+        run: pip install pre-commit
 
-    - name: Cache pre-commit hooks
-      uses: actions/cache@v4
-      with:
-        path: ~/.cache/pre-commit
-        key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
+      - name: Cache pre-commit hooks
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
 
-    - name: Run pre-commit
-      run: pre-commit run --all-files
+      - name: Run pre-commit
+        run: pre-commit run --all-files
 
   # Comprehensive test matrix
   test:
@@ -83,116 +83,116 @@ jobs:
             python-version: "3.10"
 
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0  # Full history for better caching
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history for better caching
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
-        cache: 'pip'
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
 
-    - name: Install UV
-      uses: astral-sh/setup-uv@v2
-      with:
-        enable-cache: true
-        cache-dependency-glob: "uv.lock"
+      - name: Install UV
+        uses: astral-sh/setup-uv@v2
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
 
-    - name: Cache UV dependencies
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.cache/uv
-          .venv
-        key: uv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('uv.lock', 'pyproject.toml') }}
-        restore-keys: |
-          uv-${{ runner.os }}-${{ matrix.python-version }}-
-          uv-${{ runner.os }}-
+      - name: Cache UV dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/uv
+            .venv
+          key: uv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('uv.lock', 'pyproject.toml') }}
+          restore-keys: |
+            uv-${{ runner.os }}-${{ matrix.python-version }}-
+            uv-${{ runner.os }}-
 
-    - name: Install dependencies
-      run: |
-        uv sync --all-extras --frozen
+      - name: Install dependencies
+        run: |
+          uv sync --all-extras --frozen
 
-    - name: Cache pytest
-      uses: actions/cache@v4
-      with:
-        path: .pytest_cache
-        key: pytest-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('tests/**/*.py') }}
+      - name: Cache pytest
+        uses: actions/cache@v4
+        with:
+          path: .pytest_cache
+          key: pytest-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('tests/**/*.py') }}
 
-    - name: Run tests with coverage
-      run: |
-        uv run pytest \
-          --cov=mermaid_render \
-          --cov-report=xml \
-          --cov-report=term \
-          --cov-report=html \
-          --junit-xml=junit.xml \
-          --maxfail=10 \
-          -x \
-          --tb=short
+      - name: Run tests with coverage
+        run: |
+          uv run pytest \
+            --cov=mermaid_render \
+            --cov-report=xml \
+            --cov-report=term \
+            --cov-report=html \
+            --junit-xml=junit.xml \
+            --maxfail=10 \
+            -x \
+            --tb=short
 
-    - name: Upload test results
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: test-results-${{ matrix.os }}-${{ matrix.python-version }}
-        path: |
-          junit.xml
-          htmlcov/
-        retention-days: 7
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-${{ matrix.os }}-${{ matrix.python-version }}
+          path: |
+            junit.xml
+            htmlcov/
+          retention-days: 7
 
-    - name: Upload coverage to Codecov
-      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
-      uses: codecov/codecov-action@v4
-      with:
-        file: ./coverage.xml
-        flags: unittests
-        name: codecov-umbrella
-        token: ${{ secrets.CODECOV_TOKEN }}
-        fail_ci_if_error: false
+      - name: Upload coverage to Codecov
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
 
   # Code quality and linting
   lint:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.11"
-        cache: 'pip'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
 
-    - name: Install UV
-      uses: astral-sh/setup-uv@v2
-      with:
-        enable-cache: true
+      - name: Install UV
+        uses: astral-sh/setup-uv@v2
+        with:
+          enable-cache: true
 
-    - name: Install dependencies
-      run: uv sync --group qa --frozen
+      - name: Install dependencies
+        run: uv sync --group qa --frozen
 
-    - name: Cache mypy
-      uses: actions/cache@v4
-      with:
-        path: .mypy_cache
-        key: mypy-${{ runner.os }}-${{ hashFiles('mermaid_render/**/*.py') }}
+      - name: Cache mypy
+        uses: actions/cache@v4
+        with:
+          path: .mypy_cache
+          key: mypy-${{ runner.os }}-${{ hashFiles('mermaid_render/**/*.py') }}
 
-    - name: Run ruff linting
-      run: uv run ruff check --output-format=github mermaid_render tests
+      - name: Run ruff linting
+        run: uv run ruff check --output-format=github mermaid_render tests
 
-    - name: Run ruff formatting check
-      run: uv run ruff format --check mermaid_render tests
+      - name: Run ruff formatting check
+        run: uv run ruff format --check mermaid_render tests
 
-    - name: Run black formatting check
-      run: uv run black --check --diff mermaid_render tests
+      - name: Run black formatting check
+        run: uv run black --check --diff mermaid_render tests
 
-    - name: Run mypy type checking
-      run: uv run mypy mermaid_render
+      - name: Run mypy type checking
+        run: uv run mypy mermaid_render
 
-    - name: Run isort import sorting check
-      run: uv run isort --check-only --diff mermaid_render tests
+      - name: Run isort import sorting check
+        run: uv run isort --check-only --diff mermaid_render tests
 
   # Security scanning
   security:
@@ -203,110 +203,110 @@ jobs:
       actions: read
       contents: read
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.11"
-        cache: 'pip'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
 
-    - name: Install UV
-      uses: astral-sh/setup-uv@v2
-      with:
-        enable-cache: true
+      - name: Install UV
+        uses: astral-sh/setup-uv@v2
+        with:
+          enable-cache: true
 
-    - name: Install security tools
-      run: uv sync --group security --frozen
+      - name: Install security tools
+        run: uv sync --group security --frozen
 
-    - name: Run safety check
-      run: uv run safety check --json --output safety-report.json || true
+      - name: Run safety check
+        run: uv run safety check --json --output safety-report.json || true
 
-    - name: Run bandit security linting
-      run: uv run bandit -r mermaid_render -f json -o bandit-report.json || true
+      - name: Run bandit security linting
+        run: uv run bandit -r mermaid_render -f json -o bandit-report.json || true
 
-    - name: Run pip-audit
-      run: uv run pip-audit --format=json --output=pip-audit-report.json || true
+      - name: Run pip-audit
+        run: uv run pip-audit --format=json --output=pip-audit-report.json || true
 
-    - name: Upload security reports
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: security-reports
-        path: |
-          safety-report.json
-          bandit-report.json
-          pip-audit-report.json
-        retention-days: 30
+      - name: Upload security reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-reports
+          path: |
+            safety-report.json
+            bandit-report.json
+            pip-audit-report.json
+          retention-days: 30
 
   # Package building and validation
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0  # Full history for version detection
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history for version detection
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.11"
-        cache: 'pip'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
 
-    - name: Install UV
-      uses: astral-sh/setup-uv@v2
-      with:
-        enable-cache: true
+      - name: Install UV
+        uses: astral-sh/setup-uv@v2
+        with:
+          enable-cache: true
 
-    - name: Install build dependencies
-      run: uv sync --group build --frozen
+      - name: Install build dependencies
+        run: uv sync --group build --frozen
 
-    - name: Build package
-      run: uv run python -m build
+      - name: Build package
+        run: uv run python -m build
 
-    - name: Validate package
-      run: |
-        uv run python -m twine check dist/*
-        uv run python scripts/validate-package.py
+      - name: Validate package
+        run: |
+          uv run python -m twine check dist/*
+          uv run python scripts/validate-package.py
 
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: dist
-        path: dist/
-        retention-days: 7
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7
 
   # Documentation building
   docs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.11"
-        cache: 'pip'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
 
-    - name: Install UV
-      uses: astral-sh/setup-uv@v2
-      with:
-        enable-cache: true
+      - name: Install UV
+        uses: astral-sh/setup-uv@v2
+        with:
+          enable-cache: true
 
-    - name: Install documentation dependencies
-      run: uv sync --group docs --frozen
+      - name: Install documentation dependencies
+        run: uv sync --group docs --frozen
 
-    - name: Build documentation
-      run: uv run mkdocs build --clean --strict
+      - name: Build documentation
+        run: uv run mkdocs build --clean --strict
 
-    - name: Upload documentation
-      uses: actions/upload-artifact@v4
-      with:
-        name: docs
-        path: site/
-        retention-days: 7
+      - name: Upload documentation
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs
+          path: site/
+          retention-days: 7
 
   # Performance benchmarking
   benchmark:
@@ -314,31 +314,31 @@ jobs:
     timeout-minutes: 20
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.11"
-        cache: 'pip'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
 
-    - name: Install UV
-      uses: astral-sh/setup-uv@v2
-      with:
-        enable-cache: true
+      - name: Install UV
+        uses: astral-sh/setup-uv@v2
+        with:
+          enable-cache: true
 
-    - name: Install dependencies
-      run: uv sync --all-extras --frozen
+      - name: Install dependencies
+        run: uv sync --all-extras --frozen
 
-    - name: Run performance benchmarks
-      run: uv run python scripts/quality_checker.py --report quality-report.json
+      - name: Run performance benchmarks
+        run: uv run python scripts/quality_checker.py --report quality-report.json
 
-    - name: Upload benchmark results
-      uses: actions/upload-artifact@v4
-      with:
-        name: benchmark-results
-        path: quality-report.json
-        retention-days: 30
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results
+          path: quality-report.json
+          retention-days: 30
 
   # Integration tests with external services
   integration:
@@ -357,130 +357,26 @@ jobs:
           --health-retries 5
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.11"
-        cache: 'pip'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
 
-    - name: Install UV
-      uses: astral-sh/setup-uv@v2
-      with:
-        enable-cache: true
+      - name: Install UV
+        uses: astral-sh/setup-uv@v2
+        with:
+          enable-cache: true
 
-    - name: Install dependencies
-      run: uv sync --all-extras --frozen
+      - name: Install dependencies
+        run: uv sync --all-extras --frozen
 
-    - name: Run integration tests
-      env:
-        REDIS_URL: redis://localhost:6379/0
-      run: uv run pytest tests/integration/ -v --tb=short
-
-  # Summary job for branch protection
-  ci-success:
-    runs-on: ubuntu-latest
-    needs: [pre-commit, test, lint, security, build, docs]
-    if: always()
-    steps:
-    - name: Check all jobs
-      run: |
-        if [[ "${{ needs.pre-commit.result }}" != "success" ]]; then
-          echo "Pre-commit checks failed"
-          exit 1
-        fi
-        if [[ "${{ needs.test.result }}" != "success" ]]; then
-          echo "Tests failed"
-          exit 1
-        fi
-        if [[ "${{ needs.lint.result }}" != "success" ]]; then
-          echo "Linting failed"
-          exit 1
-        fi
-        if [[ "${{ needs.security.result }}" != "success" ]]; then
-          echo "Security checks failed"
-          exit 1
-        fi
-        if [[ "${{ needs.build.result }}" != "success" ]]; then
-          echo "Build failed"
-          exit 1
-        fi
-        if [[ "${{ needs.docs.result }}" != "success" ]]; then
-          echo "Documentation build failed"
-          exit 1
-        fi
-        echo "All CI checks passed!"
-
-  # Performance benchmarking
-  benchmark:
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.11"
-        cache: 'pip'
-
-    - name: Install UV
-      uses: astral-sh/setup-uv@v2
-      with:
-        enable-cache: true
-
-    - name: Install dependencies
-      run: uv sync --all-extras --frozen
-
-    - name: Run performance benchmarks
-      run: uv run python scripts/quality_checker.py --report quality-report.json
-
-    - name: Upload benchmark results
-      uses: actions/upload-artifact@v4
-      with:
-        name: benchmark-results
-        path: quality-report.json
-        retention-days: 30
-
-  # Integration tests with external services
-  integration:
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    if: github.event_name == 'push'
-    services:
-      redis:
-        image: redis:7-alpine
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.11"
-        cache: 'pip'
-
-    - name: Install UV
-      uses: astral-sh/setup-uv@v2
-      with:
-        enable-cache: true
-
-    - name: Install dependencies
-      run: uv sync --all-extras --frozen
-
-    - name: Run integration tests
-      env:
-        REDIS_URL: redis://localhost:6379/0
-      run: uv run pytest tests/integration/ -v --tb=short
+      - name: Run integration tests
+        env:
+          REDIS_URL: redis://localhost:6379/0
+        run: uv run pytest tests/integration/ -v --tb=short
 
   # Summary job for branch protection
   ci-success:
@@ -488,30 +384,30 @@ jobs:
     needs: [pre-commit, test, lint, security, build, docs]
     if: always()
     steps:
-    - name: Check all jobs
-      run: |
-        if [[ "${{ needs.pre-commit.result }}" != "success" ]]; then
-          echo "Pre-commit checks failed"
-          exit 1
-        fi
-        if [[ "${{ needs.test.result }}" != "success" ]]; then
-          echo "Tests failed"
-          exit 1
-        fi
-        if [[ "${{ needs.lint.result }}" != "success" ]]; then
-          echo "Linting failed"
-          exit 1
-        fi
-        if [[ "${{ needs.security.result }}" != "success" ]]; then
-          echo "Security checks failed"
-          exit 1
-        fi
-        if [[ "${{ needs.build.result }}" != "success" ]]; then
-          echo "Build failed"
-          exit 1
-        fi
-        if [[ "${{ needs.docs.result }}" != "success" ]]; then
-          echo "Documentation build failed"
-          exit 1
-        fi
-        echo "All CI checks passed!"
+      - name: Check all jobs
+        run: |
+          if [[ "${{ needs.pre-commit.result }}" != "success" ]]; then
+            echo "Pre-commit checks failed"
+            exit 1
+          fi
+          if [[ "${{ needs.test.result }}" != "success" ]]; then
+            echo "Tests failed"
+            exit 1
+          fi
+          if [[ "${{ needs.lint.result }}" != "success" ]]; then
+            echo "Linting failed"
+            exit 1
+          fi
+          if [[ "${{ needs.security.result }}" != "success" ]]; then
+            echo "Security checks failed"
+            exit 1
+          fi
+          if [[ "${{ needs.build.result }}" != "success" ]]; then
+            echo "Build failed"
+            exit 1
+          fi
+          if [[ "${{ needs.docs.result }}" != "success" ]]; then
+            echo "Documentation build failed"
+            exit 1
+          fi
+          echo "All CI checks passed!"

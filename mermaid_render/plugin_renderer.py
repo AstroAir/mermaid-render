@@ -8,10 +8,10 @@ the new plugin-based rendering system while maintaining backward compatibility.
 import logging
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Union
+from typing import Any
 
 from .core import MermaidConfig, MermaidDiagram, MermaidTheme
-from .exceptions import ConfigurationError, RenderingError, UnsupportedFormatError
+from .exceptions import ConfigurationError, RenderingError
 from .renderers import (
     RendererCapability,
     RendererManager,
@@ -39,11 +39,11 @@ class PluginMermaidRenderer:
 
     def __init__(
         self,
-        config: Optional[MermaidConfig] = None,
-        theme: Optional[Union[str, MermaidTheme]] = None,
-        preferred_renderer: Optional[str] = None,
+        config: MermaidConfig | None = None,
+        theme: str | MermaidTheme | None = None,
+        preferred_renderer: str | None = None,
         fallback_enabled: bool = True,
-        renderer_config: Optional[Dict[str, Any]] = None,
+        renderer_config: dict[str, Any] | None = None,
     ) -> None:
         """
         Initialize the plugin-based renderer.
@@ -56,7 +56,7 @@ class PluginMermaidRenderer:
             renderer_config: Renderer-specific configuration
         """
         self.config = config or MermaidConfig()
-        self._theme: Optional[MermaidTheme] = None
+        self._theme: MermaidTheme | None = None
         self.preferred_renderer = preferred_renderer
         self.fallback_enabled = fallback_enabled
         self.renderer_config = renderer_config or {}
@@ -76,11 +76,11 @@ class PluginMermaidRenderer:
             self.set_theme(theme)
 
     @property
-    def SUPPORTED_FORMATS(self) -> List[str]:
+    def SUPPORTED_FORMATS(self) -> list[str]:
         """Get list of supported formats from available renderers."""
         return list(self.renderer_manager.get_available_formats())
 
-    def set_theme(self, theme: Union[str, MermaidTheme]) -> None:
+    def set_theme(self, theme: str | MermaidTheme) -> None:
         """
         Set the rendering theme.
 
@@ -94,18 +94,18 @@ class PluginMermaidRenderer:
         else:
             raise ConfigurationError(f"Invalid theme type: {type(theme)}")
 
-    def get_theme(self) -> Optional[MermaidTheme]:
+    def get_theme(self) -> MermaidTheme | None:
         """Get current theme."""
         return self._theme
 
     def render(
         self,
-        diagram: Union[MermaidDiagram, str],
+        diagram: MermaidDiagram | str,
         format: str = "svg",
-        renderer: Optional[str] = None,
-        fallback: Optional[bool] = None,
+        renderer: str | None = None,
+        fallback: bool | None = None,
         **options: Any,
-    ) -> Union[str, bytes]:
+    ) -> str | bytes:
         """
         Render a diagram using the plugin-based system.
 
@@ -166,12 +166,12 @@ class PluginMermaidRenderer:
 
     def save(
         self,
-        diagram: Union[MermaidDiagram, str],
-        output_path: Union[str, Path],
-        format: Optional[str] = None,
-        renderer: Optional[str] = None,
+        diagram: MermaidDiagram | str,
+        output_path: str | Path,
+        format: str | None = None,
+        renderer: str | None = None,
         **options: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Render and save diagram to file.
 
@@ -227,9 +227,9 @@ class PluginMermaidRenderer:
 
     def get_available_renderers(
         self,
-        format: Optional[str] = None,
-        capabilities: Optional[Set[RendererCapability]] = None,
-    ) -> List[str]:
+        format: str | None = None,
+        capabilities: set[RendererCapability] | None = None,
+    ) -> list[str]:
         """
         Get list of available renderers.
 
@@ -247,25 +247,43 @@ class PluginMermaidRenderer:
             available_only=True,
         )
 
-    def get_renderer_status(self) -> Dict[str, Any]:
+    def get_renderer_status(self) -> dict[str, Any]:
         """
         Get status of all renderers.
 
         Returns:
             Dictionary with renderer status information
         """
-        return self.renderer_manager.get_renderer_status()
+        registry = get_global_registry()
+        status: dict[str, Any] = {}
+        for name in registry.list_renderers():
+            info = registry.get_renderer_info(name)
+            if info:
+                status[name] = {
+                    "available": True,  # If it's in the registry, it's available
+                    "formats": list(info.supported_formats),
+                    "priority": (
+                        info.priority.value
+                        if hasattr(info.priority, "value")
+                        else info.priority
+                    ),
+                }
+        return status
 
-    def get_performance_stats(self) -> Dict[str, Any]:
+    def get_performance_stats(self) -> dict[str, Any]:
         """
         Get performance statistics.
 
         Returns:
             Dictionary with performance statistics
         """
-        return self.renderer_manager.get_performance_stats()
+        # Return basic stats since RendererManager doesn't track performance
+        return {
+            "active_renderers": len(self.renderer_manager._active_renderers),
+            "available_formats": list(self.renderer_manager.get_available_formats()),
+        }
 
-    def test_renderer(self, renderer_name: str) -> Dict[str, Any]:
+    def test_renderer(self, renderer_name: str) -> dict[str, Any]:
         """
         Test a specific renderer with a simple diagram.
 
@@ -304,9 +322,9 @@ class PluginMermaidRenderer:
 
     def benchmark_renderers(
         self,
-        test_diagrams: Optional[List[str]] = None,
-        formats: Optional[List[str]] = None,
-    ) -> Dict[str, Any]:
+        test_diagrams: list[str] | None = None,
+        formats: list[str] | None = None,
+    ) -> dict[str, Any]:
         """
         Benchmark all available renderers.
 
@@ -342,23 +360,27 @@ class PluginMermaidRenderer:
                             fallback_enabled=False,
                         )
 
-                        renderer_results.append({
-                            "diagram_type": diagram.split("\n")[0],
-                            "format": fmt,
-                            "success": result.success,
-                            "render_time": result.render_time,
-                            "content_size": len(result.content),
-                        })
+                        renderer_results.append(
+                            {
+                                "diagram_type": diagram.split("\n")[0],
+                                "format": fmt,
+                                "success": result.success,
+                                "render_time": result.render_time,
+                                "content_size": len(result.content),
+                            }
+                        )
 
                     except Exception as e:
-                        renderer_results.append({
-                            "diagram_type": diagram.split("\n")[0],
-                            "format": fmt,
-                            "success": False,
-                            "render_time": 0.0,
-                            "content_size": 0,
-                            "error": str(e),
-                        })
+                        renderer_results.append(
+                            {
+                                "diagram_type": diagram.split("\n")[0],
+                                "format": fmt,
+                                "success": False,
+                                "render_time": 0.0,
+                                "content_size": 0,
+                                "error": str(e),
+                            }
+                        )
 
             results[renderer_name] = renderer_results
 

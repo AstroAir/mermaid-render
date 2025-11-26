@@ -9,10 +9,12 @@ from .export import batch_export, export_multiple_formats, export_to_file
 from .helpers import (
     detect_diagram_type,
     ensure_directory,
+    escape_html,
     get_available_themes,
     get_supported_formats,
     sanitize_filename,
 )
+from .http_client import MermaidHTTPClient
 from .validation import validate_mermaid_syntax
 
 __all__ = [
@@ -25,4 +27,6 @@ __all__ = [
     "detect_diagram_type",
     "sanitize_filename",
     "ensure_directory",
+    "escape_html",
+    "MermaidHTTPClient",
 ]

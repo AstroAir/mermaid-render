@@ -6,21 +6,7 @@ This script demonstrates integration patterns with web frameworks,
 CLI applications, and CI/CD pipelines.
 """
 
-import json
-import subprocess
-import tempfile
 from pathlib import Path
-from typing import Dict, Any, Optional
-
-from mermaid_render import (
-    MermaidRenderer,
-    FlowchartDiagram,
-    SequenceDiagram,
-    quick_render,
-    export_to_file,
-    ValidationError,
-    RenderingError,
-)
 
 
 def create_output_dir() -> Path:
@@ -100,7 +86,7 @@ flowchart TD
             const theme = document.getElementById('theme').value;
             const messageDiv = document.getElementById('message');
             const outputDiv = document.getElementById('output');
-            
+
             try {
                 const response = await fetch('/api/render', {
                     method: 'POST',
@@ -113,9 +99,9 @@ flowchart TD
                         theme: theme
                     })
                 });
-                
+
                 const result = await response.json();
-                
+
                 if (result.success) {
                     outputDiv.innerHTML = result.content;
                     messageDiv.innerHTML = '<div class="success">Diagram rendered successfully!</div>';
@@ -129,11 +115,11 @@ flowchart TD
                 messageDiv.innerHTML = `<div class="error">Network error: ${error.message}</div>`;
             }
         }
-        
+
         async function downloadSVG() {
             const code = document.getElementById('diagram-code').value;
             const theme = document.getElementById('theme').value;
-            
+
             try {
                 const response = await fetch('/api/download', {
                     method: 'POST',
@@ -146,7 +132,7 @@ flowchart TD
                         theme: theme
                     })
                 });
-                
+
                 if (response.ok) {
                     const blob = await response.blob();
                     const url = window.URL.createObjectURL(blob);
@@ -160,7 +146,7 @@ flowchart TD
                 console.error('Download error:', error);
             }
         }
-        
+
         // Auto-render on page load
         window.onload = function() {
             renderDiagram();
@@ -181,40 +167,40 @@ def render_diagram():
         diagram_code = data.get('diagram', '')
         format_type = data.get('format', 'svg')
         theme = data.get('theme', 'default')
-        
+
         if not diagram_code.strip():
             return jsonify({
                 'success': False,
                 'error': 'No diagram code provided'
             }), 400
-        
+
         # Render the diagram
         result = quick_render(
             diagram_code,
             format=format_type,
             theme=theme
         )
-        
+
         return jsonify({
             'success': True,
             'content': result,
             'format': format_type
         })
-        
+
     except ValidationError as e:
         return jsonify({
             'success': False,
             'error': 'Validation failed',
             'details': str(e)
         }), 400
-        
+
     except RenderingError as e:
         return jsonify({
             'success': False,
             'error': 'Rendering failed',
             'details': str(e)
         }), 500
-        
+
     except Exception as e:
         return jsonify({
             'success': False,
@@ -229,14 +215,14 @@ def download_diagram():
         diagram_code = data.get('diagram', '')
         format_type = data.get('format', 'svg')
         theme = data.get('theme', 'default')
-        
+
         # Render the diagram
         result = quick_render(
             diagram_code,
             format=format_type,
             theme=theme
         )
-        
+
         # Return as downloadable file
         from flask import Response
         return Response(
@@ -246,7 +232,7 @@ def download_diagram():
                 'Content-Disposition': f'attachment; filename=diagram.{format_type}'
             }
         )
-        
+
     except Exception as e:
         return jsonify({
             'success': False,
@@ -256,13 +242,13 @@ def download_diagram():
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
 '''
-    
+
     # Save the Flask app example
     flask_file = output_dir / "flask_app.py"
-    with open(flask_file, 'w') as f:
+    with open(flask_file, "w") as f:
         f.write(flask_app_code)
-    
-    print(f"✅ Flask integration example created")
+
+    print("✅ Flask integration example created")
     print(f"📁 Saved to {flask_file}")
     print("🚀 Run with: python flask_app.py")
     print("🌐 Open: http://localhost:5000")
@@ -271,7 +257,7 @@ if __name__ == '__main__':
 def fastapi_integration_example(output_dir: Path) -> None:
     """Demonstrate FastAPI integration."""
     print("FastAPI integration example...")
-    
+
     fastapi_app_code = '''
 from fastapi import FastAPI, HTTPException, Response
 from fastapi.staticfiles import StaticFiles
@@ -317,7 +303,7 @@ async def root():
         <div class="container">
             <h1>Mermaid Render API</h1>
             <p>A FastAPI service for rendering Mermaid diagrams.</p>
-            
+
             <div class="endpoint">
                 <h3>POST /render</h3>
                 <p>Render a Mermaid diagram and return the result.</p>
@@ -327,17 +313,17 @@ async def root():
   "theme": "default"
 }</pre>
             </div>
-            
+
             <div class="endpoint">
                 <h3>POST /render/file</h3>
                 <p>Render a Mermaid diagram and return as downloadable file.</p>
             </div>
-            
+
             <div class="endpoint">
                 <h3>GET /docs</h3>
                 <p>Interactive API documentation (Swagger UI).</p>
             </div>
-            
+
             <p><a href="/docs">📖 View Interactive API Documentation</a></p>
         </div>
     </body>
@@ -350,33 +336,33 @@ async def render_diagram(request: DiagramRequest):
     try:
         if not request.diagram.strip():
             raise HTTPException(status_code=400, detail="No diagram code provided")
-        
+
         # Render the diagram
         result = quick_render(
             request.diagram,
             format=request.format,
             theme=request.theme
         )
-        
+
         return DiagramResponse(
             success=True,
             content=result
         )
-        
+
     except ValidationError as e:
         return DiagramResponse(
             success=False,
             error="Validation failed",
             details=str(e)
         )
-        
+
     except RenderingError as e:
         return DiagramResponse(
             success=False,
             error="Rendering failed",
             details=str(e)
         )
-        
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
@@ -389,14 +375,14 @@ async def render_diagram_file(request: DiagramRequest):
             format=request.format,
             theme=request.theme
         )
-        
+
         # Determine content type
         content_type = {
             'svg': 'image/svg+xml',
             'png': 'image/png',
             'pdf': 'application/pdf'
         }.get(request.format, 'application/octet-stream')
-        
+
         return Response(
             content=result,
             media_type=content_type,
@@ -404,7 +390,7 @@ async def render_diagram_file(request: DiagramRequest):
                 'Content-Disposition': f'attachment; filename=diagram.{request.format}'
             }
         )
-        
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -416,13 +402,13 @@ async def health_check():
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
 '''
-    
+
     # Save the FastAPI app example
     fastapi_file = output_dir / "fastapi_app.py"
-    with open(fastapi_file, 'w') as f:
+    with open(fastapi_file, "w") as f:
         f.write(fastapi_app_code)
-    
-    print(f"✅ FastAPI integration example created")
+
+    print("✅ FastAPI integration example created")
     print(f"📁 Saved to {fastapi_file}")
     print("🚀 Run with: python fastapi_app.py")
     print("🌐 Open: http://localhost:8000")
@@ -432,7 +418,7 @@ if __name__ == "__main__":
 def cli_integration_example(output_dir: Path) -> None:
     """Demonstrate CLI application integration."""
     print("CLI integration example...")
-    
+
     cli_script_code = '''#!/usr/bin/env python3
 """
 Advanced CLI tool for Mermaid diagram processing.
@@ -467,9 +453,9 @@ def validate_command(args):
             content = sys.stdin.read()
         else:
             content = Path(args.input).read_text()
-        
+
         result = validate_mermaid_syntax(content)
-        
+
         if result.is_valid:
             print("✅ Diagram is valid")
             return 0
@@ -478,7 +464,7 @@ def validate_command(args):
             for error in result.errors:
                 print(f"  - {error}")
             return 1
-            
+
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
         return 1
@@ -490,7 +476,7 @@ def render_command(args):
             content = sys.stdin.read()
         else:
             content = Path(args.input).read_text()
-        
+
         if args.output:
             export_to_file(
                 content,
@@ -502,9 +488,9 @@ def render_command(args):
         else:
             result = quick_render(content, format=args.format, theme=args.theme)
             print(result)
-        
+
         return 0
-        
+
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
         return 1
@@ -514,20 +500,20 @@ def batch_command(args):
     try:
         input_dir = Path(args.input_dir)
         output_dir = Path(args.output_dir)
-        
+
         # Find all .mmd files
         mmd_files = list(input_dir.glob("*.mmd"))
         if not mmd_files:
             print(f"No .mmd files found in {input_dir}")
             return 1
-        
+
         # Prepare diagrams dictionary
         diagrams = {}
         for mmd_file in mmd_files:
             name = mmd_file.stem
             content = mmd_file.read_text()
             diagrams[name] = content
-        
+
         # Batch export
         output_paths = batch_export(
             diagrams,
@@ -535,13 +521,13 @@ def batch_command(args):
             format=args.format,
             theme=args.theme
         )
-        
+
         print(f"✅ Processed {len(output_paths)} diagrams:")
         for name, path in output_paths.items():
             print(f"  {name} -> {path}")
-        
+
         return 0
-        
+
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
         return 1
@@ -553,23 +539,23 @@ def multi_format_command(args):
             content = sys.stdin.read()
         else:
             content = Path(args.input).read_text()
-        
+
         formats = args.formats.split(',')
         base_path = Path(args.output).with_suffix('')
-        
+
         output_paths = export_multiple_formats(
             content,
             base_path,
             formats,
             theme=args.theme
         )
-        
+
         print(f"✅ Exported to {len(formats)} formats:")
         for fmt, path in output_paths.items():
             print(f"  {fmt}: {path}")
-        
+
         return 0
-        
+
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
         return 1
@@ -578,16 +564,16 @@ def info_command(args):
     """Show library information."""
     print("Mermaid Render Library Information")
     print("=" * 40)
-    
+
     print(f"Supported formats: {', '.join(get_supported_formats())}")
     print(f"Available themes: {', '.join(get_available_themes())}")
-    
+
     # Show example usage
     print("\\nExample usage:")
     print("  mermaid-cli render input.mmd -o output.svg")
     print("  mermaid-cli batch ./diagrams ./output --format png")
     print("  mermaid-cli multi input.mmd -o diagram --formats svg,png,pdf")
-    
+
     return 0
 
 def main():
@@ -595,43 +581,43 @@ def main():
         description="Advanced Mermaid diagram processing CLI",
         prog="mermaid-cli"
     )
-    
+
     subparsers = parser.add_subparsers(dest='command', help='Available commands')
-    
+
     # Validate command
     validate_parser = subparsers.add_parser('validate', help='Validate diagram syntax')
     validate_parser.add_argument('input', help='Input file (use - for stdin)')
-    
+
     # Render command
     render_parser = subparsers.add_parser('render', help='Render single diagram')
     render_parser.add_argument('input', help='Input file (use - for stdin)')
     render_parser.add_argument('-o', '--output', help='Output file')
     render_parser.add_argument('-f', '--format', default='svg', choices=get_supported_formats())
     render_parser.add_argument('-t', '--theme', choices=get_available_themes())
-    
+
     # Batch command
     batch_parser = subparsers.add_parser('batch', help='Batch process diagrams')
     batch_parser.add_argument('input_dir', help='Input directory with .mmd files')
     batch_parser.add_argument('output_dir', help='Output directory')
     batch_parser.add_argument('-f', '--format', default='svg', choices=get_supported_formats())
     batch_parser.add_argument('-t', '--theme', choices=get_available_themes())
-    
+
     # Multi-format command
     multi_parser = subparsers.add_parser('multi', help='Export to multiple formats')
     multi_parser.add_argument('input', help='Input file (use - for stdin)')
     multi_parser.add_argument('-o', '--output', required=True, help='Output base path')
     multi_parser.add_argument('--formats', default='svg,png', help='Comma-separated formats')
     multi_parser.add_argument('-t', '--theme', choices=get_available_themes())
-    
+
     # Info command
     info_parser = subparsers.add_parser('info', help='Show library information')
-    
+
     args = parser.parse_args()
-    
+
     if not args.command:
         parser.print_help()
         return 1
-    
+
     # Execute command
     commands = {
         'validate': validate_command,
@@ -640,22 +626,22 @@ def main():
         'multi': multi_format_command,
         'info': info_command
     }
-    
+
     return commands[args.command](args)
 
 if __name__ == '__main__':
     sys.exit(main())
 '''
-    
+
     # Save the CLI script
     cli_file = output_dir / "advanced_cli.py"
-    with open(cli_file, 'w') as f:
+    with open(cli_file, "w") as f:
         f.write(cli_script_code)
-    
+
     # Make it executable
     cli_file.chmod(0o755)
-    
-    print(f"✅ Advanced CLI example created")
+
+    print("✅ Advanced CLI example created")
     print(f"📁 Saved to {cli_file}")
     print("🚀 Usage examples:")
     print("  python advanced_cli.py info")
@@ -666,25 +652,25 @@ if __name__ == '__main__':
 def main() -> None:
     """Run all integration examples."""
     print("=== Mermaid Render Integration Examples ===\n")
-    
+
     # Create output directory
     output_dir = create_output_dir()
     print(f"Output directory: {output_dir.absolute()}\n")
-    
+
     # Run examples
     try:
         flask_integration_example(output_dir)
         print()
-        
+
         fastapi_integration_example(output_dir)
         print()
-        
+
         cli_integration_example(output_dir)
         print()
-        
+
         print("✅ All integration examples completed successfully!")
         print(f"Check the {output_dir} directory for integration code.")
-        
+
     except Exception as e:
         print(f"❌ Error creating integration examples: {e}")
         raise

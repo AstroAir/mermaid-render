@@ -5,8 +5,6 @@ This module provides an object-oriented interface for creating sequence diagrams
 with support for participants, messages, activations, notes, and loops.
 """
 
-from typing import Dict, List, Optional
-
 from ..core import MermaidDiagram
 from ..exceptions import DiagramError
 
@@ -40,7 +38,7 @@ class SequenceParticipant:
         >>> db = SequenceParticipant("database")
     """
 
-    def __init__(self, id: str, name: Optional[str] = None) -> None:
+    def __init__(self, id: str, name: str | None = None) -> None:
         """
         Initialize a sequence participant.
 
@@ -178,7 +176,7 @@ class SequenceMessage:
         if message_type not in self.MESSAGE_TYPES:
             raise DiagramError(f"Unknown message type: {message_type}")
 
-    def to_mermaid(self) -> List[str]:
+    def to_mermaid(self) -> list[str]:
         """Generate Mermaid syntax for this message."""
         lines = []
         arrow = self.MESSAGE_TYPES[self.message_type]
@@ -209,7 +207,7 @@ class SequenceNote:
         text: str,
         participant: str,
         position: str = "right of",
-        participants: Optional[List[str]] = None,
+        participants: list[str] | None = None,
     ) -> None:
         """
         Initialize a sequence note.
@@ -248,8 +246,8 @@ class SequenceLoop:
             condition: Loop condition text
         """
         self.condition = condition
-        self.messages: List[SequenceMessage] = []
-        self.notes: List[SequenceNote] = []
+        self.messages: list[SequenceMessage] = []
+        self.notes: list[SequenceNote] = []
 
     def add_message(self, message: SequenceMessage) -> None:
         """Add a message to this loop."""
@@ -259,7 +257,7 @@ class SequenceLoop:
         """Add a note to this loop."""
         self.notes.append(note)
 
-    def to_mermaid(self) -> List[str]:
+    def to_mermaid(self) -> list[str]:
         """Generate Mermaid syntax for this loop."""
         lines = [f"loop {self.condition}"]
 
@@ -288,7 +286,7 @@ class SequenceDiagram(MermaidDiagram):
         >>> print(seq.to_mermaid())
     """
 
-    def __init__(self, title: Optional[str] = None, autonumber: bool = False) -> None:
+    def __init__(self, title: str | None = None, autonumber: bool = False) -> None:
         """
         Initialize sequence diagram.
 
@@ -298,19 +296,17 @@ class SequenceDiagram(MermaidDiagram):
         """
         super().__init__(title)
         self.autonumber = autonumber
-        self.participants: Dict[str, SequenceParticipant] = {}
-        self.messages: List[SequenceMessage] = []
-        self.notes: List[SequenceNote] = []
-        self.loops: List[SequenceLoop] = []
-        self.activations: Dict[str, bool] = {}
+        self.participants: dict[str, SequenceParticipant] = {}
+        self.messages: list[SequenceMessage] = []
+        self.notes: list[SequenceNote] = []
+        self.loops: list[SequenceLoop] = []
+        self.activations: dict[str, bool] = {}
 
     def get_diagram_type(self) -> str:
         """Return the Mermaid diagram type identifier."""
         return "sequenceDiagram"
 
-    def add_participant(
-        self, id: str, name: Optional[str] = None
-    ) -> SequenceParticipant:
+    def add_participant(self, id: str, name: str | None = None) -> SequenceParticipant:
         """
         Add a participant to the sequence diagram.
 
@@ -422,7 +418,7 @@ class SequenceDiagram(MermaidDiagram):
         text: str,
         participant: str,
         position: str = "right of",
-        participants: Optional[List[str]] = None,
+        participants: list[str] | None = None,
     ) -> SequenceNote:
         """
         Add a note to the sequence diagram.

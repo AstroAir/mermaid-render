@@ -7,16 +7,26 @@ custom template creation, and diagram generators for common patterns.
 """
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, cast
 
 from mermaid_render import MermaidRenderer
 
 # Template system (optional imports with fallbacks)
 TEMPLATES_AVAILABLE = False
 
+
 # Define safe shims with correct types to avoid "possibly unbound"
 class _Template:
-    def __init__(self, name: str, diagram_type: str, template_content: str, parameters: Dict[str, Any], description: str, author: str, tags: List[str]):
+    def __init__(
+        self,
+        name: str,
+        diagram_type: str,
+        template_content: str,
+        parameters: dict[str, Any],
+        description: str,
+        author: str,
+        tags: list[str],
+    ):
         self.id = f"{name}"
         self.name = name
         self.diagram_type = diagram_type
@@ -26,11 +36,29 @@ class _Template:
         self.author = author
         self.tags = tags
 
-class _TemplateManagerShim:
-    def create_template(self, name: str, diagram_type: str, template_content: str, parameters: Dict[str, Any], description: str = "", author: str = "", tags: Optional[List[str]] = None) -> _Template:
-        return _Template(name=name, diagram_type=diagram_type, template_content=template_content, parameters=parameters, description=description, author=author, tags=tags or [])
 
-    def generate(self, template_id: str, params: Dict[str, Any]) -> str:
+class _TemplateManagerShim:
+    def create_template(
+        self,
+        name: str,
+        diagram_type: str,
+        template_content: str,
+        parameters: dict[str, Any],
+        description: str = "",
+        author: str = "",
+        tags: list[str] | None = None,
+    ) -> _Template:
+        return _Template(
+            name=name,
+            diagram_type=diagram_type,
+            template_content=template_content,
+            parameters=parameters,
+            description=description,
+            author=author,
+            tags=tags or [],
+        )
+
+    def generate(self, template_id: str, params: dict[str, Any]) -> str:
         # Minimal Jinja-like replace for the demo; just return a basic sequenceDiagram using provided params
         title = params.get("title", "Untitled")
         participants = params.get("participants", [])
@@ -40,33 +68,51 @@ class _TemplateManagerShim:
             lines.append(f"    participant {p['id']} as {p['name']}")
         for e in endpoints:
             lines.append(f"    Note over {e['client']}, {e['server']}: {e['name']}")
-            lines.append(f"    {e['client']}->>{e['server']}: {e['method']} {e['path']}")
+            lines.append(
+                f"    {e['client']}->>{e['server']}: {e['method']} {e['path']}"
+            )
             if e.get("auth_required"):
-                lines.append(f"    {e['server']}->>{e['server']}: Validate Authentication")
+                lines.append(
+                    f"    {e['server']}->>{e['server']}: Validate Authentication"
+                )
             if e.get("validation"):
                 lines.append(f"    {e['server']}->>{e['server']}: Validate Request")
             lines.append(f"    {e['server']}->>{e['database']}: Query/Update Data")
             lines.append(f"    {e['database']}-->>{e['server']}: Result")
-            lines.append(f"    {e['server']}-->>{e['client']}: {e['response_code']} Response")
+            lines.append(
+                f"    {e['server']}-->>{e['client']}: {e['response_code']} Response"
+            )
         return "\n".join(lines)
 
+
 class _FlowchartGeneratorShim:
-    def from_steps(self, steps: List[Dict[str, Any]], title: Optional[str] = None, direction: str = "TD") -> None:
+    def from_steps(
+        self,
+        steps: list[dict[str, Any]],
+        title: str | None = None,
+        direction: str = "TD",
+    ) -> None:
         # Return a lightweight object with to_mermaid and add_edge
         class _Flow:
-            def __init__(self, steps: List[Dict[str, Any]], title: Optional[str], direction: str):
+            def __init__(
+                self, steps: list[dict[str, Any]], title: str | None, direction: str
+            ):
                 self.steps = steps
                 self.title = title
                 self.direction = direction
-                self.edges: List[Dict[str, str]] = []
-            def add_edge(self, src: str, dst: str, label: Optional[str] = None) -> None:
+                self.edges: list[dict[str, str]] = []
+
+            def add_edge(self, src: str, dst: str, label: str | None = None) -> None:
                 self.edges.append({"from": src, "to": dst, "label": label or ""})
+
             def to_mermaid(self) -> str:
                 lines = [f"flowchart {self.direction}"]
                 if self.title:
                     lines.append(f"    %% {self.title}")
                 for s in self.steps:
-                    nid = s["id"]; lbl = s["label"]; typ = s.get("type", "process")
+                    nid = s["id"]
+                    lbl = s["label"]
+                    typ = s.get("type", "process")
                     if typ in ("start", "end"):
                         lines.append(f"    {nid}(({lbl}))")
                     elif typ == "decision":
@@ -75,7 +121,9 @@ class _FlowchartGeneratorShim:
                         lines.append(f"    {nid}[{lbl}]")
                 # default linear edges
                 for i in range(len(self.steps) - 1):
-                    lines.append(f"    {self.steps[i]['id']} --> {self.steps[i+1]['id']}")
+                    lines.append(
+                        f"    {self.steps[i]['id']} --> {self.steps[i+1]['id']}"
+                    )
                 # custom edges
                 for e in self.edges:
                     if e["label"]:
@@ -83,10 +131,17 @@ class _FlowchartGeneratorShim:
                     else:
                         lines.append(f"    {e['from']} --> {e['to']}")
                 return "\n".join(lines)
+
         return _Flow(steps, title, direction)
 
+
 class _SequenceGeneratorShim:
-    def from_interactions(self, interactions: List[Dict[str, Any]], title: Optional[str] = None, participants: Optional[Dict[str, str]] = None) -> None:
+    def from_interactions(
+        self,
+        interactions: list[dict[str, Any]],
+        title: str | None = None,
+        participants: dict[str, str] | None = None,
+    ) -> None:
         lines = ["sequenceDiagram", "    autonumber"]
         if title:
             lines.append(f"    %% {title}")
@@ -103,8 +158,14 @@ class _SequenceGeneratorShim:
                 lines.append(f"    {it['from']}->>{it['to']}: {it['message']}")
         return "\n".join(lines)
 
+
 class _ArchitectureGeneratorShim:
-    def from_components(self, components: Dict[str, Dict[str, Any]], connections: List[Dict[str, str]], title: Optional[str] = None) -> None:
+    def from_components(
+        self,
+        components: dict[str, dict[str, Any]],
+        connections: list[dict[str, str]],
+        title: str | None = None,
+    ) -> None:
         lines = ["flowchart TD"]
         if title:
             lines.append(f"    %% {title}")
@@ -116,19 +177,37 @@ class _ArchitectureGeneratorShim:
             lines.append(f"    {c['from']}{lbl}{c['to']}")
         return "\n".join(lines)
 
+
 # Try to import real modules
 try:
     from mermaid_render.templates import (
-        TemplateManager as _TemplateManager,
-        FlowchartGenerator as _FlowchartGenerator,
-        SequenceGenerator as _SequenceGenerator,
-        ClassDiagramGenerator as _ClassDiagramGenerator,  # noqa: F401
         ArchitectureGenerator as _ArchitectureGenerator,
+    )
+    from mermaid_render.templates import (
+        ClassDiagramGenerator as _ClassDiagramGenerator,  # noqa: F401
+    )
+    from mermaid_render.templates import (
+        FlowchartGenerator as _FlowchartGenerator,
+    )
+    from mermaid_render.templates import (
         ProcessFlowGenerator as _ProcessFlowGenerator,  # noqa: F401
+    )
+    from mermaid_render.templates import (
+        SequenceGenerator as _SequenceGenerator,
+    )
+    from mermaid_render.templates import (
+        TemplateManager as _TemplateManager,
+    )
+    from mermaid_render.templates import (
         generate_from_template as _generate_from_template,
-        list_available_templates as _list_available_templates,
+    )
+    from mermaid_render.templates import (
         get_template_info as _get_template_info,
     )
+    from mermaid_render.templates import (
+        list_available_templates as _list_available_templates,
+    )
+
     TemplateManager = _TemplateManager
     FlowchartGenerator = _FlowchartGenerator
     SequenceGenerator = _SequenceGenerator
@@ -137,10 +216,10 @@ try:
 
     # Normalize list_available_templates to return List[str] for this showcase
     def list_available_templates(
-        template_manager: Optional[Any] = None,
-        diagram_type: Optional[str] = None,
-        tags: Optional[List[str]] = None,
-    ) -> List[str]:
+        template_manager: Any | None = None,
+        diagram_type: str | None = None,
+        tags: list[str] | None = None,
+    ) -> list[str]:
         try:
             res: Any = _list_available_templates(
                 template_manager=template_manager,
@@ -152,9 +231,9 @@ try:
 
         # If already a list of strings, cast for type checkers
         if isinstance(res, list) and all(isinstance(x, str) for x in res):
-            return cast(List[str], res)
+            return cast(list[str], res)
 
-        names: List[str] = []
+        names: list[str] = []
         if isinstance(res, list):
             for item in res:
                 if isinstance(item, dict):
@@ -174,7 +253,7 @@ try:
         return names
 
     # Normalize get_template_info to a stable signature: (template_name: str) -> Dict[str, Any]
-    def get_template_info(template_name: str) -> Dict[str, Any]:
+    def get_template_info(template_name: str) -> dict[str, Any]:
         try:
             info: Any = _get_template_info(template_name)
         except TypeError:
@@ -191,20 +270,23 @@ except ImportError:
     FlowchartGenerator = _FlowchartGeneratorShim
     SequenceGenerator = _SequenceGeneratorShim
     ArchitectureGenerator = _ArchitectureGeneratorShim
+
     # Provide stubbed template listing APIs
     def _shim_list_available_templates(
-        template_manager: Optional[Any] = None,
-        diagram_type: Optional[str] = None,
-        tags: Optional[List[str]] = None,
-    ) -> List[str]:
+        template_manager: Any | None = None,
+        diagram_type: str | None = None,
+        tags: list[str] | None = None,
+    ) -> list[str]:
         # Shim ignores filters but keeps the same signature for type compatibility
         return ["basic_flowchart"]
-    def _shim_get_template_info(template_name: str) -> Dict[str, Any]:
+
+    def _shim_get_template_info(template_name: str) -> dict[str, Any]:
         return {"name": template_name, "description": "Basic flowchart template (shim)"}
+
     def _shim_generate_from_template(
         template_name: str,
-        parameters: Dict[str, Any],
-        template_manager: Optional[Any] = None,
+        parameters: dict[str, Any],
+        template_manager: Any | None = None,
         validate_params: bool = True,
     ) -> str:
         if template_name != "basic_flowchart":
@@ -216,7 +298,8 @@ except ImportError:
         lines = ["flowchart TD", f"    %% {title}"]
         for s in steps:
             typ = s.get("type", "process")
-            nid = s["id"]; lbl = s["label"]
+            nid = s["id"]
+            lbl = s["label"]
             if typ in ("start", "end"):
                 lines.append(f"    {nid}(({lbl}))")
             elif typ == "decision":
@@ -232,20 +315,20 @@ except ImportError:
 
     # Assign public API names from shims (avoid duplicate def names for type checkers)
     def list_available_templates(
-        template_manager: Optional[Any] = None,
-        diagram_type: Optional[str] = None,
-        tags: Optional[List[str]] = None,
-    ) -> List[str]:
+        template_manager: Any | None = None,
+        diagram_type: str | None = None,
+        tags: list[str] | None = None,
+    ) -> list[str]:
         # Pass-through; shim ignores filters but signature matches
         return _shim_list_available_templates(template_manager, diagram_type, tags)
 
-    def get_template_info(template_name: str) -> Dict[str, Any]:
+    def get_template_info(template_name: str) -> dict[str, Any]:
         return _shim_get_template_info(template_name)
 
     def generate_from_template(
         template_name: str,
-        parameters: Dict[str, Any],
-        template_manager: Optional[Any] = None,
+        parameters: dict[str, Any],
+        template_manager: Any | None = None,
         validate_params: bool = True,
     ) -> str:
         return _shim_generate_from_template(
@@ -255,13 +338,17 @@ except ImportError:
             validate_params=validate_params,
         )
 
-    print("⚠️  Template system not available. Install with: pip install mermaid-render[templates]")
+    print(
+        "⚠️  Template system not available. Install with: pip install mermaid-render[templates]"
+    )
+
 
 def create_output_dir() -> Path:
     """Create output directory for examples."""
     output_dir = Path("output/templates")
     output_dir.mkdir(parents=True, exist_ok=True)
     return output_dir
+
 
 def _save_mermaid_code(renderer: MermaidRenderer, code: str, output_path: Path) -> None:
     """
@@ -279,6 +366,7 @@ def _save_mermaid_code(renderer: MermaidRenderer, code: str, output_path: Path) 
         # Ensure content is a string for write_text
         output_path.write_text(str(content))
 
+
 def built_in_templates_example(output_dir: Path) -> None:
     """Demonstrate using built-in templates."""
     if not TEMPLATES_AVAILABLE:
@@ -289,7 +377,7 @@ def built_in_templates_example(output_dir: Path) -> None:
 
     try:
         # List available templates
-        templates: List[str] = list_available_templates()
+        templates: list[str] = list_available_templates()
         print(f"📋 Available templates: {len(templates)}")
 
         for template_name in templates[:5]:  # Show first 5
@@ -306,11 +394,23 @@ def built_in_templates_example(output_dir: Path) -> None:
                     "title": "User Registration Process",
                     "steps": [
                         {"id": "start", "label": "Start", "type": "start"},
-                        {"id": "form", "label": "Fill Registration Form", "type": "process"},
-                        {"id": "validate", "label": "Validate Input", "type": "decision"},
+                        {
+                            "id": "form",
+                            "label": "Fill Registration Form",
+                            "type": "process",
+                        },
+                        {
+                            "id": "validate",
+                            "label": "Validate Input",
+                            "type": "decision",
+                        },
                         {"id": "save", "label": "Save User", "type": "process"},
-                        {"id": "email", "label": "Send Welcome Email", "type": "process"},
-                        {"id": "end", "label": "Complete", "type": "end"}
+                        {
+                            "id": "email",
+                            "label": "Send Welcome Email",
+                            "type": "process",
+                        },
+                        {"id": "end", "label": "Complete", "type": "end"},
                     ],
                     "connections": [
                         {"from": "start", "to": "form"},
@@ -318,20 +418,21 @@ def built_in_templates_example(output_dir: Path) -> None:
                         {"from": "validate", "to": "save", "label": "Valid"},
                         {"from": "validate", "to": "form", "label": "Invalid"},
                         {"from": "save", "to": "email"},
-                        {"from": "email", "to": "end"}
-                    ]
-                }
+                        {"from": "email", "to": "end"},
+                    ],
+                },
             )
 
             # Save the generated diagram
             renderer = MermaidRenderer()
             output_path = output_dir / "template_flowchart.svg"
             _save_mermaid_code(renderer, diagram_code, output_path)
-            print(f"✅ Generated flowchart from template")
+            print("✅ Generated flowchart from template")
             print(f"📁 Saved to {output_path}")
 
     except Exception as e:
         print(f"❌ Error with built-in templates: {e}")
+
 
 def custom_template_creation_example(output_dir: Path) -> None:
     """Demonstrate creating custom templates."""
@@ -350,11 +451,11 @@ def custom_template_creation_example(output_dir: Path) -> None:
 sequenceDiagram
     title: {{ title }}
     autonumber
-    
+
     {% for participant in participants %}
     participant {{ participant.id }} as {{ participant.name }}
     {% endfor %}
-    
+
     {% for endpoint in endpoints %}
     Note over {{ endpoint.client }}, {{ endpoint.server }}: {{ endpoint.name }}
     {{ endpoint.client }}->>{{ endpoint.server }}: {{ endpoint.method }} {{ endpoint.path }}
@@ -376,13 +477,25 @@ sequenceDiagram
             diagram_type="sequence",
             template_content=api_template_content,
             parameters={
-                "title": {"type": "string", "required": True, "description": "API documentation title"},
-                "participants": {"type": "array", "required": True, "description": "List of participants"},
-                "endpoints": {"type": "array", "required": True, "description": "List of API endpoints"}
+                "title": {
+                    "type": "string",
+                    "required": True,
+                    "description": "API documentation title",
+                },
+                "participants": {
+                    "type": "array",
+                    "required": True,
+                    "description": "List of participants",
+                },
+                "endpoints": {
+                    "type": "array",
+                    "required": True,
+                    "description": "List of API endpoints",
+                },
             },
             description="Template for generating API documentation sequence diagrams",
             author="Example Author",
-            tags=["api", "documentation", "sequence"]
+            tags=["api", "documentation", "sequence"],
         )
 
         print(f"✅ Created custom template: {template.name}")
@@ -395,7 +508,7 @@ sequenceDiagram
                 "participants": [
                     {"id": "client", "name": "Client App"},
                     {"id": "api", "name": "API Server"},
-                    {"id": "db", "name": "Database"}
+                    {"id": "db", "name": "Database"},
                 ],
                 "endpoints": [
                     {
@@ -407,7 +520,7 @@ sequenceDiagram
                         "path": "/users",
                         "auth_required": True,
                         "validation": True,
-                        "response_code": "201"
+                        "response_code": "201",
                     },
                     {
                         "name": "Get User",
@@ -418,10 +531,10 @@ sequenceDiagram
                         "path": "/users/{id}",
                         "auth_required": True,
                         "validation": False,
-                        "response_code": "200"
-                    }
-                ]
-            }
+                        "response_code": "200",
+                    },
+                ],
+            },
         )
 
         # Save the generated diagram
@@ -432,6 +545,7 @@ sequenceDiagram
 
     except Exception as e:
         print(f"❌ Error with custom template: {e}")
+
 
 def flowchart_generator_example(output_dir: Path) -> None:
     """Demonstrate the FlowchartGenerator."""
@@ -453,7 +567,7 @@ def flowchart_generator_example(output_dir: Path) -> None:
             {"id": "ship", "label": "Ship Order", "type": "process"},
             {"id": "notify", "label": "Send Confirmation", "type": "process"},
             {"id": "end", "label": "Order Complete", "type": "end"},
-            {"id": "reject", "label": "Reject Order", "type": "end"}
+            {"id": "reject", "label": "Reject Order", "type": "end"},
         ]
 
         # Convert steps to the format expected by FlowchartGenerator.generate()
@@ -467,11 +581,7 @@ def flowchart_generator_example(output_dir: Path) -> None:
             else:
                 shape = "rectangle"
 
-            nodes.append({
-                "id": step["id"],
-                "label": step["label"],
-                "shape": shape
-            })
+            nodes.append({"id": step["id"], "label": step["label"], "shape": shape})
 
         # Create edges for linear flow and decision branches
         edges = []
@@ -481,22 +591,21 @@ def flowchart_generator_example(output_dir: Path) -> None:
             # Skip the default edge from validate to inventory since we'll add custom ones
             if from_id == "validate" and to_id == "inventory":
                 continue
-            edges.append({
-                "from": from_id,
-                "to": to_id
-            })
+            edges.append({"from": from_id, "to": to_id})
 
         # Add decision edges
-        edges.extend([
-            {"from": "validate", "to": "inventory", "label": "Valid"},
-            {"from": "validate", "to": "reject", "label": "Invalid"}
-        ])
+        edges.extend(
+            [
+                {"from": "validate", "to": "inventory", "label": "Valid"},
+                {"from": "validate", "to": "reject", "label": "Invalid"},
+            ]
+        )
 
         flowchart_data = {
             "title": "Order Processing Workflow",
             "direction": "TD",
             "nodes": nodes,
-            "edges": edges
+            "edges": edges,
         }
 
         # Use the appropriate method based on what's available
@@ -506,7 +615,7 @@ def flowchart_generator_example(output_dir: Path) -> None:
         else:
             # Shim with from_steps method - fallback to manual generation
             lines = [f"flowchart {flowchart_data['direction']}"]
-            if flowchart_data.get('title'):
+            if flowchart_data.get("title"):
                 lines.append(f"    %% {flowchart_data['title']}")
 
             # Add nodes
@@ -524,7 +633,9 @@ def flowchart_generator_example(output_dir: Path) -> None:
             # Add edges
             for edge in edges:
                 if edge.get("label"):
-                    lines.append(f"    {edge['from']} -- {edge['label']} --> {edge['to']}")
+                    lines.append(
+                        f"    {edge['from']} -- {edge['label']} --> {edge['to']}"
+                    )
                 else:
                     lines.append(f"    {edge['from']} --> {edge['to']}")
 
@@ -534,11 +645,12 @@ def flowchart_generator_example(output_dir: Path) -> None:
         renderer = MermaidRenderer()
         output_path = output_dir / "generated_flowchart.svg"
         _save_mermaid_code(renderer, diagram_code, output_path)
-        print(f"✅ Generated flowchart from steps")
+        print("✅ Generated flowchart from steps")
         print(f"📁 Saved to {output_path}")
 
     except Exception as e:
         print(f"❌ Error with flowchart generator: {e}")
+
 
 def sequence_generator_example(output_dir: Path) -> None:
     """Demonstrate the SequenceGenerator."""
@@ -553,13 +665,48 @@ def sequence_generator_example(output_dir: Path) -> None:
 
         # Generate from interaction data
         interactions = [
-            {"from": "user", "to": "frontend", "message": "Click Login Button", "type": "sync"},
-            {"from": "frontend", "to": "backend", "message": "POST /auth/login", "type": "sync"},
-            {"from": "backend", "to": "database", "message": "SELECT user WHERE email = ?", "type": "sync"},
-            {"from": "database", "to": "backend", "message": "User data", "type": "return"},
-            {"from": "backend", "to": "backend", "message": "Verify password", "type": "self"},
-            {"from": "backend", "to": "frontend", "message": "JWT token", "type": "return"},
-            {"from": "frontend", "to": "user", "message": "Redirect to dashboard", "type": "return"}
+            {
+                "from": "user",
+                "to": "frontend",
+                "message": "Click Login Button",
+                "type": "sync",
+            },
+            {
+                "from": "frontend",
+                "to": "backend",
+                "message": "POST /auth/login",
+                "type": "sync",
+            },
+            {
+                "from": "backend",
+                "to": "database",
+                "message": "SELECT user WHERE email = ?",
+                "type": "sync",
+            },
+            {
+                "from": "database",
+                "to": "backend",
+                "message": "User data",
+                "type": "return",
+            },
+            {
+                "from": "backend",
+                "to": "backend",
+                "message": "Verify password",
+                "type": "self",
+            },
+            {
+                "from": "backend",
+                "to": "frontend",
+                "message": "JWT token",
+                "type": "return",
+            },
+            {
+                "from": "frontend",
+                "to": "user",
+                "message": "Redirect to dashboard",
+                "type": "return",
+            },
         ]
 
         # Convert interactions to the format expected by SequenceGenerator.generate()
@@ -567,7 +714,7 @@ def sequence_generator_example(output_dir: Path) -> None:
             {"id": "user", "name": "User"},
             {"id": "frontend", "name": "Frontend App"},
             {"id": "backend", "name": "Backend API"},
-            {"id": "database", "name": "Database"}
+            {"id": "database", "name": "Database"},
         ]
 
         messages = []
@@ -580,17 +727,19 @@ def sequence_generator_example(output_dir: Path) -> None:
             else:
                 arrow_type = "sync"
 
-            messages.append({
-                "from": interaction["from"],
-                "to": interaction["to"],
-                "message": interaction["message"],
-                "type": arrow_type
-            })
+            messages.append(
+                {
+                    "from": interaction["from"],
+                    "to": interaction["to"],
+                    "message": interaction["message"],
+                    "type": arrow_type,
+                }
+            )
 
         sequence_data = {
             "title": "User Login Sequence",
             "participants": participants,
-            "messages": messages
+            "messages": messages,
         }
 
         # Use the appropriate method based on what's available
@@ -604,7 +753,9 @@ def sequence_generator_example(output_dir: Path) -> None:
 
             # Add participants
             for participant in participants:
-                lines.append(f"    participant {participant['id']} as {participant['name']}")
+                lines.append(
+                    f"    participant {participant['id']} as {participant['name']}"
+                )
 
             # Add messages
             for msg in messages:
@@ -621,11 +772,12 @@ def sequence_generator_example(output_dir: Path) -> None:
         renderer = MermaidRenderer()
         output_path = output_dir / "generated_sequence.svg"
         _save_mermaid_code(renderer, diagram_code, output_path)
-        print(f"✅ Generated sequence diagram from interactions")
+        print("✅ Generated sequence diagram from interactions")
         print(f"📁 Saved to {output_path}")
 
     except Exception as e:
         print(f"❌ Error with sequence generator: {e}")
+
 
 def architecture_generator_example(output_dir: Path) -> None:
     """Demonstrate the ArchitectureGenerator."""
@@ -640,12 +792,36 @@ def architecture_generator_example(output_dir: Path) -> None:
 
         # Define system components
         components = {
-            "frontend": {"name": "React Frontend", "type": "client", "technologies": ["React", "TypeScript", "Tailwind"]},
-            "api_gateway": {"name": "API Gateway", "type": "gateway", "technologies": ["Kong", "Rate Limiting"]},
-            "auth_service": {"name": "Authentication Service", "type": "service", "technologies": ["Node.js", "JWT"]},
-            "user_service": {"name": "User Service", "type": "service", "technologies": ["Python", "FastAPI"]},
-            "database": {"name": "PostgreSQL", "type": "database", "technologies": ["PostgreSQL", "Connection Pool"]},
-            "cache": {"name": "Redis Cache", "type": "cache", "technologies": ["Redis", "Clustering"]},
+            "frontend": {
+                "name": "React Frontend",
+                "type": "client",
+                "technologies": ["React", "TypeScript", "Tailwind"],
+            },
+            "api_gateway": {
+                "name": "API Gateway",
+                "type": "gateway",
+                "technologies": ["Kong", "Rate Limiting"],
+            },
+            "auth_service": {
+                "name": "Authentication Service",
+                "type": "service",
+                "technologies": ["Node.js", "JWT"],
+            },
+            "user_service": {
+                "name": "User Service",
+                "type": "service",
+                "technologies": ["Python", "FastAPI"],
+            },
+            "database": {
+                "name": "PostgreSQL",
+                "type": "database",
+                "technologies": ["PostgreSQL", "Connection Pool"],
+            },
+            "cache": {
+                "name": "Redis Cache",
+                "type": "cache",
+                "technologies": ["Redis", "Clustering"],
+            },
         }
 
         connections = [
@@ -667,17 +843,15 @@ def architecture_generator_example(output_dir: Path) -> None:
             elif comp_type == "cache":
                 comp_type = "database"  # Treat cache as database type
 
-            components_array.append({
-                "id": comp_id,
-                "name": comp_data["name"],
-                "type": comp_type
-            })
+            components_array.append(
+                {"id": comp_id, "name": comp_data["name"], "type": comp_type}
+            )
 
         architecture_data = {
             "title": "Microservices Architecture",
             "direction": "TD",
             "components": components_array,
-            "connections": connections
+            "connections": connections,
         }
 
         # Use the appropriate method based on what's available
@@ -698,7 +872,9 @@ def architecture_generator_example(output_dir: Path) -> None:
             # Add connections
             for conn in connections:
                 if conn.get("label"):
-                    lines.append(f"    {conn['from']} -- {conn['label']} --> {conn['to']}")
+                    lines.append(
+                        f"    {conn['from']} -- {conn['label']} --> {conn['to']}"
+                    )
                 else:
                     lines.append(f"    {conn['from']} --> {conn['to']}")
 
@@ -708,11 +884,12 @@ def architecture_generator_example(output_dir: Path) -> None:
         renderer = MermaidRenderer()
         output_path = output_dir / "generated_architecture.svg"
         _save_mermaid_code(renderer, diagram_code, output_path)
-        print(f"✅ Generated architecture diagram")
+        print("✅ Generated architecture diagram")
         print(f"📁 Saved to {output_path}")
 
     except Exception as e:
         print(f"❌ Error with architecture generator: {e}")
+
 
 def main() -> None:
     """Run all template system examples."""
@@ -746,12 +923,15 @@ def main() -> None:
         if TEMPLATES_AVAILABLE:
             print("✅ All template system examples completed successfully!")
         else:
-            print("ℹ️  Template examples ran with local shims (install extras for full features).")
+            print(
+                "ℹ️  Template examples ran with local shims (install extras for full features)."
+            )
         print(f"Check the {output_dir} directory for generated diagrams.")
 
     except Exception as e:
         print(f"❌ Error running template examples: {e}")
         raise
+
 
 if __name__ == "__main__":
     main()

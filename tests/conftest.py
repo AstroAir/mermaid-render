@@ -2,6 +2,13 @@
 Pytest configuration and fixtures for the Mermaid Render test suite.
 """
 
+import tempfile
+from collections.abc import Generator
+from pathlib import Path
+from typing import Any
+
+import pytest
+
 from mermaid_render import (
     ConfigManager,
     FlowchartDiagram,
@@ -10,11 +17,6 @@ from mermaid_render import (
     SequenceDiagram,
     ThemeManager,
 )
-import tempfile
-from pathlib import Path
-from typing import Any, Dict, Generator
-
-import pytest
 
 # Register test categories as markers
 
@@ -42,7 +44,7 @@ def temp_dir() -> Generator[Path, None, None]:
 
 
 @pytest.fixture
-def sample_config() -> Dict[str, Any]:
+def sample_config() -> dict[str, Any]:
     """Sample configuration for testing."""
     return {
         "server_url": "https://mermaid.ink",
@@ -62,7 +64,10 @@ def mermaid_config(sample_config: Any) -> MermaidConfig:
 @pytest.fixture
 def mermaid_renderer(mermaid_config: Any) -> MermaidRenderer:
     """Create a MermaidRenderer instance for testing."""
-    return MermaidRenderer(config=mermaid_config)
+    # Disable plugin system for unit tests to allow direct mocking
+    # Also disable caching to prevent test interference
+    mermaid_config.update({"cache_enabled": False})
+    return MermaidRenderer(config=mermaid_config, use_plugin_system=False)
 
 
 @pytest.fixture
@@ -127,7 +132,7 @@ flowchart TD
 
 
 @pytest.fixture
-def sample_themes() -> Dict[str, Dict[str, Any]]:
+def sample_themes() -> dict[str, dict[str, Any]]:
     """Sample theme configurations for testing."""
     return {
         "test_theme": {
@@ -149,7 +154,7 @@ def sample_themes() -> Dict[str, Dict[str, Any]]:
 
 # Test data fixtures
 @pytest.fixture
-def diagram_test_cases() -> Dict[str, str]:
+def diagram_test_cases() -> dict[str, str]:
     """Test cases for different diagram types."""
     return {
         "flowchart": """
@@ -188,7 +193,7 @@ stateDiagram-v2
 
 
 @pytest.fixture
-def mock_responses() -> Dict[str, Any]:
+def mock_responses() -> dict[str, Any]:
     """Mock HTTP responses for testing."""
     return {
         "svg_success": """<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">

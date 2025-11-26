@@ -5,19 +5,19 @@ This module provides convenient functions for exporting diagrams to various form
 """
 
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import Any
 
 from ..core import MermaidDiagram, MermaidRenderer
 from ..exceptions import UnsupportedFormatError
 
 
 def export_to_file(
-    diagram: Union[MermaidDiagram, str],
-    output_path: Union[str, Path],
-    format: Optional[str] = None,
-    theme: Optional[str] = None,
-    config: Optional[Dict[str, Any]] = None,
-    renderer: Optional[MermaidRenderer] = None,
+    diagram: MermaidDiagram | str,
+    output_path: str | Path,
+    format: str | None = None,
+    theme: str | None = None,
+    config: dict[str, Any] | None = None,
+    renderer: MermaidRenderer | None = None,
     **options: Any,
 ) -> None:
     """
@@ -77,13 +77,13 @@ def export_to_file(
 
 
 def export_multiple_formats(
-    diagram: Union[MermaidDiagram, str],
-    base_path: Union[str, Path],
+    diagram: MermaidDiagram | str,
+    base_path: str | Path,
     formats: list[str],
-    theme: Optional[str] = None,
-    config: Optional[Dict[str, Any]] = None,
+    theme: str | None = None,
+    config: dict[str, Any] | None = None,
     **options: Any,
-) -> Dict[str, Path]:
+) -> dict[str, Path]:
     """
     Export a diagram to multiple formats simultaneously.
 
@@ -165,13 +165,13 @@ def export_multiple_formats(
 
 
 def batch_export(
-    diagrams: Dict[str, Union[MermaidDiagram, str]],
-    output_dir: Union[str, Path],
+    diagrams: dict[str, MermaidDiagram | str],
+    output_dir: str | Path,
     format: str = "svg",
-    theme: Optional[str] = None,
-    config: Optional[Dict[str, Any]] = None,
+    theme: str | None = None,
+    config: dict[str, Any] | None = None,
     **options: Any,
-) -> Dict[str, Path]:
+) -> dict[str, Path]:
     """
     Export multiple diagrams to files in batch.
 

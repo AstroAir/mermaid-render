@@ -269,7 +269,7 @@ from mermaid_render.cache import AsyncRedisCache
 async def render_with_cache():
     cache = AsyncRedisCache(host="localhost")
     renderer = AsyncMermaidRenderer(cache=cache)
-    
+
     result = await renderer.render(diagram)
     return result
 ```

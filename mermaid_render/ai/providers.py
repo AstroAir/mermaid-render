@@ -11,10 +11,10 @@ import logging
 import os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, cast
 from urllib.parse import urljoin
 
-import requests  # type: ignore
+import requests
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -24,12 +24,12 @@ logger = logging.getLogger(__name__)
 class ProviderConfig:
     """Configuration for AI providers."""
 
-    api_key: Optional[str] = None
-    base_url: Optional[str] = None
-    model: Optional[str] = None
+    api_key: str | None = None
+    base_url: str | None = None
+    model: str | None = None
     timeout: int = 30
     max_retries: int = 3
-    custom_headers: Optional[Dict[str, str]] = None
+    custom_headers: dict[str, str] | None = None
 
     def __post_init__(self) -> None:
         """Post-initialization validation."""
@@ -44,17 +44,17 @@ class GenerationResponse:
     """Response from AI provider generation."""
 
     content: str
-    model: Optional[str] = None
-    usage: Optional[Dict[str, Any]] = None
-    metadata: Optional[Dict[str, Any]] = None
-    provider: Optional[str] = None
+    model: str | None = None
+    usage: dict[str, Any] | None = None
+    metadata: dict[str, Any] | None = None
+    provider: str | None = None
 
 
 class ProviderError(Exception):
     """Base exception for provider errors."""
 
     def __init__(
-        self, message: str, provider: str = "unknown", error_code: Optional[str] = None
+        self, message: str, provider: str = "unknown", error_code: str | None = None
     ) -> None:
         super().__init__(message)
         self.provider = provider
@@ -87,10 +87,10 @@ class AIProvider(ABC):
     to be compatible with the mermaid-render AI module.
     """
 
-    def __init__(self, config: Optional[ProviderConfig] = None) -> None:
+    def __init__(self, config: ProviderConfig | None = None) -> None:
         """Initialize the provider with configuration."""
         self.config: ProviderConfig = config or ProviderConfig()
-        self._client: Optional[Any] = None
+        self._client: Any | None = None
         self.provider_name: str = self.__class__.__name__.replace(
             "Provider", ""
         ).lower()
@@ -123,7 +123,7 @@ class AIProvider(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_supported_models(self) -> List[str]:
+    def get_supported_models(self) -> list[str]:
         """
         Get list of supported models for this provider.
 
@@ -224,7 +224,7 @@ class OpenAIProvider(AIProvider):
     """
 
     def __init__(
-        self, config: Optional[ProviderConfig] = None, model: str = "gpt-3.5-turbo"
+        self, config: ProviderConfig | None = None, model: str = "gpt-3.5-turbo"
     ) -> None:
         """Initialize OpenAI provider."""
         if config is None:
@@ -233,15 +233,15 @@ class OpenAIProvider(AIProvider):
             config.model = model
 
         super().__init__(config)
-        self._client: Optional[Any] = None
+        self._client: Any | None = None
 
     @property
-    def api_key(self) -> Optional[str]:
+    def api_key(self) -> str | None:
         """Get the API key."""
         return self.config.api_key
 
     @property
-    def model(self) -> Optional[str]:
+    def model(self) -> str | None:
         """Get the model name."""
         return self.config.model
 
@@ -266,11 +266,11 @@ class OpenAIProvider(AIProvider):
 
             # Prepare messages
             raw_messages = kwargs.get("messages", [{"role": "user", "content": prompt}])
-            messages: List[Dict[str, Any]]
+            messages: list[dict[str, Any]]
             if isinstance(raw_messages, str):
                 messages = [{"role": "user", "content": raw_messages}]
             else:
-                messages = cast(List[Dict[str, Any]], raw_messages)
+                messages = cast(list[dict[str, Any]], raw_messages)
 
             # Make API call with retry logic
             for attempt in range(self.config.max_retries + 1):
@@ -366,7 +366,7 @@ class OpenAIProvider(AIProvider):
         openai_available = importlib.util.find_spec("openai") is not None
         return openai_available and (self.config.api_key is not None)
 
-    def get_supported_models(self) -> List[str]:
+    def get_supported_models(self) -> list[str]:
         """Get list of supported OpenAI models."""
         return [
             "gpt-4o",
@@ -396,7 +396,7 @@ class AnthropicProvider(AIProvider):
 
     def __init__(
         self,
-        config: Optional[ProviderConfig] = None,
+        config: ProviderConfig | None = None,
         model: str = "claude-3-5-sonnet-20241022",
     ) -> None:
         """Initialize Anthropic provider."""
@@ -406,15 +406,15 @@ class AnthropicProvider(AIProvider):
             config.model = model
 
         super().__init__(config)
-        self._client: Optional[Any] = None
+        self._client: Any | None = None
 
     @property
-    def api_key(self) -> Optional[str]:
+    def api_key(self) -> str | None:
         """Get the API key."""
         return self.config.api_key
 
     @property
-    def model(self) -> Optional[str]:
+    def model(self) -> str | None:
         """Get the model name."""
         return self.config.model
 
@@ -438,11 +438,11 @@ class AnthropicProvider(AIProvider):
 
             # Prepare messages
             raw_messages = kwargs.get("messages", [{"role": "user", "content": prompt}])
-            messages: List[Dict[str, Any]]
+            messages: list[dict[str, Any]]
             if isinstance(raw_messages, str):
                 messages = [{"role": "user", "content": raw_messages}]
             else:
-                messages = cast(List[Dict[str, Any]], raw_messages)
+                messages = cast(list[dict[str, Any]], raw_messages)
 
             for attempt in range(self.config.max_retries + 1):
                 try:
@@ -533,7 +533,7 @@ class AnthropicProvider(AIProvider):
         anthropic_available = importlib.util.find_spec("anthropic") is not None
         return anthropic_available and (self.config.api_key is not None)
 
-    def get_supported_models(self) -> List[str]:
+    def get_supported_models(self) -> list[str]:
         """Get list of supported Anthropic models."""
         return [
             "claude-3-5-sonnet-20241022",
@@ -562,7 +562,7 @@ class LocalModelProvider(AIProvider):
     """
 
     def __init__(
-        self, config: Optional[ProviderConfig] = None, model_path: Optional[str] = None
+        self, config: ProviderConfig | None = None, model_path: str | None = None
     ) -> None:
         """Initialize local model provider."""
         if config is None:
@@ -570,7 +570,7 @@ class LocalModelProvider(AIProvider):
 
         super().__init__(config)
         self.model_path = model_path or "/tmp/local_model"  # Default path
-        self.model: Optional[Any] = None
+        self.model: Any | None = None
 
     @property
     def model_name(self) -> str:
@@ -597,7 +597,7 @@ class LocalModelProvider(AIProvider):
         """Check if local model is available."""
         return True  # Always available as fallback
 
-    def get_supported_models(self) -> List[str]:
+    def get_supported_models(self) -> list[str]:
         """Get list of supported local models."""
         return ["local-template"]
 
@@ -682,7 +682,7 @@ class OpenRouterProvider(AIProvider):
 
     def __init__(
         self,
-        config: Optional[ProviderConfig] = None,
+        config: ProviderConfig | None = None,
         model: str = "openai/gpt-3.5-turbo",
     ) -> None:
         """Initialize OpenRouter provider."""
@@ -708,7 +708,7 @@ class OpenRouterProvider(AIProvider):
                 )
 
             # Prepare headers
-            headers: Dict[str, str] = {
+            headers: dict[str, str] = {
                 "Authorization": f"Bearer {self.config.api_key}",
                 "Content-Type": "application/json",
                 "HTTP-Referer": cast(
@@ -723,14 +723,14 @@ class OpenRouterProvider(AIProvider):
 
             # Prepare messages
             raw_messages = kwargs.get("messages", [{"role": "user", "content": prompt}])
-            messages: List[Dict[str, Any]]
+            messages: list[dict[str, Any]]
             if isinstance(raw_messages, str):
                 messages = [{"role": "user", "content": raw_messages}]
             else:
-                messages = cast(List[Dict[str, Any]], raw_messages)
+                messages = cast(list[dict[str, Any]], raw_messages)
 
             # Prepare request body
-            request_body: Dict[str, Any] = {
+            request_body: dict[str, Any] = {
                 "model": self.config.model or "openai/gpt-3.5-turbo",
                 "messages": messages,
                 "max_tokens": kwargs.get("max_tokens", 1000),
@@ -843,7 +843,7 @@ class OpenRouterProvider(AIProvider):
         """Check if OpenRouter is available."""
         return self.config.api_key is not None
 
-    def get_supported_models(self) -> List[str]:
+    def get_supported_models(self) -> list[str]:
         """
         Get list of popular supported OpenRouter models.
 
@@ -878,7 +878,7 @@ class OpenRouterProvider(AIProvider):
             "perplexity/llama-3.1-sonar-large-128k-online",
         ]
 
-    def list_models(self) -> List[Dict[str, Any]]:
+    def list_models(self) -> list[dict[str, Any]]:
         """
         Get complete list of available models from OpenRouter API.
 
@@ -899,7 +899,7 @@ class OpenRouterProvider(AIProvider):
 
             data = response.json().get("data", [])
             if isinstance(data, list):
-                return cast(List[Dict[str, Any]], data)
+                return cast(list[dict[str, Any]], data)
             return []
 
         except Exception as e:
@@ -924,7 +924,7 @@ class CustomProviderConfig:
 
     name: str
     base_url: str
-    api_key: Optional[str] = None
+    api_key: str | None = None
     auth_type: str = "bearer"  # bearer, api_key, basic, custom, none
     auth_header: str = "Authorization"
     auth_prefix: str = "Bearer"
@@ -932,9 +932,9 @@ class CustomProviderConfig:
     response_format: str = "openai"  # openai, anthropic, custom
     timeout: int = 30
     max_retries: int = 3
-    custom_headers: Optional[Dict[str, str]] = None
-    model_mapping: Optional[Dict[str, str]] = None
-    parameter_mapping: Optional[Dict[str, str]] = None
+    custom_headers: dict[str, str] | None = None
+    model_mapping: dict[str, str] | None = None
+    parameter_mapping: dict[str, str] | None = None
 
     def __post_init__(self) -> None:
         """Post-initialization validation."""
@@ -946,6 +946,19 @@ class CustomProviderConfig:
             raise ValueError("Timeout must be positive")
         if self.max_retries < 0:
             raise ValueError("Max retries cannot be negative")
+
+        # Validate request format
+        valid_formats = ["openai", "anthropic", "custom"]
+        if self.request_format not in valid_formats:
+            raise ValueError(
+                f"Invalid request format: {self.request_format}. Must be one of {valid_formats}"
+            )
+
+        # Validate response format
+        if self.response_format not in valid_formats:
+            raise ValueError(
+                f"Invalid response format: {self.response_format}. Must be one of {valid_formats}"
+            )
 
 
 class CustomProvider(AIProvider):
@@ -1036,9 +1049,9 @@ class CustomProvider(AIProvider):
             )
             return self._get_fallback_response(prompt)
 
-    def _prepare_headers(self) -> Dict[str, str]:
+    def _prepare_headers(self) -> dict[str, str]:
         """Prepare request headers based on auth configuration."""
-        headers: Dict[str, str] = {"Content-Type": "application/json"}
+        headers: dict[str, str] = {"Content-Type": "application/json"}
 
         # Add authentication
         if self.custom_config.auth_type == "bearer" and self.config.api_key:
@@ -1061,14 +1074,14 @@ class CustomProvider(AIProvider):
 
         return headers
 
-    def _prepare_request_body(self, prompt: str, **kwargs: Any) -> Dict[str, Any]:
+    def _prepare_request_body(self, prompt: str, **kwargs: Any) -> dict[str, Any]:
         """Prepare request body based on format configuration."""
         # Prepare messages
         raw_messages = kwargs.get("messages", [{"role": "user", "content": prompt}])
         if isinstance(raw_messages, str):
-            messages: List[Dict[str, Any]] = [{"role": "user", "content": raw_messages}]
+            messages: list[dict[str, Any]] = [{"role": "user", "content": raw_messages}]
         else:
-            messages = cast(List[Dict[str, Any]], raw_messages)
+            messages = cast(list[dict[str, Any]], raw_messages)
 
         if self.custom_config.request_format == "openai":
             return self._prepare_openai_request(messages, **kwargs)
@@ -1078,10 +1091,10 @@ class CustomProvider(AIProvider):
             return self._prepare_custom_request(messages, **kwargs)
 
     def _prepare_openai_request(
-        self, messages: List[Dict[str, Any]], **kwargs: Any
-    ) -> Dict[str, Any]:
+        self, messages: list[dict[str, Any]], **kwargs: Any
+    ) -> dict[str, Any]:
         """Prepare OpenAI-format request."""
-        request_body: Dict[str, Any] = {
+        request_body: dict[str, Any] = {
             "model": self._map_model(cast(str, kwargs.get("model", "default"))),
             "messages": messages,
             "max_tokens": kwargs.get("max_tokens", 1000),
@@ -1101,10 +1114,10 @@ class CustomProvider(AIProvider):
         return self._map_parameters(request_body)
 
     def _prepare_anthropic_request(
-        self, messages: List[Dict[str, Any]], **kwargs: Any
-    ) -> Dict[str, Any]:
+        self, messages: list[dict[str, Any]], **kwargs: Any
+    ) -> dict[str, Any]:
         """Prepare Anthropic-format request."""
-        request_body: Dict[str, Any] = {
+        request_body: dict[str, Any] = {
             "model": self._map_model(cast(str, kwargs.get("model", "default"))),
             "messages": messages,
             "max_tokens": kwargs.get("max_tokens", 1000),
@@ -1120,8 +1133,8 @@ class CustomProvider(AIProvider):
         return self._map_parameters(request_body)
 
     def _prepare_custom_request(
-        self, messages: List[Dict[str, Any]], **kwargs: Any
-    ) -> Dict[str, Any]:
+        self, messages: list[dict[str, Any]], **kwargs: Any
+    ) -> dict[str, Any]:
         """Prepare custom format request - override in subclasses."""
         # Default to OpenAI format for custom providers
         return self._prepare_openai_request(messages, **kwargs)
@@ -1132,12 +1145,12 @@ class CustomProvider(AIProvider):
             return self.custom_config.model_mapping.get(model, model)
         return model
 
-    def _map_parameters(self, request_body: Dict[str, Any]) -> Dict[str, Any]:
+    def _map_parameters(self, request_body: dict[str, Any]) -> dict[str, Any]:
         """Map parameter names using configuration."""
         if not self.custom_config.parameter_mapping:
             return request_body
 
-        mapped_body: Dict[str, Any] = {}
+        mapped_body: dict[str, Any] = {}
         for key, value in request_body.items():
             mapped_key = self.custom_config.parameter_mapping.get(key, key)
             mapped_body[mapped_key] = value
@@ -1158,7 +1171,7 @@ class CustomProvider(AIProvider):
             # For custom format, assume the base_url is the complete endpoint
             return base_url
 
-    def _parse_response(self, response_data: Dict[str, Any]) -> GenerationResponse:
+    def _parse_response(self, response_data: dict[str, Any]) -> GenerationResponse:
         """Parse response based on format configuration."""
         if self.custom_config.response_format == "openai":
             return self._parse_openai_response(response_data)
@@ -1168,7 +1181,7 @@ class CustomProvider(AIProvider):
             return self._parse_custom_response(response_data)
 
     def _parse_openai_response(
-        self, response_data: Dict[str, Any]
+        self, response_data: dict[str, Any]
     ) -> GenerationResponse:
         """Parse OpenAI-format response."""
         if not response_data.get("choices"):
@@ -1190,7 +1203,7 @@ class CustomProvider(AIProvider):
         )
 
     def _parse_anthropic_response(
-        self, response_data: Dict[str, Any]
+        self, response_data: dict[str, Any]
     ) -> GenerationResponse:
         """Parse Anthropic-format response."""
         content = ""
@@ -1213,7 +1226,7 @@ class CustomProvider(AIProvider):
         )
 
     def _parse_custom_response(
-        self, response_data: Dict[str, Any]
+        self, response_data: dict[str, Any]
     ) -> GenerationResponse:
         """Parse custom format response - override in subclasses."""
         # Default to trying OpenAI format first, then simple text extraction
@@ -1241,7 +1254,7 @@ class CustomProvider(AIProvider):
             self.config.api_key is not None or self.custom_config.auth_type == "none"
         )
 
-    def get_supported_models(self) -> List[str]:
+    def get_supported_models(self) -> list[str]:
         """Get list of supported models."""
         if self.custom_config.model_mapping:
             return list(self.custom_config.model_mapping.keys())
@@ -1266,7 +1279,7 @@ class CustomProvider(AIProvider):
 class ProviderFactory:
     """Factory for creating AI providers."""
 
-    _providers: Dict[str, Any] = {
+    _providers: dict[str, Any] = {
         "openai": OpenAIProvider,
         "anthropic": AnthropicProvider,
         "openrouter": OpenRouterProvider,
@@ -1278,7 +1291,7 @@ class ProviderFactory:
     def create_provider(
         cls,
         provider_type: str,
-        config: Optional[Union[ProviderConfig, CustomProviderConfig]] = None,
+        config: ProviderConfig | CustomProviderConfig | None = None,
         **kwargs: Any,
     ) -> AIProvider:
         """
@@ -1321,7 +1334,7 @@ class ProviderFactory:
         cls._providers[name.lower()] = provider_class
 
     @classmethod
-    def get_available_providers(cls) -> List[str]:
+    def get_available_providers(cls) -> list[str]:
         """Get list of available provider types."""
         return list(cls._providers.keys())
 
@@ -1329,10 +1342,10 @@ class ProviderFactory:
 class ProviderManager:
     """Manager for handling multiple AI providers with fallback support."""
 
-    def __init__(self, providers: Optional[List[AIProvider]] = None) -> None:
+    def __init__(self, providers: list[AIProvider] | None = None) -> None:
         """Initialize provider manager."""
-        self.providers: List[AIProvider] = providers or []
-        self.primary_provider: Optional[AIProvider] = None
+        self.providers: list[AIProvider] = providers or []
+        self.primary_provider: AIProvider | None = None
 
         if self.providers:
             self.primary_provider = self.providers[0]
@@ -1361,7 +1374,7 @@ class ProviderManager:
         if not self.providers:
             raise ProviderError("No providers available")
 
-        last_error: Optional[Exception] = None
+        last_error: Exception | None = None
 
         for provider in self.providers:
             if not provider.is_available():
@@ -1401,11 +1414,11 @@ class ProviderManager:
         else:
             raise ProviderError("All providers failed or unavailable")
 
-    def get_available_providers(self) -> List[AIProvider]:
+    def get_available_providers(self) -> list[AIProvider]:
         """Get list of available providers."""
         return [p for p in self.providers if p.is_available()]
 
-    def get_provider_status(self) -> Dict[str, bool]:
+    def get_provider_status(self) -> dict[str, bool]:
         """Get status of all providers."""
         return {p.provider_name: p.is_available() for p in self.providers}
 

@@ -1,7 +1,5 @@
 """Git graph diagram model for the Mermaid Render library."""
 
-from typing import List, Optional
-
 from ..core import MermaidDiagram
 
 
@@ -11,16 +9,16 @@ class GitGraphDiagram(MermaidDiagram):
     Supports defining branches, commits, and merges and emits Mermaid gitgraph syntax.
     """
 
-    def __init__(self, title: Optional[str] = None) -> None:
+    def __init__(self, title: str | None = None) -> None:
         """Initialize an empty git graph.
 
         Args:
             title: Optional diagram title.
         """
         super().__init__(title)
-        self.commits: List[tuple] = []
-        self.branches: List[str] = []
-        self.merges: List[tuple] = []
+        self.commits: list[tuple[str, str, str]] = []
+        self.branches: list[str] = []
+        self.merges: list[tuple[str, str]] = []
 
     def get_diagram_type(self) -> str:
         """Return the Mermaid diagram type identifier."""

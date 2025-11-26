@@ -53,7 +53,7 @@ else:
     print("Validation errors:")
     for error in result.errors:
         print(f"  - {error}")
-    
+
     print("Warnings:")
     for warning in result.warnings:
         print(f"  - {warning}")

@@ -6,8 +6,6 @@ MermaidValidator class for common validation tasks. These are lightweight
 convenience functions that delegate to the main validator implementation.
 """
 
-from typing import List
-
 from ..validators import MermaidValidator, ValidationResult
 
 # Create a shared validator instance for efficiency
@@ -58,7 +56,7 @@ def quick_validate(mermaid_code: str) -> bool:
     return _shared_validator.validate(mermaid_code).is_valid
 
 
-def get_validation_errors(mermaid_code: str) -> List[str]:
+def get_validation_errors(mermaid_code: str) -> list[str]:
     """
     Get list of validation errors for Mermaid code.
 
@@ -76,7 +74,7 @@ def get_validation_errors(mermaid_code: str) -> List[str]:
     return _shared_validator.validate(mermaid_code).errors
 
 
-def get_validation_warnings(mermaid_code: str) -> List[str]:
+def get_validation_warnings(mermaid_code: str) -> list[str]:
     """
     Get list of validation warnings for Mermaid code.
 
@@ -96,7 +94,7 @@ def get_validation_warnings(mermaid_code: str) -> List[str]:
     return _shared_validator.validate(mermaid_code).warnings
 
 
-def suggest_fixes(mermaid_code: str) -> List[str]:
+def suggest_fixes(mermaid_code: str) -> list[str]:
     """
     Get suggestions for fixing validation errors.
 

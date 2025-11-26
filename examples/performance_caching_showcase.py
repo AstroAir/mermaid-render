@@ -8,13 +8,12 @@ and monitoring capabilities.
 
 import time
 from pathlib import Path
-from typing import Dict, Any, List, Tuple
+from typing import Any
 
 from mermaid_render import (
-    MermaidRenderer,
     FlowchartDiagram,
+    MermaidRenderer,
     SequenceDiagram,
-    quick_render,
 )
 
 # Cache system (optional imports with fallbacks)
@@ -34,7 +33,9 @@ try:
     raise ImportError("Cache module not available")
 except ImportError:
     CACHE_AVAILABLE = False
-    print("⚠️  Cache system not available. Install with: pip install mermaid-render[cache]")
+    print(
+        "⚠️  Cache system not available. Install with: pip install mermaid-render[cache]"
+    )
 
 
 def create_output_dir() -> Path:
@@ -78,17 +79,17 @@ def basic_caching_example(output_dir: Path) -> None:
         assert result1 == result2, "Results should be identical"
 
         # Simulated cache statistics
-        print(f"📊 Simulated Cache Statistics:")
-        print(f"   Hits: 1")
-        print(f"   Misses: 1")
-        print(f"   Hit Rate: 50.0%")
-        print(f"   Size: 1 items")
+        print("📊 Simulated Cache Statistics:")
+        print("   Hits: 1")
+        print("   Misses: 1")
+        print("   Hit Rate: 50.0%")
+        print("   Size: 1 items")
 
         # Save example diagram
         output_path = output_dir / "cached_diagram.svg"
-        with open(output_path, 'w') as f:
+        with open(output_path, "w") as f:
             if isinstance(result1, bytes):
-                f.write(result1.decode('utf-8'))
+                f.write(result1.decode("utf-8"))
             else:
                 f.write(result1)
         print(f"📁 Cached diagram saved to {output_path}")
@@ -103,7 +104,7 @@ def advanced_caching_strategies(output_dir: Path) -> None:
 
     try:
         # Create multiple diagrams for testing
-        diagrams: Dict[str, Any] = {}
+        diagrams: dict[str, Any] = {}
 
         # Complex flowchart
         complex_flow = FlowchartDiagram(title="Complex Business Process")
@@ -149,8 +150,10 @@ def advanced_caching_strategies(output_dir: Path) -> None:
 
             print(f"  {name}: First={first_time:.3f}s, Second={second_time:.3f}s")
 
-        print(f"📈 With real caching, second renders would be significantly faster")
-        print(f"📊 Total time: First={total_time_first:.3f}s, Second={total_time_second:.3f}s")
+        print("📈 With real caching, second renders would be significantly faster")
+        print(
+            f"📊 Total time: First={total_time_first:.3f}s, Second={total_time_second:.3f}s"
+        )
 
     except Exception as e:
         print(f"❌ Error in advanced caching: {e}")
@@ -164,7 +167,7 @@ def performance_monitoring_example(output_dir: Path) -> None:
         renderer = MermaidRenderer()
 
         # Create test diagrams of varying complexity
-        test_diagrams: List[Tuple[str, Any]] = []
+        test_diagrams: list[tuple[str, Any]] = []
 
         # Simple diagram
         simple = FlowchartDiagram(title="Simple Flow")
@@ -225,10 +228,10 @@ def performance_monitoring_example(output_dir: Path) -> None:
             "total_renders": total_renders,
             "total_time": total_time,
             "avg_render_time": avg_render_time,
-            "test_diagrams": len(test_diagrams)
+            "test_diagrams": len(test_diagrams),
         }
 
-        print(f"📊 Performance Metrics:")
+        print("📊 Performance Metrics:")
         print(f"   Total renders: {metrics['total_renders']}")
         print(f"   Average render time: {metrics['avg_render_time']:.3f}s")
         print(f"   Total time: {metrics['total_time']:.3f}s")
@@ -236,7 +239,8 @@ def performance_monitoring_example(output_dir: Path) -> None:
         # Save performance report
         report_path = output_dir / "performance_report.json"
         import json
-        with open(report_path, 'w') as f:
+
+        with open(report_path, "w") as f:
             json.dump(metrics, f, indent=2)
         print(f"📁 Performance report saved to {report_path}")
 
@@ -282,23 +286,26 @@ def cache_optimization_example(output_dir: Path) -> None:
             rare_times.append(time.time() - start_time)
 
         # Simulated optimization results
-        print(f"📊 Simulated cache optimization:")
-        print(f"   Frequently used avg time: {sum(frequent_times)/len(frequent_times):.3f}s")
+        print("📊 Simulated cache optimization:")
+        print(
+            f"   Frequently used avg time: {sum(frequent_times)/len(frequent_times):.3f}s"
+        )
         print(f"   Rarely used avg time: {sum(rare_times)/len(rare_times):.3f}s")
-        print(f"   With real caching, frequently used diagrams would be much faster")
+        print("   With real caching, frequently used diagrams would be much faster")
 
         # Save optimization report
         report = {
             "frequent_renders": len(frequent_times),
             "rare_renders": len(rare_times),
-            "frequent_avg_time": sum(frequent_times)/len(frequent_times),
-            "rare_avg_time": sum(rare_times)/len(rare_times),
-            "note": "With real caching, frequently accessed diagrams would have much faster render times"
+            "frequent_avg_time": sum(frequent_times) / len(frequent_times),
+            "rare_avg_time": sum(rare_times) / len(rare_times),
+            "note": "With real caching, frequently accessed diagrams would have much faster render times",
         }
 
         report_path = output_dir / "cache_optimization_report.json"
         import json
-        with open(report_path, 'w') as f:
+
+        with open(report_path, "w") as f:
             json.dump(report, f, indent=2)
         print(f"📁 Optimization report saved to {report_path}")
 
@@ -309,10 +316,10 @@ def cache_optimization_example(output_dir: Path) -> None:
 def benchmark_comparison_example(output_dir: Path) -> None:
     """Compare performance with and without caching."""
     print("Benchmark comparison example...")
-    
+
     # Create test diagrams
-    test_diagrams: List[Tuple[str, Any]] = []
-    
+    test_diagrams: list[tuple[str, Any]] = []
+
     # Small diagram
     small = FlowchartDiagram(title="Small Diagram")
     for i in range(5):
@@ -320,7 +327,7 @@ def benchmark_comparison_example(output_dir: Path) -> None:
         if i > 0:
             small.add_edge(f"s{i-1}", f"s{i}")
     test_diagrams.append(("small", small))
-    
+
     # Large diagram
     large = SequenceDiagram(title="Large Diagram")
     for i in range(10):
@@ -330,11 +337,11 @@ def benchmark_comparison_example(output_dir: Path) -> None:
         to_p = f"p{(i + 1) % 10}"
         large.add_message(from_p, to_p, f"Message {i}")
     test_diagrams.append(("large", large))
-    
+
     # Benchmark without cache
     print("Benchmarking without cache...")
     renderer_no_cache = MermaidRenderer()
-    
+
     no_cache_times = {}
     for name, diagram in test_diagrams:
         times = []
@@ -342,11 +349,11 @@ def benchmark_comparison_example(output_dir: Path) -> None:
             start_time = time.time()
             renderer_no_cache.render(diagram, format="svg")
             times.append(time.time() - start_time)
-        
+
         avg_time = sum(times) / len(times)
         no_cache_times[name] = avg_time
         print(f"  {name}: {avg_time:.3f}s average")
-    
+
     # Simulate cache benchmark
     print("Simulating cache benchmark...")
     with_cache_times = {}
@@ -371,12 +378,13 @@ def benchmark_comparison_example(output_dir: Path) -> None:
         "no_cache": no_cache_times,
         "with_cache_simulated": with_cache_times,
         "timestamp": time.time(),
-        "note": "Cache times are simulated - real caching would provide similar speedups"
+        "note": "Cache times are simulated - real caching would provide similar speedups",
     }
-    
+
     benchmark_path = output_dir / "benchmark_results.json"
     import json
-    with open(benchmark_path, 'w') as f:
+
+    with open(benchmark_path, "w") as f:
         json.dump(results, f, indent=2)
     print(f"📁 Benchmark results saved to {benchmark_path}")
 
@@ -384,38 +392,38 @@ def benchmark_comparison_example(output_dir: Path) -> None:
 def main() -> None:
     """Run all performance and caching examples."""
     print("=== Mermaid Render Performance & Caching Showcase ===\n")
-    
+
     if not CACHE_AVAILABLE:
         print("⚠️  Cache system requires additional dependencies.")
         print("Install with: pip install mermaid-render[cache]\n")
-    
+
     # Create output directory
     output_dir = create_output_dir()
     print(f"Output directory: {output_dir.absolute()}\n")
-    
+
     # Run examples
     try:
         basic_caching_example(output_dir)
         print()
-        
+
         advanced_caching_strategies(output_dir)
         print()
-        
+
         performance_monitoring_example(output_dir)
         print()
-        
+
         cache_optimization_example(output_dir)
         print()
-        
+
         benchmark_comparison_example(output_dir)
         print()
-        
+
         if CACHE_AVAILABLE:
             print("✅ All performance and caching examples completed successfully!")
         else:
             print("ℹ️  Some examples skipped (cache dependencies not available)")
         print(f"Check the {output_dir} directory for results and reports.")
-        
+
     except Exception as e:
         print(f"❌ Error running performance examples: {e}")
         raise

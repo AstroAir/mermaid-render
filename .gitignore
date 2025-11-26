@@ -244,3 +244,4 @@ site/
 # Benchmarking
 benchmark_results/
 performance_logs/
+test/

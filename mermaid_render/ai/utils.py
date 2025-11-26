@@ -1,6 +1,6 @@
 """Utility functions for AI-powered features."""
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from mermaid_render.ai.providers import (
     AIProvider,
@@ -9,7 +9,7 @@ from mermaid_render.ai.providers import (
     ProviderManager,
 )
 
-from .analysis import DiagramAnalyzer, EnhancementResult, EnhancementType
+from .analysis import DiagramAnalyzer
 from .diagram_generator import DiagramGenerator, GenerationConfig
 from .nl_processor import NLProcessor
 from .suggestions import SuggestionEngine
@@ -20,7 +20,7 @@ def generate_from_text(
     diagram_type: str = "auto",
     style_preference: str = "clean",
     complexity_level: str = "medium",
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Generate diagram from natural language text.
 
@@ -49,8 +49,8 @@ def generate_from_text(
 
 def optimize_diagram(
     diagram_code: str,
-    optimization_types: Optional[List[str]] = None,
-) -> List[Dict[str, Any]]:
+    optimization_types: list[str] | None = None,
+) -> list[dict[str, Any]]:
     """
     Optimize diagram using AI-powered optimization.
 
@@ -64,7 +64,7 @@ def optimize_diagram(
     if optimization_types is None:
         optimization_types = ["layout", "style"]
 
-    results: List[Dict[str, Any]] = []
+    results: list[dict[str, Any]] = []
 
     if "layout" in optimization_types:
         layout_result = enhance_diagram_layout(diagram_code)
@@ -78,8 +78,8 @@ def optimize_diagram(
 
 
 def analyze_diagram(
-    diagram_code: str, context: Optional[Dict[str, Any]] = None
-) -> Dict[str, Any]:
+    diagram_code: str, context: dict[str, Any] | None = None
+) -> dict[str, Any]:
     """
     Analyze diagram quality and complexity.
 
@@ -98,9 +98,9 @@ def analyze_diagram(
 
 def get_suggestions(
     diagram_code: str,
-    suggestion_types: Optional[List[str]] = None,
-    priority_filter: Optional[str] = None,
-) -> List[Dict[str, Any]]:
+    suggestion_types: list[str] | None = None,
+    priority_filter: str | None = None,
+) -> list[dict[str, Any]]:
     """
     Get AI-powered suggestions for diagram improvement.
 
@@ -134,7 +134,7 @@ def get_suggestions(
     return [s.to_dict() for s in suggestions]
 
 
-def extract_entities(text: str) -> Dict[str, Any]:
+def extract_entities(text: str) -> dict[str, Any]:
     """
     Extract entities from natural language text.
 
@@ -150,7 +150,7 @@ def extract_entities(text: str) -> Dict[str, Any]:
     return entities.to_dict()
 
 
-def classify_intent(text: str) -> Dict[str, Any]:
+def classify_intent(text: str) -> dict[str, Any]:
     """
     Classify intent of natural language text.
 
@@ -170,7 +170,7 @@ def improve_diagram_with_ai(
     diagram_code: str,
     improvement_request: str,
     style_preference: str = "clean",
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Improve existing diagram based on AI suggestions.
 
@@ -190,7 +190,7 @@ def improve_diagram_with_ai(
     return result.to_dict()
 
 
-def get_diagram_insights(diagram_code: str) -> Dict[str, Any]:
+def get_diagram_insights(diagram_code: str) -> dict[str, Any]:
     """
     Get comprehensive insights about a diagram.
 
@@ -226,7 +226,7 @@ def get_diagram_insights(diagram_code: str) -> Dict[str, Any]:
     }
 
 
-def validate_ai_generated_diagram(diagram_code: str) -> Dict[str, Any]:
+def validate_ai_generated_diagram(diagram_code: str) -> dict[str, Any]:
     """
     Validate AI-generated diagram for quality and correctness.
 
@@ -271,7 +271,7 @@ def validate_ai_generated_diagram(diagram_code: str) -> Dict[str, Any]:
 def generate_diagram_variations(
     base_diagram: str,
     variation_count: int = 3,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """
     Generate variations of a base diagram.
 
@@ -283,7 +283,7 @@ def generate_diagram_variations(
         List of diagram variations
     """
     generator = DiagramGenerator()
-    variations: List[Dict[str, Any]] = []
+    variations: list[dict[str, Any]] = []
 
     variation_requests = [
         "Make this diagram more detailed",
@@ -311,7 +311,7 @@ def generate_diagram_variations(
     return variations
 
 
-def enhance_diagram_layout(diagram_code: str) -> Dict[str, Any]:
+def enhance_diagram_layout(diagram_code: str) -> dict[str, Any]:
     """
     Enhance diagram layout for better readability.
 
@@ -326,7 +326,7 @@ def enhance_diagram_layout(diagram_code: str) -> Dict[str, Any]:
     return result.to_dict()
 
 
-def enhance_diagram_style(diagram_code: str) -> Dict[str, Any]:
+def enhance_diagram_style(diagram_code: str) -> dict[str, Any]:
     """
     Enhance diagram styling for better appearance.
 
@@ -341,7 +341,7 @@ def enhance_diagram_style(diagram_code: str) -> Dict[str, Any]:
     return result.to_dict()
 
 
-def get_enhancement_suggestions(diagram_code: str) -> List[str]:
+def get_enhancement_suggestions(diagram_code: str) -> list[str]:
     """
     Get suggestions for diagram enhancement.
 
@@ -355,9 +355,7 @@ def get_enhancement_suggestions(diagram_code: str) -> List[str]:
 
     # Check for common issues
     if len(diagram_code.split("\n")) > 50:
-        suggestions.append(
-            "Consider breaking large diagram into smaller components"
-        )
+        suggestions.append("Consider breaking large diagram into smaller components")
 
     if diagram_code.count("-->") > 20:
         suggestions.append("Diagram has many connections - consider simplifying")
@@ -371,7 +369,7 @@ def get_enhancement_suggestions(diagram_code: str) -> List[str]:
     return suggestions
 
 
-def enhance_diagram_all(diagram_code: str) -> List[Dict[str, Any]]:
+def enhance_diagram_all(diagram_code: str) -> list[dict[str, Any]]:
     """
     Apply all enhancements to a diagram.
 
@@ -396,7 +394,7 @@ def enhance_diagram_all(diagram_code: str) -> List[Dict[str, Any]]:
 
 
 def create_provider_from_config(
-    provider_type: str, config_dict: Dict[str, Any]
+    provider_type: str, config_dict: dict[str, Any]
 ) -> AIProvider:
     """
     Create an AI provider from configuration dictionary.
@@ -433,7 +431,7 @@ def create_provider_from_config(
 
 
 def setup_multi_provider_generation(
-    provider_configs: List[Dict[str, Any]], fallback_to_local: bool = True
+    provider_configs: list[dict[str, Any]], fallback_to_local: bool = True
 ) -> ProviderManager:
     """
     Setup multiple AI providers with automatic fallback.
@@ -486,9 +484,9 @@ def setup_multi_provider_generation(
 
 def generate_with_multiple_providers(
     text: str,
-    provider_configs: List[Dict[str, Any]],
-    generation_config: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    provider_configs: list[dict[str, Any]],
+    generation_config: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     """
     Generate diagram using multiple providers with automatic fallback.
 
@@ -536,11 +534,11 @@ def generate_with_multiple_providers(
 
 
 def batch_generate_diagrams(
-    texts: List[str],
-    provider_config: Dict[str, Any],
-    generation_config: Optional[Dict[str, Any]] = None,
+    texts: list[str],
+    provider_config: dict[str, Any],
+    generation_config: dict[str, Any] | None = None,
     max_concurrent: int = 5,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """
     Generate multiple diagrams in batch with concurrency control.
 
@@ -555,7 +553,7 @@ def batch_generate_diagrams(
     """
     import concurrent.futures
 
-    def generate_single(text: str) -> Dict[str, Any]:
+    def generate_single(text: str) -> dict[str, Any]:
         """Generate a single diagram."""
         try:
             provider = create_provider_from_config(
@@ -594,10 +592,10 @@ def batch_generate_diagrams(
 
 
 def compare_provider_performance(
-    test_prompts: List[str],
-    provider_configs: List[Dict[str, Any]],
-    metrics: Optional[List[str]] = None,
-) -> Dict[str, Any]:
+    test_prompts: list[str],
+    provider_configs: list[dict[str, Any]],
+    metrics: list[str] | None = None,
+) -> dict[str, Any]:
     """
     Compare performance of different AI providers.
 
@@ -614,7 +612,7 @@ def compare_provider_performance(
     if metrics is None:
         metrics = ["response_time", "success_rate", "quality"]
 
-    results: Dict[str, Dict[str, Any]] = {}
+    results: dict[str, dict[str, Any]] = {}
 
     for provider_config in provider_configs:
         provider_name = f"{provider_config['type']}"
@@ -698,7 +696,7 @@ def compare_provider_performance(
     return results
 
 
-def export_provider_config(provider: AIProvider) -> Dict[str, Any]:
+def export_provider_config(provider: AIProvider) -> dict[str, Any]:
     """
     Export provider configuration for serialization.
 
@@ -708,7 +706,7 @@ def export_provider_config(provider: AIProvider) -> Dict[str, Any]:
     Returns:
         Serializable configuration dictionary
     """
-    config_dict: Dict[str, Any] = {
+    config_dict: dict[str, Any] = {
         "provider_type": provider.provider_name,
         "is_available": provider.is_available(),
         "supported_models": provider.get_supported_models(),
@@ -741,9 +739,9 @@ def export_provider_config(provider: AIProvider) -> Dict[str, Any]:
 
 def validate_diagram_with_ai(
     diagram_code: str,
-    validation_criteria: Optional[List[str]] = None,
-    provider_config: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    validation_criteria: list[str] | None = None,
+    provider_config: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     """
     Use AI to validate and provide feedback on diagram quality.
 
@@ -817,10 +815,10 @@ Format your response as structured feedback.
 
 
 def create_openrouter_provider(
-    api_key: Optional[str] = None,
+    api_key: str | None = None,
     model: str = "openai/gpt-3.5-turbo",
-    site_url: Optional[str] = None,
-    site_name: Optional[str] = None,
+    site_url: str | None = None,
+    site_name: str | None = None,
 ) -> OpenRouterProvider:
     """
     Convenience function to create OpenRouter provider.
@@ -847,7 +845,7 @@ def create_openrouter_provider(
     )
 
     # Add custom headers for attribution
-    custom_headers: Dict[str, str] = {}
+    custom_headers: dict[str, str] = {}
     if site_url:
         custom_headers["HTTP-Referer"] = site_url
     if site_name:
@@ -863,7 +861,7 @@ def create_openrouter_provider(
 def create_custom_provider_config(
     name: str,
     base_url: str,
-    api_key: Optional[str] = None,
+    api_key: str | None = None,
     request_format: str = "openai",
     response_format: str = "openai",
     auth_type: str = "bearer",

@@ -7,7 +7,7 @@ including toolboxes, property panels, and editor components.
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 @dataclass
@@ -16,10 +16,10 @@ class UIComponent(ABC):
 
     component_id: str
     component_type: str
-    properties: Dict[str, Any]
+    properties: dict[str, Any]
 
     @abstractmethod
-    def render(self) -> Dict[str, Any]:
+    def render(self) -> dict[str, Any]:
         """Render component to dictionary representation."""
         pass
 
@@ -35,7 +35,7 @@ class NodeComponent(UIComponent):
             properties={"node_type": node_type, "label": label, **properties},
         )
 
-    def render(self) -> Dict[str, Any]:
+    def render(self) -> dict[str, Any]:
         return {
             "id": self.component_id,
             "type": self.component_type,
@@ -55,7 +55,7 @@ class EdgeComponent(UIComponent):
             properties={"edge_type": edge_type, **properties},
         )
 
-    def render(self) -> Dict[str, Any]:
+    def render(self) -> dict[str, Any]:
         return {
             "id": self.component_id,
             "type": self.component_type,
@@ -71,9 +71,9 @@ class ToolboxComponent(UIComponent):
         super().__init__(
             component_id="toolbox", component_type="toolbox", properties={}
         )
-        self.tools: List[Dict[str, Any]] = self._get_default_tools()
+        self.tools: list[dict[str, Any]] = self._get_default_tools()
 
-    def render(self) -> Dict[str, Any]:
+    def render(self) -> dict[str, Any]:
         return {
             "id": self.component_id,
             "type": self.component_type,
@@ -81,7 +81,7 @@ class ToolboxComponent(UIComponent):
             "template": "toolbox.html",
         }
 
-    def _get_default_tools(self) -> List[Dict[str, Any]]:
+    def _get_default_tools(self) -> list[dict[str, Any]]:
         return [
             {"id": "select", "name": "Select", "icon": "cursor"},
             {"id": "rectangle", "name": "Rectangle", "icon": "square"},
@@ -98,9 +98,9 @@ class PropertiesPanel(UIComponent):
         super().__init__(
             component_id="properties", component_type="properties", properties={}
         )
-        self.selected_element: Optional[Dict[str, Any]] = None
+        self.selected_element: dict[str, Any] | None = None
 
-    def render(self) -> Dict[str, Any]:
+    def render(self) -> dict[str, Any]:
         return {
             "id": self.component_id,
             "type": self.component_type,
@@ -108,7 +108,7 @@ class PropertiesPanel(UIComponent):
             "template": "properties_panel.html",
         }
 
-    def set_selected_element(self, element: Dict[str, Any]) -> None:
+    def set_selected_element(self, element: dict[str, Any]) -> None:
         self.selected_element = element
 
 
@@ -123,7 +123,7 @@ class CodeEditor(UIComponent):
         )
         self.code: str = ""
 
-    def render(self) -> Dict[str, Any]:
+    def render(self) -> dict[str, Any]:
         return {
             "id": self.component_id,
             "type": self.component_type,
@@ -147,7 +147,7 @@ class PreviewPanel(UIComponent):
         )
         self.preview_content: str = ""
 
-    def render(self) -> Dict[str, Any]:
+    def render(self) -> dict[str, Any]:
         return {
             "id": self.component_id,
             "type": self.component_type,

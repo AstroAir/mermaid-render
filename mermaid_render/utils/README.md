@@ -22,7 +22,7 @@ This module provides utility functions and helper classes for common operations 
 
 ```python
 from mermaid_render.utils import (
-    export_to_file, 
+    export_to_file,
     validate_mermaid_syntax,
     get_supported_formats,
     sanitize_filename

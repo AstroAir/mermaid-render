@@ -6,7 +6,7 @@ providing clear error messages, error codes, suggestions for fixes,
 and proper exception hierarchy.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class MermaidRenderError(Exception):
@@ -21,9 +21,9 @@ class MermaidRenderError(Exception):
     def __init__(
         self,
         message: str,
-        error_code: Optional[str] = None,
-        suggestions: Optional[List[str]] = None,
-        details: Optional[Dict[str, Any]] = None,
+        error_code: str | None = None,
+        suggestions: list[str] | None = None,
+        details: dict[str, Any] | None = None,
     ) -> None:
         """
         Initialize the exception.
@@ -56,7 +56,7 @@ class MermaidRenderError(Exception):
 
         return " - ".join(parts)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """
         Convert exception to dictionary for structured error handling.
 
@@ -85,10 +85,10 @@ class ValidationError(MermaidRenderError):
     def __init__(
         self,
         message: str,
-        errors: Optional[List[str]] = None,
-        line_number: Optional[int] = None,
-        error_code: Optional[str] = None,
-        suggestions: Optional[List[str]] = None,
+        errors: list[str] | None = None,
+        line_number: int | None = None,
+        error_code: str | None = None,
+        suggestions: list[str] | None = None,
     ) -> None:
         """
         Initialize validation error.
@@ -112,7 +112,7 @@ class ValidationError(MermaidRenderError):
         self.errors = errors or []
         self.line_number = line_number
 
-    def _generate_suggestions(self, message: str, errors: List[str]) -> List[str]:
+    def _generate_suggestions(self, message: str, errors: list[str]) -> list[str]:
         """Generate automatic suggestions based on error patterns."""
         suggestions = []
 
@@ -172,16 +172,16 @@ class RenderingError(MermaidRenderError):
     - File I/O operations fail during rendering
     """
 
-    format: Optional[str]
-    status_code: Optional[int]
+    format: str | None
+    status_code: int | None
 
     def __init__(
         self,
         message: str,
-        format: Optional[str] = None,
-        status_code: Optional[int] = None,
-        error_code: Optional[str] = None,
-        suggestions: Optional[List[str]] = None,
+        format: str | None = None,
+        status_code: int | None = None,
+        error_code: str | None = None,
+        suggestions: list[str] | None = None,
     ) -> None:
         """
         Initialize rendering error.
@@ -213,8 +213,8 @@ class RenderingError(MermaidRenderError):
         self.status_code = status_code
 
     def _generate_suggestions(
-        self, message: str, format: Optional[str], status_code: Optional[int]
-    ) -> List[str]:
+        self, message: str, format: str | None, status_code: int | None
+    ) -> list[str]:
         """Generate automatic suggestions based on error patterns."""
         suggestions = []
 
@@ -259,8 +259,8 @@ class ConfigurationError(MermaidRenderError):
     def __init__(
         self,
         message: str,
-        config_key: Optional[str] = None,
-        expected_type: Optional[type] = None,
+        config_key: str | None = None,
+        expected_type: type | None = None,
     ) -> None:
         """
         Initialize configuration error.
@@ -296,16 +296,16 @@ class UnsupportedFormatError(MermaidRenderError):
     - Format-specific features are not available
     """
 
-    requested_format: Optional[str]
-    supported_formats: List[str]
+    requested_format: str | None
+    supported_formats: list[str]
 
     def __init__(
         self,
         message: str,
-        requested_format: Optional[str] = None,
-        supported_formats: Optional[List[str]] = None,
-        error_code: Optional[str] = None,
-        suggestions: Optional[List[str]] = None,
+        requested_format: str | None = None,
+        supported_formats: list[str] | None = None,
+        error_code: str | None = None,
+        suggestions: list[str] | None = None,
     ) -> None:
         """
         Initialize unsupported format error.
@@ -323,7 +323,7 @@ class UnsupportedFormatError(MermaidRenderError):
         )
         all_suggestions = (suggestions or []) + auto_suggestions
 
-        details: Dict[str, Any] = {}
+        details: dict[str, Any] = {}
         if requested_format:
             details["requested_format"] = requested_format
         if supported_formats:
@@ -339,8 +339,8 @@ class UnsupportedFormatError(MermaidRenderError):
         self.supported_formats = supported_formats or []
 
     def _generate_suggestions(
-        self, requested_format: Optional[str], supported_formats: List[str]
-    ) -> List[str]:
+        self, requested_format: str | None, supported_formats: list[str]
+    ) -> list[str]:
         """Generate automatic suggestions based on requested format."""
         suggestions = []
 
@@ -378,10 +378,10 @@ class DiagramError(MermaidRenderError):
     def __init__(
         self,
         message: str,
-        diagram_type: Optional[str] = None,
-        operation: Optional[str] = None,
-        error_code: Optional[str] = None,
-        suggestions: Optional[List[str]] = None,
+        diagram_type: str | None = None,
+        operation: str | None = None,
+        error_code: str | None = None,
+        suggestions: list[str] | None = None,
     ) -> None:
         """
         Initialize diagram error.
@@ -412,8 +412,8 @@ class DiagramError(MermaidRenderError):
         self.operation = operation
 
     def _generate_suggestions(
-        self, message: str, diagram_type: Optional[str], operation: Optional[str]
-    ) -> List[str]:
+        self, message: str, diagram_type: str | None, operation: str | None
+    ) -> list[str]:
         """Generate automatic suggestions based on error context."""
         suggestions = []
 
@@ -454,8 +454,8 @@ class ErrorAggregator:
 
     def __init__(self) -> None:
         """Initialize the error aggregator."""
-        self.errors: List[MermaidRenderError] = []
-        self.warnings: List[str] = []
+        self.errors: list[MermaidRenderError] = []
+        self.warnings: list[str] = []
 
     def add_error(self, error: MermaidRenderError) -> None:
         """Add an error to the collection."""
@@ -473,7 +473,7 @@ class ErrorAggregator:
         """Check if there are any warnings."""
         return len(self.warnings) > 0
 
-    def get_summary(self) -> Dict[str, Any]:
+    def get_summary(self) -> dict[str, Any]:
         """Get a summary of all errors and warnings."""
         return {
             "error_count": len(self.errors),
@@ -510,8 +510,8 @@ class NetworkError(RenderingError):
     def __init__(
         self,
         message: str,
-        url: Optional[str] = None,
-        timeout: Optional[float] = None,
+        url: str | None = None,
+        timeout: float | None = None,
     ) -> None:
         """
         Initialize network error.
@@ -551,8 +551,8 @@ class ThemeError(ConfigurationError):
     def __init__(
         self,
         message: str,
-        theme_name: Optional[str] = None,
-        available_themes: Optional[List[str]] = None,
+        theme_name: str | None = None,
+        available_themes: list[str] | None = None,
     ) -> None:
         """
         Initialize theme error.
@@ -593,8 +593,8 @@ class TemplateError(MermaidRenderError):
     def __init__(
         self,
         message: str,
-        template_name: Optional[str] = None,
-        parameter: Optional[str] = None,
+        template_name: str | None = None,
+        parameter: str | None = None,
     ) -> None:
         """
         Initialize template error.
@@ -635,8 +635,8 @@ class DataSourceError(MermaidRenderError):
     def __init__(
         self,
         message: str,
-        source_type: Optional[str] = None,
-        source_location: Optional[str] = None,
+        source_type: str | None = None,
+        source_location: str | None = None,
     ) -> None:
         """
         Initialize data source error.
@@ -677,8 +677,8 @@ class CacheError(MermaidRenderError):
     def __init__(
         self,
         message: str,
-        cache_backend: Optional[str] = None,
-        cache_key: Optional[str] = None,
+        cache_backend: str | None = None,
+        cache_key: str | None = None,
     ) -> None:
         """
         Initialize cache error.
@@ -719,8 +719,8 @@ class VersionControlError(MermaidRenderError):
     def __init__(
         self,
         message: str,
-        operation: Optional[str] = None,
-        branch: Optional[str] = None,
+        operation: str | None = None,
+        branch: str | None = None,
     ) -> None:
         """
         Initialize version control error.

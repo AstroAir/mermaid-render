@@ -5,11 +5,8 @@ This module provides rendering functionality using Playwright to run
 Mermaid.js in a headless browser for high-fidelity diagram rendering.
 """
 
-import json
-import tempfile
 import time
-from pathlib import Path
-from typing import Any, Dict, Optional, Set, Union, TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from playwright.sync_api import Browser, BrowserContext, Page
@@ -48,9 +45,9 @@ class PlaywrightRenderer(BaseRenderer):
         self.viewport_height = config.get("viewport_height", 800)
         self.mermaid_version = config.get("mermaid_version", "10.6.1")
 
-        self._browser: Optional["Browser"] = None
-        self._context: Optional["BrowserContext"] = None
-        self._page: Optional["Page"] = None
+        self._browser: Browser | None = None
+        self._context: BrowserContext | None = None
+        self._page: Page | None = None
 
     def get_info(self) -> RendererInfo:
         """
@@ -68,7 +65,6 @@ class PlaywrightRenderer(BaseRenderer):
                 RendererCapability.THEME_SUPPORT,
                 RendererCapability.CUSTOM_CONFIG,
                 RendererCapability.LOCAL_RENDERING,
-                RendererCapability.PERFORMANCE_METRICS,
             },
             priority=RendererPriority.HIGH,
             version="1.0.0",
@@ -77,7 +73,11 @@ class PlaywrightRenderer(BaseRenderer):
             config_schema={
                 "type": "object",
                 "properties": {
-                    "browser_type": {"type": "string", "enum": ["chromium", "firefox", "webkit"], "default": "chromium"},
+                    "browser_type": {
+                        "type": "string",
+                        "enum": ["chromium", "firefox", "webkit"],
+                        "default": "chromium",
+                    },
                     "headless": {"type": "boolean", "default": True},
                     "timeout": {"type": "integer", "default": 30000},
                     "viewport_width": {"type": "integer", "default": 1200},
@@ -91,8 +91,8 @@ class PlaywrightRenderer(BaseRenderer):
         self,
         mermaid_code: str,
         format: str,
-        theme: Optional[str] = None,
-        config: Optional[Dict[str, Any]] = None,
+        theme: str | None = None,
+        config: dict[str, Any] | None = None,
         **options: Any,
     ) -> RenderResult:
         """
@@ -108,11 +108,12 @@ class PlaywrightRenderer(BaseRenderer):
         Returns:
             RenderResult containing the rendered content and metadata
         """
-        from ..exceptions import RenderingError, UnsupportedFormatError
+        from ..exceptions import UnsupportedFormatError
 
         if format.lower() not in {"svg", "png", "pdf"}:
             raise UnsupportedFormatError(
-                f"Playwright renderer doesn't support format '{format}'")
+                f"Playwright renderer doesn't support format '{format}'"
+            )
 
         start_time = time.time()
 
@@ -131,7 +132,7 @@ class PlaywrightRenderer(BaseRenderer):
             self._page.wait_for_selector("#mermaid-diagram svg", timeout=self.timeout)
 
             # Get the rendered content based on format
-            content: Union[str, bytes]
+            content: str | bytes
             if format.lower() == "svg":
                 content = self._extract_svg()
             elif format.lower() == "png":
@@ -189,16 +190,20 @@ class PlaywrightRenderer(BaseRenderer):
                 try:
                     if self.browser_type == "chromium":
                         self._browser = self._playwright.chromium.launch(
-                            headless=self.headless)
+                            headless=self.headless
+                        )
                     elif self.browser_type == "firefox":
                         self._browser = self._playwright.firefox.launch(
-                            headless=self.headless)
+                            headless=self.headless
+                        )
                     elif self.browser_type == "webkit":
                         self._browser = self._playwright.webkit.launch(
-                            headless=self.headless)
+                            headless=self.headless
+                        )
                     else:
                         raise ValueError(
-                            f"Unsupported browser type: {self.browser_type}")
+                            f"Unsupported browser type: {self.browser_type}"
+                        )
                 except Exception as e:
                     raise RenderingError(
                         f"Failed to launch {self.browser_type} browser. "
@@ -209,8 +214,10 @@ class PlaywrightRenderer(BaseRenderer):
             if self._context is None:
                 assert self._browser is not None  # Guaranteed by previous code
                 self._context = self._browser.new_context(
-                    viewport={"width": self.viewport_width,
-                              "height": self.viewport_height}
+                    viewport={
+                        "width": self.viewport_width,
+                        "height": self.viewport_height,
+                    }
                 )
 
             if self._page is None:
@@ -225,8 +232,8 @@ class PlaywrightRenderer(BaseRenderer):
     def _create_html_template(
         self,
         mermaid_code: str,
-        theme: Optional[str] = None,
-        config: Optional[Dict[str, Any]] = None,
+        theme: str | None = None,
+        config: dict[str, Any] | None = None,
     ) -> str:
         """Create HTML template with Mermaid.js."""
         theme_config = ""
@@ -259,7 +266,7 @@ class PlaywrightRenderer(BaseRenderer):
         assert self._page is not None  # Should be guaranteed by caller
         return str(self._page.locator("#mermaid-diagram svg").inner_html())
 
-    def _capture_png(self, options: Dict[str, Any]) -> bytes:
+    def _capture_png(self, options: dict[str, Any]) -> bytes:
         """Capture PNG screenshot of the diagram."""
         assert self._page is not None  # Should be guaranteed by caller
         element = self._page.locator("#mermaid-diagram svg")
@@ -269,7 +276,7 @@ class PlaywrightRenderer(BaseRenderer):
         )
         return bytes(result)
 
-    def _capture_pdf(self, options: Dict[str, Any]) -> bytes:
+    def _capture_pdf(self, options: dict[str, Any]) -> bytes:
         """Capture PDF of the diagram."""
         assert self._page is not None  # Should be guaranteed by caller
         result = self._page.pdf(
@@ -278,7 +285,7 @@ class PlaywrightRenderer(BaseRenderer):
         )
         return bytes(result)
 
-    def _get_diagram_dimensions(self) -> Dict[str, Any]:
+    def _get_diagram_dimensions(self) -> dict[str, Any]:
         """Get dimensions of the rendered diagram."""
         try:
             assert self._page is not None  # Should be guaranteed by caller

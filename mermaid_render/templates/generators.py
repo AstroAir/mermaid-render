@@ -6,19 +6,19 @@ from structured data without requiring template knowledge.
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict
+from typing import Any
 
 
 class DiagramGenerator(ABC):
     """Base class for diagram generators."""
 
     @abstractmethod
-    def generate(self, data: Dict[str, Any], **options: Any) -> str:
+    def generate(self, data: dict[str, Any], **options: Any) -> str:
         """Generate diagram from structured data."""
         pass
 
     @abstractmethod
-    def get_schema(self) -> Dict[str, Any]:
+    def get_schema(self) -> dict[str, Any]:
         """Get data schema for this generator."""
         pass
 
@@ -31,7 +31,7 @@ class FlowchartGenerator(DiagramGenerator):
     automatic styling and layout optimization.
     """
 
-    def generate(self, data: Dict[str, Any], **options: Any) -> str:
+    def generate(self, data: dict[str, Any], **options: Any) -> str:
         """
         Generate flowchart from structured data.
 
@@ -125,7 +125,7 @@ class FlowchartGenerator(DiagramGenerator):
 
         return "\n".join(lines)
 
-    def get_schema(self) -> Dict[str, Any]:
+    def get_schema(self) -> dict[str, Any]:
         """Get data schema for flowchart generation."""
         return {
             "type": "object",
@@ -206,7 +206,7 @@ class SequenceGenerator(DiagramGenerator):
     with automatic lifeline management.
     """
 
-    def generate(self, data: Dict[str, Any], **options: Any) -> str:
+    def generate(self, data: dict[str, Any], **options: Any) -> str:
         """
         Generate sequence diagram from structured data.
 
@@ -220,7 +220,7 @@ class SequenceGenerator(DiagramGenerator):
         title = data.get("title", "")
         participants = data.get("participants", [])
         messages = data.get("messages", [])
-        # notes = data.get("notes", [])  # TODO: Add support for notes
+        notes = data.get("notes", [])
 
         lines = ["sequenceDiagram"]
 
@@ -268,9 +268,23 @@ class SequenceGenerator(DiagramGenerator):
                 arrow = arrow_map.get(msg_type, "->>")
                 lines.append(f"    {from_p}{arrow}{to_p}: {message}")
 
+        # Add standalone notes (separate from message notes)
+        for note in notes:
+            if isinstance(note, dict):
+                participant = str(note.get("participant", ""))
+                message = str(note.get("message", ""))
+                note_type = str(note.get("type", "over"))
+
+                if note_type == "left":
+                    lines.append(f"    Note left of {participant}: {message}")
+                elif note_type == "right":
+                    lines.append(f"    Note right of {participant}: {message}")
+                else:  # default to "over"
+                    lines.append(f"    Note over {participant}: {message}")
+
         return "\n".join(lines)
 
-    def get_schema(self) -> Dict[str, Any]:
+    def get_schema(self) -> dict[str, Any]:
         """Get data schema for sequence generation."""
         return {
             "type": "object",
@@ -321,6 +335,30 @@ class SequenceGenerator(DiagramGenerator):
                         },
                     },
                 },
+                "notes": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "participant": {
+                                "type": "string",
+                                "description": "Participant to attach note to",
+                            },
+                            "message": {
+                                "type": "string",
+                                "description": "Note content",
+                            },
+                            "type": {
+                                "type": "string",
+                                "enum": ["over", "left", "right"],
+                                "default": "over",
+                                "description": "Note position relative to participant",
+                            },
+                        },
+                        "required": ["participant", "message"],
+                    },
+                    "description": "Standalone notes to add to the diagram",
+                },
             },
             "required": ["participants", "messages"],
         }
@@ -334,7 +372,7 @@ class ClassDiagramGenerator(DiagramGenerator):
     attributes, methods, and relationships.
     """
 
-    def generate(self, data: Dict[str, Any], **options: Any) -> str:
+    def generate(self, data: dict[str, Any], **options: Any) -> str:
         """
         Generate class diagram from structured data.
 
@@ -362,30 +400,46 @@ class ClassDiagramGenerator(DiagramGenerator):
 
             # Add attributes
             for attr in cls.get("attributes", []):
-                visibility = attr.get("visibility", "+")
-                name = attr["name"]
-                attr_type = attr.get("type", "")
-
-                if attr_type:
-                    lines.append(f"        {visibility}{name}: {attr_type}")
+                if isinstance(attr, str):
+                    # Handle string format like "name: String"
+                    if ":" in attr:
+                        name, attr_type = attr.split(":", 1)
+                        name = name.strip()
+                        attr_type = attr_type.strip()
+                        lines.append(f"        +{name}: {attr_type}")
+                    else:
+                        lines.append(f"        +{attr}")
                 else:
-                    lines.append(f"        {visibility}{name}")
+                    # Handle dictionary format
+                    visibility = attr.get("visibility", "+")
+                    name = attr["name"]
+                    attr_type = attr.get("type", "")
+
+                    if attr_type:
+                        lines.append(f"        {visibility}{name}: {attr_type}")
+                    else:
+                        lines.append(f"        {visibility}{name}")
 
             # Add methods
             for method in cls.get("methods", []):
-                visibility = method.get("visibility", "+")
-                name = method["name"]
-                params = method.get("parameters", [])
-                return_type = method.get("return_type", "")
-
-                param_str = ", ".join(params) if params else ""
-
-                if return_type:
-                    lines.append(
-                        f"        {visibility}{name}({param_str}): {return_type}"
-                    )
+                if isinstance(method, str):
+                    # Handle string format like "move(): void"
+                    lines.append(f"        +{method}")
                 else:
-                    lines.append(f"        {visibility}{name}({param_str})")
+                    # Handle dictionary format
+                    visibility = method.get("visibility", "+")
+                    name = method["name"]
+                    params = method.get("parameters", [])
+                    return_type = method.get("return_type", "")
+
+                    param_str = ", ".join(params) if params else ""
+
+                    if return_type:
+                        lines.append(
+                            f"        {visibility}{name}({param_str}): {return_type}"
+                        )
+                    else:
+                        lines.append(f"        {visibility}{name}({param_str})")
 
             lines.append("    }")
 
@@ -423,7 +477,7 @@ class ClassDiagramGenerator(DiagramGenerator):
 
         return "\n".join(lines)
 
-    def get_schema(self) -> Dict[str, Any]:
+    def get_schema(self) -> dict[str, Any]:
         """Get data schema for class diagram generation."""
         return {
             "type": "object",
@@ -515,14 +569,14 @@ class ArchitectureGenerator(DiagramGenerator):
     system components and their interactions.
     """
 
-    def generate(self, data: Dict[str, Any], **options: Any) -> str:
+    def generate(self, data: dict[str, Any], **options: Any) -> str:
         """Generate architecture diagram from structured data."""
         # Use flowchart generator with architecture-specific styling
         flowchart_data = {
             "direction": data.get("direction", "TD"),
             "title": data.get("title", ""),
             "nodes": [],
-            "edges": data.get("connections", []),
+            "edges": [],
             "styling": {
                 "classes": {
                     "service": {
@@ -550,15 +604,39 @@ class ArchitectureGenerator(DiagramGenerator):
             comp_type = component.get("type", "service")
             shape = "cylinder" if comp_type == "database" else "rectangle"
 
-            node = {"id": component["id"], "label": component["name"], "shape": shape}
+            # Generate ID from name if not provided
+            comp_id = component.get("id", component["name"].replace(" ", "_"))
+
+            node = {"id": comp_id, "label": component["name"], "shape": shape}
 
             flowchart_data["nodes"].append(node)
-            flowchart_data["styling"]["node_classes"][component["id"]] = comp_type
+            flowchart_data["styling"]["node_classes"][comp_id] = comp_type
+
+        # Process connections
+        for connection in data.get("connections", []):
+            from_name = connection["from"]
+            to_name = connection["to"]
+
+            # Convert names to IDs (replace spaces with underscores)
+            from_id = from_name.replace(" ", "_")
+            to_id = to_name.replace(" ", "_")
+
+            protocol = connection.get("protocol", "")
+            label = protocol if protocol else ""
+
+            edge = {
+                "from": from_id,
+                "to": to_id,
+                "label": label,
+                "arrow": "-->",
+            }
+
+            flowchart_data["edges"].append(edge)
 
         generator = FlowchartGenerator()
         return generator.generate(flowchart_data)
 
-    def get_schema(self) -> Dict[str, Any]:
+    def get_schema(self) -> dict[str, Any]:
         """Get data schema for architecture generation."""
         return {
             "type": "object",
@@ -614,7 +692,7 @@ class ProcessFlowGenerator(DiagramGenerator):
     parallel processes, and standard business symbols.
     """
 
-    def generate(self, data: Dict[str, Any], **options: Any) -> str:
+    def generate(self, data: dict[str, Any], **options: Any) -> str:
         """Generate process flow diagram from structured data."""
         # Implementation similar to FlowchartGenerator but with
         # business process specific shapes and styling
@@ -664,7 +742,7 @@ class ProcessFlowGenerator(DiagramGenerator):
 
         return "\n".join(lines)
 
-    def get_schema(self) -> Dict[str, Any]:
+    def get_schema(self) -> dict[str, Any]:
         """Get data schema for process flow generation."""
         return {
             "type": "object",

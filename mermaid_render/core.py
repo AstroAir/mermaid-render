@@ -11,10 +11,11 @@ This module contains the main classes that form the foundation of the library:
 import os
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 try:
     import mermaid as md  # noqa: F401
+
     _MERMAID_AVAILABLE = True
 except ImportError:
     md = None
@@ -22,6 +23,7 @@ except ImportError:
 
 from .exceptions import (
     ConfigurationError,
+    DiagramError,
     RenderingError,
     UnsupportedFormatError,
     ValidationError,
@@ -93,7 +95,7 @@ class MermaidConfig:
             ...     cache_enabled=False
             ... )
         """
-        self._config: Dict[str, Any] = {
+        self._config: dict[str, Any] = {
             "server_url": os.getenv("MERMAID_INK_SERVER", "https://mermaid.ink"),
             "timeout": 30,
             "retries": 3,
@@ -141,7 +143,7 @@ class MermaidConfig:
         """
         self._config[key] = value
 
-    def update(self, config: Dict[str, Any]) -> None:
+    def update(self, config: dict[str, Any]) -> None:
         """
         Update multiple configuration values at once.
 
@@ -158,7 +160,7 @@ class MermaidConfig:
         """
         self._config.update(config)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """
         Return configuration as dictionary.
 
@@ -252,7 +254,7 @@ class MermaidTheme:
             ... )
         """
         self.name = name
-        self._config: Dict[str, Any] = {}
+        self._config: dict[str, Any] = {}
 
         if name in self.BUILT_IN_THEMES:
             self._config = self.BUILT_IN_THEMES[name].copy()
@@ -263,7 +265,7 @@ class MermaidTheme:
 
         self._config.update(custom_config)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """
         Return theme configuration as dictionary.
 
@@ -277,7 +279,7 @@ class MermaidTheme:
         """
         return self._config.copy()
 
-    def apply_to_config(self, config: Dict[str, Any]) -> Dict[str, Any]:
+    def apply_to_config(self, config: dict[str, Any]) -> dict[str, Any]:
         """
         Apply theme settings to a configuration dictionary.
 
@@ -328,7 +330,7 @@ class MermaidDiagram(ABC):
         >>> mermaid_code = diagram.to_mermaid()
     """
 
-    def __init__(self, title: Optional[str] = None) -> None:
+    def __init__(self, title: str | None = None) -> None:
         """
         Initialize diagram with optional title.
 
@@ -340,9 +342,9 @@ class MermaidDiagram(ABC):
             >>> diagram = FlowchartDiagram(title="User Registration Process")
         """
         self.title = title
-        self._elements: List[str] = []
-        self._config: Dict[str, Any] = {}
-        self._cached_mermaid: Optional[str] = None
+        self._elements: list[str] = []
+        self._config: dict[str, Any] = {}
+        self._cached_mermaid: str | None = None
         self._is_disposed: bool = False
 
     @abstractmethod
@@ -432,7 +434,7 @@ class MermaidDiagram(ABC):
         # Clear cache since configuration changed
         self.clear_cache()
 
-    def get_config(self) -> Dict[str, Any]:
+    def get_config(self) -> dict[str, Any]:
         """
         Get diagram configuration.
 
@@ -446,6 +448,71 @@ class MermaidDiagram(ABC):
             >>> print(f"Direction: {config.get('direction')}")
         """
         return self._config.copy()
+
+    def _escape_html(self, text: str) -> str:
+        """
+        Escape HTML special characters in text.
+
+        This helper method escapes characters that have special meaning in HTML
+        to prevent rendering issues and potential XSS vulnerabilities in diagram labels.
+
+        Args:
+            text: Text to escape
+
+        Returns:
+            Escaped text safe for use in diagram labels
+
+        Example:
+            >>> diagram = FlowchartDiagram()
+            >>> safe_text = diagram._escape_html("<script>alert('xss')</script>")
+            >>> print(safe_text)  # &lt;script&gt;alert('xss')&lt;/script&gt;
+        """
+        return (
+            text.replace("&", "&amp;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+            .replace('"', "&quot;")
+            .replace("'", "&#39;")
+        )
+
+    def _validate_id(self, element_id: str, element_type: str = "element") -> None:
+        """
+        Validate that an element ID is not empty and doesn't contain invalid characters.
+
+        Args:
+            element_id: The ID to validate
+            element_type: Type of element (for error messages)
+
+        Raises:
+            DiagramError: If ID is invalid
+        """
+        if not element_id or not element_id.strip():
+            raise DiagramError(f"{element_type} ID cannot be empty")
+
+        # Check for characters that could break Mermaid syntax
+        invalid_chars = [" ", "\n", "\r", "\t", "[", "]", "(", ")", "{", "}", "|"]
+        for char in invalid_chars:
+            if char in element_id:
+                raise DiagramError(
+                    f"{element_type} ID '{element_id}' contains invalid character '{char}'"
+                )
+
+    def _validate_unique_id(
+        self, element_id: str, existing_ids: set[str], element_type: str = "element"
+    ) -> None:
+        """
+        Validate that an element ID is unique within a collection.
+
+        Args:
+            element_id: The ID to validate
+            existing_ids: Set of existing IDs
+            element_type: Type of element (for error messages)
+
+        Raises:
+            DiagramError: If ID already exists
+        """
+        if element_id in existing_ids:
+            raise DiagramError(f"{element_type} with ID '{element_id}' already exists")
 
     def validate(self) -> bool:
         """
@@ -592,10 +659,10 @@ class MermaidRenderer:
 
     def __init__(
         self,
-        config: Optional[MermaidConfig] = None,
-        theme: Optional[Union[str, MermaidTheme]] = None,
+        config: MermaidConfig | None = None,
+        theme: str | MermaidTheme | None = None,
         use_plugin_system: bool = True,
-        preferred_renderer: Optional[str] = None,
+        preferred_renderer: str | None = None,
     ) -> None:
         """
         Initialize the renderer.
@@ -622,21 +689,22 @@ class MermaidRenderer:
             ... )
         """
         self.config = config or MermaidConfig()
-        self._theme: Optional[MermaidTheme] = None
+        self._theme: MermaidTheme | None = None
         self.use_plugin_system = use_plugin_system
         self.preferred_renderer = preferred_renderer
 
         if use_plugin_system:
             # Initialize plugin-based renderer manager
             from .renderers import RendererManager
-            self._renderer_manager: Optional[RendererManager] = RendererManager(
+
+            self._renderer_manager: RendererManager | None = RendererManager(
                 default_fallback_enabled=self.config.get("fallback_enabled", True),
                 max_fallback_attempts=self.config.get("max_fallback_attempts", 3),
             )
             # Legacy renderers not initialized in plugin mode
-            self._svg_renderer: Optional[SVGRenderer] = None
-            self._png_renderer: Optional[PNGRenderer] = None
-            self._pdf_renderer: Optional[PDFRenderer] = None
+            self._svg_renderer: SVGRenderer | None = None
+            self._png_renderer: PNGRenderer | None = None
+            self._pdf_renderer: PDFRenderer | None = None
         else:
             # Initialize legacy format-specific renderers
             self._svg_renderer = SVGRenderer()
@@ -650,7 +718,7 @@ class MermaidRenderer:
         if theme:
             self.set_theme(theme)
 
-    def set_theme(self, theme: Union[str, MermaidTheme]) -> None:
+    def set_theme(self, theme: str | MermaidTheme) -> None:
         """
         Set the rendering theme.
 
@@ -679,7 +747,7 @@ class MermaidRenderer:
         else:
             raise ConfigurationError(f"Invalid theme type: {type(theme)}")
 
-    def get_theme(self) -> Optional[MermaidTheme]:
+    def get_theme(self) -> MermaidTheme | None:
         """
         Get current theme.
 
@@ -696,10 +764,10 @@ class MermaidRenderer:
 
     def render(
         self,
-        diagram: Union[MermaidDiagram, str],
+        diagram: MermaidDiagram | str,
         format: str = "svg",
         **options: Any,
-    ) -> Union[str, bytes]:
+    ) -> str | bytes:
         """
         Render a diagram to the specified format.
 
@@ -743,7 +811,7 @@ class MermaidRenderer:
 
     def render_raw(
         self, mermaid_code: str, format: str = "svg", **options: Any
-    ) -> Union[str, bytes]:
+    ) -> str | bytes:
         """
         Render raw Mermaid code to specified format.
 
@@ -780,7 +848,11 @@ class MermaidRenderer:
                 return result.content
             else:
                 # Use legacy rendering system
-                if self._svg_renderer is None or self._png_renderer is None or self._pdf_renderer is None:
+                if (
+                    self._svg_renderer is None
+                    or self._png_renderer is None
+                    or self._pdf_renderer is None
+                ):
                     raise RenderingError("Legacy renderers not initialized")
 
                 if format == "svg":
@@ -817,9 +889,9 @@ class MermaidRenderer:
 
     def save(
         self,
-        diagram: Union[MermaidDiagram, str],
-        output_path: Union[str, Path],
-        format: Optional[str] = None,
+        diagram: MermaidDiagram | str,
+        output_path: str | Path,
+        format: str | None = None,
         **options: Any,
     ) -> None:
         """
@@ -863,8 +935,8 @@ class MermaidRenderer:
     def save_raw(
         self,
         mermaid_code: str,
-        output_path: Union[str, Path],
-        format: Optional[str] = None,
+        output_path: str | Path,
+        format: str | None = None,
         **options: Any,
     ) -> None:
         """
@@ -905,7 +977,7 @@ class MermaidRenderer:
                 else:
                     f.write(content)
 
-    def get_available_renderers(self) -> List[str]:
+    def get_available_renderers(self) -> list[str]:
         """
         Get list of available renderers (plugin system only).
 
@@ -920,7 +992,7 @@ class MermaidRenderer:
 
         return self._renderer_manager.registry.list_renderers(available_only=True)
 
-    def get_renderer_status(self) -> Dict[str, Any]:
+    def get_renderer_status(self) -> dict[str, Any]:
         """
         Get status of all renderers (plugin system only).
 
@@ -933,9 +1005,23 @@ class MermaidRenderer:
         if not self.use_plugin_system or self._renderer_manager is None:
             raise RuntimeError("Plugin system not enabled. Set use_plugin_system=True")
 
-        return self._renderer_manager.get_renderer_status()
+        # Get status from registry since RendererManager doesn't have this method
+        status: dict[str, Any] = {}
+        for name in self._renderer_manager.registry.list_renderers():
+            info = self._renderer_manager.registry.get_renderer_info(name)
+            if info:
+                status[name] = {
+                    "available": True,
+                    "formats": list(info.supported_formats),
+                    "priority": (
+                        info.priority.value
+                        if hasattr(info.priority, "value")
+                        else info.priority
+                    ),
+                }
+        return status
 
-    def test_renderer(self, renderer_name: str) -> Dict[str, Any]:
+    def test_renderer(self, renderer_name: str) -> dict[str, Any]:
         """
         Test a specific renderer (plugin system only).
 

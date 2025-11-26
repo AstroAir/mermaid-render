@@ -8,7 +8,7 @@ template structure, parameters, and content validation.
 import re
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union, Type
+from typing import Any
 
 from ..exceptions import ValidationError
 
@@ -39,8 +39,8 @@ class ParameterSchema:
     description: str
     required: bool = True
     default: Any = None
-    validation: Optional[Dict[str, Any]] = None
-    examples: Optional[List[Any]] = None
+    validation: dict[str, Any] | None = None
+    examples: list[Any] | None = None
 
     def validate_value(self, value: Any) -> bool:
         """
@@ -132,7 +132,7 @@ class ParameterSchema:
 
     def _validate_item_type(self, item: Any, expected_type: str) -> bool:
         """Validate list item type."""
-        type_map: Dict[str, Union[Type[Any], tuple[Type[Any], ...]]] = {
+        type_map: dict[str, type[Any] | tuple[type[Any], ...]] = {
             "string": str,
             "integer": int,
             "float": (int, float),
@@ -161,11 +161,11 @@ class TemplateSchema:
     version: str
     diagram_type: str
     description: str
-    parameters: List[ParameterSchema]
+    parameters: list[ParameterSchema]
     template_content: str
-    metadata: Optional[Dict[str, Any]] = None
+    metadata: dict[str, Any] | None = None
 
-    def validate(self) -> List[str]:
+    def validate(self) -> list[str]:
         """
         Validate the template schema.
 
@@ -225,7 +225,7 @@ class TemplateSchema:
     def _validate_jinja_syntax(self) -> bool:
         """Basic Jinja2 syntax validation."""
         try:
-            from jinja2 import BaseLoader, Environment  # type: ignore[import-not-found]
+            from jinja2 import BaseLoader, Environment
 
             env = Environment(loader=BaseLoader())
             env.from_string(self.template_content)
@@ -234,7 +234,7 @@ class TemplateSchema:
             return False
 
 
-def validate_template(template_data: Dict[str, Any]) -> None:
+def validate_template(template_data: dict[str, Any]) -> None:
     """
     Validate template data against schema.
 
@@ -278,8 +278,8 @@ def validate_template(template_data: Dict[str, Any]) -> None:
 
 
 def validate_template_parameters(
-    template_parameters: Dict[str, Any], provided_parameters: Dict[str, Any]
-) -> List[str]:
+    template_parameters: dict[str, Any], provided_parameters: dict[str, Any]
+) -> list[str]:
     """
     Validate provided parameters against template parameter schema.
 
@@ -320,12 +320,18 @@ def validate_template_parameters(
             )
             errors.extend(param_errors)
 
+            # Also check for JSON Schema-style validation rules directly in param_schema
+            json_schema_errors = _validate_json_schema_rules(
+                param_name, param_value, param_schema
+            )
+            errors.extend(json_schema_errors)
+
     return errors
 
 
 def _validate_parameter_type(value: Any, expected_type: str) -> bool:
     """Validate parameter type."""
-    type_map: Dict[str, Union[Type[Any], tuple[Type[Any], ...]]] = {
+    type_map: dict[str, type[Any] | tuple[type[Any], ...]] = {
         "string": str,
         "integer": int,
         "float": (int, float),
@@ -343,8 +349,8 @@ def _validate_parameter_type(value: Any, expected_type: str) -> bool:
 
 
 def _validate_parameter_rules(
-    param_name: str, value: Any, rules: Dict[str, Any]
-) -> List[str]:
+    param_name: str, value: Any, rules: dict[str, Any]
+) -> list[str]:
     """Validate parameter against custom rules."""
     errors = []
 
@@ -381,6 +387,54 @@ def _validate_parameter_rules(
         if "max_items" in rules and len(value) > rules["max_items"]:
             errors.append(
                 f"Parameter {param_name} has too many items (max: {rules['max_items']})"
+            )
+
+    return errors
+
+
+def _validate_json_schema_rules(
+    param_name: str, value: Any, schema: dict[str, Any]
+) -> list[str]:
+    """Validate parameter against JSON Schema-style rules."""
+    errors = []
+
+    # String validation
+    if isinstance(value, str):
+        if "minLength" in schema and len(value) < schema["minLength"]:
+            errors.append(
+                f"Parameter {param_name} too short (min: {schema['minLength']})"
+            )
+
+        if "maxLength" in schema and len(value) > schema["maxLength"]:
+            errors.append(
+                f"Parameter {param_name} too long (max: {schema['maxLength']})"
+            )
+
+        if "pattern" in schema and not re.match(schema["pattern"], value):
+            errors.append(f"Parameter {param_name} doesn't match required pattern")
+
+    # Numeric validation
+    elif isinstance(value, (int, float)):
+        if "minimum" in schema and value < schema["minimum"]:
+            errors.append(
+                f"Parameter {param_name} too small (min: {schema['minimum']})"
+            )
+
+        if "maximum" in schema and value > schema["maximum"]:
+            errors.append(
+                f"Parameter {param_name} too large (max: {schema['maximum']})"
+            )
+
+    # Array validation
+    elif isinstance(value, list):
+        if "minItems" in schema and len(value) < schema["minItems"]:
+            errors.append(
+                f"Parameter {param_name} has too few items (min: {schema['minItems']})"
+            )
+
+        if "maxItems" in schema and len(value) > schema["maxItems"]:
+            errors.append(
+                f"Parameter {param_name} has too many items (max: {schema['maxItems']})"
             )
 
     return errors

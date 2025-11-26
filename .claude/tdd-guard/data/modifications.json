@@ -1,0 +1,11 @@
+{
+  "session_id": "a1a73aac-e7fa-44cc-b83b-15c32958768e",
+  "transcript_path": "C:\\Users\\Max Qian\\.claude\\projects\\D--Project-mermaid-render\\a1a73aac-e7fa-44cc-b83b-15c32958768e.jsonl",
+  "hook_event_name": "PreToolUse",
+  "tool_name": "Edit",
+  "tool_input": {
+    "file_path": "D:\\Project\\mermaid-render\\mermaid_render\\renderers\\manager.py",
+    "old_string": "        # Validate input with core validator\n        validator = MermaidValidator()\n        if not validator.validate_syntax(mermaid_code):\n            raise RenderingError(f\"Invalid Mermaid syntax\")",
+    "new_string": "        # Validate input with core validator\n        validator = MermaidValidator()\n        validation_result = validator.validate(mermaid_code)\n        if not validation_result.is_valid:\n            raise RenderingError(f\"Invalid Mermaid syntax: {', '.join(validation_result.errors)}\")"
+  }
+}

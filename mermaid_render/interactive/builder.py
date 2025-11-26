@@ -6,10 +6,11 @@ support for visual elements, connections, and real-time updates.
 """
 
 import uuid
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any
 
 from ..exceptions import DiagramError
 
@@ -40,12 +41,22 @@ class Position:
     x: float
     y: float
 
-    def to_dict(self) -> Dict[str, float]:
+    def to_dict(self) -> dict[str, float]:
         return {"x": self.x, "y": self.y}
 
     @classmethod
-    def from_dict(cls, data: Dict[str, float]) -> "Position":
+    def from_dict(cls, data: dict[str, float]) -> "Position":
         return cls(x=data["x"], y=data["y"])
+
+    def distance_to(self, other: "Position") -> float:
+        """Calculate distance to another position."""
+        import math
+
+        return math.sqrt((self.x - other.x) ** 2 + (self.y - other.y) ** 2)
+
+    def move(self, dx: float, dy: float) -> "Position":
+        """Create a new position moved by the given offsets."""
+        return Position(self.x + dx, self.y + dy)
 
 
 @dataclass
@@ -55,12 +66,31 @@ class Size:
     width: float
     height: float
 
-    def to_dict(self) -> Dict[str, float]:
+    def __post_init__(self) -> None:
+        """Validate size dimensions."""
+        if self.width <= 0:
+            raise ValueError("Width must be positive")
+        if self.height <= 0:
+            raise ValueError("Height must be positive")
+
+    def to_dict(self) -> dict[str, float]:
         return {"width": self.width, "height": self.height}
 
     @classmethod
-    def from_dict(cls, data: Dict[str, float]) -> "Size":
+    def from_dict(cls, data: dict[str, float]) -> "Size":
         return cls(width=data["width"], height=data["height"])
+
+    def area(self) -> float:
+        """Calculate the area of the size."""
+        return self.width * self.height
+
+    def aspect_ratio(self) -> float:
+        """Calculate the aspect ratio (width/height)."""
+        return self.width / self.height
+
+    def scale(self, factor: float) -> "Size":
+        """Create a new size scaled by the given factor."""
+        return Size(self.width * factor, self.height * factor)
 
 
 @dataclass
@@ -72,20 +102,21 @@ class DiagramElement:
     position, styling, and interaction capabilities.
     """
 
-    id: str
     element_type: ElementType
-    label: str
     position: Position
     size: Size
-    properties: Dict[str, Any] = field(default_factory=dict)
-    style: Dict[str, Any] = field(default_factory=dict)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    label: str
+    id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    properties: dict[str, Any] = field(default_factory=dict)
+    style: dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     created_at: datetime = field(default_factory=datetime.now)
     updated_at: datetime = field(default_factory=datetime.now)
 
     def __post_init__(self) -> None:
-        if not self.id:
-            self.id = str(uuid.uuid4())
+        """Validate element after initialization."""
+        if not self.label or not self.label.strip():
+            raise DiagramError("Element label cannot be empty")
 
     def update_position(self, x: float, y: float) -> None:
         """Update element position."""
@@ -99,17 +130,67 @@ class DiagramElement:
         self.size.height = height
         self.updated_at = datetime.now()
 
-    def update_properties(self, properties: Dict[str, Any]) -> None:
+    def update_properties(self, properties: dict[str, Any]) -> None:
         """Update element properties."""
         self.properties.update(properties)
         self.updated_at = datetime.now()
 
-    def update_style(self, style: Dict[str, Any]) -> None:
+    def update_style(self, style: dict[str, Any]) -> None:
         """Update element styling."""
         self.style.update(style)
         self.updated_at = datetime.now()
 
-    def to_dict(self) -> Dict[str, Any]:
+    def move(self, position: Position) -> None:
+        """Move element to new position."""
+        self.position = position
+        self.updated_at = datetime.now()
+
+    def resize(self, size: Size) -> None:
+        """Resize element to new dimensions."""
+        self.size = size
+        self.updated_at = datetime.now()
+
+    def bounds(self) -> dict[str, float]:
+        """Get element bounds as dictionary."""
+        return {
+            "left": self.position.x,
+            "top": self.position.y,
+            "right": self.position.x + self.size.width,
+            "bottom": self.position.y + self.size.height,
+        }
+
+    def contains_point(self, position: Position) -> bool:
+        """Check if point is within element bounds."""
+        return (
+            self.position.x <= position.x <= self.position.x + self.size.width
+            and self.position.y <= position.y <= self.position.y + self.size.height
+        )
+
+    def overlaps_with(self, other: "DiagramElement") -> bool:
+        """Check if this element overlaps with another."""
+        bounds1 = self.bounds()
+        bounds2 = other.bounds()
+
+        return not (
+            bounds1["right"] < bounds2["left"]
+            or bounds2["right"] < bounds1["left"]
+            or bounds1["bottom"] < bounds2["top"]
+            or bounds2["bottom"] < bounds1["top"]
+        )
+
+    def clone(self) -> "DiagramElement":
+        """Create a copy of this element with a new ID."""
+        return DiagramElement(
+            element_type=self.element_type,
+            position=Position(self.position.x, self.position.y),
+            size=Size(self.size.width, self.size.height),
+            label=self.label,
+            properties=self.properties.copy(),
+            style=self.style.copy(),
+            metadata=self.metadata.copy(),
+        )
+
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization."""
         return {
             "id": self.id,
@@ -125,19 +206,27 @@ class DiagramElement:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "DiagramElement":
+    def from_dict(cls, data: dict[str, Any]) -> "DiagramElement":
         """Create from dictionary."""
+        created_at = datetime.now()
+        updated_at = datetime.now()
+
+        if "created_at" in data:
+            created_at = datetime.fromisoformat(data["created_at"])
+        if "updated_at" in data:
+            updated_at = datetime.fromisoformat(data["updated_at"])
+
         return cls(
-            id=data["id"],
             element_type=ElementType(data["element_type"]),
-            label=data["label"],
             position=Position.from_dict(data["position"]),
             size=Size.from_dict(data["size"]),
+            label=data["label"],
+            id=data.get("id", str(uuid.uuid4())),
             properties=data.get("properties", {}),
             style=data.get("style", {}),
             metadata=data.get("metadata", {}),
-            created_at=datetime.fromisoformat(data["created_at"]),
-            updated_at=datetime.fromisoformat(data["updated_at"]),
+            created_at=created_at,
+            updated_at=updated_at,
         )
 
 
@@ -155,9 +244,9 @@ class DiagramConnection:
     target_id: str
     label: str = ""
     connection_type: str = "default"
-    style: Dict[str, Any] = field(default_factory=dict)
-    properties: Dict[str, Any] = field(default_factory=dict)
-    control_points: List[Position] = field(default_factory=list)
+    style: dict[str, Any] = field(default_factory=dict)
+    properties: dict[str, Any] = field(default_factory=dict)
+    control_points: list[Position] = field(default_factory=list)
     created_at: datetime = field(default_factory=datetime.now)
     updated_at: datetime = field(default_factory=datetime.now)
 
@@ -170,7 +259,7 @@ class DiagramConnection:
         self.label = label
         self.updated_at = datetime.now()
 
-    def update_style(self, style: Dict[str, Any]) -> None:
+    def update_style(self, style: dict[str, Any]) -> None:
         """Update connection styling."""
         self.style.update(style)
         self.updated_at = datetime.now()
@@ -180,7 +269,7 @@ class DiagramConnection:
         self.control_points.append(position)
         self.updated_at = datetime.now()
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization."""
         return {
             "id": self.id,
@@ -196,7 +285,7 @@ class DiagramConnection:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "DiagramConnection":
+    def from_dict(cls, data: dict[str, Any]) -> "DiagramConnection":
         """Create from dictionary."""
         return cls(
             id=data["id"],
@@ -230,9 +319,9 @@ class DiagramBuilder:
             diagram_type: Type of diagram to build
         """
         self.diagram_type = diagram_type
-        self.elements: Dict[str, DiagramElement] = {}
-        self.connections: Dict[str, DiagramConnection] = {}
-        self.metadata: Dict[str, Any] = {
+        self.elements: dict[str, DiagramElement] = {}
+        self.connections: dict[str, DiagramConnection] = {}
+        self.metadata: dict[str, Any] = {
             "title": "",
             "description": "",
             "created_at": datetime.now().isoformat(),
@@ -240,21 +329,21 @@ class DiagramBuilder:
         }
 
         # Event handlers
-        self._element_added_handlers: List[Callable] = []
-        self._element_updated_handlers: List[Callable] = []
-        self._element_removed_handlers: List[Callable] = []
-        self._connection_added_handlers: List[Callable] = []
-        self._connection_updated_handlers: List[Callable] = []
-        self._connection_removed_handlers: List[Callable] = []
+        self._element_added_handlers: list[Callable[..., Any]] = []
+        self._element_updated_handlers: list[Callable[..., Any]] = []
+        self._element_removed_handlers: list[Callable[..., Any]] = []
+        self._connection_added_handlers: list[Callable[..., Any]] = []
+        self._connection_updated_handlers: list[Callable[..., Any]] = []
+        self._connection_removed_handlers: list[Callable[..., Any]] = []
 
     def add_element(
         self,
         element_type: ElementType,
         label: str,
         position: Position,
-        size: Optional[Size] = None,
-        properties: Optional[Dict[str, Any]] = None,
-        style: Optional[Dict[str, Any]] = None,
+        size: Size | None = None,
+        properties: dict[str, Any] | None = None,
+        style: dict[str, Any] | None = None,
     ) -> DiagramElement:
         """
         Add a new element to the diagram.
@@ -295,11 +384,11 @@ class DiagramBuilder:
     def update_element(
         self,
         element_id: str,
-        label: Optional[str] = None,
-        position: Optional[Position] = None,
-        size: Optional[Size] = None,
-        properties: Optional[Dict[str, Any]] = None,
-        style: Optional[Dict[str, Any]] = None,
+        label: str | None = None,
+        position: Position | None = None,
+        size: Size | None = None,
+        properties: dict[str, Any] | None = None,
+        style: dict[str, Any] | None = None,
     ) -> bool:
         """
         Update an existing element.
@@ -381,9 +470,9 @@ class DiagramBuilder:
         target_id: str,
         label: str = "",
         connection_type: str = "default",
-        style: Optional[Dict[str, Any]] = None,
-        properties: Optional[Dict[str, Any]] = None,
-    ) -> Optional[DiagramConnection]:
+        style: dict[str, Any] | None = None,
+        properties: dict[str, Any] | None = None,
+    ) -> DiagramConnection | None:
         """
         Add a connection between elements.
 
@@ -423,10 +512,10 @@ class DiagramBuilder:
     def update_connection(
         self,
         connection_id: str,
-        label: Optional[str] = None,
-        connection_type: Optional[str] = None,
-        style: Optional[Dict[str, Any]] = None,
-        properties: Optional[Dict[str, Any]] = None,
+        label: str | None = None,
+        connection_type: str | None = None,
+        style: dict[str, Any] | None = None,
+        properties: dict[str, Any] | None = None,
     ) -> bool:
         """
         Update an existing connection.
@@ -517,25 +606,25 @@ class DiagramBuilder:
         self.connections.clear()
 
         # Parse the code
-        lines = [line.strip() for line in code.strip().split('\n') if line.strip()]
+        lines = [line.strip() for line in code.strip().split("\n") if line.strip()]
         if not lines:
             return
 
         # Determine diagram type from first line
         first_line = lines[0].lower()
-        if first_line.startswith('flowchart') or first_line.startswith('graph'):
+        if first_line.startswith("flowchart") or first_line.startswith("graph"):
             self.diagram_type = DiagramType.FLOWCHART
             self._parse_flowchart(lines)
-        elif first_line.startswith('sequencediagram'):
+        elif first_line.startswith("sequencediagram"):
             self.diagram_type = DiagramType.SEQUENCE
             self._parse_sequence_diagram(lines)
-        elif first_line.startswith('classdiagram'):
+        elif first_line.startswith("classdiagram"):
             self.diagram_type = DiagramType.CLASS
             self._parse_class_diagram(lines)
-        elif first_line.startswith('statediagram'):
+        elif first_line.startswith("statediagram"):
             self.diagram_type = DiagramType.STATE
             self._parse_state_diagram(lines)
-        elif first_line.startswith('erdiagram'):
+        elif first_line.startswith("erdiagram"):
             self.diagram_type = DiagramType.ER
             self._parse_er_diagram(lines)
         else:
@@ -545,7 +634,7 @@ class DiagramBuilder:
 
         self._update_metadata()
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert builder state to dictionary."""
         return {
             "diagram_type": self.diagram_type.value,
@@ -556,7 +645,7 @@ class DiagramBuilder:
             "metadata": self.metadata,
         }
 
-    def from_dict(self, data: Dict[str, Any]) -> None:
+    def from_dict(self, data: dict[str, Any]) -> None:
         """Load builder state from dictionary."""
         self.diagram_type = DiagramType(data["diagram_type"])
         self.elements = {
@@ -650,7 +739,6 @@ class DiagramBuilder:
 
         # Collect participants
         participants: set[str] = set()
-        messages: list[str] = []
 
         # Process elements to find participants
         for element in self.elements.values():
@@ -659,9 +747,16 @@ class DiagramBuilder:
 
         # Add participant declarations
         for participant in sorted(participants):
-            participant_element: Optional[DiagramElement] = next((e for e in self.elements.values() if e.id == participant), None)
-            if participant_element and participant_element.label != participant_element.id:
-                lines.append(f"    participant {participant} as {participant_element.label}")
+            participant_element: DiagramElement | None = next(
+                (e for e in self.elements.values() if e.id == participant), None
+            )
+            if (
+                participant_element
+                and participant_element.label != participant_element.id
+            ):
+                lines.append(
+                    f"    participant {participant} as {participant_element.label}"
+                )
             else:
                 lines.append(f"    participant {participant}")
 
@@ -723,7 +818,9 @@ class DiagramBuilder:
             relationship = self._get_class_relationship(connection.connection_type)
 
             if connection.label:
-                lines.append(f"    {source} {relationship} {target} : {connection.label}")
+                lines.append(
+                    f"    {source} {relationship} {target} : {connection.label}"
+                )
             else:
                 lines.append(f"    {source} {relationship} {target}")
 
@@ -736,7 +833,7 @@ class DiagramBuilder:
             "sync": "->>",
             "async": "-->>",
             "dotted": "-->>",
-            "return": "-->>"
+            "return": "-->>",
         }
         return arrow_map.get(connection_type, "->>")
 
@@ -749,11 +846,11 @@ class DiagramBuilder:
             "aggregation": "--o",
             "association": "-->",
             "dependency": "..>",
-            "realization": "..|>"
+            "realization": "..|>",
         }
         return relationship_map.get(connection_type, "-->")
 
-    def _parse_flowchart(self, lines: List[str]) -> None:
+    def _parse_flowchart(self, lines: list[str]) -> None:
         """Parse flowchart Mermaid code and create elements."""
         import re
 
@@ -766,11 +863,14 @@ class DiagramBuilder:
 
         for line in content_lines:
             line = line.strip()
-            if not line or line.startswith('%'):
+            if not line or line.startswith("%"):
                 continue
 
             # Parse node definitions (e.g., "A[Start]", "B(Process)", "C{Decision}")
-            node_match = re.match(r'^\s*([A-Za-z0-9_]+)(\[.*?\]|\(.*?\)|\{.*?\}|\(\(.*?\)\)|{{.*?}})', line)
+            node_match = re.match(
+                r"^\s*([A-Za-z0-9_]+)(\[.*?\]|\(.*?\)|\{.*?\}|\(\(.*?\)\)|{{.*?}})",
+                line,
+            )
             if node_match:
                 node_id = node_match.group(1)
                 node_def = node_match.group(2)
@@ -790,13 +890,16 @@ class DiagramBuilder:
                     label=label,
                     position=node_positions[node_id],
                     size=self._get_default_size(ElementType.NODE),
-                    properties={"shape": shape}
+                    properties={"shape": shape},
                 )
                 self.elements[node_id] = element
                 continue
 
             # Parse connections (e.g., "A --> B", "A -->|label| B")
-            connection_match = re.match(r'^\s*([A-Za-z0-9_]+)\s*(-->|---|-\.-|==>|~~~)\s*(?:\|([^|]+)\|\s*)?([A-Za-z0-9_]+)', line)
+            connection_match = re.match(
+                r"^\s*([A-Za-z0-9_]+)\s*(-->|---|-\.-|==>|~~~)\s*(?:\|([^|]+)\|\s*)?([A-Za-z0-9_]+)",
+                line,
+            )
             if connection_match:
                 source_id = connection_match.group(1)
                 arrow_type = connection_match.group(2)
@@ -809,7 +912,7 @@ class DiagramBuilder:
                     "---": "line",
                     "-.-": "dotted",
                     "==>": "thick",
-                    "~~~": "invisible"
+                    "~~~": "invisible",
                 }
                 connection_type = connection_type_map.get(arrow_type, "default")
 
@@ -826,7 +929,7 @@ class DiagramBuilder:
                             label=node_id,
                             position=node_positions[node_id],
                             size=self._get_default_size(ElementType.NODE),
-                            properties={"shape": "rectangle"}
+                            properties={"shape": "rectangle"},
                         )
                         self.elements[node_id] = element
 
@@ -836,26 +939,26 @@ class DiagramBuilder:
                     source_id=source_id,
                     target_id=target_id,
                     label=label,
-                    connection_type=connection_type
+                    connection_type=connection_type,
                 )
                 self.connections[connection.id] = connection
 
-    def _parse_node_definition(self, node_def: str) -> Tuple[str, str]:
+    def _parse_node_definition(self, node_def: str) -> tuple[str, str]:
         """Parse node definition to extract shape and label."""
         node_def = node_def.strip()
 
-        if node_def.startswith('[') and node_def.endswith(']'):
+        if node_def.startswith("[") and node_def.endswith("]"):
             # Rectangle: [label]
             return "rectangle", node_def[1:-1]
-        elif node_def.startswith('(') and node_def.endswith(')'):
-            if node_def.startswith('((') and node_def.endswith('))'):
+        elif node_def.startswith("(") and node_def.endswith(")"):
+            if node_def.startswith("((") and node_def.endswith("))"):
                 # Circle: ((label))
                 return "circle", node_def[2:-2]
             else:
                 # Rounded rectangle: (label)
                 return "rounded", node_def[1:-1]
-        elif node_def.startswith('{') and node_def.endswith('}'):
-            if node_def.startswith('{{') and node_def.endswith('}}'):
+        elif node_def.startswith("{") and node_def.endswith("}"):
+            if node_def.startswith("{{") and node_def.endswith("}}"):
                 # Hexagon: {{label}}
                 return "hexagon", node_def[2:-2]
             else:
@@ -865,7 +968,7 @@ class DiagramBuilder:
             # Default to rectangle
             return "rectangle", node_def
 
-    def _parse_sequence_diagram(self, lines: List[str]) -> None:
+    def _parse_sequence_diagram(self, lines: list[str]) -> None:
         """Parse sequence diagram Mermaid code and create elements."""
         # Placeholder implementation for sequence diagrams
         # This would parse participant declarations and message flows
@@ -874,19 +977,19 @@ class DiagramBuilder:
 
         for line in lines[1:]:  # Skip first line
             line = line.strip()
-            if not line or line.startswith('%'):
+            if not line or line.startswith("%"):
                 continue
 
             # Simple participant parsing (participant A as Alice)
-            if line.startswith('participant'):
+            if line.startswith("participant"):
                 parts = line.split()
                 if len(parts) >= 2:
                     participant_id = parts[1]
                     label = participant_id
-                    if 'as' in parts:
-                        as_index = parts.index('as')
+                    if "as" in parts:
+                        as_index = parts.index("as")
                         if as_index + 1 < len(parts):
-                            label = ' '.join(parts[as_index + 1:])
+                            label = " ".join(parts[as_index + 1 :])
 
                     element = DiagramElement(
                         id=participant_id,
@@ -894,12 +997,12 @@ class DiagramBuilder:
                         label=label,
                         position=Position(participant_x, current_y),
                         size=Size(120, 60),
-                        properties={"shape": "rectangle", "type": "participant"}
+                        properties={"shape": "rectangle", "type": "participant"},
                     )
                     self.elements[participant_id] = element
                     participant_x += 200
 
-    def _parse_class_diagram(self, lines: List[str]) -> None:
+    def _parse_class_diagram(self, lines: list[str]) -> None:
         """Parse class diagram Mermaid code and create elements."""
         # Placeholder implementation for class diagrams
         # This would parse class definitions and relationships
@@ -908,11 +1011,11 @@ class DiagramBuilder:
 
         for line in lines[1:]:  # Skip first line
             line = line.strip()
-            if not line or line.startswith('%'):
+            if not line or line.startswith("%"):
                 continue
 
             # Simple class parsing (class ClassName)
-            if line.startswith('class'):
+            if line.startswith("class"):
                 parts = line.split()
                 if len(parts) >= 2:
                     class_name = parts[1]
@@ -923,7 +1026,7 @@ class DiagramBuilder:
                         label=class_name,
                         position=Position(current_x, current_y),
                         size=Size(150, 100),
-                        properties={"shape": "rectangle", "type": "class"}
+                        properties={"shape": "rectangle", "type": "class"},
                     )
                     self.elements[class_name] = element
                     current_x += 200
@@ -931,7 +1034,7 @@ class DiagramBuilder:
                         current_x = 100
                         current_y += 150
 
-    def _parse_state_diagram(self, lines: List[str]) -> None:
+    def _parse_state_diagram(self, lines: list[str]) -> None:
         """Parse state diagram Mermaid code and create elements."""
         # Placeholder implementation for state diagrams
         current_y = 50
@@ -939,12 +1042,12 @@ class DiagramBuilder:
 
         for line in lines[1:]:  # Skip first line
             line = line.strip()
-            if not line or line.startswith('%'):
+            if not line or line.startswith("%"):
                 continue
 
             # Simple state parsing
-            if '-->' in line:
-                parts = line.split('-->')
+            if "-->" in line:
+                parts = line.split("-->")
                 if len(parts) == 2:
                     source = parts[0].strip()
                     target = parts[1].strip()
@@ -958,7 +1061,7 @@ class DiagramBuilder:
                                 label=state_id,
                                 position=Position(current_x, current_y),
                                 size=Size(120, 60),
-                                properties={"shape": "rounded", "type": "state"}
+                                properties={"shape": "rounded", "type": "state"},
                             )
                             self.elements[state_id] = element
                             current_x += 200
@@ -966,7 +1069,7 @@ class DiagramBuilder:
                                 current_x = 100
                                 current_y += 100
 
-    def _parse_er_diagram(self, lines: List[str]) -> None:
+    def _parse_er_diagram(self, lines: list[str]) -> None:
         """Parse ER diagram Mermaid code and create elements."""
         # Placeholder implementation for ER diagrams
         current_y = 50
@@ -974,12 +1077,12 @@ class DiagramBuilder:
 
         for line in lines[1:]:  # Skip first line
             line = line.strip()
-            if not line or line.startswith('%'):
+            if not line or line.startswith("%"):
                 continue
 
             # Simple entity parsing
-            if '{' in line and '}' in line:
-                entity_match = line.split('{')[0].strip()
+            if "{" in line and "}" in line:
+                entity_match = line.split("{")[0].strip()
                 if entity_match:
                     element = DiagramElement(
                         id=entity_match,
@@ -987,7 +1090,7 @@ class DiagramBuilder:
                         label=entity_match,
                         position=Position(current_x, current_y),
                         size=Size(150, 100),
-                        properties={"shape": "rectangle", "type": "entity"}
+                        properties={"shape": "rectangle", "type": "entity"},
                     )
                     self.elements[entity_match] = element
                     current_x += 200

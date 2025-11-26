@@ -79,26 +79,26 @@ class CustomThemePlugin(Plugin):
             version="1.0.0",
             description="Custom theming plugin"
         )
-    
+
     def initialize(self, renderer):
         """Initialize plugin with renderer instance"""
         self.renderer = renderer
         self.register_themes()
-    
+
     def register_themes(self):
         """Register custom themes"""
         self.renderer.theme_manager.register_theme(
             "corporate_blue",
             self.create_corporate_theme()
         )
-    
+
     def create_corporate_theme(self):
         return {
             "primary_color": "#1e3a8a",
             "secondary_color": "#3b82f6",
             "background": "#f8fafc"
         }
-    
+
     def process_diagram(self, diagram, options):
         """Process diagram before rendering"""
         if options.get("auto_corporate_theme"):
@@ -173,14 +173,14 @@ from mermaid_render.async_renderer import AsyncMermaidRenderer
 
 async def render_multiple_async():
     renderer = AsyncMermaidRenderer()
-    
+
     # Render multiple diagrams concurrently
     tasks = [
         renderer.render_async(diagram1, format="svg"),
         renderer.render_async(diagram2, format="png"),
         renderer.render_async(diagram3, format="pdf")
     ]
-    
+
     results = await asyncio.gather(*tasks)
     return results
 
@@ -333,18 +333,18 @@ class CustomBackend(BaseBackend):
             supported_formats=["svg", "png"],
             capabilities=["high_quality", "fast_rendering"]
         )
-    
+
     def render(self, diagram, format, options):
         # Custom rendering logic
         if format == "svg":
             return self.render_svg(diagram, options)
         elif format == "png":
             return self.render_png(diagram, options)
-    
+
     def render_svg(self, diagram, options):
         # Implement SVG rendering
         pass
-    
+
     def render_png(self, diagram, options):
         # Implement PNG rendering
         pass
@@ -361,7 +361,7 @@ from mermaid_render.api import APIExtension
 class DiagramAnalyticsExtension(APIExtension):
     def __init__(self):
         super().__init__(name="analytics")
-    
+
     def register_endpoints(self, app):
         @app.route('/api/analytics/diagram-stats')
         def get_diagram_stats():
@@ -370,7 +370,7 @@ class DiagramAnalyticsExtension(APIExtension):
                 "popular_types": self.get_popular_types(),
                 "performance_metrics": self.get_performance_metrics()
             }
-    
+
     def get_total_renders(self):
         # Implementation
         pass
@@ -523,14 +523,14 @@ config = AdvancedConfig(
             "performance_monitoring": True
         }
     },
-    
+
     # Feature flags
     feature_flags={
         "ai_optimization": True,
         "advanced_caching": True,
         "real_time_collaboration": False
     },
-    
+
     # Dynamic configuration
     dynamic_config=True,
     config_refresh_interval=300  # 5 minutes

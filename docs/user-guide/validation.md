@@ -131,18 +131,18 @@ class NoOrphanNodesRule(CustomRule):
             name="no_orphan_nodes",
             description="Ensure all nodes are connected"
         )
-    
+
     def validate(self, diagram):
         errors = []
         # Parse diagram and check for orphan nodes
         nodes = self.parse_nodes(diagram)
         edges = self.parse_edges(diagram)
-        
+
         connected_nodes = set()
         for edge in edges:
             connected_nodes.add(edge.source)
             connected_nodes.add(edge.target)
-        
+
         for node in nodes:
             if node.id not in connected_nodes:
                 errors.append(ValidationError(
@@ -151,7 +151,7 @@ class NoOrphanNodesRule(CustomRule):
                     severity="warning",
                     suggestion="Connect this node or remove it"
                 ))
-        
+
         return ValidationResult(errors=errors)
 
 # Use custom rule
@@ -243,7 +243,7 @@ for suggestion in suggestions:
     print(f"Line {suggestion.line}: {suggestion.description}")
     print(f"  Current: {suggestion.current}")
     print(f"  Suggested: {suggestion.suggested}")
-    
+
     # Apply suggestion manually
     if input("Apply this fix? (y/n): ").lower() == 'y':
         diagram = suggestion.apply(diagram)
@@ -410,20 +410,20 @@ config = ValidationConfig(
     semantic_validation=True,
     performance_validation=True,
     accessibility_validation=False,
-    
+
     # Error handling
     strict_mode=False,
     max_errors=10,
     stop_on_first_error=False,
-    
+
     # Auto-correction
     enable_auto_correction=True,
     auto_fix_syntax=True,
     auto_fix_formatting=True,
-    
+
     # Custom rules
     custom_rules_directory="./validation_rules",
-    
+
     # Output
     verbose_errors=True,
     include_suggestions=True,
@@ -462,7 +462,7 @@ validator = DiagramValidator()
 def validate_endpoint():
     diagram = request.json['diagram']
     result = validator.validate(diagram)
-    
+
     return jsonify({
         'valid': result.is_valid,
         'errors': [error.to_dict() for error in result.errors],
@@ -479,15 +479,15 @@ class EditorValidator:
     def __init__(self):
         self.validator = DiagramValidator()
         self.debounce_timer = None
-    
+
     def validate_on_change(self, diagram_content):
         # Debounce validation to avoid excessive calls
         if self.debounce_timer:
             self.debounce_timer.cancel()
-        
+
         self.debounce_timer = Timer(0.5, self._validate, [diagram_content])
         self.debounce_timer.start()
-    
+
     def _validate(self, content):
         result = self.validator.validate(content)
         self.update_editor_markers(result)

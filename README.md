@@ -479,6 +479,7 @@ The Mermaid Render library is designed with a modular, plugin-based architecture
 ### Plugin System
 
 The library uses a plugin-based architecture for rendering, allowing you to:
+
 - Choose from multiple rendering backends (Playwright, Node.js, Graphviz)
 - Add custom renderers without modifying core code
 - Configure renderer-specific settings independently
@@ -606,6 +607,7 @@ mypy mermaid_render
 #### Installation Problems
 
 **Issue**: `pip install mermaid-render` fails with dependency conflicts
+
 ```bash
 # Solution: Use a virtual environment
 python -m venv mermaid_env
@@ -614,6 +616,7 @@ pip install mermaid-render
 ```
 
 **Issue**: PDF export not working
+
 ```bash
 # Solution: Install PDF dependencies
 pip install mermaid-render[pdf]
@@ -624,6 +627,7 @@ pip install cairosvg
 #### Rendering Issues
 
 **Issue**: "Connection timeout" errors
+
 ```python
 # Solution: Increase timeout or use local rendering
 from mermaid_render import MermaidConfig, MermaidRenderer
@@ -633,6 +637,7 @@ renderer = MermaidRenderer(config=config)
 ```
 
 **Issue**: "Invalid diagram syntax" errors
+
 ```python
 # Solution: Use validation to debug
 from mermaid_render.utils import validate_mermaid_syntax
@@ -647,6 +652,7 @@ if not result.is_valid:
 #### Performance Issues
 
 **Issue**: Slow rendering for large diagrams
+
 ```python
 # Solution: Enable caching
 from mermaid_render import MermaidConfig

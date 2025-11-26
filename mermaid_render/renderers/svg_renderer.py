@@ -11,7 +11,7 @@ import logging
 import re
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, cast
 
 try:
     import mermaid as md
@@ -21,9 +21,10 @@ except ImportError:
     _MERMAID_AVAILABLE = False
     md = None
 
-import requests  # type: ignore
+import requests
 
 from ..exceptions import NetworkError, RenderingError
+from ..validators import MermaidValidator
 
 
 class SVGRenderer:
@@ -42,7 +43,7 @@ class SVGRenderer:
         max_retries: int = 3,
         backoff_factor: float = 0.3,
         cache_enabled: bool = True,
-        cache_dir: Optional[str] = None,
+        cache_dir: str | None = None,
         cache_ttl: int = 3600,  # 1 hour default
     ) -> None:
         """
@@ -78,11 +79,14 @@ class SVGRenderer:
         # Set up logging
         self.logger = logging.getLogger(__name__)
 
+        # Create validator instance
+        self._validator = MermaidValidator()
+
         # Create a session with retry strategy
         self._session = self._create_session()
 
         # Performance metrics
-        self._metrics: Dict[str, Any] = {
+        self._metrics: dict[str, Any] = {
             "cache_hits": 0,
             "cache_misses": 0,
             "render_times": [],
@@ -111,7 +115,7 @@ class SVGRenderer:
         return session
 
     def _generate_cache_key(
-        self, mermaid_code: str, theme: Optional[str], config: Optional[Dict[str, Any]]
+        self, mermaid_code: str, theme: str | None, config: dict[str, Any] | None
     ) -> str:
         """Generate a cache key for the given parameters."""
         # Create a hash of the input parameters
@@ -155,7 +159,7 @@ class SVGRenderer:
         except Exception:
             return False
 
-    def _get_cached_content(self, cache_key: str) -> Optional[str]:
+    def _get_cached_content(self, cache_key: str) -> str | None:
         """Get cached SVG content if valid."""
         if not self._is_cache_valid(cache_key):
             return None
@@ -219,9 +223,9 @@ class SVGRenderer:
 
         return removed_count
 
-    def get_cache_stats(self) -> Dict[str, Any]:
+    def get_cache_stats(self) -> dict[str, Any]:
         """Get cache statistics."""
-        stats: Dict[str, Any] = {
+        stats: dict[str, Any] = {
             "cache_enabled": self.cache_enabled,
             "cache_dir": str(self.cache_dir),
             "cache_hits": self._metrics["cache_hits"],
@@ -249,11 +253,11 @@ class SVGRenderer:
 
         return stats
 
-    def get_performance_metrics(self) -> Dict[str, Any]:
+    def get_performance_metrics(self) -> dict[str, Any]:
         """Get performance metrics."""
-        render_times: List[float] = self._metrics["render_times"]
+        render_times: list[float] = self._metrics["render_times"]
 
-        metrics: Dict[str, Any] = {
+        metrics: dict[str, Any] = {
             "total_requests": self._metrics["total_requests"],
             "cache_hits": self._metrics["cache_hits"],
             "cache_misses": self._metrics["cache_misses"],
@@ -277,7 +281,7 @@ class SVGRenderer:
 
         return metrics
 
-    def optimize_for_large_diagrams(self, mermaid_code: str) -> Dict[str, Any]:
+    def optimize_for_large_diagrams(self, mermaid_code: str) -> dict[str, Any]:
         """
         Analyze and provide optimization suggestions for large diagrams.
 
@@ -287,7 +291,7 @@ class SVGRenderer:
         Returns:
             Optimization suggestions
         """
-        analysis: Dict[str, Any] = {
+        analysis: dict[str, Any] = {
             "size_category": "small",
             "complexity_score": 0,
             "suggestions": [],
@@ -338,7 +342,7 @@ class SVGRenderer:
 
         return analysis
 
-    def preload_cache(self, diagram_configs: list[Dict[str, Any]]) -> Dict[str, Any]:
+    def preload_cache(self, diagram_configs: list[dict[str, Any]]) -> dict[str, Any]:
         """
         Preload cache with commonly used diagrams.
 
@@ -348,8 +352,11 @@ class SVGRenderer:
         Returns:
             Preload results
         """
-        results: Dict[str, Union[int, List[str]]] = {
-            "successful": 0, "failed": 0, "errors": []}
+        results: dict[str, int | list[str]] = {
+            "successful": 0,
+            "failed": 0,
+            "errors": [],
+        }
 
         for config in diagram_configs:
             try:
@@ -366,7 +373,7 @@ class SVGRenderer:
 
             except Exception as e:
                 results["failed"] = cast(int, results["failed"]) + 1
-                cast(List[str], results["errors"]).append(str(e))
+                cast(list[str], results["errors"]).append(str(e))
 
         return results
 
@@ -409,7 +416,7 @@ class SVGRenderer:
         _ = (exc_type, exc_val, exc_tb)
         self.close()
 
-    def get_server_status(self) -> Dict[str, Any]:
+    def get_server_status(self) -> dict[str, Any]:
         """
         Check the status of the mermaid.ink server.
 
@@ -430,8 +437,8 @@ class SVGRenderer:
     def render(
         self,
         mermaid_code: str,
-        theme: Optional[str] = None,
-        config: Optional[Dict[str, Any]] = None,
+        theme: str | None = None,
+        config: dict[str, Any] | None = None,
         validate: bool = True,
         sanitize: bool = True,
         optimize: bool = False,
@@ -526,8 +533,8 @@ class SVGRenderer:
                     f"Mermaid syntax suggestions: {'; '.join(syntax_result['suggestions'])}"
                 )
 
-        svg_content: Optional[str] = None
-        last_error: Optional[Exception] = None
+        svg_content: str | None = None
+        last_error: Exception | None = None
 
         if self.use_local:
             try:
@@ -539,15 +546,15 @@ class SVGRenderer:
                     svg_content = self._render_remote(mermaid_code, theme, config)
                 except Exception as remote_error:
                     # If both fail, create detailed error with context
-                    error_context: Dict[str, Any] = {
+                    error_context: dict[str, Any] = {
                         "local_error": str(last_error),
                         "remote_error": str(remote_error),
                         "server_url": self.server_url,
                         "use_local": self.use_local,
                     }
                     raise self.create_detailed_error(
-                        RuntimeError(
-                            "Both local and remote rendering failed"), error_context
+                        RuntimeError("Both local and remote rendering failed"),
+                        error_context,
                     ) from last_error
         else:
             svg_content = self._render_remote(mermaid_code, theme, config)
@@ -596,9 +603,9 @@ class SVGRenderer:
     def render_with_fallback(
         self,
         mermaid_code: str,
-        theme: Optional[str] = None,
-        config: Optional[Dict[str, Any]] = None,
-        fallback_servers: Optional[list[str]] = None,
+        theme: str | None = None,
+        config: dict[str, Any] | None = None,
+        fallback_servers: list[str] | None = None,
     ) -> str:
         """
         Render with fallback to alternative servers if primary fails.
@@ -621,7 +628,7 @@ class SVGRenderer:
 
             # Try fallback servers
             original_server = self.server_url
-            last_error: Optional[Exception] = primary_error
+            last_error: Exception | None = primary_error
 
             for fallback_url in fallback_servers:
                 try:
@@ -648,8 +655,8 @@ class SVGRenderer:
     def _render_local(
         self,
         mermaid_code: str,
-        theme: Optional[str] = None,
-        config: Optional[Dict[str, Any]] = None,
+        theme: str | None = None,
+        config: dict[str, Any] | None = None,
     ) -> str:
         """
         Render using local mermaid-py library.
@@ -683,7 +690,9 @@ class SVGRenderer:
                 if "Mock" in text_content:
                     # This is a mock, fallback to str(mermaid_obj)
                     svg_content = str(mermaid_obj)
-                    self.logger.debug(f"Mock detected in text, using fallback: {repr(svg_content)}")
+                    self.logger.debug(
+                        f"Mock detected in text, using fallback: {repr(svg_content)}"
+                    )
                 else:
                     svg_content = text_content
             elif isinstance(svg_response, str):
@@ -694,9 +703,11 @@ class SVGRenderer:
                 svg_response_str = str(svg_response)
 
                 # If svg_response doesn't give us valid SVG (e.g., it's a Mock), try str(mermaid_obj)
-                if (not svg_response_str or
-                    "<svg" not in svg_response_str.lower() or
-                    "Mock" in svg_response_str):
+                if (
+                    not svg_response_str
+                    or "<svg" not in svg_response_str.lower()
+                    or "Mock" in svg_response_str
+                ):
                     svg_content = str(mermaid_obj)
                 else:
                     svg_content = svg_response_str
@@ -735,8 +746,8 @@ class SVGRenderer:
     def _render_remote(
         self,
         mermaid_code: str,
-        theme: Optional[str] = None,
-        config: Optional[Dict[str, Any]] = None,
+        theme: str | None = None,
+        config: dict[str, Any] | None = None,
     ) -> str:
         """
         Render using remote mermaid.ink service.
@@ -752,14 +763,14 @@ class SVGRenderer:
         import base64
         import json as _json
 
-        url: Optional[str] = None
+        url: str | None = None
         try:
             # Validate input
             if not mermaid_code or not mermaid_code.strip():
                 raise RenderingError("Empty mermaid code provided")
 
             # Prepare the configuration
-            mermaid_config: Dict[str, Any] = {}
+            mermaid_config: dict[str, Any] = {}
             if config:
                 # Filter out invalid config options
                 valid_config = {
@@ -829,7 +840,7 @@ class SVGRenderer:
             }
             raise self.create_detailed_error(e, context) from e
         except Exception as e:
-            error_context: Dict[str, Any] = {
+            error_context: dict[str, Any] = {
                 "server_url": self.server_url,
                 "operation": "remote_svg_rendering",
                 "mermaid_length": len(mermaid_code),
@@ -839,17 +850,17 @@ class SVGRenderer:
     def render_to_file(
         self,
         mermaid_code: str,
-        output_path: Union[str, Path],
-        theme: Optional[str] = None,
-        config: Optional[Dict[str, Any]] = None,
+        output_path: str | Path,
+        theme: str | None = None,
+        config: dict[str, Any] | None = None,
         validate: bool = True,
         sanitize: bool = True,
         optimize: bool = False,
         add_metadata: bool = True,
         format: str = "svg",
         quality: int = 90,
-        background: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        background: str | None = None,
+    ) -> dict[str, Any]:
         """
         Render Mermaid code to file with enhanced export options.
 
@@ -893,7 +904,7 @@ class SVGRenderer:
         normalized_output.parent.mkdir(parents=True, exist_ok=True)
 
         # Export based on format
-        export_info: Dict[str, Any] = {
+        export_info: dict[str, Any] = {
             "output_path": str(normalized_output),
             "format": format,
             "size_bytes": 0,
@@ -939,7 +950,7 @@ class SVGRenderer:
         svg_content: str,
         output_path: Path,
         quality: int,
-        background: Optional[str],
+        background: str | None,
     ) -> None:
         """Export SVG to PNG format."""
         try:
@@ -968,7 +979,7 @@ class SVGRenderer:
             _ = quality  # parameter acknowledged for API compatibility
 
     def _export_pdf(
-        self, svg_content: str, output_path: Path, background: Optional[str]
+        self, svg_content: str, output_path: Path, background: str | None
     ) -> None:
         """Export SVG to PDF format."""
         try:
@@ -996,7 +1007,7 @@ class SVGRenderer:
         svg_content: str,
         output_path: Path,
         mermaid_code: str,
-        theme: Optional[str],
+        theme: str | None,
     ) -> None:
         """Export SVG embedded in HTML."""
         import datetime
@@ -1086,19 +1097,19 @@ class SVGRenderer:
                 svg_content = (
                     svg_content[: svg_start + 1]
                     + background_rect
-                    + svg_content[svg_start + 1:]
+                    + svg_content[svg_start + 1 :]
                 )
 
         return svg_content
 
     def batch_export(
         self,
-        diagrams: list[Dict[str, Any]],
+        diagrams: list[dict[str, Any]],
         output_dir: str,
         format: str = "svg",
         naming_pattern: str = "{index}_{name}",
         **export_options: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Export multiple diagrams in batch.
 
@@ -1117,7 +1128,7 @@ class SVGRenderer:
         output_path = Path(output_dir)
         output_path.mkdir(parents=True, exist_ok=True)
 
-        results: Dict[str, Any] = {
+        results: dict[str, Any] = {
             "total": len(diagrams),
             "successful": 0,
             "failed": 0,
@@ -1184,7 +1195,7 @@ class SVGRenderer:
 
         return results
 
-    def create_export_template(self, template_name: str) -> Dict[str, Any]:
+    def create_export_template(self, template_name: str) -> dict[str, Any]:
         """
         Create export template with predefined settings.
 
@@ -1194,7 +1205,7 @@ class SVGRenderer:
         Returns:
             Template configuration
         """
-        templates: Dict[str, Dict[str, Any]] = {
+        templates: dict[str, dict[str, Any]] = {
             "web": {
                 "format": "svg",
                 "optimize": True,
@@ -1242,12 +1253,12 @@ class SVGRenderer:
     def export_with_template(
         self,
         mermaid_code: str,
-        output_path: Union[str, Path],
+        output_path: str | Path,
         template_name: str,
-        theme: Optional[str] = None,
-        config: Optional[Dict[str, Any]] = None,
+        theme: str | None = None,
+        config: dict[str, Any] | None = None,
         **overrides: Any,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Export using a predefined template.
 
@@ -1275,7 +1286,7 @@ class SVGRenderer:
         )
 
     def _add_svg_metadata(
-        self, svg_content: str, mermaid_code: str, theme: Optional[str]
+        self, svg_content: str, mermaid_code: str, theme: str | None
     ) -> str:
         """
         Add metadata to SVG content.
@@ -1310,12 +1321,12 @@ Original Mermaid Code:
                     + "\n"
                     + metadata
                     + "\n"
-                    + svg_content[svg_start + 1:]
+                    + svg_content[svg_start + 1 :]
                 )
 
         return svg_content
 
-    def get_supported_themes(self) -> Dict[str, Dict[str, Any]]:
+    def get_supported_themes(self) -> dict[str, dict[str, Any]]:
         """
         Get detailed information about supported themes.
 
@@ -1388,7 +1399,7 @@ Original Mermaid Code:
         """Validate if theme is supported."""
         return theme in self.get_theme_names()
 
-    def get_theme_info(self, theme: str) -> Optional[Dict[str, Any]]:
+    def get_theme_info(self, theme: str) -> dict[str, Any] | None:
         """
         Get detailed information about a specific theme.
 
@@ -1402,8 +1413,8 @@ Original Mermaid Code:
         return themes.get(theme)
 
     def create_custom_theme(
-        self, name: str, colors: Dict[str, str], description: Optional[str] = None
-    ) -> Dict[str, Any]:
+        self, name: str, colors: dict[str, str], description: str | None = None
+    ) -> dict[str, Any]:
         """
         Create a custom theme configuration.
 
@@ -1443,8 +1454,8 @@ Original Mermaid Code:
         }
 
     def apply_theme_to_config(
-        self, config: Dict[str, Any], theme: Union[str, Dict[str, Any]]
-    ) -> Dict[str, Any]:
+        self, config: dict[str, Any], theme: str | dict[str, Any]
+    ) -> dict[str, Any]:
         """
         Apply theme configuration to mermaid config.
 
@@ -1517,7 +1528,7 @@ Original Mermaid Code:
 
         return preview_code
 
-    def compare_themes(self, themes: list[str]) -> Dict[str, Any]:
+    def compare_themes(self, themes: list[str]) -> dict[str, Any]:
         """
         Compare multiple themes side by side.
 
@@ -1527,7 +1538,7 @@ Original Mermaid Code:
         Returns:
             Comparison data for the themes
         """
-        comparison: Dict[str, Any] = {"themes": {}, "color_comparison": {}}
+        comparison: dict[str, Any] = {"themes": {}, "color_comparison": {}}
 
         all_themes = self.get_supported_themes()
 
@@ -1554,7 +1565,7 @@ Original Mermaid Code:
 
         return comparison
 
-    def suggest_theme(self, preferences: Dict[str, Any]) -> str:
+    def suggest_theme(self, preferences: dict[str, Any]) -> str:
         """
         Suggest a theme based on user preferences.
 
@@ -1579,7 +1590,7 @@ Original Mermaid Code:
 
     def validate_svg_content(
         self, svg_content: str, strict: bool = False
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Validate SVG content for correctness and security.
 
@@ -1590,7 +1601,7 @@ Original Mermaid Code:
         Returns:
             Dictionary with validation results
         """
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "is_valid": True,
             "errors": [],
             "warnings": [],
@@ -1752,7 +1763,9 @@ Original Mermaid Code:
         for tag, count in opening_tag_counts.items():
             closing_count = closing_tag_counts.get(tag, 0)
             if abs(count - closing_count) > count * 0.5:  # Allow 50% tolerance
-                self.logger.warning(f"Potential XML structure issue: tag '{tag}' has {count} opening and {closing_count} closing tags")
+                self.logger.warning(
+                    f"Potential XML structure issue: tag '{tag}' has {count} opening and {closing_count} closing tags"
+                )
 
         # Calculate depth using a simple stack-based approach
         depth = 0
@@ -1994,7 +2007,7 @@ Original Mermaid Code:
 
         return svg_content
 
-    def scan_svg_security(self, svg_content: str) -> Dict[str, Any]:
+    def scan_svg_security(self, svg_content: str) -> dict[str, Any]:
         """
         Perform comprehensive security scan of SVG content.
 
@@ -2004,7 +2017,7 @@ Original Mermaid Code:
         Returns:
             Security scan results
         """
-        scan_result: Dict[str, Any] = {
+        scan_result: dict[str, Any] = {
             "risk_level": "low",
             "issues": [],
             "recommendations": [],
@@ -2089,7 +2102,7 @@ Original Mermaid Code:
 
         return scan_result
 
-    def create_svg_report(self, svg_content: str) -> Dict[str, Any]:
+    def create_svg_report(self, svg_content: str) -> dict[str, Any]:
         """
         Create comprehensive SVG analysis report.
 
@@ -2099,7 +2112,7 @@ Original Mermaid Code:
         Returns:
             Complete analysis report
         """
-        report: Dict[str, Any] = {
+        report: dict[str, Any] = {
             "validation": self.validate_svg_content(svg_content, strict=True),
             "security": self.scan_svg_security(svg_content),
             "statistics": self._get_svg_statistics(svg_content),
@@ -2118,9 +2131,9 @@ Original Mermaid Code:
 
         return report
 
-    def _get_svg_statistics(self, svg_content: str) -> Dict[str, Any]:
+    def _get_svg_statistics(self, svg_content: str) -> dict[str, Any]:
         """Get statistics about SVG content."""
-        stats: Dict[str, Any] = {
+        stats: dict[str, Any] = {
             "size": len(svg_content),
             "elements": len(re.findall(r"<\w+", svg_content)),
             "text_elements": len(
@@ -2140,81 +2153,35 @@ Original Mermaid Code:
 
         return stats
 
-    def validate_mermaid_syntax(self, mermaid_code: str) -> Dict[str, Any]:
+    def validate_mermaid_syntax(self, mermaid_code: str) -> dict[str, Any]:
         """
         Validate Mermaid syntax and provide detailed error information.
+
+        This method now uses the centralized MermaidValidator for consistent
+        validation across the library.
 
         Args:
             mermaid_code: Mermaid code to validate
 
         Returns:
-            Dictionary with validation results
+            Dictionary with validation results containing:
+            - is_valid: Boolean indicating if the syntax is valid
+            - errors: List of error messages
+            - warnings: List of warning messages
+            - suggestions: List of suggested fixes
         """
-        result: Dict[str, Any] = {
-            "is_valid": True,
-            "errors": [],
-            "warnings": [],
-            "suggestions": [],
+        validation_result = self._validator.validate(mermaid_code)
+
+        return {
+            "is_valid": validation_result.is_valid,
+            "errors": validation_result.errors,
+            "warnings": validation_result.warnings,
+            "suggestions": (
+                self._validator.suggest_fixes(mermaid_code)
+                if not validation_result.is_valid
+                else []
+            ),
         }
-
-        if not mermaid_code or not mermaid_code.strip():
-            result["is_valid"] = False
-            result["errors"].append("Empty mermaid code")
-            return result
-
-        # Basic syntax validation
-        lines = mermaid_code.strip().split("\n")
-        first_line = lines[0].strip()
-
-        # Check for diagram type declaration
-        valid_diagram_types = [
-            "flowchart",
-            "graph",
-            "sequenceDiagram",
-            "classDiagram",
-            "stateDiagram",
-            "erDiagram",
-            "journey",
-            "gantt",
-            "pie",
-            "gitgraph",
-            "mindmap",
-            "timeline",
-            "sankey",
-        ]
-
-        has_diagram_type = any(first_line.startswith(dt) for dt in valid_diagram_types)
-        if not has_diagram_type:
-            result["warnings"].append(
-                f"No recognized diagram type found. First line: '{first_line}'"
-            )
-            result["suggestions"].append(
-                "Start with a diagram type like 'flowchart TD' or 'sequenceDiagram'"
-            )
-
-        # Check for common syntax issues
-        for i, line in enumerate(lines, 1):
-            line = line.strip()
-            if not line or line.startswith("%"):  # Skip empty lines and comments
-                continue
-
-            # Check for unmatched brackets
-            open_brackets = line.count("[") + line.count("(") + line.count("{")
-            close_brackets = line.count("]") + line.count(")") + line.count("}")
-            if open_brackets != close_brackets:
-                result["warnings"].append(f"Line {i}: Potentially unmatched brackets")
-
-            # Check for invalid characters in node IDs
-            if "-->" in line or "---" in line:
-                parts = re.split(r"-->|---", line)
-                for part in parts:
-                    part = part.strip()
-                    if part and not re.match(r'^[A-Za-z0-9_\[\](){}"\s-]+$', part):
-                        result["warnings"].append(
-                            f"Line {i}: Potentially invalid characters in '{part}'"
-                        )
-
-        return result
 
     def get_error_suggestions(self, error_message: str) -> list[str]:
         """
@@ -2271,7 +2238,7 @@ Original Mermaid Code:
         return suggestions
 
     def create_detailed_error(
-        self, base_error: Exception, context: Dict[str, Any]
+        self, base_error: Exception, context: dict[str, Any]
     ) -> RenderingError:
         """
         Create a detailed error with context and suggestions.
@@ -2302,7 +2269,7 @@ Original Mermaid Code:
 
         return RenderingError(detailed_msg)
 
-    def diagnose_rendering_issues(self, mermaid_code: str) -> Dict[str, Any]:
+    def diagnose_rendering_issues(self, mermaid_code: str) -> dict[str, Any]:
         """
         Diagnose potential rendering issues and provide recommendations.
 
@@ -2312,7 +2279,7 @@ Original Mermaid Code:
         Returns:
             Dictionary with diagnostic information
         """
-        diagnosis: Dict[str, Any] = {
+        diagnosis: dict[str, Any] = {
             "syntax_check": self.validate_mermaid_syntax(mermaid_code),
             "server_status": self.get_server_status(),
             "recommendations": [],
@@ -2349,8 +2316,8 @@ Original Mermaid Code:
     def render_with_recovery(
         self,
         mermaid_code: str,
-        theme: Optional[str] = None,
-        config: Optional[Dict[str, Any]] = None,
+        theme: str | None = None,
+        config: dict[str, Any] | None = None,
         max_attempts: int = 3,
     ) -> str:
         """
@@ -2365,7 +2332,7 @@ Original Mermaid Code:
         Returns:
             SVG content
         """
-        last_error: Optional[Exception] = None
+        last_error: Exception | None = None
 
         for attempt in range(max_attempts):
             try:

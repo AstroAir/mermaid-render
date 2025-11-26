@@ -433,9 +433,9 @@ app = Flask(__name__)
 @app.route('/export/<format>')
 def export_diagram(format):
     diagram = request.args.get('diagram')
-    
+
     result = renderer.render(diagram, format=format)
-    
+
     # Return file
     buffer = io.BytesIO(result.bytes)
     return send_file(
@@ -457,16 +457,16 @@ def main():
     parser.add_argument('--format', default='svg', help='Output format')
     parser.add_argument('--output', help='Output file')
     parser.add_argument('--dpi', type=int, default=300, help='DPI for raster formats')
-    
+
     args = parser.parse_args()
-    
+
     with open(args.input, 'r') as f:
         diagram = f.read()
-    
+
     result = renderer.render(diagram, format=args.format, options={
         'dpi': args.dpi
     })
-    
+
     output_file = args.output or f"diagram.{args.format}"
     result.save(output_file)
     print(f"Exported to {output_file}")

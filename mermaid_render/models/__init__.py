@@ -19,6 +19,13 @@ Available diagram types:
 """
 
 from .class_diagram import ClassDiagram
+from .constants import (
+    ARROW_TYPES,
+    DIAGRAM_TYPES,
+    FLOWCHART_SHAPES,
+    THEMES,
+    VISIBILITY_SYMBOLS,
+)
 from .er_diagram import ERDiagram
 from .flowchart import FlowchartDiagram
 from .gantt import GanttDiagram
@@ -42,4 +49,10 @@ __all__ = [
     "GitGraphDiagram",
     "MindmapDiagram",
     "TimelineDiagram",
+    # Constants
+    "VISIBILITY_SYMBOLS",
+    "DIAGRAM_TYPES",
+    "FLOWCHART_SHAPES",
+    "ARROW_TYPES",
+    "THEMES",
 ]

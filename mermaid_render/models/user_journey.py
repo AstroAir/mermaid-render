@@ -1,7 +1,5 @@
 """User Journey diagram model for the Mermaid Render library."""
 
-from typing import List, Optional
-
 from ..core import MermaidDiagram
 
 
@@ -12,15 +10,15 @@ class UserJourneyDiagram(MermaidDiagram):
     and renders Mermaid journey syntax.
     """
 
-    def __init__(self, title: Optional[str] = None) -> None:
+    def __init__(self, title: str | None = None) -> None:
         """Initialize an empty user journey diagram.
 
         Args:
             title: Optional diagram title.
         """
         super().__init__(title)
-        self.sections: List[tuple] = []
-        self.tasks: List[tuple] = []
+        self.sections: list[tuple[str, str]] = []
+        self.tasks: list[tuple[str, list[str], int]] = []
 
     def get_diagram_type(self) -> str:
         """Return the Mermaid diagram type identifier."""
@@ -34,7 +32,7 @@ class UserJourneyDiagram(MermaidDiagram):
         """
         self.sections.append(("section", title))
 
-    def add_task(self, task: str, actors: List[str], score: int) -> None:
+    def add_task(self, task: str, actors: list[str], score: int) -> None:
         """Add a task with actors and satisfaction score.
 
         Args:

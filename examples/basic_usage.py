@@ -7,12 +7,13 @@ diagram creation, rendering, and saving to files.
 """
 
 from pathlib import Path
+
 from mermaid_render import (
-    MermaidRenderer,
     FlowchartDiagram,
+    MermaidRenderer,
     SequenceDiagram,
-    quick_render,
     export_to_file,
+    quick_render,
 )
 
 
@@ -102,11 +103,11 @@ flowchart LR
 
     # Ensure svg_content is a string before writing
     if isinstance(svg_content, bytes):
-        svg_content = svg_content.decode('utf-8')
+        svg_content = svg_content.decode("utf-8")
 
     # Save to file
     output_path = output_dir / "quick_render.svg"
-    with open(output_path, 'w', encoding='utf-8') as f:
+    with open(output_path, "w", encoding="utf-8") as f:
         f.write(svg_content)
 
     print(f"Quick rendered diagram to {output_path}")

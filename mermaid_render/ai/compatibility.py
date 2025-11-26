@@ -6,11 +6,10 @@ original optimization classes while delegating to the new integrated functionali
 """
 
 from dataclasses import dataclass
-from typing import Any, Dict, List
+from typing import Any
 
-from .analysis import DiagramAnalyzer, EnhancementResult, EnhancementType
+from .analysis import DiagramAnalyzer, EnhancementType
 from .suggestions import SuggestionEngine
-
 
 # Alias for backward compatibility
 OptimizationType = EnhancementType
@@ -23,10 +22,10 @@ class OptimizationResult:
     original_diagram: str
     optimized_diagram: str
     optimization_type: OptimizationType
-    improvements: List[str]
+    improvements: list[str]
     confidence_score: float
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "original_diagram": self.original_diagram,
             "optimized_diagram": self.optimized_diagram,
@@ -39,7 +38,7 @@ class OptimizationResult:
 class LayoutOptimizer:
     """
     Compatibility wrapper for layout optimization functionality.
-    
+
     This class maintains the exact same API as the original LayoutOptimizer
     while delegating to the integrated DiagramAnalyzer functionality.
     """
@@ -51,16 +50,16 @@ class LayoutOptimizer:
     def optimize(self, diagram_code: str) -> OptimizationResult:
         """
         Optimize diagram layout.
-        
+
         Args:
             diagram_code: Mermaid diagram code
-            
+
         Returns:
             OptimizationResult with layout improvements
         """
         # Delegate to the integrated functionality
         result = self._analyzer.enhance_layout(diagram_code)
-        
+
         # Convert EnhancementResult to OptimizationResult for compatibility
         return OptimizationResult(
             original_diagram=result.original_diagram,
@@ -90,7 +89,7 @@ class LayoutOptimizer:
 class StyleOptimizer:
     """
     Compatibility wrapper for style optimization functionality.
-    
+
     This class maintains the exact same API as the original StyleOptimizer
     while delegating to the integrated SuggestionEngine functionality.
     """
@@ -102,16 +101,16 @@ class StyleOptimizer:
     def optimize(self, diagram_code: str) -> OptimizationResult:
         """
         Optimize diagram styling.
-        
+
         Args:
             diagram_code: Mermaid diagram code
-            
+
         Returns:
             OptimizationResult with style improvements
         """
         # Delegate to the integrated functionality
         result = self._engine.enhance_style(diagram_code)
-        
+
         # Convert EnhancementResult to OptimizationResult for compatibility
         return OptimizationResult(
             original_diagram=result.original_diagram,
@@ -137,7 +136,7 @@ class StyleOptimizer:
 class DiagramOptimizer:
     """
     Compatibility wrapper for main diagram optimization functionality.
-    
+
     This class maintains the exact same API as the original DiagramOptimizer
     while delegating to the integrated functionality across multiple modules.
     """
@@ -155,7 +154,7 @@ class DiagramOptimizer:
         """Optimize diagram styling."""
         return self.style_optimizer.optimize(diagram_code)
 
-    def optimize_all(self, diagram_code: str) -> List[OptimizationResult]:
+    def optimize_all(self, diagram_code: str) -> list[OptimizationResult]:
         """Apply all optimizations."""
         results = []
 
@@ -169,7 +168,8 @@ class DiagramOptimizer:
 
         return results
 
-    def get_optimization_suggestions(self, diagram_code: str) -> List[str]:
+    def get_optimization_suggestions(self, diagram_code: str) -> list[str]:
         """Get suggestions for diagram optimization."""
         from .utils import get_enhancement_suggestions
+
         return get_enhancement_suggestions(diagram_code)

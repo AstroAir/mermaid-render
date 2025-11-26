@@ -10,11 +10,12 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Union, TypedDict
+from typing import Any, TypedDict
 
 
 class ExampleScript(TypedDict):
     """Type definition for example script configuration."""
+
     script: Path
     description: str
 
@@ -26,7 +27,7 @@ def create_output_dir() -> Path:
     return output_dir
 
 
-def run_example_script(script_path: Path, description: str) -> Dict[str, Any]:
+def run_example_script(script_path: Path, description: str) -> dict[str, Any]:
     """Run an example script and return results."""
     print(f"🚀 Running: {description}")
     print(f"   Script: {script_path}")
@@ -39,7 +40,7 @@ def run_example_script(script_path: Path, description: str) -> Dict[str, Any]:
             [sys.executable, str(script_path)],
             capture_output=True,
             text=True,
-            timeout=300  # 5 minute timeout
+            timeout=300,  # 5 minute timeout
         )
 
         execution_time = time.time() - start_time
@@ -52,7 +53,7 @@ def run_example_script(script_path: Path, description: str) -> Dict[str, Any]:
                 "success": True,
                 "execution_time": execution_time,
                 "stdout": result.stdout,
-                "stderr": result.stderr
+                "stderr": result.stderr,
             }
         else:
             print(f"   ❌ Failed with exit code {result.returncode}")
@@ -64,19 +65,19 @@ def run_example_script(script_path: Path, description: str) -> Dict[str, Any]:
                 "execution_time": execution_time,
                 "exit_code": result.returncode,
                 "stdout": result.stdout,
-                "stderr": result.stderr
+                "stderr": result.stderr,
             }
 
     except subprocess.TimeoutExpired:
-        print(f"   ⏰ Timed out after 5 minutes")
+        print("   ⏰ Timed out after 5 minutes")
         return {
             "script": str(script_path),
             "description": description,
             "success": False,
             "execution_time": 300,
-            "error": "Timeout"
+            "error": "Timeout",
         }
-    
+
     except Exception as e:
         execution_time = time.time() - start_time
         print(f"   💥 Exception: {e}")
@@ -85,57 +86,108 @@ def run_example_script(script_path: Path, description: str) -> Dict[str, Any]:
             "description": description,
             "success": False,
             "execution_time": execution_time,
-            "error": str(e)
+            "error": str(e),
         }
 
 
-def generate_summary_report(results: List[Dict[str, Any]], output_dir: Path) -> Dict[str, Any]:
+def generate_summary_report(
+    results: list[dict[str, Any]], output_dir: Path
+) -> dict[str, Any]:
     """Generate a comprehensive summary report."""
     print("\n📊 Generating summary report...")
 
     # Calculate statistics
     total_examples = len(results)
-    successful_examples = sum(1 for r in results if r['success'])
+    successful_examples = sum(1 for r in results if r["success"])
     failed_examples = total_examples - successful_examples
-    total_time = sum(r['execution_time'] for r in results)
+    total_time = sum(r["execution_time"] for r in results)
 
     # Create summary
-    summary: Dict[str, Any] = {
+    summary: dict[str, Any] = {
         "execution_summary": {
             "total_examples": total_examples,
             "successful": successful_examples,
             "failed": failed_examples,
-            "success_rate": f"{(successful_examples / total_examples * 100):.1f}%" if total_examples > 0 else "0%",
+            "success_rate": (
+                f"{(successful_examples / total_examples * 100):.1f}%"
+                if total_examples > 0
+                else "0%"
+            ),
             "total_execution_time": f"{total_time:.2f}s",
-            "average_execution_time": f"{(total_time / total_examples):.2f}s" if total_examples > 0 else "0s"
+            "average_execution_time": (
+                f"{(total_time / total_examples):.2f}s" if total_examples > 0 else "0s"
+            ),
         },
         "example_results": results,
         "generated_files": {
-            "basic_usage": list((output_dir / "basic").glob("*")) if (output_dir / "basic").exists() else [],
-            "advanced_usage": list((output_dir / "advanced").glob("*")) if (output_dir / "advanced").exists() else [],
-            "diagram_types": list((output_dir / "diagram_types").glob("*")) if (output_dir / "diagram_types").exists() else [],
-            "ai_features": list((output_dir / "ai_features").glob("*")) if (output_dir / "ai_features").exists() else [],
-            "templates": list((output_dir / "templates").glob("*")) if (output_dir / "templates").exists() else [],
-            "integration": list((output_dir / "integration").glob("*")) if (output_dir / "integration").exists() else [],
-            "real_world": list((output_dir / "real_world").glob("*")) if (output_dir / "real_world").exists() else [],
-            "performance": list((output_dir / "performance").glob("*")) if (output_dir / "performance").exists() else [],
-            "testing": list((output_dir / "testing").glob("*")) if (output_dir / "testing").exists() else [],
-            "interactive": list((output_dir / "interactive").glob("*")) if (output_dir / "interactive").exists() else []
-        }
+            "basic_usage": (
+                list((output_dir / "basic").glob("*"))
+                if (output_dir / "basic").exists()
+                else []
+            ),
+            "advanced_usage": (
+                list((output_dir / "advanced").glob("*"))
+                if (output_dir / "advanced").exists()
+                else []
+            ),
+            "diagram_types": (
+                list((output_dir / "diagram_types").glob("*"))
+                if (output_dir / "diagram_types").exists()
+                else []
+            ),
+            "ai_features": (
+                list((output_dir / "ai_features").glob("*"))
+                if (output_dir / "ai_features").exists()
+                else []
+            ),
+            "templates": (
+                list((output_dir / "templates").glob("*"))
+                if (output_dir / "templates").exists()
+                else []
+            ),
+            "integration": (
+                list((output_dir / "integration").glob("*"))
+                if (output_dir / "integration").exists()
+                else []
+            ),
+            "real_world": (
+                list((output_dir / "real_world").glob("*"))
+                if (output_dir / "real_world").exists()
+                else []
+            ),
+            "performance": (
+                list((output_dir / "performance").glob("*"))
+                if (output_dir / "performance").exists()
+                else []
+            ),
+            "testing": (
+                list((output_dir / "testing").glob("*"))
+                if (output_dir / "testing").exists()
+                else []
+            ),
+            "interactive": (
+                list((output_dir / "interactive").glob("*"))
+                if (output_dir / "interactive").exists()
+                else []
+            ),
+        },
     }
-    
+
     # Convert Path objects to strings for JSON serialization
     for category in summary["generated_files"]:
-        summary["generated_files"][category] = [str(p) for p in summary["generated_files"][category]]
-    
+        summary["generated_files"][category] = [
+            str(p) for p in summary["generated_files"][category]
+        ]
+
     # Save summary report
     import json
+
     summary_path = output_dir / "example_execution_summary.json"
-    with open(summary_path, 'w') as f:
+    with open(summary_path, "w") as f:
         json.dump(summary, f, indent=2, default=str)
-    
+
     print(f"📁 Summary report saved to {summary_path}")
-    
+
     # Create HTML report
     html_report = f"""
 <!DOCTYPE html>
@@ -165,7 +217,7 @@ def generate_summary_report(results: List[Dict[str, Any]], output_dir: Path) -> 
 <body>
     <div class="container">
         <h1>Mermaid Render Examples - Execution Report</h1>
-        
+
         <div class="summary">
             <h2>Execution Summary</h2>
             <div class="stats">
@@ -191,35 +243,35 @@ def generate_summary_report(results: List[Dict[str, Any]], output_dir: Path) -> 
                 </div>
             </div>
         </div>
-        
+
         <h2>Example Results</h2>
         <div class="examples">
 """
-    
+
     for result in results:
-        status_class = "success" if result['success'] else "failure"
-        status_icon = "✅" if result['success'] else "❌"
-        
+        status_class = "success" if result["success"] else "failure"
+        status_icon = "✅" if result["success"] else "❌"
+
         html_report += f"""
             <div class="example {status_class}">
                 <h4>{status_icon} {result['description']}</h4>
                 <p><strong>Script:</strong> {result['script']}</p>
                 <p><strong>Execution Time:</strong> {result['execution_time']:.2f}s</p>
 """
-        
-        if not result['success']:
-            error_info = result.get('error', result.get('stderr', 'Unknown error'))
+
+        if not result["success"]:
+            error_info = result.get("error", result.get("stderr", "Unknown error"))
             html_report += f"<p><strong>Error:</strong> {error_info}</p>"
-        
+
         html_report += "</div>"
-    
+
     html_report += """
         </div>
-        
+
         <div class="files">
             <h2>Generated Files</h2>
 """
-    
+
     for category, files in summary["generated_files"].items():
         if files:
             html_report += f"""
@@ -229,23 +281,23 @@ def generate_summary_report(results: List[Dict[str, Any]], output_dir: Path) -> 
 """
             for file_path in files:
                 html_report += f"<p>📁 {file_path}</p>"
-            
+
             html_report += "</div></div>"
-    
+
     html_report += """
         </div>
     </div>
 </body>
 </html>
 """
-    
+
     # Save HTML report
     html_path = output_dir / "example_execution_report.html"
-    with open(html_path, 'w') as f:
+    with open(html_path, "w") as f:
         f.write(html_report)
-    
+
     print(f"📁 HTML report saved to {html_path}")
-    
+
     return summary
 
 
@@ -259,48 +311,47 @@ def main() -> int:
 
     # Define all example scripts
     examples_dir = Path(__file__).parent
-    example_scripts: List[ExampleScript] = [
+    example_scripts: list[ExampleScript] = [
         {
             "script": examples_dir / "basic_usage.py",
-            "description": "Basic Usage Examples - Fundamental features and simple diagrams"
+            "description": "Basic Usage Examples - Fundamental features and simple diagrams",
         },
         {
             "script": examples_dir / "advanced_usage.py",
-            "description": "Advanced Usage Examples - Complex features and configurations"
+            "description": "Advanced Usage Examples - Complex features and configurations",
         },
         {
             "script": examples_dir / "diagram_types_showcase.py",
-            "description": "Diagram Types Showcase - All supported diagram types with practical examples"
+            "description": "Diagram Types Showcase - All supported diagram types with practical examples",
         },
         {
             "script": examples_dir / "ai_features_showcase.py",
-            "description": "AI Features Showcase - Natural language generation and optimization"
+            "description": "AI Features Showcase - Natural language generation and optimization",
         },
         {
             "script": examples_dir / "template_system_showcase.py",
-            "description": "Template System Showcase - Template usage and custom generators"
+            "description": "Template System Showcase - Template usage and custom generators",
         },
         {
             "script": examples_dir / "integration_examples.py",
-            "description": "Integration Examples - Web frameworks, CLI, and CI/CD patterns"
+            "description": "Integration Examples - Web frameworks, CLI, and CI/CD patterns",
         },
         {
             "script": examples_dir / "real_world_use_cases.py",
-            "description": "Real-World Use Cases - Practical applications and documentation"
+            "description": "Real-World Use Cases - Practical applications and documentation",
         },
         {
             "script": examples_dir / "performance_caching_showcase.py",
-            "description": "Performance & Caching - Optimization strategies and monitoring"
+            "description": "Performance & Caching - Optimization strategies and monitoring",
         },
         {
             "script": examples_dir / "testing_validation_showcase.py",
-            "description": "Testing & Validation - Testing patterns and error handling"
+            "description": "Testing & Validation - Testing patterns and error handling",
         },
-
     ]
 
     # Filter to only existing scripts
-    available_scripts: List[ExampleScript] = []
+    available_scripts: list[ExampleScript] = []
     for example in example_scripts:
         if example["script"].exists():
             available_scripts.append(example)
@@ -310,7 +361,7 @@ def main() -> int:
     print(f"Found {len(available_scripts)} example scripts to run\n")
 
     # Run all examples
-    results: List[Dict[str, Any]] = []
+    results: list[dict[str, Any]] = []
     start_time = time.time()
 
     for i, example in enumerate(available_scripts, 1):
@@ -325,8 +376,8 @@ def main() -> int:
     summary = generate_summary_report(results, output_dir)
 
     # Print final summary
-    print(f"\n🎉 All examples completed!")
-    print(f"📊 Summary:")
+    print("\n🎉 All examples completed!")
+    print("📊 Summary:")
     print(f"   Total examples: {summary['execution_summary']['total_examples']}")
     print(f"   Successful: {summary['execution_summary']['successful']}")
     print(f"   Failed: {summary['execution_summary']['failed']}")
@@ -336,7 +387,7 @@ def main() -> int:
     print(f"🌐 Open {output_dir}/example_execution_report.html for a detailed report.")
 
     # Return appropriate exit code
-    failed_count = summary['execution_summary']['failed']
+    failed_count = summary["execution_summary"]["failed"]
     return 0 if failed_count == 0 else 1
 
 

@@ -1,4 +1,3 @@
-from typing import Any
 #!/usr/bin/env python3
 """
 Real-world use cases for Mermaid Render.
@@ -8,16 +7,14 @@ documentation, API documentation, business process modeling, and database design
 """
 
 from pathlib import Path
+
 from mermaid_render import (
-    MermaidRenderer,
-    FlowchartDiagram,
-    SequenceDiagram,
-    ClassDiagram,
     ERDiagram,
+    FlowchartDiagram,
+    MermaidRenderer,
+    SequenceDiagram,
     UserJourneyDiagram,
-    StateDiagram,
 )
-from mermaid_render.models.class_diagram import ClassMethod, ClassAttribute
 
 
 def create_output_dir() -> Path:
@@ -30,13 +27,12 @@ def create_output_dir() -> Path:
 def software_architecture_documentation(output_dir: Path) -> None:
     """Create comprehensive software architecture documentation."""
     print("Software architecture documentation example...")
-    
+
     # 1. System Overview Flowchart
     system_overview = FlowchartDiagram(
-        direction="TD", 
-        title="E-commerce Platform Architecture Overview"
+        direction="TD", title="E-commerce Platform Architecture Overview"
     )
-    
+
     # Add main components
     system_overview.add_node("users", "Users", shape="rectangle")
     system_overview.add_node("cdn", "CDN", shape="rectangle")
@@ -51,7 +47,7 @@ def software_architecture_documentation(output_dir: Path) -> None:
     system_overview.add_node("db", "Database Cluster", shape="cylindrical")
     system_overview.add_node("cache", "Redis Cache", shape="cylindrical")
     system_overview.add_node("queue", "Message Queue", shape="rectangle")
-    
+
     # Add connections
     system_overview.add_edge("users", "cdn", "Static Assets")
     system_overview.add_edge("users", "lb", "API Requests")
@@ -67,24 +63,23 @@ def software_architecture_documentation(output_dir: Path) -> None:
     system_overview.add_edge("cart", "cache", "Cart Cache")
     system_overview.add_edge("order", "db", "Order DB")
     system_overview.add_edge("order", "queue", "Order Events")
-    
+
     # Add styling
     system_overview.add_style("users", {"fill": "#e1f5fe"})
     system_overview.add_style("db", {"fill": "#f3e5f5"})
     system_overview.add_style("cache", {"fill": "#fff3e0"})
-    
+
     # Save system overview
     renderer = MermaidRenderer()
     overview_path = output_dir / "system_architecture.svg"
     renderer.save(system_overview, overview_path)
     print(f"📁 System architecture saved to {overview_path}")
-    
+
     # 2. Microservices Communication Sequence
     microservices_seq = SequenceDiagram(
-        title="Order Processing Microservices Flow",
-        autonumber=True
+        title="Order Processing Microservices Flow", autonumber=True
     )
-    
+
     # Add participants
     microservices_seq.add_participant("client", "Client App")
     microservices_seq.add_participant("gateway", "API Gateway")
@@ -95,7 +90,7 @@ def software_architecture_documentation(output_dir: Path) -> None:
     microservices_seq.add_participant("payment", "Payment Service")
     microservices_seq.add_participant("inventory", "Inventory Service")
     microservices_seq.add_participant("notification", "Notification Service")
-    
+
     # Add order flow
     microservices_seq.add_message("client", "gateway", "POST /orders")
     microservices_seq.add_message("gateway", "auth", "validate_token()")
@@ -103,17 +98,27 @@ def software_architecture_documentation(output_dir: Path) -> None:
     microservices_seq.add_message("gateway", "cart", "get_cart_items()")
     microservices_seq.add_message("cart", "gateway", "cart_data", message_type="return")
     microservices_seq.add_message("gateway", "catalog", "validate_products()")
-    microservices_seq.add_message("catalog", "gateway", "product_info", message_type="return")
+    microservices_seq.add_message(
+        "catalog", "gateway", "product_info", message_type="return"
+    )
     microservices_seq.add_message("gateway", "inventory", "check_availability()")
-    microservices_seq.add_message("inventory", "gateway", "availability_status", message_type="return")
+    microservices_seq.add_message(
+        "inventory", "gateway", "availability_status", message_type="return"
+    )
     microservices_seq.add_message("gateway", "order", "create_order()")
     microservices_seq.add_message("order", "payment", "process_payment()")
-    microservices_seq.add_message("payment", "order", "payment_result", message_type="return")
+    microservices_seq.add_message(
+        "payment", "order", "payment_result", message_type="return"
+    )
     microservices_seq.add_message("order", "inventory", "reserve_items()")
     microservices_seq.add_message("order", "notification", "send_confirmation()")
-    microservices_seq.add_message("order", "gateway", "order_created", message_type="return")
-    microservices_seq.add_message("gateway", "client", "201 Created", message_type="return")
-    
+    microservices_seq.add_message(
+        "order", "gateway", "order_created", message_type="return"
+    )
+    microservices_seq.add_message(
+        "gateway", "client", "201 Created", message_type="return"
+    )
+
     # Save microservices sequence
     seq_path = output_dir / "microservices_flow.svg"
     renderer.save(microservices_seq, seq_path)
@@ -123,88 +128,82 @@ def software_architecture_documentation(output_dir: Path) -> None:
 def api_documentation_example(output_dir: Path) -> None:
     """Create comprehensive API documentation diagrams."""
     print("API documentation example...")
-    
+
     # 1. REST API Endpoints Flowchart
-    api_flow = FlowchartDiagram(
-        direction="TD",
-        title="REST API Endpoint Structure"
-    )
-    
+    api_flow = FlowchartDiagram(direction="TD", title="REST API Endpoint Structure")
+
     # Add API structure
     api_flow.add_node("root", "/api/v1", shape="rectangle")
     api_flow.add_node("auth", "/auth", shape="rectangle")
     api_flow.add_node("users", "/users", shape="rectangle")
     api_flow.add_node("products", "/products", shape="rectangle")
     api_flow.add_node("orders", "/orders", shape="rectangle")
-    
+
     # Auth endpoints
     api_flow.add_node("login", "POST /login", shape="rectangle")
     api_flow.add_node("logout", "POST /logout", shape="rectangle")
     api_flow.add_node("refresh", "POST /refresh", shape="rectangle")
-    
+
     # User endpoints
     api_flow.add_node("get_users", "GET /users", shape="rectangle")
     api_flow.add_node("create_user", "POST /users", shape="rectangle")
     api_flow.add_node("get_user", "GET /users/{id}", shape="rectangle")
     api_flow.add_node("update_user", "PUT /users/{id}", shape="rectangle")
-    
+
     # Product endpoints
     api_flow.add_node("get_products", "GET /products", shape="rectangle")
     api_flow.add_node("create_product", "POST /products", shape="rectangle")
     api_flow.add_node("get_product", "GET /products/{id}", shape="rectangle")
-    
+
     # Order endpoints
     api_flow.add_node("get_orders", "GET /orders", shape="rectangle")
     api_flow.add_node("create_order", "POST /orders", shape="rectangle")
     api_flow.add_node("get_order", "GET /orders/{id}", shape="rectangle")
-    
+
     # Add connections
     api_flow.add_edge("root", "auth")
     api_flow.add_edge("root", "users")
     api_flow.add_edge("root", "products")
     api_flow.add_edge("root", "orders")
-    
+
     api_flow.add_edge("auth", "login")
     api_flow.add_edge("auth", "logout")
     api_flow.add_edge("auth", "refresh")
-    
+
     api_flow.add_edge("users", "get_users")
     api_flow.add_edge("users", "create_user")
     api_flow.add_edge("users", "get_user")
     api_flow.add_edge("users", "update_user")
-    
+
     api_flow.add_edge("products", "get_products")
     api_flow.add_edge("products", "create_product")
     api_flow.add_edge("products", "get_product")
-    
+
     api_flow.add_edge("orders", "get_orders")
     api_flow.add_edge("orders", "create_order")
     api_flow.add_edge("orders", "get_order")
-    
+
     # Add styling
     api_flow.add_style("root", {"fill": "#e8f5e8"})
     api_flow.add_style("auth", {"fill": "#fff3cd"})
     api_flow.add_style("users", {"fill": "#d1ecf1"})
     api_flow.add_style("products", {"fill": "#f8d7da"})
     api_flow.add_style("orders", {"fill": "#d4edda"})
-    
+
     # Save API structure
     renderer = MermaidRenderer()
     api_path = output_dir / "api_structure.svg"
     renderer.save(api_flow, api_path)
     print(f"📁 API structure saved to {api_path}")
-    
+
     # 2. Authentication Flow Sequence
-    auth_seq = SequenceDiagram(
-        title="JWT Authentication Flow",
-        autonumber=True
-    )
-    
+    auth_seq = SequenceDiagram(title="JWT Authentication Flow", autonumber=True)
+
     auth_seq.add_participant("client", "Client App")
     auth_seq.add_participant("api", "API Server")
     auth_seq.add_participant("auth", "Auth Service")
     auth_seq.add_participant("db", "User Database")
-    
+
     # Login flow
     auth_seq.add_message("client", "api", "POST /auth/login")
     auth_seq.add_message("api", "auth", "validate_credentials()")
@@ -214,7 +213,7 @@ def api_documentation_example(output_dir: Path) -> None:
     auth_seq.add_message("auth", "auth", "generate_jwt_token()", message_type="sync")
     auth_seq.add_message("auth", "api", "jwt_token", message_type="return")
     auth_seq.add_message("api", "client", "200 OK + JWT", message_type="return")
-    
+
     # Protected request flow
     auth_seq.add_note("Subsequent protected requests", "client", "right of")
     auth_seq.add_message("client", "api", "GET /users (with JWT header)")
@@ -223,7 +222,7 @@ def api_documentation_example(output_dir: Path) -> None:
     auth_seq.add_message("api", "db", "SELECT users")
     auth_seq.add_message("db", "api", "users_data", message_type="return")
     auth_seq.add_message("api", "client", "200 OK + users", message_type="return")
-    
+
     # Save auth sequence
     auth_path = output_dir / "auth_flow.svg"
     renderer.save(auth_seq, auth_path)
@@ -233,13 +232,10 @@ def api_documentation_example(output_dir: Path) -> None:
 def business_process_modeling(output_dir: Path) -> None:
     """Create business process models."""
     print("Business process modeling example...")
-    
+
     # 1. Customer Onboarding Process
-    onboarding = FlowchartDiagram(
-        direction="TD",
-        title="Customer Onboarding Process"
-    )
-    
+    onboarding = FlowchartDiagram(direction="TD", title="Customer Onboarding Process")
+
     # Add process steps
     onboarding.add_node("start", "New Customer", shape="circle")
     onboarding.add_node("register", "Customer Registration", shape="rectangle")
@@ -255,7 +251,7 @@ def business_process_modeling(output_dir: Path) -> None:
     onboarding.add_node("complete", "Onboarding Complete", shape="circle")
     onboarding.add_node("rejected", "Application Rejected", shape="circle")
     onboarding.add_node("resend_email", "Resend Verification", shape="rectangle")
-    
+
     # Add process flow
     onboarding.add_edge("start", "register")
     onboarding.add_edge("register", "verify_email")
@@ -271,24 +267,26 @@ def business_process_modeling(output_dir: Path) -> None:
     onboarding.add_edge("welcome", "training")
     onboarding.add_edge("training", "first_purchase")
     onboarding.add_edge("first_purchase", "complete")
-    
+
     # Add styling
     onboarding.add_style("start", {"fill": "#90EE90"})
     onboarding.add_style("complete", {"fill": "#90EE90"})
     onboarding.add_style("rejected", {"fill": "#FFB6C1"})
-    
+
     # Save onboarding process
     renderer = MermaidRenderer()
     onboarding_path = output_dir / "customer_onboarding.svg"
     renderer.save(onboarding, onboarding_path)
     print(f"📁 Customer onboarding saved to {onboarding_path}")
-    
+
     # 2. Customer Journey Map
     journey = UserJourneyDiagram(title="E-commerce Customer Journey")
-    
+
     # Add journey sections and tasks
     journey.add_section("Awareness")
-    journey.add_task("Customer discovers brand", ["Social Media", "Search", "Referral"], 3)
+    journey.add_task(
+        "Customer discovers brand", ["Social Media", "Search", "Referral"], 3
+    )
 
     journey.add_section("Interest")
     journey.add_task("Browses products", ["Website", "Reviews", "Comparison"], 4)
@@ -309,8 +307,10 @@ def business_process_modeling(output_dir: Path) -> None:
     journey.add_task("Contacts support", ["Help Center", "Chat", "Email"], 2)
 
     journey.add_section("Loyalty")
-    journey.add_task("Becomes repeat customer", ["Rewards", "Recommendations", "Reviews"], 5)
-    
+    journey.add_task(
+        "Becomes repeat customer", ["Rewards", "Recommendations", "Reviews"], 5
+    )
+
     # Save customer journey
     journey_path = output_dir / "customer_journey.svg"
     renderer.save(journey, journey_path)
@@ -320,100 +320,121 @@ def business_process_modeling(output_dir: Path) -> None:
 def database_design_example(output_dir: Path) -> None:
     """Create database design documentation."""
     print("Database design example...")
-    
+
     # Create comprehensive ER diagram for e-commerce
     er = ERDiagram()  # ER diagrams don't support titles in Mermaid
-    
+
     # Add entities with detailed attributes
-    er.add_entity("User", {
-        "user_id": "PK",
-        "email": "UNIQUE NOT NULL",
-        "password_hash": "NOT NULL",
-        "first_name": "VARCHAR(50)",
-        "last_name": "VARCHAR(50)",
-        "phone": "VARCHAR(20)",
-        "date_of_birth": "DATE",
-        "created_at": "TIMESTAMP",
-        "updated_at": "TIMESTAMP",
-        "is_active": "BOOLEAN DEFAULT TRUE",
-        "email_verified": "BOOLEAN DEFAULT FALSE"
-    })
-    
-    er.add_entity("Address", {
-        "address_id": "PK",
-        "user_id": "FK",
-        "type": "ENUM('billing', 'shipping')",
-        "street_address": "VARCHAR(255)",
-        "city": "VARCHAR(100)",
-        "state": "VARCHAR(100)",
-        "postal_code": "VARCHAR(20)",
-        "country": "VARCHAR(100)",
-        "is_default": "BOOLEAN DEFAULT FALSE"
-    })
-    
-    er.add_entity("Category", {
-        "category_id": "PK",
-        "parent_id": "FK NULLABLE",
-        "name": "VARCHAR(100) NOT NULL",
-        "description": "TEXT",
-        "slug": "VARCHAR(100) UNIQUE",
-        "is_active": "BOOLEAN DEFAULT TRUE",
-        "sort_order": "INTEGER"
-    })
-    
-    er.add_entity("Product", {
-        "product_id": "PK",
-        "category_id": "FK",
-        "name": "VARCHAR(255) NOT NULL",
-        "description": "TEXT",
-        "sku": "VARCHAR(100) UNIQUE",
-        "price": "DECIMAL(10,2)",
-        "cost": "DECIMAL(10,2)",
-        "weight": "DECIMAL(8,2)",
-        "dimensions": "VARCHAR(50)",
-        "stock_quantity": "INTEGER DEFAULT 0",
-        "min_stock_level": "INTEGER DEFAULT 0",
-        "is_active": "BOOLEAN DEFAULT TRUE",
-        "created_at": "TIMESTAMP",
-        "updated_at": "TIMESTAMP"
-    })
-    
-    er.add_entity("Order", {
-        "order_id": "PK",
-        "user_id": "FK",
-        "billing_address_id": "FK",
-        "shipping_address_id": "FK",
-        "order_number": "VARCHAR(50) UNIQUE",
-        "status": "ENUM('pending', 'confirmed', 'shipped', 'delivered', 'cancelled')",
-        "subtotal": "DECIMAL(10,2)",
-        "tax_amount": "DECIMAL(10,2)",
-        "shipping_amount": "DECIMAL(10,2)",
-        "total_amount": "DECIMAL(10,2)",
-        "payment_status": "ENUM('pending', 'paid', 'failed', 'refunded')",
-        "created_at": "TIMESTAMP",
-        "updated_at": "TIMESTAMP"
-    })
-    
-    er.add_entity("OrderItem", {
-        "order_item_id": "PK",
-        "order_id": "FK",
-        "product_id": "FK",
-        "quantity": "INTEGER NOT NULL",
-        "unit_price": "DECIMAL(10,2)",
-        "total_price": "DECIMAL(10,2)"
-    })
-    
-    er.add_entity("Payment", {
-        "payment_id": "PK",
-        "order_id": "FK",
-        "payment_method": "ENUM('credit_card', 'debit_card', 'paypal', 'bank_transfer')",
-        "amount": "DECIMAL(10,2)",
-        "status": "ENUM('pending', 'completed', 'failed', 'refunded')",
-        "transaction_id": "VARCHAR(255)",
-        "gateway_response": "JSON",
-        "processed_at": "TIMESTAMP"
-    })
-    
+    er.add_entity(
+        "User",
+        {
+            "user_id": "PK",
+            "email": "UNIQUE NOT NULL",
+            "password_hash": "NOT NULL",
+            "first_name": "VARCHAR(50)",
+            "last_name": "VARCHAR(50)",
+            "phone": "VARCHAR(20)",
+            "date_of_birth": "DATE",
+            "created_at": "TIMESTAMP",
+            "updated_at": "TIMESTAMP",
+            "is_active": "BOOLEAN DEFAULT TRUE",
+            "email_verified": "BOOLEAN DEFAULT FALSE",
+        },
+    )
+
+    er.add_entity(
+        "Address",
+        {
+            "address_id": "PK",
+            "user_id": "FK",
+            "type": "ENUM('billing', 'shipping')",
+            "street_address": "VARCHAR(255)",
+            "city": "VARCHAR(100)",
+            "state": "VARCHAR(100)",
+            "postal_code": "VARCHAR(20)",
+            "country": "VARCHAR(100)",
+            "is_default": "BOOLEAN DEFAULT FALSE",
+        },
+    )
+
+    er.add_entity(
+        "Category",
+        {
+            "category_id": "PK",
+            "parent_id": "FK NULLABLE",
+            "name": "VARCHAR(100) NOT NULL",
+            "description": "TEXT",
+            "slug": "VARCHAR(100) UNIQUE",
+            "is_active": "BOOLEAN DEFAULT TRUE",
+            "sort_order": "INTEGER",
+        },
+    )
+
+    er.add_entity(
+        "Product",
+        {
+            "product_id": "PK",
+            "category_id": "FK",
+            "name": "VARCHAR(255) NOT NULL",
+            "description": "TEXT",
+            "sku": "VARCHAR(100) UNIQUE",
+            "price": "DECIMAL(10,2)",
+            "cost": "DECIMAL(10,2)",
+            "weight": "DECIMAL(8,2)",
+            "dimensions": "VARCHAR(50)",
+            "stock_quantity": "INTEGER DEFAULT 0",
+            "min_stock_level": "INTEGER DEFAULT 0",
+            "is_active": "BOOLEAN DEFAULT TRUE",
+            "created_at": "TIMESTAMP",
+            "updated_at": "TIMESTAMP",
+        },
+    )
+
+    er.add_entity(
+        "Order",
+        {
+            "order_id": "PK",
+            "user_id": "FK",
+            "billing_address_id": "FK",
+            "shipping_address_id": "FK",
+            "order_number": "VARCHAR(50) UNIQUE",
+            "status": "ENUM('pending', 'confirmed', 'shipped', 'delivered', 'cancelled')",
+            "subtotal": "DECIMAL(10,2)",
+            "tax_amount": "DECIMAL(10,2)",
+            "shipping_amount": "DECIMAL(10,2)",
+            "total_amount": "DECIMAL(10,2)",
+            "payment_status": "ENUM('pending', 'paid', 'failed', 'refunded')",
+            "created_at": "TIMESTAMP",
+            "updated_at": "TIMESTAMP",
+        },
+    )
+
+    er.add_entity(
+        "OrderItem",
+        {
+            "order_item_id": "PK",
+            "order_id": "FK",
+            "product_id": "FK",
+            "quantity": "INTEGER NOT NULL",
+            "unit_price": "DECIMAL(10,2)",
+            "total_price": "DECIMAL(10,2)",
+        },
+    )
+
+    er.add_entity(
+        "Payment",
+        {
+            "payment_id": "PK",
+            "order_id": "FK",
+            "payment_method": "ENUM('credit_card', 'debit_card', 'paypal', 'bank_transfer')",
+            "amount": "DECIMAL(10,2)",
+            "status": "ENUM('pending', 'completed', 'failed', 'refunded')",
+            "transaction_id": "VARCHAR(255)",
+            "gateway_response": "JSON",
+            "processed_at": "TIMESTAMP",
+        },
+    )
+
     # Add relationships
     er.add_relationship("User", "Address", "||--o{")
     er.add_relationship("User", "Order", "||--o{")
@@ -424,7 +445,7 @@ def database_design_example(output_dir: Path) -> None:
     er.add_relationship("Order", "Payment", "||--o{")
     er.add_relationship("Address", "Order", "||--o{")
     er.add_relationship("Address", "Order", "||--o{")
-    
+
     # Save ER diagram
     renderer = MermaidRenderer()
     er_path = output_dir / "database_schema.svg"
@@ -435,28 +456,28 @@ def database_design_example(output_dir: Path) -> None:
 def main() -> None:
     """Run all real-world use case examples."""
     print("=== Mermaid Render Real-World Use Cases ===\n")
-    
+
     # Create output directory
     output_dir = create_output_dir()
     print(f"Output directory: {output_dir.absolute()}\n")
-    
+
     # Run examples
     try:
         software_architecture_documentation(output_dir)
         print()
-        
+
         api_documentation_example(output_dir)
         print()
-        
+
         business_process_modeling(output_dir)
         print()
-        
+
         database_design_example(output_dir)
         print()
-        
+
         print("✅ All real-world use case examples completed successfully!")
         print(f"Check the {output_dir} directory for generated diagrams.")
-        
+
     except Exception as e:
         print(f"❌ Error running real-world examples: {e}")
         raise

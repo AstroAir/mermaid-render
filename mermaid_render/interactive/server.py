@@ -9,27 +9,22 @@ import json
 import logging
 import traceback
 import uuid
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional
+from typing import Any
 
 import uvicorn
 from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.middleware.cors import CORSMiddleware
 
 from ..core import MermaidRenderer
+from ..validators.validator import MermaidValidator
 from .builder import DiagramBuilder, DiagramType, ElementType, Position, Size
-from .validation import LiveValidator
-from .websocket_handler import DiagramSession, WebSocketHandler
 from .security import InputSanitizer, SecurityValidator, api_rate_limiter
-from .performance import (
-    default_debouncer,
-    default_performance_monitor,
-    default_resource_manager,
-    performance_monitor
-)
+from .websocket_handler import DiagramSession, WebSocketHandler
 
 
 class InteractiveServer:
@@ -44,8 +39,8 @@ class InteractiveServer:
         self,
         host: str = "localhost",
         port: int = 8080,
-        static_dir: Optional[Path] = None,
-        templates_dir: Optional[Path] = None,
+        static_dir: Path | None = None,
+        templates_dir: Path | None = None,
     ) -> None:
         """
         Initialize interactive server.
@@ -70,13 +65,13 @@ class InteractiveServer:
         self.websocket_handler = WebSocketHandler()
 
         # Active diagram sessions
-        self.sessions: Dict[str, DiagramSession] = {}
+        self.sessions: dict[str, DiagramSession] = {}
 
         # Renderer for preview generation
         self.renderer = MermaidRenderer()
 
         # Validator for live validation
-        self.validator = LiveValidator()
+        self.validator = MermaidValidator()
 
         # Setup logging
         self.logger = logging.getLogger(__name__)
@@ -106,7 +101,9 @@ class InteractiveServer:
 
         # Add security middleware
         @app.middleware("http")  # type: ignore[misc]
-        async def security_middleware(request: Request, call_next: Callable) -> Any:
+        async def security_middleware(
+            request: Request, call_next: Callable[..., Any]
+        ) -> Any:
             """Security middleware for rate limiting and origin validation."""
             # Get client IP for rate limiting
             client_ip = request.client.host if request.client else "unknown"
@@ -116,15 +113,22 @@ class InteractiveServer:
                 if not api_rate_limiter.is_allowed(client_ip):
                     return JSONResponse(
                         status_code=429,
-                        content={"error": "Rate limit exceeded", "message": "Too many requests"}
+                        content={
+                            "error": "Rate limit exceeded",
+                            "message": "Too many requests",
+                        },
                     )
 
             # Validate origin for sensitive endpoints
             origin = request.headers.get("origin")
-            if request.method in ["POST", "PUT", "DELETE"] and not SecurityValidator.validate_origin(origin):
+            if request.method in [
+                "POST",
+                "PUT",
+                "DELETE",
+            ] and not SecurityValidator.validate_origin(origin):
                 return JSONResponse(
                     status_code=403,
-                    content={"error": "Forbidden", "message": "Invalid origin"}
+                    content={"error": "Forbidden", "message": "Invalid origin"},
                 )
 
             response = await call_next(request)
@@ -139,7 +143,9 @@ class InteractiveServer:
 
         # Add global exception handler
         @app.exception_handler(Exception)  # type: ignore[misc]
-        async def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+        async def global_exception_handler(
+            request: Request, exc: Exception
+        ) -> JSONResponse:
             """Global exception handler for better error reporting."""
             logging.error(f"Unhandled exception: {exc}")
             logging.error(traceback.format_exc())
@@ -149,8 +155,8 @@ class InteractiveServer:
                 content={
                     "error": "Internal server error",
                     "message": str(exc),
-                    "type": type(exc).__name__
-                }
+                    "type": type(exc).__name__,
+                },
             )
 
         # Setup templates
@@ -163,9 +169,7 @@ class InteractiveServer:
             return templates.TemplateResponse("index.html", {"request": request})
 
         @app.get("/builder/{diagram_type}", response_class=HTMLResponse)  # type: ignore
-        async def builder(
-            request: Request, diagram_type: str
-        ) -> HTMLResponse:
+        async def builder(request: Request, diagram_type: str) -> HTMLResponse:
             """Diagram builder for specific type."""
             try:
                 DiagramType(diagram_type)
@@ -181,15 +185,14 @@ class InteractiveServer:
             )
 
         @app.post("/api/sessions")  # type: ignore
-        @performance_monitor("create_session", default_performance_monitor)
-        async def create_session(diagram_type: str = "flowchart") -> Dict[str, Any]:
+        async def create_session(diagram_type: str = "flowchart") -> dict[str, Any]:
             """Create new diagram session."""
             try:
-                # Check resource limits
-                if not default_resource_manager.check_resource_limits("max_sessions", len(self.sessions)):
+                # Check resource limits (simplified - removed external dependency)
+                max_sessions = 100  # Default limit
+                if len(self.sessions) >= max_sessions:
                     raise HTTPException(
-                        status_code=503,
-                        detail="Maximum number of sessions reached"
+                        status_code=503, detail="Maximum number of sessions reached"
                     )
 
                 session_id = str(uuid.uuid4())
@@ -206,17 +209,14 @@ class InteractiveServer:
             except ValueError as e:
                 raise HTTPException(
                     status_code=400,
-                    detail=f"Invalid diagram type '{diagram_type}': {str(e)}"
+                    detail=f"Invalid diagram type '{diagram_type}': {str(e)}",
                 )
             except Exception as e:
                 logging.error(f"Failed to create session: {e}")
-                raise HTTPException(
-                    status_code=500,
-                    detail="Failed to create session"
-                )
+                raise HTTPException(status_code=500, detail="Failed to create session")
 
         @app.get("/api/sessions/{session_id}")  # type: ignore
-        async def get_session(session_id: str) -> Dict[str, Any]:
+        async def get_session(session_id: str) -> dict[str, Any]:
             """Get session information."""
             if session_id not in self.sessions:
                 raise HTTPException(status_code=404, detail="Session not found")
@@ -232,7 +232,9 @@ class InteractiveServer:
             }
 
         @app.post("/api/sessions/{session_id}/elements")  # type: ignore
-        async def add_element(session_id: str, element_data: dict) -> Dict[str, Any]:
+        async def add_element(
+            session_id: str, element_data: dict[str, Any]
+        ) -> dict[str, Any]:
             """Add element to diagram."""
             try:
                 # Sanitize session ID
@@ -270,25 +272,20 @@ class InteractiveServer:
 
             except ValueError as e:
                 raise HTTPException(
-                    status_code=400,
-                    detail=f"Invalid element data: {str(e)}"
+                    status_code=400, detail=f"Invalid element data: {str(e)}"
                 )
             except KeyError as e:
                 raise HTTPException(
-                    status_code=400,
-                    detail=f"Missing required field: {str(e)}"
+                    status_code=400, detail=f"Missing required field: {str(e)}"
                 )
             except Exception as e:
                 logging.error(f"Failed to add element: {e}")
-                raise HTTPException(
-                    status_code=500,
-                    detail="Failed to add element"
-                )
+                raise HTTPException(status_code=500, detail="Failed to add element")
 
         @app.put("/api/sessions/{session_id}/elements/{element_id}")  # type: ignore
         async def update_element(
-            session_id: str, element_id: str, element_data: dict
-        ) -> Dict[str, Any]:
+            session_id: str, element_id: str, element_data: dict[str, Any]
+        ) -> dict[str, Any]:
             """Update element in diagram."""
             if session_id not in self.sessions:
                 raise HTTPException(status_code=404, detail="Session not found")
@@ -296,7 +293,7 @@ class InteractiveServer:
             session = self.sessions[session_id]
 
             # Extract update parameters
-            update_params: Dict[str, Any] = {}
+            update_params: dict[str, Any] = {}
             if "label" in element_data:
                 update_params["label"] = element_data["label"]
             if "position" in element_data:
@@ -326,7 +323,7 @@ class InteractiveServer:
             return {"success": True}
 
         @app.delete("/api/sessions/{session_id}/elements/{element_id}")  # type: ignore
-        async def remove_element(session_id: str, element_id: str) -> Dict[str, Any]:
+        async def remove_element(session_id: str, element_id: str) -> dict[str, Any]:
             """Remove element from diagram."""
             if session_id not in self.sessions:
                 raise HTTPException(status_code=404, detail="Session not found")
@@ -350,8 +347,8 @@ class InteractiveServer:
 
         @app.post("/api/sessions/{session_id}/connections")  # type: ignore
         async def add_connection(
-            session_id: str, connection_data: dict
-        ) -> Dict[str, Any]:
+            session_id: str, connection_data: dict[str, Any]
+        ) -> dict[str, Any]:
             """Add connection to diagram."""
             if session_id not in self.sessions:
                 raise HTTPException(status_code=404, detail="Session not found")
@@ -382,7 +379,7 @@ class InteractiveServer:
             return connection.to_dict()
 
         @app.get("/api/sessions/{session_id}/code")  # type: ignore
-        async def get_mermaid_code(session_id: str) -> Dict[str, Any]:
+        async def get_mermaid_code(session_id: str) -> dict[str, Any]:
             """Get generated Mermaid code for session."""
             if session_id not in self.sessions:
                 raise HTTPException(status_code=404, detail="Session not found")
@@ -412,7 +409,7 @@ class InteractiveServer:
                 }
 
         @app.get("/api/sessions/{session_id}/preview")  # type: ignore
-        async def get_preview(session_id: str, format: str = "svg") -> Dict[str, Any]:
+        async def get_preview(session_id: str, format: str = "svg") -> dict[str, Any]:
             """Get rendered preview of diagram."""
             if session_id not in self.sessions:
                 raise HTTPException(status_code=404, detail="Session not found")
@@ -480,8 +477,8 @@ class InteractiveServer:
 
 
 def create_app(
-    static_dir: Optional[Path] = None,
-    templates_dir: Optional[Path] = None,
+    static_dir: Path | None = None,
+    templates_dir: Path | None = None,
 ) -> FastAPI:
     """
     Create FastAPI application for interactive builder.
@@ -503,8 +500,8 @@ def create_app(
 def start_server(
     host: str = "localhost",
     port: int = 8080,
-    static_dir: Optional[Path] = None,
-    templates_dir: Optional[Path] = None,
+    static_dir: Path | None = None,
+    templates_dir: Path | None = None,
     **kwargs: Any,
 ) -> None:
     """

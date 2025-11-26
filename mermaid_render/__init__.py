@@ -28,7 +28,6 @@ from .config import ConfigManager, ThemeManager
 
 # Core classes
 from .core import MermaidConfig, MermaidDiagram, MermaidRenderer, MermaidTheme
-from .plugin_renderer import PluginMermaidRenderer
 from .exceptions import (
     CacheError,
     ConfigurationError,
@@ -57,6 +56,7 @@ from .models import (
     TimelineDiagram,
     UserJourneyDiagram,
 )
+from .plugin_renderer import PluginMermaidRenderer
 
 # Utilities
 from .utils import (
@@ -94,7 +94,6 @@ try:
         CacheManager,
         FileBackend,
         MemoryBackend,
-        PerformanceMonitor,
         RedisBackend,
         clear_cache,
         create_cache_manager,
@@ -143,7 +142,7 @@ except ImportError:
 
 if TYPE_CHECKING:
     from pathlib import Path
-    from typing import Any, Dict, List, Optional, Union
+    from typing import Any, Dict, List, Optional, Union  # noqa: UP035
 
 # Version is managed by hatch-vcs and set during build
 try:
@@ -215,7 +214,6 @@ __all__ = [
     "MemoryBackend",
     "FileBackend",
     "RedisBackend",
-    "PerformanceMonitor",
     "create_cache_manager",
     "warm_cache",
     "clear_cache",
@@ -226,7 +224,6 @@ __all__ = [
     "InteractiveServer",
     "start_server",
     "create_interactive_session",
-
     # AI-powered features
     "DiagramGenerator",
     "NLProcessor",
@@ -237,6 +234,10 @@ __all__ = [
     "optimize_diagram",
     "analyze_diagram",
     "get_suggestions",
+    # Convenience functions
+    "quick_render",
+    "render_to_file",
+    "render",
     # Metadata
     "__version__",
     "__author__",
@@ -247,24 +248,31 @@ __all__ = [
 # MCP (Model Context Protocol) functionality (optional)
 try:
     from .mcp import (
-        render_diagram as mcp_render_diagram,
-        validate_diagram as mcp_validate_diagram,
         list_themes as mcp_list_themes,
     )
+    from .mcp import (
+        render_diagram as mcp_render_diagram,
+    )
+    from .mcp import (
+        validate_diagram as mcp_validate_diagram,
+    )
+
     _MCP_AVAILABLE = True
 except ImportError:
     _MCP_AVAILABLE = False
 
 # Add MCP exports if available
 if _MCP_AVAILABLE:
-    __all__.extend([
-        "mcp_render_diagram",
-        "mcp_validate_diagram",
-        "mcp_list_themes",
-    ])
+    __all__.extend(
+        [
+            "mcp_render_diagram",
+            "mcp_validate_diagram",
+            "mcp_list_themes",
+        ]
+    )
 
 # Import convenience functions
-from .convenience import quick_render, render_to_file
+from .convenience import quick_render, render_to_file  # noqa: E402
 
 # Backward compatibility aliases
 render = quick_render

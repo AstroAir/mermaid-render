@@ -1,7 +1,5 @@
 """Gantt diagram model for the Mermaid Render library."""
 
-from typing import List, Optional
-
 from ..core import MermaidDiagram
 
 
@@ -11,9 +9,7 @@ class GanttDiagram(MermaidDiagram):
     Stores sections and tasks and renders them to Mermaid Gantt syntax.
     """
 
-    def __init__(
-        self, title: Optional[str] = None, date_format: str = "%Y-%m-%d"
-    ) -> None:
+    def __init__(self, title: str | None = None, date_format: str = "%Y-%m-%d") -> None:
         """Initialize an empty Gantt diagram.
 
         Args:
@@ -22,8 +18,8 @@ class GanttDiagram(MermaidDiagram):
         """
         super().__init__(title)
         self.date_format = date_format
-        self.sections: List[str] = []
-        self.tasks: List[tuple] = []
+        self.sections: list[str] = []
+        self.tasks: list[tuple[str, str | None, str | None, str]] = []
 
     def get_diagram_type(self) -> str:
         """Return the Mermaid diagram type identifier."""
@@ -40,8 +36,8 @@ class GanttDiagram(MermaidDiagram):
     def add_task(
         self,
         name: str,
-        start_date: Optional[str] = None,
-        duration: Optional[str] = None,
+        start_date: str | None = None,
+        duration: str | None = None,
         status: str = "active",
     ) -> None:
         """Add a task to the Gantt chart.

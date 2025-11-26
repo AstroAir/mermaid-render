@@ -111,21 +111,21 @@ theme = Theme(
     accent_color="#e74c3c",
     background_color="#ffffff",
     text_color="#2c3e50",
-    
+
     # Typography
     font_family="Roboto, sans-serif",
     font_size=14,
     font_weight="normal",
-    
+
     # Shapes and borders
     border_width=1,
     border_radius=4,
     line_width=2,
-    
+
     # Spacing
     node_padding=8,
     edge_spacing=20,
-    
+
     # Diagram-specific settings
     flowchart_curve="basis",
     sequence_actor_margin=50,
@@ -229,7 +229,7 @@ diagram_with_classes = """
 flowchart TD
     A[Start]:::highlight --> B[Process]:::normal
     B --> C[End]:::success
-    
+
     classDef highlight fill:#e74c3c,stroke:#c0392b,color:#fff
     classDef normal fill:#3498db,stroke:#2980b9,color:#fff
     classDef success fill:#27ae60,stroke:#229954,color:#fff

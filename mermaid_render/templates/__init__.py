@@ -45,7 +45,12 @@ from .generators import (
     SequenceGenerator,
 )
 from .library import BuiltInTemplates, CommunityTemplates
-from .schema import ParameterSchema, TemplateSchema, validate_template
+from .schema import (
+    ParameterSchema,
+    TemplateSchema,
+    validate_template,
+    validate_template_parameters,
+)
 from .template_manager import Template, TemplateManager
 
 # Convenience functions
@@ -55,7 +60,6 @@ from .utils import (
     get_template_info,
     import_template,
     list_available_templates,
-    validate_template_parameters,
 )
 
 __all__ = [

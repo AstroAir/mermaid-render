@@ -152,14 +152,14 @@ ws_manager = WebSocketManager()
 async def handle_diagram_change(session_id, diagram_content):
     # Validate diagram
     validation_result = validator.validate(diagram_content)
-    
+
     # Send validation result back
     await ws_manager.send_to_session(session_id, {
         'type': 'validation_result',
         'valid': validation_result.is_valid,
         'errors': validation_result.errors
     })
-    
+
     # Update preview if valid
     if validation_result.is_valid:
         rendered = renderer.render(diagram_content)
@@ -280,7 +280,7 @@ from mermaid_render.interactive import CustomComponent
 class DiagramStatsComponent(CustomComponent):
     def __init__(self):
         super().__init__(name="diagram_stats")
-    
+
     def render(self, diagram):
         stats = self.analyze_diagram(diagram)
         return {
@@ -288,7 +288,7 @@ class DiagramStatsComponent(CustomComponent):
             'edge_count': stats.edge_count,
             'complexity_score': stats.complexity
         }
-    
+
     def analyze_diagram(self, diagram):
         # Analyze diagram and return stats
         pass

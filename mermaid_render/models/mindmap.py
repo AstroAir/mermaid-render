@@ -1,7 +1,5 @@
 """Mindmap diagram model for the Mermaid Render library."""
 
-from typing import List, Optional
-
 from ..core import MermaidDiagram
 
 
@@ -22,7 +20,7 @@ class MindmapNode:
         self.id = id
         self.text = text
         self.shape = shape
-        self.children: List[MindmapNode] = []
+        self.children: list[MindmapNode] = []
 
     def add_child(self, child: "MindmapNode") -> None:
         """Add a child node.
@@ -32,7 +30,7 @@ class MindmapNode:
         """
         self.children.append(child)
 
-    def to_mermaid(self, level: int = 0) -> List[str]:
+    def to_mermaid(self, level: int = 0) -> list[str]:
         """Generate Mermaid syntax lines for this node and its subtree.
 
         Args:
@@ -67,7 +65,7 @@ class MindmapDiagram(MermaidDiagram):
     Manages a root node and provides helpers to add/find nodes and render Mermaid text.
     """
 
-    def __init__(self, title: Optional[str] = None, root_text: str = "Root") -> None:
+    def __init__(self, title: str | None = None, root_text: str = "Root") -> None:
         """Initialize a mindmap diagram with a root node.
 
         Args:
@@ -107,7 +105,7 @@ class MindmapDiagram(MermaidDiagram):
 
         return node
 
-    def _find_node(self, current: MindmapNode, node_id: str) -> Optional[MindmapNode]:
+    def _find_node(self, current: MindmapNode, node_id: str) -> MindmapNode | None:
         """Find a node by ID in the tree."""
         if current.id == node_id:
             return current

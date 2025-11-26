@@ -5,10 +5,11 @@ This module provides an object-oriented interface for creating flowchart diagram
 with support for nodes, edges, subgraphs, and styling.
 """
 
-from typing import Dict, List, Optional
-
 from ..core import MermaidDiagram
 from ..exceptions import DiagramError
+from ..utils import escape_html
+from .constants import ARROW_TYPES as _SHARED_ARROW_TYPES
+from .constants import FLOWCHART_SHAPES
 
 
 class FlowchartNode:
@@ -46,28 +47,15 @@ class FlowchartNode:
         ...                      style={"fill": "#90EE90"})
     """
 
-    SHAPES = {
-        "rectangle": ("[", "]"),  # Standard process
-        "rounded": ("(", ")"),  # Rounded process
-        "stadium": ("([", "])"),  # Stadium shape
-        "subroutine": ("[[", "]]"),  # Subroutine/subprocess
-        "cylindrical": ("[(", ")]"),  # Database/storage
-        "circle": ("((", "))"),  # Start/end point
-        "asymmetric": (">", "]"),  # Asymmetric shape
-        "rhombus": ("{", "}"),  # Decision point
-        "hexagon": ("{{", "}}"),  # Hexagonal process
-        "parallelogram": ("[/", "/]"),  # Input/output
-        "parallelogram_alt": ("[\\", "\\]"),  # Alternative input/output
-        "trapezoid": ("[/", "\\]"),  # Manual operation
-        "trapezoid_alt": ("[\\", "/]"),  # Alternative manual operation
-    }
+    # Use shared shapes from constants module
+    SHAPES = FLOWCHART_SHAPES
 
     def __init__(
         self,
         id: str,
         label: str,
         shape: str = "rectangle",
-        style: Optional[Dict[str, str]] = None,
+        style: dict[str, str] | None = None,
     ) -> None:
         """
         Initialize a flowchart node.
@@ -125,7 +113,32 @@ class FlowchartNode:
             B[Process Data]
         """
         start, end = self.SHAPES[self.shape]
-        return f"{self.id}{start}{self.label}{end}"
+        # Escape HTML entities in label for proper Mermaid rendering
+        escaped_label = escape_html(self.label)
+        return f"{self.id}{start}{escaped_label}{end}"
+
+    def update_style(self, style_updates: dict[str, str]) -> None:
+        """
+        Update the node's style properties.
+
+        Args:
+            style_updates: Dictionary of style properties to update
+        """
+        self.style.update(style_updates)
+
+    def clone(self, new_id: str) -> "FlowchartNode":
+        """
+        Create a copy of this node with a new ID.
+
+        Args:
+            new_id: The ID for the cloned node
+
+        Returns:
+            A new FlowchartNode instance with the same properties but different ID
+        """
+        return FlowchartNode(
+            id=new_id, label=self.label, shape=self.shape, style=self.style.copy()
+        )
 
 
 class FlowchartEdge:
@@ -165,22 +178,20 @@ class FlowchartEdge:
         ...                              style={"stroke": "#ff0000"})
     """
 
-    ARROW_TYPES = {
-        "arrow": "-->",  # Standard directional arrow
-        "open": "---",  # Open line (no arrow)
-        "dotted": "-.-",  # Dotted line
-        "dotted_arrow": "-.->",  # Dotted arrow
-        "thick": "==>",  # Thick arrow
-        "thick_open": "===",  # Thick open line
-    }
+    # Use shared arrow types from constants module
+    ARROW_TYPES = _SHARED_ARROW_TYPES
+
+    # Alias for backward compatibility with tests
+    EDGE_TYPES = ARROW_TYPES
 
     def __init__(
         self,
         from_node: str,
         to_node: str,
-        label: Optional[str] = None,
+        label: str | None = None,
         arrow_type: str = "arrow",
-        style: Optional[Dict[str, str]] = None,
+        edge_type: str | None = None,  # Backward compatibility
+        style: dict[str, str] | None = None,
     ) -> None:
         """
         Initialize a flowchart edge.
@@ -213,14 +224,25 @@ class FlowchartEdge:
             ...                         arrow_type="dotted_arrow",
             ...                         style={"stroke": "#888888"})
         """
+        # Validate node IDs
+        if not from_node or not from_node.strip():
+            raise DiagramError("From node cannot be empty")
+        if not to_node or not to_node.strip():
+            raise DiagramError("To node cannot be empty")
+
+        # Handle backward compatibility with edge_type parameter
+        if edge_type is not None:
+            arrow_type = edge_type
+
         self.from_node = from_node
         self.to_node = to_node
         self.label = label
         self.arrow_type = arrow_type
+        self.edge_type = arrow_type  # Backward compatibility property
         self.style = style or {}
 
         if arrow_type not in self.ARROW_TYPES:
-            raise DiagramError(f"Unknown arrow type: {arrow_type}")
+            raise DiagramError(f"Invalid edge type: {arrow_type}")
 
     def to_mermaid(self) -> str:
         """Generate Mermaid syntax for this edge."""
@@ -239,8 +261,8 @@ class FlowchartSubgraph:
     def __init__(
         self,
         id: str,
-        title: Optional[str] = None,
-        direction: Optional[str] = None,
+        title: str | None = None,
+        direction: str = "TB",  # Default direction to match tests
     ) -> None:
         """
         Initialize a subgraph.
@@ -250,17 +272,27 @@ class FlowchartSubgraph:
             title: Optional title for the subgraph
             direction: Optional flow direction (TD, LR, etc.)
         """
+        # Validate direction if provided
+        valid_directions = ["TD", "TB", "BT", "RL", "LR"]
+        if direction is not None and direction not in valid_directions:
+            raise DiagramError(f"Invalid direction: {direction}")
+
         self.id = id
         self.title = title
         self.direction = direction
-        self.nodes: List[str] = []
+        self.nodes: list[str] = []
+        self.edges: list[FlowchartEdge] = []  # Add edges support
 
     def add_node(self, node_id: str) -> None:
         """Add a node to this subgraph."""
         if node_id not in self.nodes:
             self.nodes.append(node_id)
 
-    def to_mermaid(self) -> List[str]:
+    def add_edge(self, edge: FlowchartEdge) -> None:
+        """Add an edge to this subgraph."""
+        self.edges.append(edge)
+
+    def to_mermaid(self) -> list[str]:
         """Generate Mermaid syntax for this subgraph."""
         lines = []
 
@@ -300,8 +332,8 @@ class FlowchartDiagram(MermaidDiagram):
 
     def __init__(
         self,
-        direction: str = "TD",
-        title: Optional[str] = None,
+        direction: str = "TB",  # Changed default to TB to match tests
+        title: str | None = None,
     ) -> None:
         """
         Initialize flowchart diagram.
@@ -316,10 +348,10 @@ class FlowchartDiagram(MermaidDiagram):
             raise DiagramError(f"Invalid direction: {direction}")
 
         self.direction = direction
-        self.nodes: Dict[str, FlowchartNode] = {}
-        self.edges: List[FlowchartEdge] = []
-        self.subgraphs: Dict[str, FlowchartSubgraph] = {}
-        self.styles: Dict[str, Dict[str, str]] = {}
+        self.nodes: dict[str, FlowchartNode] = {}
+        self.edges: list[FlowchartEdge] = []
+        self.subgraphs: dict[str, FlowchartSubgraph] = {}
+        self.styles: dict[str, dict[str, str]] = {}
 
     def get_diagram_type(self) -> str:
         """Return the Mermaid diagram type identifier."""
@@ -330,7 +362,7 @@ class FlowchartDiagram(MermaidDiagram):
         id: str,
         label: str,
         shape: str = "rectangle",
-        style: Optional[Dict[str, str]] = None,
+        style: dict[str, str] | None = None,
     ) -> FlowchartNode:
         """
         Add a node to the flowchart.
@@ -404,9 +436,9 @@ class FlowchartDiagram(MermaidDiagram):
         self,
         from_node: str,
         to_node: str,
-        label: Optional[str] = None,
+        label: str | None = None,
         arrow_type: str = "arrow",
-        style: Optional[Dict[str, str]] = None,
+        style: dict[str, str] | None = None,
     ) -> FlowchartEdge:
         """
         Add an edge (connection) between two nodes in the flowchart.
@@ -486,15 +518,15 @@ class FlowchartDiagram(MermaidDiagram):
         if to_node not in self.nodes:
             raise DiagramError(f"Target node '{to_node}' does not exist")
 
-        edge = FlowchartEdge(from_node, to_node, label, arrow_type, style)
+        edge = FlowchartEdge(from_node, to_node, label, arrow_type, style=style)
         self.edges.append(edge)
         return edge
 
     def add_subgraph(
         self,
         id: str,
-        title: Optional[str] = None,
-        direction: Optional[str] = None,
+        title: str | None = None,
+        direction: str = "TB",
     ) -> FlowchartSubgraph:
         """
         Add a subgraph to group nodes.
@@ -523,9 +555,49 @@ class FlowchartDiagram(MermaidDiagram):
 
         self.subgraphs[subgraph_id].add_node(node_id)
 
-    def add_style(self, element_id: str, style: Dict[str, str]) -> None:
+    def get_node(self, node_id: str) -> FlowchartNode | None:
+        """Get a node by its ID."""
+        return self.nodes.get(node_id)
+
+    def remove_node(self, node_id: str) -> None:
+        """Remove a node and all edges connected to it."""
+        if node_id not in self.nodes:
+            raise DiagramError(f"Node '{node_id}' does not exist")
+
+        # Remove the node
+        del self.nodes[node_id]
+
+        # Remove all edges connected to this node
+        self.edges = [
+            edge
+            for edge in self.edges
+            if edge.from_node != node_id and edge.to_node != node_id
+        ]
+
+    def add_style(self, element_id: str, style: dict[str, str]) -> None:
         """Add styling to a node or edge."""
         self.styles[element_id] = style
+
+    def validate_diagram(self) -> None:
+        """
+        Validate the diagram structure.
+
+        Raises:
+            DiagramError: If the diagram is invalid
+        """
+        if not self.nodes:
+            raise DiagramError("Diagram must contain at least one node")
+
+        # Validate that all edges reference existing nodes
+        for edge in self.edges:
+            if edge.from_node not in self.nodes:
+                raise DiagramError(
+                    f"Edge references non-existent source node: {edge.from_node}"
+                )
+            if edge.to_node not in self.nodes:
+                raise DiagramError(
+                    f"Edge references non-existent target node: {edge.to_node}"
+                )
 
     def _generate_mermaid(self) -> str:
         """Generate complete Mermaid syntax for the flowchart."""

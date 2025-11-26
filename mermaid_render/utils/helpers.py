@@ -19,10 +19,37 @@ without requiring complex setup or configuration.
 
 import re
 from pathlib import Path
-from typing import List, Optional
+from typing import Any
 
 
-def get_supported_formats() -> List[str]:
+def escape_html(text: str) -> str:
+    """
+    Escape HTML special characters in text.
+
+    This function escapes characters that have special meaning in HTML
+    to prevent rendering issues and potential XSS vulnerabilities in diagram labels.
+
+    Args:
+        text: Text to escape
+
+    Returns:
+        Escaped text safe for use in diagram labels
+
+    Example:
+        >>> safe_text = escape_html("<script>alert('xss')</script>")
+        >>> print(safe_text)
+        &lt;script&gt;alert('xss')&lt;/script&gt;
+    """
+    return (
+        text.replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace('"', "&quot;")
+        .replace("'", "&#39;")
+    )
+
+
+def get_supported_formats() -> list[str]:
     """
     Get list of supported output formats.
 
@@ -48,7 +75,7 @@ def get_supported_formats() -> List[str]:
     return ["svg", "png", "pdf"]
 
 
-def get_available_themes() -> List[str]:
+def get_available_themes() -> list[str]:
     """
     Get list of available themes.
 
@@ -65,7 +92,7 @@ def get_available_themes() -> List[str]:
     return theme_manager.get_available_themes()
 
 
-def detect_diagram_type(mermaid_code: str) -> Optional[str]:
+def detect_diagram_type(mermaid_code: str) -> str | None:
     """
     Detect the type of Mermaid diagram from code.
 
@@ -189,7 +216,7 @@ def format_file_size(size_bytes: int) -> str:
     return f"{size:.1f} {size_names[i]}"
 
 
-def get_file_info(file_path: Path) -> dict:
+def get_file_info(file_path: Path) -> dict[str, Any]:
     """
     Get information about a file.
 
@@ -255,7 +282,7 @@ def validate_theme(theme: str) -> bool:
     return theme in get_available_themes()
 
 
-def get_diagram_stats(mermaid_code: str) -> dict:
+def get_diagram_stats(mermaid_code: str) -> dict[str, Any]:
     """
     Get statistics about a Mermaid diagram.
 

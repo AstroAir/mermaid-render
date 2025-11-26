@@ -1,9 +1,9 @@
 """Utility functions for interactive diagram building."""
 
-from typing import Any, Dict, List
+from typing import Any
 
+from ..validators.validator import MermaidValidator
 from .builder import DiagramBuilder, DiagramType
-from .validation import LiveValidator
 
 
 def create_interactive_session(diagram_type: str = "flowchart") -> DiagramBuilder:
@@ -73,7 +73,7 @@ def export_diagram_code(builder: DiagramBuilder) -> str:
     return builder.generate_mermaid_code()
 
 
-def validate_diagram_live(code: str) -> Dict[str, Any]:
+def validate_diagram_live(code: str) -> dict[str, Any]:
     """
     Validate diagram code with real-time feedback.
 
@@ -94,12 +94,16 @@ def validate_diagram_live(code: str) -> Dict[str, Any]:
         >>> else:
         ...     print(f"Errors: {result['errors']}")
     """
-    validator = LiveValidator()
+    validator = MermaidValidator()
     result = validator.validate(code)
-    return result.to_dict()
+    return {
+        "is_valid": result.is_valid,
+        "errors": result.errors,
+        "warnings": result.warnings,
+    }
 
 
-def get_available_components() -> List[Dict[str, Any]]:
+def get_available_components() -> list[dict[str, Any]]:
     """
     Get a list of available diagram components for interactive building.
 

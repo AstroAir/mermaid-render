@@ -7,20 +7,20 @@ configuration management, batch processing, and error handling.
 """
 
 from pathlib import Path
-from typing import Dict, Any, List, Optional, Union
+from typing import Any
+
 from mermaid_render import (
-    MermaidRenderer,
-    MermaidConfig,
-    MermaidTheme,
-    FlowchartDiagram,
-    SequenceDiagram,
     ClassDiagram,
+    FlowchartDiagram,
+    MermaidConfig,
     MermaidDiagram,
+    MermaidRenderer,
+    MermaidTheme,
+    SequenceDiagram,
 )
-from mermaid_render.config import ThemeManager, ConfigManager
-from mermaid_render.utils import export_multiple_formats, batch_export
-from mermaid_render.exceptions import ValidationError, RenderingError
-from mermaid_render.models.class_diagram import ClassMethod, ClassAttribute
+from mermaid_render.config import ConfigManager, ThemeManager
+from mermaid_render.models.class_diagram import ClassMethod
+from mermaid_render.utils import batch_export, export_multiple_formats
 
 
 def create_output_dir() -> Path:
@@ -35,13 +35,14 @@ def custom_theme_example(output_dir: Path) -> None:
     print("Custom theme example...")
 
     # Create custom theme
-    custom_theme = MermaidTheme("custom",
+    custom_theme = MermaidTheme(
+        "custom",
         primaryColor="#e74c3c",
         primaryTextColor="#ffffff",
         primaryBorderColor="#c0392b",
         lineColor="#2c3e50",
         secondaryColor="#f39c12",
-        tertiaryColor="#e67e22"
+        tertiaryColor="#e67e22",
     )
 
     # Create diagram
@@ -69,14 +70,14 @@ def theme_manager_example(output_dir: Path) -> None:
     theme_manager = ThemeManager(custom_themes_dir=themes_dir)
 
     # Create and save custom themes
-    corporate_theme: Dict[str, Any] = {
+    corporate_theme: dict[str, Any] = {
         "theme": "corporate",
         "primaryColor": "#2c3e50",
         "primaryTextColor": "#ffffff",
         "primaryBorderColor": "#34495e",
         "lineColor": "#7f8c8d",
         "secondaryColor": "#3498db",
-        "tertiaryColor": "#2980b9"
+        "tertiaryColor": "#2980b9",
     }
 
     theme_manager.add_custom_theme("corporate", corporate_theme, save_to_file=True)
@@ -85,7 +86,7 @@ def theme_manager_example(output_dir: Path) -> None:
     theme_manager.create_theme_variant(
         "corporate",
         "corporate_green",
-        {"primaryColor": "#27ae60", "secondaryColor": "#2ecc71"}
+        {"primaryColor": "#27ae60", "secondaryColor": "#2ecc71"},
     )
 
     # List available themes
@@ -118,17 +119,14 @@ def configuration_example(output_dir: Path) -> None:
         default_theme="dark",
         validate_syntax=True,
         cache_enabled=False,
-        custom_setting="example_value"
+        custom_setting="example_value",
     )
 
     # Create config manager
     config_manager = ConfigManager(load_env=False)
-    config_manager.update({
-        "timeout": 45,
-        "default_format": "svg",
-        "max_width": 1200,
-        "max_height": 800
-    })
+    config_manager.update(
+        {"timeout": 45, "default_format": "svg", "max_width": 1200, "max_height": 800}
+    )
 
     # Save configuration to file
     config_file = output_dir / "config.json"
@@ -155,7 +153,7 @@ def batch_processing_example(output_dir: Path) -> None:
     print("Batch processing example...")
 
     # Create multiple diagrams
-    diagrams: Dict[str, Union[MermaidDiagram, str]] = {}
+    diagrams: dict[str, MermaidDiagram | str] = {}
 
     # Flowchart
     flowchart = FlowchartDiagram()
@@ -177,7 +175,9 @@ def batch_processing_example(output_dir: Path) -> None:
     # Class diagram
     class_diagram = ClassDiagram()
     base_class = class_diagram.add_class("BaseClass", is_abstract=True)
-    base_class.add_method(ClassMethod("abstract_method", "public", "void", is_abstract=True))
+    base_class.add_method(
+        ClassMethod("abstract_method", "public", "void", is_abstract=True)
+    )
 
     derived_class = class_diagram.add_class("DerivedClass")
     derived_class.add_method(ClassMethod("concrete_method", "public", "void"))
@@ -197,7 +197,7 @@ def batch_processing_example(output_dir: Path) -> None:
     multi_paths = export_multiple_formats(
         flowchart,
         output_dir / "multi_format",
-        ["svg"]  # Only SVG for this example
+        ["svg"],  # Only SVG for this example
     )
 
     print("Multi-format export:")
@@ -210,11 +210,9 @@ def error_handling_example() -> None:
     print("Error handling example...")
 
     from mermaid_render.exceptions import (
-        ValidationError,
-        RenderingError,
-        UnsupportedFormatError,
         DiagramError,
-        ThemeError
+        ThemeError,
+        UnsupportedFormatError,
     )
 
     # Diagram creation errors
@@ -227,6 +225,7 @@ def error_handling_example() -> None:
     # Theme errors
     try:
         from mermaid_render.config import ThemeManager
+
         theme_manager = ThemeManager()
         theme_manager.get_theme("nonexistent_theme")
     except ThemeError as e:
@@ -235,6 +234,7 @@ def error_handling_example() -> None:
     # Validation errors
     try:
         from mermaid_render.utils import validate_mermaid_syntax
+
         result = validate_mermaid_syntax("invalid diagram")
         if not result.is_valid:
             print(f"✅ Validation failed as expected: {result.errors}")

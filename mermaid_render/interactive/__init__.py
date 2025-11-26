@@ -47,7 +47,6 @@ from .utils import (
     load_diagram_from_code,
     validate_diagram_live,
 )
-from .validation import LiveValidator, ValidationResult
 from .websocket_handler import DiagramSession, WebSocketHandler
 
 __all__ = [
@@ -74,9 +73,6 @@ __all__ = [
     "TemplateLibrary",
     "ExportManager",
     "ExportFormat",
-    # Validation
-    "LiveValidator",
-    "ValidationResult",
     # Utilities
     "create_interactive_session",
     "load_diagram_from_code",

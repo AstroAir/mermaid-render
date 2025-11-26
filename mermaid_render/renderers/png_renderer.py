@@ -6,9 +6,9 @@ This module provides PNG rendering functionality using the mermaid.ink service.
 
 import base64
 import json
-from typing import Any, Dict, Optional
+from typing import Any
 
-import requests  # type: ignore
+import requests
 
 from ..exceptions import NetworkError, RenderingError
 
@@ -45,10 +45,10 @@ class PNGRenderer:
     def render(
         self,
         mermaid_code: str,
-        theme: Optional[str] = None,
-        config: Optional[Dict[str, Any]] = None,
-        width: Optional[int] = None,
-        height: Optional[int] = None,
+        theme: str | None = None,
+        config: dict[str, Any] | None = None,
+        width: int | None = None,
+        height: int | None = None,
     ) -> bytes:
         """
         Render Mermaid code to PNG.
@@ -67,10 +67,10 @@ class PNGRenderer:
             RenderingError: If rendering fails
             NetworkError: If network request fails
         """
-        url: Optional[str] = None  # ensure always bound for exception handling
+        url: str | None = None  # ensure always bound for exception handling
         try:
             # Prepare the configuration
-            mermaid_config: Dict[str, Any] = {}
+            mermaid_config: dict[str, Any] = {}
             if theme:
                 mermaid_config["theme"] = theme
             if config:
@@ -119,10 +119,10 @@ class PNGRenderer:
         self,
         mermaid_code: str,
         output_path: str,
-        theme: Optional[str] = None,
-        config: Optional[Dict[str, Any]] = None,
-        width: Optional[int] = None,
-        height: Optional[int] = None,
+        theme: str | None = None,
+        config: dict[str, Any] | None = None,
+        width: int | None = None,
+        height: int | None = None,
     ) -> None:
         """
         Render Mermaid code to PNG file.

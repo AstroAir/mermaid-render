@@ -1,7 +1,5 @@
 """State diagram model for the Mermaid Render library."""
 
-from typing import Dict, List, Optional
-
 from ..core import MermaidDiagram
 
 
@@ -11,21 +9,21 @@ class StateDiagram(MermaidDiagram):
     Stores named states and directional transitions, and renders Mermaid stateDiagram-v2.
     """
 
-    def __init__(self, title: Optional[str] = None) -> None:
+    def __init__(self, title: str | None = None) -> None:
         """Initialize an empty state diagram.
 
         Args:
             title: Optional diagram title.
         """
         super().__init__(title)
-        self.states: Dict[str, str] = {}
-        self.transitions: List[tuple] = []
+        self.states: dict[str, str] = {}
+        self.transitions: list[tuple[str, str, str | None]] = []
 
     def get_diagram_type(self) -> str:
         """Return the Mermaid diagram type identifier."""
         return "stateDiagram-v2"
 
-    def add_state(self, id: str, label: Optional[str] = None) -> None:
+    def add_state(self, id: str, label: str | None = None) -> None:
         """Add a state to the diagram.
 
         Args:
@@ -35,7 +33,7 @@ class StateDiagram(MermaidDiagram):
         self.states[id] = label or id
 
     def add_transition(
-        self, from_state: str, to_state: str, label: Optional[str] = None
+        self, from_state: str, to_state: str, label: str | None = None
     ) -> None:
         """Add a transition between states.
 

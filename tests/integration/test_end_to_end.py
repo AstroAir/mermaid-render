@@ -20,11 +20,13 @@ class TestEndToEndWorkflow:
     """Test complete end-to-end workflows."""
 
     @patch("mermaid_render.renderers.svg_renderer.md.Mermaid")
-    def test_flowchart_creation_and_rendering(self, mock_mermaid: Any, temp_dir: Any) -> None:
+    def test_flowchart_creation_and_rendering(
+        self, mock_mermaid: Any, temp_dir: Any
+    ) -> None:
         """Test complete flowchart workflow."""
         # Mock the mermaid-py library
         mock_instance = Mock()
-        mock_instance.configure_mock(**{'__str__.return_value': "<svg>flowchart content</svg>"})
+        mock_instance.__str__ = Mock(return_value="<svg>flowchart content</svg>")
         mock_instance.svg_response = Mock()
         mock_instance.svg_response.text = "<svg>flowchart content</svg>"
         mock_mermaid.return_value = mock_instance
@@ -47,21 +49,27 @@ class TestEndToEndWorkflow:
         renderer = MermaidRenderer()
         svg_content = renderer.render(flowchart, format="svg")
 
-        assert svg_content == '<svg xmlns="http://www.w3.org/2000/svg">flowchart content</svg>'
+        assert (
+            svg_content
+            == '<svg xmlns="http://www.w3.org/2000/svg">flowchart content</svg>'
+        )
 
         # Save to file
         output_path = temp_dir / "flowchart.svg"
         renderer.save(flowchart, output_path)
 
         assert output_path.exists()
-        assert output_path.read_text() == '<svg xmlns="http://www.w3.org/2000/svg">flowchart content</svg>'
+        assert (
+            output_path.read_text()
+            == '<svg xmlns="http://www.w3.org/2000/svg">flowchart content</svg>'
+        )
 
     @patch("mermaid_render.renderers.svg_renderer.md.Mermaid")
     def test_sequence_diagram_workflow(self, mock_mermaid: Any, temp_dir: Any) -> None:
         """Test complete sequence diagram workflow."""
         # Mock the mermaid-py library
         mock_instance = Mock()
-        mock_instance.configure_mock(**{'__str__.return_value': "<svg>sequence content</svg>"})
+        mock_instance.__str__ = Mock(return_value="<svg>sequence content</svg>")
         mock_mermaid.return_value = mock_instance
 
         # Create sequence diagram
@@ -94,7 +102,7 @@ class TestEndToEndWorkflow:
         """Test quick_render convenience function."""
         # Mock the mermaid-py library
         mock_instance = Mock()
-        mock_instance.configure_mock(**{'__str__.return_value': "<svg>quick render</svg>"})
+        mock_instance.__str__ = Mock(return_value="<svg>quick render</svg>")
         mock_mermaid.return_value = mock_instance
 
         diagram_code = """
@@ -117,14 +125,16 @@ flowchart TD
         assert output_path.exists()
         # The content might be different due to different mock instances
         content = output_path.read_text()
-        assert content.startswith('<svg xmlns="http://www.w3.org/2000/svg">') and content.endswith('</svg>')
+        assert content.startswith(
+            '<svg xmlns="http://www.w3.org/2000/svg">'
+        ) and content.endswith("</svg>")
 
     @patch("mermaid_render.renderers.svg_renderer.md.Mermaid")
     def test_export_to_file_function(self, mock_mermaid: Any, temp_dir: Any) -> None:
         """Test export_to_file convenience function."""
         # Mock the mermaid-py library
         mock_instance = Mock()
-        mock_instance.configure_mock(**{'__str__.return_value': "<svg>exported content</svg>"})
+        mock_instance.__str__ = Mock(return_value="<svg>exported content</svg>")
         mock_mermaid.return_value = mock_instance
 
         # Create a simple diagram
@@ -138,7 +148,10 @@ flowchart TD
         export_to_file(flowchart, output_path, theme="neutral")
 
         assert output_path.exists()
-        assert output_path.read_text() == '<svg xmlns="http://www.w3.org/2000/svg">exported content</svg>'
+        assert (
+            output_path.read_text()
+            == '<svg xmlns="http://www.w3.org/2000/svg">exported content</svg>'
+        )
 
     def test_diagram_validation_workflow(self) -> None:
         """Test diagram validation workflow."""
@@ -222,7 +235,7 @@ flowchart TD
 
         # Mock different format responses
         mock_instance = Mock()
-        mock_instance.configure_mock(**{'__str__.return_value': "<svg>exported content</svg>"})
+        mock_instance.__str__ = Mock(return_value="<svg>exported content</svg>")
         mock_mermaid.return_value = mock_instance
 
         # Create diagram

@@ -31,7 +31,6 @@ Example:
 
 import re
 from dataclasses import dataclass
-from typing import Dict, List, Optional
 
 
 @dataclass
@@ -64,9 +63,9 @@ class ValidationResult:
     """
 
     is_valid: bool
-    errors: List[str]
-    warnings: List[str]
-    line_errors: Dict[int, List[str]]
+    errors: list[str]
+    warnings: list[str]
+    line_errors: dict[int, list[str]]
 
     def __bool__(self) -> bool:
         """
@@ -146,10 +145,10 @@ class MermaidValidator:
 
     def __init__(self) -> None:
         """Initialize the validator."""
-        self.errors: List[str] = []
-        self.warnings: List[str] = []
-        self.line_errors: Dict[int, List[str]] = {}
-        self.current_diagram_type: Optional[str] = None
+        self.errors: list[str] = []
+        self.warnings: list[str] = []
+        self.line_errors: dict[int, list[str]] = {}
+        self.current_diagram_type: str | None = None
 
     def validate(self, mermaid_code: str) -> ValidationResult:
         """
@@ -201,7 +200,7 @@ class MermaidValidator:
             line_errors=self.line_errors.copy(),
         )
 
-    def _add_error(self, message: str, line_number: Optional[int] = None) -> None:
+    def _add_error(self, message: str, line_number: int | None = None) -> None:
         """Add an error message."""
         self.errors.append(message)
         if line_number is not None:
@@ -209,11 +208,11 @@ class MermaidValidator:
                 self.line_errors[line_number] = []
             self.line_errors[line_number].append(message)
 
-    def _add_warning(self, message: str, line_number: Optional[int] = None) -> None:
+    def _add_warning(self, message: str, line_number: int | None = None) -> None:
         """Add a warning message."""
         self.warnings.append(message)
 
-    def _detect_diagram_type(self, first_line: str) -> Optional[str]:
+    def _detect_diagram_type(self, first_line: str) -> str | None:
         """Detect the diagram type from the first line."""
         first_line = first_line.strip()
 
@@ -223,7 +222,7 @@ class MermaidValidator:
 
         return None
 
-    def _validate_structure(self, lines: List[str]) -> None:
+    def _validate_structure(self, lines: list[str]) -> None:
         """Validate basic diagram structure."""
         if not lines:
             self._add_error("Empty diagram")
@@ -239,7 +238,7 @@ class MermaidValidator:
         # Check for consistent indentation
         self._validate_indentation(lines)
 
-    def _validate_indentation(self, lines: List[str]) -> None:
+    def _validate_indentation(self, lines: list[str]) -> None:
         """Validate indentation consistency."""
         indent_levels = []
 
@@ -254,7 +253,7 @@ class MermaidValidator:
             if len(set(indent_levels)) > 3:  # Allow some variation
                 self._add_warning("Inconsistent indentation detected")
 
-    def _validate_syntax(self, lines: List[str]) -> None:
+    def _validate_syntax(self, lines: list[str]) -> None:
         """Validate general syntax rules."""
         for i, line in enumerate(lines, 1):
             line = line.strip()
@@ -285,7 +284,7 @@ class MermaidValidator:
         if stack:
             self._add_error(f"Unclosed brackets: {stack}", line_number)
 
-    def _validate_diagram_type(self, lines: List[str], diagram_type: str) -> None:
+    def _validate_diagram_type(self, lines: list[str], diagram_type: str) -> None:
         """Validate diagram-specific syntax."""
         if diagram_type == "flowchart":
             self._validate_flowchart(lines)
@@ -297,7 +296,7 @@ class MermaidValidator:
             self._validate_timeline(lines)
         # Add more diagram-specific validations as needed
 
-    def _validate_flowchart(self, lines: List[str]) -> None:
+    def _validate_flowchart(self, lines: list[str]) -> None:
         """Validate flowchart-specific syntax."""
         nodes = set()
 
@@ -333,7 +332,7 @@ class MermaidValidator:
         if not nodes:
             self._add_warning("No nodes found in flowchart")
 
-    def _validate_sequence_diagram(self, lines: List[str]) -> None:
+    def _validate_sequence_diagram(self, lines: list[str]) -> None:
         """Validate sequence diagram-specific syntax."""
         participants = set()
 
@@ -367,7 +366,7 @@ class MermaidValidator:
         if not participants:
             self._add_warning("No participants found in sequence diagram")
 
-    def _validate_class_diagram(self, lines: List[str]) -> None:
+    def _validate_class_diagram(self, lines: list[str]) -> None:
         """Validate class diagram-specific syntax."""
         classes = set()
 
@@ -398,7 +397,7 @@ class MermaidValidator:
         if not classes:
             self._add_warning("No classes found in class diagram")
 
-    def _validate_timeline(self, lines: List[str]) -> None:
+    def _validate_timeline(self, lines: list[str]) -> None:
         """Validate timeline-specific syntax."""
         has_periods = False
         has_events = False
@@ -447,7 +446,7 @@ class MermaidValidator:
         """Validate a node ID according to Mermaid rules."""
         return bool(re.match(self.PATTERNS["node_id"], node_id))
 
-    def suggest_fixes(self, mermaid_code: str) -> List[str]:
+    def suggest_fixes(self, mermaid_code: str) -> list[str]:
         """Suggest fixes for common validation errors."""
         suggestions = []
         result = self.validate(mermaid_code)

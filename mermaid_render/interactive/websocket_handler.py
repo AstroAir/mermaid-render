@@ -9,18 +9,12 @@ import json
 import time
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Set
+from typing import Any
 
 from fastapi import WebSocket
 
 from .builder import DiagramBuilder
 from .security import InputSanitizer, SecurityValidator, websocket_rate_limiter
-from .performance import (
-    default_debouncer,
-    default_connection_pool,
-    default_performance_monitor,
-    DebounceConfig
-)
 
 
 @dataclass
@@ -31,7 +25,7 @@ class DiagramSession:
     builder: DiagramBuilder
     created_at: datetime
     updated_at: datetime
-    connected_clients: Set[WebSocket]
+    connected_clients: set[WebSocket]
 
     def __init__(self, session_id: str, builder: DiagramBuilder) -> None:
         self.session_id = session_id
@@ -65,9 +59,9 @@ class WebSocketHandler:
 
     def __init__(self) -> None:
         """Initialize WebSocket handler."""
-        self.sessions: Dict[str, DiagramSession] = {}
-        self.client_sessions: Dict[WebSocket, str] = {}
-        self.broadcast_debouncer = default_debouncer
+        self.sessions: dict[str, DiagramSession] = {}
+        self.client_sessions: dict[WebSocket, str] = {}
+        # Removed dependency on external debouncer
 
     async def connect(self, websocket: WebSocket, session_id: str) -> None:
         """
@@ -116,11 +110,16 @@ class WebSocketHandler:
         except ValueError as e:
             # Invalid session ID or other validation error
             await websocket.close(code=1008, reason=str(e))
-        except Exception as e:
+        except Exception:
             # Unexpected error during connection
             await websocket.close(code=1011, reason="Internal server error")
 
-    async def broadcast_debounced(self, session_id: str, message: Dict[str, Any], debounce_key: Optional[str] = None) -> None:
+    async def broadcast_debounced(
+        self,
+        session_id: str,
+        message: dict[str, Any],
+        debounce_key: str | None = None,
+    ) -> None:
         """
         Broadcast message with debouncing to reduce excessive updates.
 
@@ -132,14 +131,10 @@ class WebSocketHandler:
         if debounce_key is None:
             debounce_key = f"{session_id}_{message.get('type', 'unknown')}"
 
-        await self.broadcast_debouncer.debounce(
-            debounce_key,
-            self._do_broadcast,
-            session_id,
-            message
-        )
+        # Directly call broadcast without debouncing (debouncer was removed)
+        await self._do_broadcast(session_id, message)
 
-    async def _do_broadcast(self, session_id: str, message: Dict[str, Any]) -> None:
+    async def _do_broadcast(self, session_id: str, message: dict[str, Any]) -> None:
         """Internal method to perform the actual broadcast."""
         if session_id not in self.sessions:
             return
@@ -148,7 +143,7 @@ class WebSocketHandler:
         message_json = json.dumps(message)
 
         # Track performance
-        start_time = time.time()
+        time.time()
 
         # Send to all clients in session
         disconnected_clients = []
@@ -165,9 +160,7 @@ class WebSocketHandler:
             if client in self.client_sessions:
                 del self.client_sessions[client]
 
-        # Record performance
-        duration = time.time() - start_time
-        default_performance_monitor.record_operation("websocket_broadcast", duration)
+        # Performance monitoring removed (external dependency)
 
     def disconnect(self, websocket: WebSocket, session_id: str) -> None:
         """
@@ -188,7 +181,7 @@ class WebSocketHandler:
         if websocket in self.client_sessions:
             del self.client_sessions[websocket]
 
-    async def handle_message(self, session_id: str, message: Dict[str, Any]) -> None:
+    async def handle_message(self, session_id: str, message: dict[str, Any]) -> None:
         """
         Handle incoming WebSocket message.
 
@@ -224,7 +217,7 @@ class WebSocketHandler:
             await self._send_to_session_clients(session, error_message)
 
     async def broadcast_to_session(
-        self, session_id: str, message: Dict[str, Any]
+        self, session_id: str, message: dict[str, Any]
     ) -> None:
         """
         Broadcast message to all clients in session.
@@ -264,7 +257,7 @@ class WebSocketHandler:
             await self._send_to_session_clients(session, message)
 
     async def _send_to_session_clients(
-        self, session: DiagramSession, message: Dict[str, Any]
+        self, session: DiagramSession, message: dict[str, Any]
     ) -> None:
         """Send message to all clients in session."""
         if not session.connected_clients:
@@ -287,7 +280,7 @@ class WebSocketHandler:
                 del self.client_sessions[client]
 
     async def _handle_element_update(
-        self, session: DiagramSession, message: Dict[str, Any]
+        self, session: DiagramSession, message: dict[str, Any]
     ) -> None:
         """Handle element update message."""
         element_id = message.get("element_id")
@@ -297,7 +290,7 @@ class WebSocketHandler:
             # Apply updates to builder
             from .builder import Position, Size
 
-            update_params: Dict[str, Any] = {}
+            update_params: dict[str, Any] = {}
             if "label" in updates:
                 update_params["label"] = updates["label"]
             if "position" in updates:
@@ -322,7 +315,7 @@ class WebSocketHandler:
                 await self._send_to_session_clients(session, broadcast_message)
 
     async def _handle_connection_update(
-        self, session: DiagramSession, message: Dict[str, Any]
+        self, session: DiagramSession, message: dict[str, Any]
     ) -> None:
         """Handle connection update message."""
         connection_id = message.get("connection_id")
@@ -330,7 +323,7 @@ class WebSocketHandler:
 
         if connection_id and updates:
             # Apply updates to builder
-            update_params: Dict[str, Any] = {}
+            update_params: dict[str, Any] = {}
             if "label" in updates:
                 update_params["label"] = updates["label"]
             if "connection_type" in updates:
@@ -353,7 +346,7 @@ class WebSocketHandler:
                 await self._send_to_session_clients(session, broadcast_message)
 
     async def _handle_cursor_update(
-        self, session: DiagramSession, message: Dict[str, Any]
+        self, session: DiagramSession, message: dict[str, Any]
     ) -> None:
         """Handle cursor position update."""
         cursor_data = {
@@ -365,7 +358,7 @@ class WebSocketHandler:
         await self._send_to_session_clients(session, cursor_data)
 
     async def _handle_selection_update(
-        self, session: DiagramSession, message: Dict[str, Any]
+        self, session: DiagramSession, message: dict[str, Any]
     ) -> None:
         """Handle selection update."""
         selection_data = {
@@ -377,7 +370,7 @@ class WebSocketHandler:
         await self._send_to_session_clients(session, selection_data)
 
     async def _handle_chat_message(
-        self, session: DiagramSession, message: Dict[str, Any]
+        self, session: DiagramSession, message: dict[str, Any]
     ) -> None:
         """Handle chat message."""
         chat_data = {
@@ -389,7 +382,7 @@ class WebSocketHandler:
         }
         await self._send_to_session_clients(session, chat_data)
 
-    def get_session_info(self, session_id: str) -> Optional[Dict[str, Any]]:
+    def get_session_info(self, session_id: str) -> dict[str, Any] | None:
         """Get information about a session."""
         if session_id not in self.sessions:
             return None
@@ -405,10 +398,10 @@ class WebSocketHandler:
             "connection_count": len(session.builder.connections),
         }
 
-    def get_all_sessions(self) -> List[Dict[str, Any]]:
+    def get_all_sessions(self) -> list[dict[str, Any]]:
         """Get information about all active sessions."""
         # Filter out any None values to satisfy the return type.
-        sessions: List[Dict[str, Any]] = []
+        sessions: list[dict[str, Any]] = []
         for session_id in self.sessions.keys():
             info = self.get_session_info(session_id)
             if info is not None:

@@ -65,7 +65,7 @@ run_mcp_tests.py                     # Main test runner (from project root)
 # Run full comprehensive test suite
 python run_mcp_tests.py
 
-# Run quick test suite  
+# Run quick test suite
 python run_mcp_tests.py quick
 
 # Run mock demonstration

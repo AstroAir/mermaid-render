@@ -36,38 +36,38 @@ command_exists() {
 # Check Python version
 check_python_version() {
     log_info "Checking Python version..."
-    
+
     if ! command_exists python3; then
         log_error "Python 3 is not installed. Please install Python 3.9 or higher."
         exit 1
     fi
-    
+
     python_version=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
     required_version="3.9"
-    
+
     if [ "$(printf '%s\n' "$required_version" "$python_version" | sort -V | head -n1)" != "$required_version" ]; then
         log_error "Python $python_version is installed, but Python $required_version or higher is required."
         exit 1
     fi
-    
+
     log_success "Python $python_version is installed and compatible."
 }
 
 # Setup virtual environment
 setup_virtual_env() {
     log_info "Setting up virtual environment..."
-    
+
     if [ ! -d "venv" ]; then
         python3 -m venv venv
         log_success "Virtual environment created."
     else
         log_info "Virtual environment already exists."
     fi
-    
+
     # Activate virtual environment
     source venv/bin/activate
     log_success "Virtual environment activated."
-    
+
     # Upgrade pip
     log_info "Upgrading pip..."
     pip install --upgrade pip
@@ -77,7 +77,7 @@ setup_virtual_env() {
 # Install dependencies
 install_dependencies() {
     log_info "Installing dependencies..."
-    
+
     # Install the package in development mode with all extras
     pip install -e ".[dev,test,cache,interactive,ai,collaboration,docs,pdf,performance,all]"
     log_success "Dependencies installed."
@@ -86,7 +86,7 @@ install_dependencies() {
 # Setup pre-commit hooks
 setup_pre_commit() {
     log_info "Setting up pre-commit hooks..."
-    
+
     if command_exists pre-commit; then
         pre-commit install
         pre-commit install --hook-type commit-msg
@@ -103,7 +103,7 @@ setup_pre_commit() {
 # Create necessary directories
 create_directories() {
     log_info "Creating necessary directories..."
-    
+
     directories=(
         "output"
         "logs"
@@ -112,21 +112,21 @@ create_directories() {
         ".mermaid_cache"
         "temp"
     )
-    
+
     for dir in "${directories[@]}"; do
         if [ ! -d "$dir" ]; then
             mkdir -p "$dir"
             log_info "Created directory: $dir"
         fi
     done
-    
+
     log_success "Directories created."
 }
 
 # Setup environment file
 setup_environment() {
     log_info "Setting up environment configuration..."
-    
+
     if [ ! -f ".env" ]; then
         if [ -f ".env.example" ]; then
             cp .env.example .env
@@ -143,7 +143,7 @@ setup_environment() {
 # Install system dependencies (optional)
 install_system_dependencies() {
     log_info "Checking for system dependencies..."
-    
+
     # Check for Cairo (needed for PDF export)
     if ! command_exists pkg-config || ! pkg-config --exists cairo; then
         log_warning "Cairo not found. PDF export may not work."
@@ -154,7 +154,7 @@ install_system_dependencies() {
     else
         log_success "Cairo found."
     fi
-    
+
     # Check for Git
     if ! command_exists git; then
         log_warning "Git not found. Version control features may not work."
@@ -166,7 +166,7 @@ install_system_dependencies() {
 # Run initial tests
 run_initial_tests() {
     log_info "Running initial tests to verify setup..."
-    
+
     # Run a quick test
     if python -c "import mermaid_render; print('✅ Import successful')"; then
         log_success "Package import test passed."
@@ -174,7 +174,7 @@ run_initial_tests() {
         log_error "Package import test failed."
         return 1
     fi
-    
+
     # Run basic tests
     if command_exists pytest; then
         log_info "Running basic tests..."
@@ -191,11 +191,11 @@ run_initial_tests() {
 # Setup IDE configuration
 setup_ide_config() {
     log_info "Setting up IDE configuration..."
-    
+
     # VS Code settings
     if [ ! -d ".vscode" ]; then
         mkdir -p .vscode
-        
+
         cat > .vscode/settings.json << EOF
 {
     "python.defaultInterpreterPath": "./venv/bin/python",
@@ -229,10 +229,10 @@ EOF
 main() {
     log_info "Starting Mermaid Render development environment setup..."
     echo
-    
+
     # Change to project root
     cd "$(dirname "$0")/.."
-    
+
     # Run setup steps
     check_python_version
     setup_virtual_env
@@ -243,7 +243,7 @@ main() {
     install_system_dependencies
     setup_ide_config
     run_initial_tests
-    
+
     echo
     log_success "Development environment setup complete!"
     echo

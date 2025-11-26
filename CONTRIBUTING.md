@@ -74,6 +74,7 @@ mypy mermaid_render
 ### Branch naming
 
 Use descriptive branch names:
+
 - `feature/add-new-diagram-type`
 - `fix/validation-error-handling`
 - `docs/improve-api-documentation`
@@ -82,6 +83,7 @@ Use descriptive branch names:
 ### Commit messages
 
 Follow conventional commit format:
+
 - `feat: add support for timeline diagrams`
 - `fix: resolve validation error for complex flowcharts`
 - `docs: update API documentation for themes`
@@ -126,7 +128,7 @@ def test_flowchart_node_creation():
     """Test that flowchart nodes are created correctly."""
     flowchart = FlowchartDiagram()
     flowchart.add_node("A", "Start", shape="circle")
-    
+
     assert len(flowchart.nodes) == 1
     assert flowchart.nodes[0].id == "A"
     assert flowchart.nodes[0].label == "Start"

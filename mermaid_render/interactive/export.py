@@ -1,10 +1,9 @@
 """Export functionality for interactive diagrams."""
 
 import json
-import tempfile
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import Any
 
 from ..core import MermaidRenderer
 from .builder import DiagramBuilder
@@ -23,7 +22,7 @@ class ExportFormat(Enum):
 class ExportManager:
     """Manages diagram export functionality."""
 
-    def __init__(self, renderer: Optional[MermaidRenderer] = None) -> None:
+    def __init__(self, renderer: MermaidRenderer | None = None) -> None:
         """
         Initialize export manager.
 
@@ -35,10 +34,10 @@ class ExportManager:
 
     def export_diagram(
         self,
-        diagram_data: Union[Dict[str, Any], DiagramBuilder],
+        diagram_data: dict[str, Any] | DiagramBuilder,
         format: ExportFormat,
-        filename: Optional[str] = None
-    ) -> Union[str, bytes]:
+        filename: str | None = None,
+    ) -> str | bytes:
         """
         Export diagram in specified format.
 
@@ -67,9 +66,9 @@ class ExportManager:
 
     def export_to_file(
         self,
-        diagram_data: Union[Dict[str, Any], DiagramBuilder],
-        filepath: Union[str, Path],
-        format: Optional[ExportFormat] = None
+        diagram_data: dict[str, Any] | DiagramBuilder,
+        filepath: str | Path,
+        format: ExportFormat | None = None,
     ) -> None:
         """
         Export diagram to file.
@@ -83,13 +82,13 @@ class ExportManager:
 
         if format is None:
             # Auto-detect format from file extension
-            extension = filepath.suffix.lower().lstrip('.')
+            extension = filepath.suffix.lower().lstrip(".")
             format_map = {
-                'svg': ExportFormat.SVG,
-                'png': ExportFormat.PNG,
-                'pdf': ExportFormat.PDF,
-                'mmd': ExportFormat.MERMAID,
-                'json': ExportFormat.JSON
+                "svg": ExportFormat.SVG,
+                "png": ExportFormat.PNG,
+                "pdf": ExportFormat.PDF,
+                "mmd": ExportFormat.MERMAID,
+                "json": ExportFormat.JSON,
             }
             format = format_map.get(extension, ExportFormat.SVG)
 
@@ -101,23 +100,27 @@ class ExportManager:
             if isinstance(content, bytes):
                 filepath.write_bytes(content)
             else:
-                raise TypeError(f"Expected bytes for {format} format, got {type(content)}")
+                raise TypeError(
+                    f"Expected bytes for {format} format, got {type(content)}"
+                )
         else:
             # Text content
             if isinstance(content, str):
-                filepath.write_text(content, encoding='utf-8')
+                filepath.write_text(content, encoding="utf-8")
             else:
-                raise TypeError(f"Expected str for {format} format, got {type(content)}")
+                raise TypeError(
+                    f"Expected str for {format} format, got {type(content)}"
+                )
 
-    def _create_builder_from_data(self, diagram_data: Dict[str, Any]) -> DiagramBuilder:
+    def _create_builder_from_data(self, diagram_data: dict[str, Any]) -> DiagramBuilder:
         """Create DiagramBuilder from data dictionary."""
         from .builder import DiagramType
 
         builder = DiagramBuilder()
 
         # Set diagram type if specified
-        if 'diagram_type' in diagram_data:
-            builder.diagram_type = DiagramType(diagram_data['diagram_type'])
+        if "diagram_type" in diagram_data:
+            builder.diagram_type = DiagramType(diagram_data["diagram_type"])
 
         # Load from dictionary
         builder.from_dict(diagram_data)
@@ -136,8 +139,8 @@ class ExportManager:
         self,
         builder: DiagramBuilder,
         format: ExportFormat,
-        filename: Optional[str] = None
-    ) -> Union[str, bytes]:
+        filename: str | None = None,
+    ) -> str | bytes:
         """Export using MermaidRenderer for SVG/PNG/PDF formats."""
         # Generate Mermaid code
         mermaid_code = builder.generate_mermaid_code()
@@ -165,16 +168,16 @@ class ExportManager:
         svg_parts = [
             '<?xml version="1.0" encoding="UTF-8"?>',
             '<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">',
-            '<style>',
-            '.node { fill: #f9f9f9; stroke: #333; stroke-width: 2; }',
-            '.text { font-family: Arial, sans-serif; font-size: 14px; text-anchor: middle; }',
-            '.connection { stroke: #333; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }',
-            '</style>',
-            '<defs>',
+            "<style>",
+            ".node { fill: #f9f9f9; stroke: #333; stroke-width: 2; }",
+            ".text { font-family: Arial, sans-serif; font-size: 14px; text-anchor: middle; }",
+            ".connection { stroke: #333; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }",
+            "</style>",
+            "<defs>",
             '<marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">',
             '<polygon points="0 0, 10 3.5, 0 7" fill="#333" />',
-            '</marker>',
-            '</defs>'
+            "</marker>",
+            "</defs>",
         ]
 
         # Add elements
@@ -183,17 +186,23 @@ class ExportManager:
             width, height = element.size.width, element.size.height
 
             # Add shape based on type
-            shape = element.properties.get('shape', 'rectangle')
-            if shape == 'circle':
-                cx, cy = x + width/2, y + height/2
-                rx, ry = width/2, height/2
-                svg_parts.append(f'<ellipse cx="{cx}" cy="{cy}" rx="{rx}" ry="{ry}" class="node" />')
+            shape = element.properties.get("shape", "rectangle")
+            if shape == "circle":
+                cx, cy = x + width / 2, y + height / 2
+                rx, ry = width / 2, height / 2
+                svg_parts.append(
+                    f'<ellipse cx="{cx}" cy="{cy}" rx="{rx}" ry="{ry}" class="node" />'
+                )
             else:
-                svg_parts.append(f'<rect x="{x}" y="{y}" width="{width}" height="{height}" class="node" />')
+                svg_parts.append(
+                    f'<rect x="{x}" y="{y}" width="{width}" height="{height}" class="node" />'
+                )
 
             # Add text
-            text_x, text_y = x + width/2, y + height/2
-            svg_parts.append(f'<text x="{text_x}" y="{text_y}" class="text">{element.label}</text>')
+            text_x, text_y = x + width / 2, y + height / 2
+            svg_parts.append(
+                f'<text x="{text_x}" y="{text_y}" class="text">{element.label}</text>'
+            )
 
         # Add connections
         for connection in builder.connections.values():
@@ -201,27 +210,31 @@ class ExportManager:
             target = builder.elements.get(connection.target_id)
 
             if source and target:
-                x1 = source.position.x + source.size.width/2
-                y1 = source.position.y + source.size.height/2
-                x2 = target.position.x + target.size.width/2
-                y2 = target.position.y + target.size.height/2
+                x1 = source.position.x + source.size.width / 2
+                y1 = source.position.y + source.size.height / 2
+                x2 = target.position.x + target.size.width / 2
+                y2 = target.position.y + target.size.height / 2
 
-                svg_parts.append(f'<line x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" class="connection" />')
+                svg_parts.append(
+                    f'<line x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" class="connection" />'
+                )
 
                 # Add label if present
                 if connection.label:
                     label_x = (x1 + x2) / 2
                     label_y = (y1 + y2) / 2
-                    svg_parts.append(f'<text x="{label_x}" y="{label_y}" class="text">{connection.label}</text>')
+                    svg_parts.append(
+                        f'<text x="{label_x}" y="{label_y}" class="text">{connection.label}</text>'
+                    )
 
-        svg_parts.append('</svg>')
-        return '\n'.join(svg_parts)
+        svg_parts.append("</svg>")
+        return "\n".join(svg_parts)
 
     def get_supported_formats(self) -> list[ExportFormat]:
         """Get list of supported export formats."""
         return self.supported_formats.copy()
 
-    def validate_format(self, format: Union[str, ExportFormat]) -> ExportFormat:
+    def validate_format(self, format: str | ExportFormat) -> ExportFormat:
         """
         Validate and normalize export format.
 

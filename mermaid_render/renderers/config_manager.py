@@ -9,9 +9,9 @@ import json
 import logging
 import os
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
-import jsonschema  # type: ignore[import-untyped]
+import jsonschema
 
 
 class RendererConfigManager:
@@ -25,7 +25,7 @@ class RendererConfigManager:
 
     def __init__(
         self,
-        config_dir: Optional[Union[str, Path]] = None,
+        config_dir: str | Path | None = None,
         env_prefix: str = "MERMAID_RENDER",
     ) -> None:
         """
@@ -36,23 +36,24 @@ class RendererConfigManager:
             env_prefix: Prefix for environment variables
         """
         self.logger = logging.getLogger(__name__)
-        self.config_dir = Path(
-            config_dir) if config_dir else Path.home() / ".mermaid_render"
+        self.config_dir = (
+            Path(config_dir) if config_dir else Path.home() / ".mermaid_render"
+        )
         self.env_prefix = env_prefix
 
         # Ensure config directory exists
         self.config_dir.mkdir(parents=True, exist_ok=True)
 
         # Loaded configurations
-        self._configs: Dict[str, Dict[str, Any]] = {}
-        self._schemas: Dict[str, Dict[str, Any]] = {}
+        self._configs: dict[str, dict[str, Any]] = {}
+        self._schemas: dict[str, dict[str, Any]] = {}
 
     def load_renderer_config(
         self,
         renderer_name: str,
-        schema: Optional[Dict[str, Any]] = None,
-        defaults: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        schema: dict[str, Any] | None = None,
+        defaults: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """
         Load configuration for a specific renderer.
 
@@ -71,7 +72,7 @@ class RendererConfigManager:
         config_file = self.config_dir / f"{renderer_name}.json"
         if config_file.exists():
             try:
-                with open(config_file, 'r') as f:
+                with open(config_file) as f:
                     file_config = json.load(f)
                 config.update(file_config)
                 self.logger.debug(f"Loaded config from {config_file}")
@@ -99,7 +100,7 @@ class RendererConfigManager:
     def save_renderer_config(
         self,
         renderer_name: str,
-        config: Dict[str, Any],
+        config: dict[str, Any],
         validate: bool = True,
     ) -> bool:
         """
@@ -117,7 +118,8 @@ class RendererConfigManager:
             # Validate if schema is available
             if validate and renderer_name in self._schemas:
                 validation_errors = self._validate_config(
-                    config, self._schemas[renderer_name])
+                    config, self._schemas[renderer_name]
+                )
                 if validation_errors:
                     self.logger.error(
                         f"Cannot save invalid config for {renderer_name}: {validation_errors}"
@@ -126,14 +128,15 @@ class RendererConfigManager:
 
             # Save to file
             config_file = self.config_dir / f"{renderer_name}.json"
-            with open(config_file, 'w') as f:
+            with open(config_file, "w") as f:
                 json.dump(config, f, indent=2)
 
             # Update cached config
             self._configs[renderer_name] = config.copy()
 
             self.logger.info(
-                f"Saved configuration for {renderer_name} to {config_file}")
+                f"Saved configuration for {renderer_name} to {config_file}"
+            )
             return True
 
         except Exception as e:
@@ -143,7 +146,7 @@ class RendererConfigManager:
     def get_renderer_config(
         self,
         renderer_name: str,
-        key: Optional[str] = None,
+        key: str | None = None,
         default: Any = None,
     ) -> Any:
         """
@@ -196,7 +199,9 @@ class RendererConfigManager:
 
             # Save if requested
             if save:
-                return self.save_renderer_config(renderer_name, self._configs[renderer_name])
+                return self.save_renderer_config(
+                    renderer_name, self._configs[renderer_name]
+                )
 
             return True
 
@@ -204,14 +209,14 @@ class RendererConfigManager:
             self.logger.error(f"Failed to set config {key} for {renderer_name}: {e}")
             return False
 
-    def _load_env_config(self, renderer_name: str) -> Dict[str, Any]:
+    def _load_env_config(self, renderer_name: str) -> dict[str, Any]:
         """Load configuration from environment variables."""
         config = {}
         prefix = f"{self.env_prefix}_{renderer_name.upper()}_"
 
         for key, value in os.environ.items():
             if key.startswith(prefix):
-                config_key = key[len(prefix):].lower()
+                config_key = key[len(prefix) :].lower()
 
                 # Try to parse as JSON first, then as string
                 try:
@@ -221,15 +226,16 @@ class RendererConfigManager:
 
         if config:
             self.logger.debug(
-                f"Loaded environment config for {renderer_name}: {list(config.keys())}")
+                f"Loaded environment config for {renderer_name}: {list(config.keys())}"
+            )
 
         return config
 
     def _validate_config(
         self,
-        config: Dict[str, Any],
-        schema: Dict[str, Any],
-    ) -> List[str]:
+        config: dict[str, Any],
+        schema: dict[str, Any],
+    ) -> list[str]:
         """Validate configuration against JSON schema."""
         try:
             jsonschema.validate(config, schema)
@@ -239,7 +245,7 @@ class RendererConfigManager:
         except Exception as e:
             return [f"Schema validation error: {e}"]
 
-    def get_all_configs(self) -> Dict[str, Dict[str, Any]]:
+    def get_all_configs(self) -> dict[str, dict[str, Any]]:
         """Get all loaded renderer configurations."""
         return self._configs.copy()
 
@@ -269,7 +275,7 @@ class RendererConfigManager:
             self.logger.error(f"Failed to clear config for {renderer_name}: {e}")
             return False
 
-    def export_configs(self, output_path: Union[str, Path]) -> bool:
+    def export_configs(self, output_path: str | Path) -> bool:
         """
         Export all configurations to a file.
 
@@ -286,7 +292,7 @@ class RendererConfigManager:
                 "schemas": self._schemas,
             }
 
-            with open(output_path, 'w') as f:
+            with open(output_path, "w") as f:
                 json.dump(export_data, f, indent=2)
 
             self.logger.info(f"Exported configurations to {output_path}")
@@ -296,7 +302,7 @@ class RendererConfigManager:
             self.logger.error(f"Failed to export configurations: {e}")
             return False
 
-    def import_configs(self, input_path: Union[str, Path]) -> bool:
+    def import_configs(self, input_path: str | Path) -> bool:
         """
         Import configurations from a file.
 
@@ -307,7 +313,7 @@ class RendererConfigManager:
             True if imported successfully
         """
         try:
-            with open(input_path, 'r') as f:
+            with open(input_path) as f:
                 import_data = json.load(f)
 
             if "configs" in import_data:
@@ -325,7 +331,7 @@ class RendererConfigManager:
 
 
 # Global config manager instance
-_global_config_manager: Optional[RendererConfigManager] = None
+_global_config_manager: RendererConfigManager | None = None
 
 
 def get_global_config_manager() -> RendererConfigManager:

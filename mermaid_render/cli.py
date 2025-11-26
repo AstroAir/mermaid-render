@@ -8,7 +8,6 @@ This module provides a CLI for rendering Mermaid diagrams from the command line.
 import argparse
 import sys
 from pathlib import Path
-from typing import Optional
 
 from . import __version__, quick_render
 from .exceptions import RenderingError, ValidationError
@@ -90,7 +89,7 @@ def main() -> int:
                 return 1
 
         # Determine output path
-        output_path: Optional[str] = args.output
+        output_path: str | None = args.output
         if args.format != "svg" and not output_path:
             print(
                 f"Error: Output file required for {args.format} format", file=sys.stderr

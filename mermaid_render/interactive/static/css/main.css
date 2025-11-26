@@ -235,19 +235,19 @@ body {
         gap: 1rem;
         text-align: center;
     }
-    
+
     .main-content {
         padding: 1rem;
     }
-    
+
     .welcome-section h2 {
         font-size: 2rem;
     }
-    
+
     .diagram-types {
         grid-template-columns: 1fr;
     }
-    
+
     .features-grid {
         grid-template-columns: 1fr;
     }

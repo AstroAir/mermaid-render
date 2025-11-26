@@ -56,7 +56,7 @@ body:
       placeholder: |
         # Example of how the feature might work
         from mermaid_render import NewFeature
-        
+
         feature = NewFeature()
         result = feature.do_something()
     validations:

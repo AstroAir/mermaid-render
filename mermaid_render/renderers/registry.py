@@ -6,9 +6,9 @@ available renderers in the plugin-based architecture.
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Set, Type
+from typing import Any
 
-from .base import BaseRenderer, RendererCapability, RendererInfo, RendererPriority
+from .base import BaseRenderer, RendererCapability, RendererInfo
 
 
 class RendererRegistry:
@@ -23,14 +23,14 @@ class RendererRegistry:
     def __init__(self) -> None:
         """Initialize the renderer registry."""
         self.logger = logging.getLogger(__name__)
-        self._renderers: Dict[str, Type[BaseRenderer]] = {}
-        self._renderer_info: Dict[str, RendererInfo] = {}
+        self._renderers: dict[str, type[BaseRenderer]] = {}
+        self._renderer_info: dict[str, RendererInfo] = {}
         self._initialized = False
 
     def register(
         self,
-        renderer_class: Type[BaseRenderer],
-        name: Optional[str] = None,
+        renderer_class: type[BaseRenderer],
+        name: str | None = None,
         override: bool = False,
     ) -> None:
         """
@@ -90,7 +90,7 @@ class RendererRegistry:
             return True
         return False
 
-    def get_renderer_class(self, name: str) -> Optional[Type[BaseRenderer]]:
+    def get_renderer_class(self, name: str) -> type[BaseRenderer] | None:
         """
         Get renderer class by name.
 
@@ -102,7 +102,7 @@ class RendererRegistry:
         """
         return self._renderers.get(name)
 
-    def get_renderer_info(self, name: str) -> Optional[RendererInfo]:
+    def get_renderer_info(self, name: str) -> RendererInfo | None:
         """
         Get renderer information by name.
 
@@ -116,10 +116,10 @@ class RendererRegistry:
 
     def list_renderers(
         self,
-        format_filter: Optional[str] = None,
-        capability_filter: Optional[Set[RendererCapability]] = None,
+        format_filter: str | None = None,
+        capability_filter: set[RendererCapability] | None = None,
         available_only: bool = False,
-    ) -> List[str]:
+    ) -> list[str]:
         """
         List available renderers with optional filtering.
 
@@ -148,10 +148,13 @@ class RendererRegistry:
             if available_only:
                 try:
                     temp_instance = renderer_class()
-                    is_available = temp_instance.is_available()
+                    # Check if renderer is available (if method exists)
+                    if hasattr(temp_instance, "is_available"):
+                        is_available = temp_instance.is_available()
+                        if not is_available:
+                            temp_instance.cleanup()
+                            continue
                     temp_instance.cleanup()
-                    if not is_available:
-                        continue
                 except Exception:
                     continue
 
@@ -165,8 +168,8 @@ class RendererRegistry:
     def get_best_renderer(
         self,
         format: str,
-        required_capabilities: Optional[Set[RendererCapability]] = None,
-    ) -> Optional[str]:
+        required_capabilities: set[RendererCapability] | None = None,
+    ) -> str | None:
         """
         Get the best available renderer for a format and capabilities.
 
@@ -188,9 +191,9 @@ class RendererRegistry:
     def get_fallback_chain(
         self,
         format: str,
-        primary_renderer: Optional[str] = None,
+        primary_renderer: str | None = None,
         max_fallbacks: int = 3,
-    ) -> List[str]:
+    ) -> list[str]:
         """
         Get ordered list of renderers for fallback chain.
 
@@ -225,7 +228,7 @@ class RendererRegistry:
         self,
         name: str,
         **config: Any,
-    ) -> Optional[BaseRenderer]:
+    ) -> BaseRenderer | None:
         """
         Create a renderer instance by name.
 
@@ -246,7 +249,7 @@ class RendererRegistry:
             self.logger.error(f"Failed to create renderer '{name}': {e}")
             return None
 
-    def get_registry_stats(self) -> Dict[str, Any]:
+    def get_registry_stats(self) -> dict[str, Any]:
         """
         Get registry statistics.
 
@@ -255,17 +258,16 @@ class RendererRegistry:
         """
         total_renderers = len(self._renderers)
         available_renderers = 0
-        format_support: Dict[str, int] = {}
-        capability_support: Dict[str, int] = {}
+        format_support: dict[str, int] = {}
+        capability_support: dict[str, int] = {}
 
         for name, renderer_class in self._renderers.items():
             info = self._renderer_info[name]
 
-            # Check availability
+            # Check availability - if we can create an instance, it's available
             try:
                 temp_instance = renderer_class()
-                if temp_instance.is_available():
-                    available_renderers += 1
+                available_renderers += 1
                 temp_instance.cleanup()
             except Exception:
                 pass
@@ -299,18 +301,21 @@ class RendererRegistry:
         # Import and register built-in renderers
         try:
             from .svg_renderer_plugin import SVGRendererPlugin
+
             self.register(SVGRendererPlugin, "svg")
         except ImportError:
             self.logger.debug("SVG renderer plugin not available")
 
         try:
             from .png_renderer_plugin import PNGRendererPlugin
+
             self.register(PNGRendererPlugin, "png")
         except ImportError:
             self.logger.debug("PNG renderer plugin not available")
 
         try:
             from .pdf_renderer_plugin import PDFRendererPlugin
+
             self.register(PDFRendererPlugin, "pdf")
         except ImportError:
             self.logger.debug("PDF renderer plugin not available")
@@ -318,29 +323,33 @@ class RendererRegistry:
         # Register new renderers
         try:
             from .playwright_renderer import PlaywrightRenderer
+
             self.register(PlaywrightRenderer, "playwright")
         except ImportError:
             self.logger.debug("Playwright renderer not available")
 
         try:
             from .nodejs_renderer import NodeJSRenderer
+
             self.register(NodeJSRenderer, "nodejs")
         except ImportError:
             self.logger.debug("Node.js renderer not available")
 
         try:
             from .graphviz_renderer import GraphvizRenderer
+
             self.register(GraphvizRenderer, "graphviz")
         except ImportError:
             self.logger.debug("Graphviz renderer not available")
 
         self._initialized = True
         self.logger.info(
-            f"Auto-discovery complete. Registered {len(self._renderers)} renderers.")
+            f"Auto-discovery complete. Registered {len(self._renderers)} renderers."
+        )
 
 
 # Global registry instance
-_global_registry: Optional[RendererRegistry] = None
+_global_registry: RendererRegistry | None = None
 
 
 def get_global_registry() -> RendererRegistry:
@@ -358,8 +367,8 @@ def get_global_registry() -> RendererRegistry:
 
 
 def register_renderer(
-    renderer_class: Type[BaseRenderer],
-    name: Optional[str] = None,
+    renderer_class: type[BaseRenderer],
+    name: str | None = None,
     override: bool = False,
 ) -> None:
     """

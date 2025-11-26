@@ -1,12 +1,13 @@
 """Generate the code reference pages and navigation."""
 
-from pathlib import Path
 import importlib
 import pkgutil
+from pathlib import Path
 
 import mkdocs_gen_files
 
 nav = mkdocs_gen_files.Nav()
+
 
 def is_module_available(module_name: str) -> bool:
     """Check if a module is available for import."""
@@ -16,19 +17,23 @@ def is_module_available(module_name: str) -> bool:
     except ImportError:
         return False
 
+
 def get_submodules(package_name: str) -> list[str]:
     """Get all submodules of a package."""
     try:
         package = importlib.import_module(package_name)
-        if hasattr(package, '__path__'):
+        if hasattr(package, "__path__"):
             submodules = []
-            for _, name, ispkg in pkgutil.iter_modules(package.__path__, package_name + "."):
-                if not name.startswith('_'):
+            for _, name, ispkg in pkgutil.iter_modules(
+                package.__path__, package_name + "."
+            ):
+                if not name.startswith("_"):
                     submodules.append(name)
             return submodules
         return []
     except ImportError:
         return []
+
 
 # Define the core modules to document
 core_modules = [
@@ -96,13 +101,19 @@ for module in available_modules:
         elif module == "mermaid_render.ai":
             fd.write("AI-powered features for diagram generation and optimization.\n\n")
         elif module == "mermaid_render.cache":
-            fd.write("Caching system with multiple backends and performance monitoring.\n\n")
+            fd.write(
+                "Caching system with multiple backends and performance monitoring.\n\n"
+            )
         elif module == "mermaid_render.collaboration":
-            fd.write("Collaboration features for multi-user editing and version control.\n\n")
+            fd.write(
+                "Collaboration features for multi-user editing and version control.\n\n"
+            )
         elif module == "mermaid_render.interactive":
             fd.write("Interactive web interface and diagram builder.\n\n")
         elif module == "mermaid_render.templates":
-            fd.write("Template system for generating diagrams from structured data.\n\n")
+            fd.write(
+                "Template system for generating diagrams from structured data.\n\n"
+            )
         elif module == "mermaid_render.config":
             fd.write("Configuration management and theme system.\n\n")
         elif module == "mermaid_render.exceptions":
@@ -142,17 +153,31 @@ for parent_module, submodules in submodule_groups.items():
 
         # Add parent module description
         if parent_name == "models":
-            fd.write("Diagram model classes providing object-oriented interfaces for creating different types of Mermaid diagrams.\n\n")
-            fd.write("Each model class provides a clean, type-safe interface for building specific diagram types with validation and Mermaid syntax generation.\n\n")
+            fd.write(
+                "Diagram model classes providing object-oriented interfaces for creating different types of Mermaid diagrams.\n\n"
+            )
+            fd.write(
+                "Each model class provides a clean, type-safe interface for building specific diagram types with validation and Mermaid syntax generation.\n\n"
+            )
         elif parent_name == "renderers":
-            fd.write("Rendering engines for converting Mermaid diagrams to different output formats.\n\n")
-            fd.write("The renderer system supports multiple backends and output formats with extensible plugin architecture.\n\n")
+            fd.write(
+                "Rendering engines for converting Mermaid diagrams to different output formats.\n\n"
+            )
+            fd.write(
+                "The renderer system supports multiple backends and output formats with extensible plugin architecture.\n\n"
+            )
         elif parent_name == "utils":
-            fd.write("Utility functions for validation, export, and helper operations.\n\n")
-            fd.write("Common utility functions used throughout the library for various operations.\n\n")
+            fd.write(
+                "Utility functions for validation, export, and helper operations.\n\n"
+            )
+            fd.write(
+                "Common utility functions used throughout the library for various operations.\n\n"
+            )
         elif parent_name == "validators":
             fd.write("Validation system for Mermaid diagram syntax and structure.\n\n")
-            fd.write("Comprehensive validation with detailed error reporting and suggestions.\n\n")
+            fd.write(
+                "Comprehensive validation with detailed error reporting and suggestions.\n\n"
+            )
 
         # Add overview of submodules
         fd.write("## Available Modules\n\n")
@@ -219,7 +244,9 @@ for parent_module, submodules in submodule_groups.items():
             continue
 
         submodule_name = submodule.split(".")[-1]
-        submodule_doc_path = Path("api-reference") / parent_name / f"{submodule_name}.md"
+        submodule_doc_path = (
+            Path("api-reference") / parent_name / f"{submodule_name}.md"
+        )
 
         with mkdocs_gen_files.open(submodule_doc_path, "w") as fd:
             submodule_title = submodule_name.replace("_", " ").title()
@@ -227,11 +254,17 @@ for parent_module, submodules in submodule_groups.items():
 
             # Add submodule-specific descriptions
             if parent_name == "models":
-                fd.write(f"Model classes for creating {submodule_title.lower()} diagrams with object-oriented interface.\n\n")
+                fd.write(
+                    f"Model classes for creating {submodule_title.lower()} diagrams with object-oriented interface.\n\n"
+                )
             elif parent_name == "renderers":
-                fd.write(f"Renderer implementation for {submodule_title.lower()} format output.\n\n")
+                fd.write(
+                    f"Renderer implementation for {submodule_title.lower()} format output.\n\n"
+                )
             elif parent_name == "utils":
-                fd.write(f"Utility functions for {submodule_title.lower()} operations.\n\n")
+                fd.write(
+                    f"Utility functions for {submodule_title.lower()} operations.\n\n"
+                )
             elif parent_name == "validators":
                 fd.write(f"Validation components for {submodule_title.lower()}.\n\n")
 
@@ -251,7 +284,9 @@ for parent_module, submodules in submodule_groups.items():
             fd.write("      show_submodules: false\n")
 
         # Set edit path for submodule
-        mkdocs_gen_files.set_edit_path(submodule_doc_path, Path("../../") / Path(submodule.replace(".", "/")))
+        mkdocs_gen_files.set_edit_path(
+            submodule_doc_path, Path("../../") / Path(submodule.replace(".", "/"))
+        )
 
 # Build navigation structure
 nav_items = []
@@ -278,12 +313,16 @@ for parent_module, submodules in submodule_groups.items():
             continue
         submodule_name = submodule.split(".")[-1]
         submodule_title = submodule_name.replace("_", " ").title()
-        nav_items.append(f"    * [{submodule_title}]({parent_name}/{submodule_name}.md)")
+        nav_items.append(
+            f"    * [{submodule_title}]({parent_name}/{submodule_name}.md)"
+        )
 
 # Write the navigation file
 with mkdocs_gen_files.open("api-reference/SUMMARY.md", "w") as nav_file:
     nav_file.write("# API Reference\n\n")
-    nav_file.write("This section contains the complete API reference for all modules.\n\n")
+    nav_file.write(
+        "This section contains the complete API reference for all modules.\n\n"
+    )
     for item in nav_items:
         nav_file.write(f"{item}\n")
 

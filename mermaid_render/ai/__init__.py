@@ -40,6 +40,15 @@ from .analysis import (
     EnhancementType,
     QualityMetrics,
 )
+
+# Import compatibility wrappers for backward compatibility
+from .compatibility import (
+    DiagramOptimizer,
+    LayoutOptimizer,
+    OptimizationResult,
+    OptimizationType,
+    StyleOptimizer,
+)
 from .diagram_generator import (
     DiagramGenerator,
     GenerationConfig,
@@ -53,14 +62,6 @@ from .nl_processor import (
     IntentClassification,
     NLProcessor,
     TextAnalysis,
-)
-# Import compatibility wrappers for backward compatibility
-from .compatibility import (
-    DiagramOptimizer,
-    LayoutOptimizer,
-    OptimizationResult,
-    OptimizationType,
-    StyleOptimizer,
 )
 from .providers import (
     AIProvider,

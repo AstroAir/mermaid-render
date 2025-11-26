@@ -8,7 +8,7 @@ environment variables, configuration files, and runtime configuration.
 import json
 import os
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 from ..exceptions import ConfigurationError
 
@@ -66,7 +66,7 @@ class ConfigManager:
 
     def __init__(
         self,
-        config_file: Optional[Path] = None,
+        config_file: str | Path | None = None,
         load_env: bool = True,
         **runtime_config: Any,
     ) -> None:
@@ -78,8 +78,8 @@ class ConfigManager:
             load_env: Whether to load environment variables
             **runtime_config: Runtime configuration overrides
         """
-        self._config: Dict[str, Any] = {}
-        self._runtime_config: Dict[str, Any] = {}
+        self._config: dict[str, Any] = {}
+        self._runtime_config: dict[str, Any] = {}
 
         # Load configuration in order of precedence
         self._load_defaults()
@@ -132,7 +132,7 @@ class ConfigManager:
         if key in ["cache_dir", "custom_themes_dir"]:
             self._process_paths()
 
-    def update(self, config: Dict[str, Any], runtime: bool = True) -> None:
+    def update(self, config: dict[str, Any], runtime: bool = True) -> None:
         """
         Update multiple configuration values.
 
@@ -147,11 +147,25 @@ class ConfigManager:
 
         self._process_config()
 
-    def get_all(self) -> Dict[str, Any]:
+    def get_all(self) -> dict[str, Any]:
         """Get all configuration values with proper precedence."""
         result = self._config.copy()
         result.update(self._runtime_config)
         return result
+
+    def has(self, key: str) -> bool:
+        """Check if configuration key exists."""
+        return key in self._runtime_config or key in self._config
+
+    def keys(self) -> list[str]:
+        """Get all configuration keys."""
+        all_keys = set(self._config.keys())
+        all_keys.update(self._runtime_config.keys())
+        return list(all_keys)
+
+    def to_dict(self) -> dict[str, Any]:
+        """Get configuration as dictionary (alias for get_all)."""
+        return self.get_all()
 
     def reset_to_defaults(self) -> None:
         """Reset configuration to default values."""
@@ -159,6 +173,45 @@ class ConfigManager:
         self._runtime_config.clear()
         self._load_defaults()
         self._process_config()
+
+    def reset(self) -> None:
+        """Reset configuration to default values (alias for reset_to_defaults)."""
+        self.reset_to_defaults()
+
+    def validate(self) -> None:
+        """Validate current configuration (alias for validate_config)."""
+        self.validate_config()
+
+    def save(self, config_file: str | Path) -> None:
+        """Save configuration to file (alias for save_to_file)."""
+        config_path = Path(config_file) if isinstance(config_file, str) else config_file
+        self.save_to_file(config_path)
+
+    def load(self, config_file: str | Path) -> None:
+        """Load configuration from file."""
+        self._load_config_file(config_file)
+        self._process_config()
+
+    def get_cache_dir(self) -> Path:
+        """Get expanded cache directory path."""
+        cache_dir = self.get("cache_dir")
+        return Path(cache_dir).expanduser().resolve()
+
+    def get_themes_dir(self) -> Path:
+        """Get expanded themes directory path."""
+        themes_dir = self.get("custom_themes_dir")
+        return Path(themes_dir).expanduser().resolve()
+
+    def is_cache_enabled(self) -> bool:
+        """Check if caching is enabled."""
+        return bool(self.get("cache_enabled", True))
+
+    def get_timeout(self) -> float:
+        """Get timeout value with validation."""
+        timeout = self.get("timeout", 30.0)
+        if not isinstance(timeout, (int, float)) or timeout <= 0:
+            raise ConfigurationError("timeout must be a positive number")
+        return float(timeout)
 
     def save_to_file(self, config_file: Path) -> None:
         """
@@ -236,24 +289,25 @@ class ConfigManager:
         """Load default configuration values."""
         self._config = self.DEFAULT_CONFIG.copy()
 
-    def _load_config_file(self, config_file: Path) -> None:
+    def _load_config_file(self, config_file: str | Path) -> None:
         """
         Load configuration from file.
 
         Args:
             config_file: Configuration file path
         """
-        if not config_file.exists():
+        config_path = Path(config_file) if isinstance(config_file, str) else config_file
+        if not config_path.exists():
             return
 
         try:
-            with open(config_file, encoding="utf-8") as f:
+            with open(config_path, encoding="utf-8") as f:
                 file_config = json.load(f)
 
             self._config.update(file_config)
 
         except (OSError, json.JSONDecodeError) as e:
-            raise ConfigurationError(f"Failed to load config file {config_file}: {e}")
+            raise ConfigurationError(f"Failed to load config file {config_path}: {e}")
 
     def _load_environment(self) -> None:
         """Load configuration from environment variables."""
@@ -275,26 +329,30 @@ class ConfigManager:
         Returns:
             Converted value
         """
-        # Boolean values
-        if key in ["validate_syntax", "cache_enabled", "use_local_rendering"]:
-            return value.lower() in ("true", "1", "yes", "on")
+        try:
+            # Boolean values
+            if key in ["validate_syntax", "cache_enabled", "use_local_rendering"]:
+                return value.lower() in ("true", "1", "yes", "on")
 
-        # Numeric values
-        if key in ["timeout", "cache_ttl"]:
-            return float(value)
+            # Numeric values
+            if key in ["timeout", "cache_ttl"]:
+                return float(value)
 
-        if key in [
-            "retries",
-            "max_cache_size",
-            "default_width",
-            "default_height",
-            "max_width",
-            "max_height",
-        ]:
-            return int(value)
+            if key in [
+                "retries",
+                "max_cache_size",
+                "default_width",
+                "default_height",
+                "max_width",
+                "max_height",
+            ]:
+                return int(value)
 
-        # String values (default)
-        return value
+            # String values (default)
+            return value
+        except (ValueError, TypeError):
+            # If conversion fails, return the default value for this key
+            return self.DEFAULT_CONFIG.get(key, value)
 
     def _process_config(self) -> None:
         """Process and validate configuration after loading."""

@@ -45,15 +45,15 @@ The configuration system supports nested settings:
 rendering:
   timeout: 30
   validate_syntax: true
-  
+
 themes:
   default_theme: "default"
   custom_themes_dir: "./themes"
-  
+
 ai:
   provider: "openai"
   model: "gpt-4"
-  
+
 cache:
   enabled: true
   backend: "redis"

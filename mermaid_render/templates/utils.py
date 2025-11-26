@@ -7,17 +7,16 @@ including generation, validation, and management utilities.
 
 import json
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, cast
 
 from ..exceptions import TemplateError as MermaidTemplateError
-from .schema import validate_template_parameters
 from .template_manager import Template, TemplateManager
 
 
 def generate_from_template(
     template_name: str,
-    parameters: Dict[str, Any],
-    template_manager: Optional[TemplateManager] = None,
+    parameters: dict[str, Any],
+    template_manager: TemplateManager | None = None,
     validate_params: bool = True,
 ) -> str:
     """
@@ -50,10 +49,10 @@ def generate_from_template(
 
 
 def list_available_templates(
-    template_manager: Optional[TemplateManager] = None,
-    diagram_type: Optional[str] = None,
-    tags: Optional[List[str]] = None,
-) -> List[Dict[str, Any]]:
+    template_manager: TemplateManager | None = None,
+    diagram_type: str | None = None,
+    tags: list[str] | None = None,
+) -> list[dict[str, Any]]:
     """
     List available templates with metadata.
 
@@ -93,8 +92,8 @@ def list_available_templates(
 
 def get_template_info(
     template_name: str,
-    template_manager: Optional[TemplateManager] = None,
-) -> Optional[Dict[str, Any]]:
+    template_manager: TemplateManager | None = None,
+) -> dict[str, Any] | None:
     """
     Get detailed information about a template.
 
@@ -137,9 +136,9 @@ def get_template_info(
 
 def validate_template_params_by_name(
     template_name: str,
-    parameters: Dict[str, Any],
-    template_manager: Optional[TemplateManager] = None,
-) -> List[str]:
+    parameters: dict[str, Any],
+    template_manager: TemplateManager | None = None,
+) -> list[str]:
     """
     Validate parameters against template schema.
 
@@ -176,8 +175,8 @@ def validate_template_params_by_name(
 
 def export_template(
     template_name: str,
-    output_path: Union[str, Path],
-    template_manager: Optional[TemplateManager] = None,
+    output_path: str | Path,
+    template_manager: TemplateManager | None = None,
 ) -> bool:
     """
     Export template to file.
@@ -204,9 +203,9 @@ def export_template(
 
 
 def import_template(
-    template_file: Union[str, Path],
-    template_manager: Optional[TemplateManager] = None,
-) -> Optional[str]:
+    template_file: str | Path,
+    template_manager: TemplateManager | None = None,
+) -> str | None:
     """
     Import template from file.
 
@@ -235,11 +234,11 @@ def import_template(
 def create_template_from_diagram(
     diagram_code: str,
     template_name: str,
-    parameters: Dict[str, Any],
+    parameters: dict[str, Any],
     description: str = "",
-    diagram_type: Optional[str] = None,
-    template_manager: Optional[TemplateManager] = None,
-) -> Optional[str]:
+    diagram_type: str | None = None,
+    template_manager: TemplateManager | None = None,
+) -> str | None:
     """
     Create a template from existing diagram code.
 
@@ -288,8 +287,8 @@ def create_template_from_diagram(
 
 def get_template_examples(
     template_name: str,
-    template_manager: Optional[TemplateManager] = None,
-) -> List[Dict[str, Any]]:
+    template_manager: TemplateManager | None = None,
+) -> list[dict[str, Any]]:
     """
     Get example parameter sets for a template.
 
@@ -338,9 +337,9 @@ def get_template_examples(
     return examples
 
 
-def _generate_basic_example(parameters: Dict[str, Any]) -> Dict[str, Any]:
+def _generate_basic_example(parameters: dict[str, Any]) -> dict[str, Any]:
     """Generate a basic example from parameter schema."""
-    example: Dict[str, Any] = {}
+    example: dict[str, Any] = {}
 
     required_params = parameters.get("required", [])
     properties = parameters.get("properties", {})
@@ -369,9 +368,9 @@ def _generate_basic_example(parameters: Dict[str, Any]) -> Dict[str, Any]:
 
 def search_templates(
     query: str,
-    template_manager: Optional[TemplateManager] = None,
-    search_fields: Optional[List[str]] = None,
-) -> List[Dict[str, Any]]:
+    template_manager: TemplateManager | None = None,
+    search_fields: list[str] | None = None,
+) -> list[dict[str, Any]]:
     """
     Search templates by query string.
 
@@ -431,14 +430,15 @@ def search_templates(
             )
 
     # Sort by relevance score
-    matching_templates.sort(key=lambda x: cast(
-        float, x["relevance_score"]), reverse=True)
+    matching_templates.sort(
+        key=lambda x: cast(float, x["relevance_score"]), reverse=True
+    )
 
     return matching_templates
 
 
 def _calculate_relevance(
-    template: Template, query: str, search_fields: List[str]
+    template: Template, query: str, search_fields: list[str]
 ) -> float:
     """Calculate relevance score for search results."""
     score = 0.0

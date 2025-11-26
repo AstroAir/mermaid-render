@@ -5,8 +5,6 @@ This module provides an object-oriented interface for creating timeline diagrams
 with support for time periods, events, sections, and styling.
 """
 
-from typing import List, Optional
-
 from ..core import MermaidDiagram
 
 
@@ -53,7 +51,7 @@ class TimelinePeriod:
             period: Time period identifier (e.g., "2021", "Q1 2022", "January")
         """
         self.period = period
-        self.events: List[TimelineEvent] = []
+        self.events: list[TimelineEvent] = []
 
     def add_event(self, text: str) -> TimelineEvent:
         """
@@ -69,7 +67,7 @@ class TimelinePeriod:
         self.events.append(event)
         return event
 
-    def to_mermaid(self) -> List[str]:
+    def to_mermaid(self) -> list[str]:
         """
         Generate Mermaid syntax for this time period.
 
@@ -109,7 +107,7 @@ class TimelineSection:
             name: Section name/title
         """
         self.name = name
-        self.periods: List[TimelinePeriod] = []
+        self.periods: list[TimelinePeriod] = []
 
     def add_period(self, period: str) -> TimelinePeriod:
         """
@@ -125,7 +123,7 @@ class TimelineSection:
         self.periods.append(timeline_period)
         return timeline_period
 
-    def to_mermaid(self) -> List[str]:
+    def to_mermaid(self) -> list[str]:
         """
         Generate Mermaid syntax for this section.
 
@@ -164,7 +162,7 @@ class TimelineDiagram(MermaidDiagram):
     """
 
     def __init__(
-        self, title: Optional[str] = None, disable_multicolor: bool = False
+        self, title: str | None = None, disable_multicolor: bool = False
     ) -> None:
         """
         Initialize timeline diagram.
@@ -175,8 +173,8 @@ class TimelineDiagram(MermaidDiagram):
         """
         super().__init__(title)
         self.disable_multicolor = disable_multicolor
-        self.sections: List[TimelineSection] = []
-        self.periods: List[TimelinePeriod] = []  # Periods not in sections
+        self.sections: list[TimelineSection] = []
+        self.periods: list[TimelinePeriod] = []  # Periods not in sections
 
     def get_diagram_type(self) -> str:
         """Return the Mermaid diagram type identifier."""

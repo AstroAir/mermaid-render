@@ -6,7 +6,7 @@ patterns and use cases, as well as community-contributed templates.
 """
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class BuiltInTemplates:
@@ -20,19 +20,19 @@ class BuiltInTemplates:
     def __init__(self) -> None:
         self._templates = self._load_builtin_templates()
 
-    def get_all_templates(self) -> List[Dict[str, Any]]:
+    def get_all_templates(self) -> list[dict[str, Any]]:
         """Get all built-in templates."""
         return list(self._templates.values())
 
-    def get_template(self, name: str) -> Optional[Dict[str, Any]]:
+    def get_template(self, name: str) -> dict[str, Any] | None:
         """Get specific template by name."""
         return self._templates.get(name)
 
-    def list_template_names(self) -> List[str]:
+    def list_template_names(self) -> list[str]:
         """Get list of all template names."""
         return list(self._templates.keys())
 
-    def _load_builtin_templates(self) -> Dict[str, Dict[str, Any]]:
+    def _load_builtin_templates(self) -> dict[str, dict[str, Any]]:
         """Load built-in template definitions."""
         now = datetime.now().isoformat()
 
@@ -47,21 +47,21 @@ class BuiltInTemplates:
     {% for service in services %}
     {{ service.id }}[{{ service.name }}]
     {% endfor %}
-    
+
     {% for db in databases %}
     {{ db.id }}[({{ db.name }})]
     {% endfor %}
-    
+
     {% for connection in connections %}
     {{ connection.from }} --> {{ connection.to }}{% if connection.label %} : {{ connection.label }}{% endif %}
     {% endfor %}
-    
+
     %% Styling
     {% for service in services %}
     classDef service fill:#e1f5fe,stroke:#01579b,stroke-width:2px
     class {{ service.id }} service
     {% endfor %}
-    
+
     {% for db in databases %}
     classDef database fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
     class {{ db.id }} database
@@ -108,7 +108,7 @@ class BuiltInTemplates:
                 "diagram_type": "journey",
                 "template_content": """journey
     title {{ title }}
-    
+
     {% for section in sections %}
     section {{ section.name }}
         {% for step in section.steps %}
@@ -148,11 +148,11 @@ class BuiltInTemplates:
                 "diagram_type": "sequence",
                 "template_content": """sequenceDiagram
     title {{ title }}
-    
+
     {% for participant in participants %}
     participant {{ participant.id }} as {{ participant.name }}
     {% endfor %}
-    
+
     {% for interaction in interactions %}
     {% if interaction.type == "call" %}
     {{ interaction.from }}->>{{ interaction.to }}: {{ interaction.message }}
@@ -207,7 +207,7 @@ class BuiltInTemplates:
                 "diagram_type": "class",
                 "template_content": """classDiagram
     %% {{ title }}
-    
+
     {% for class in classes %}
     class {{ class.name }} {
         {% for attribute in class.attributes %}
@@ -224,7 +224,7 @@ class BuiltInTemplates:
     <<interface>> {{ class.name }}
     {% endif %}
     {% endfor %}
-    
+
     {% for relationship in relationships %}
     {{ relationship.from }} {{ relationship.type }} {{ relationship.to }}{% if relationship.label %} : {{ relationship.label }}{% endif %}
     {% endfor %}""",
@@ -265,7 +265,7 @@ class BuiltInTemplates:
                 "diagram_type": "flowchart",
                 "template_content": """flowchart TD
     %% {{ title }}
-    
+
     Start([{{ start_label }}])
     {% for step in steps %}
     {% if step.type == "process" %}
@@ -281,19 +281,19 @@ class BuiltInTemplates:
     {% endif %}
     {% endfor %}
     End([{{ end_label }}])
-    
+
     %% Connections
     Start --> {{ first_step }}
     {% for connection in connections %}
     {{ connection.from }} -->{% if connection.condition %}|{{ connection.condition }}|{% endif %} {{ connection.to }}
     {% endfor %}
     {{ last_step }} --> End
-    
+
     %% Styling
     classDef startEnd fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
     classDef process fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
     classDef decision fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
-    
+
     class Start,End startEnd
     {% for step in steps %}
     {% if step.type == "process" %}
@@ -378,24 +378,24 @@ class CommunityTemplates:
             enable_online: Whether to fetch templates from online repository
         """
         self.enable_online = enable_online
-        self._templates: Dict[str, Dict[str, Any]] = {}
+        self._templates: dict[str, dict[str, Any]] = {}
 
         if enable_online:
             self._load_online_templates()
 
-    def get_all_templates(self) -> List[Dict[str, Any]]:
+    def get_all_templates(self) -> list[dict[str, Any]]:
         """Get all community templates."""
         return list(self._templates.values())
 
-    def get_template(self, name: str) -> Optional[Dict[str, Any]]:
+    def get_template(self, name: str) -> dict[str, Any] | None:
         """Get specific template by name."""
         return self._templates.get(name)
 
-    def list_template_names(self) -> List[str]:
+    def list_template_names(self) -> list[str]:
         """Get list of all template names."""
         return list(self._templates.keys())
 
-    def submit_template(self, template_data: Dict[str, Any]) -> bool:
+    def submit_template(self, template_data: dict[str, Any]) -> bool:
         """
         Submit a template to the community library.
 
