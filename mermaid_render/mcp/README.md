@@ -2,94 +2,170 @@
 
 This directory contains the comprehensive Model Context Protocol (MCP) server implementation for mermaid-render, featuring AI-powered tools, resources, and prompts.
 
-## Overview
+## Quick Start
 
-The enhanced MCP server exposes the full mermaid-render functionality through the Model Context Protocol, allowing AI assistants and other MCP clients to generate, validate, analyze, and manipulate Mermaid diagrams with advanced AI capabilities.
+### One-Click Setup
 
-## Features
+Configuration files for popular AI assistants are available in the `mcp-config/` directory:
 
-### Core Functionality
+- **Claude Desktop**: Copy `mcp-config/claude_desktop_config.json` to your Claude config directory
+- **Cursor IDE**: Use `mcp-config/cursor_config.json`
+- **Windsurf IDE**: Use `mcp-config/windsurf_config.json`
 
-- **Diagram Rendering**: Render Mermaid diagrams to various formats (SVG, PNG, PDF)
-- **Diagram Validation**: Validate Mermaid diagram syntax and structure
-- **Theme Management**: List and apply different themes to diagrams
-
-### AI-Powered Features
-
-- **AI Diagram Generation**: Generate diagrams from natural language descriptions
-- **Diagram Analysis**: Analyze diagram quality, complexity, and best practices
-- **Diagram Optimization**: Optimize diagrams for better readability and structure
-- **Smart Suggestions**: Get AI-powered suggestions for diagram improvements
-
-### Template System
-
-- **Template-Based Creation**: Create diagrams from predefined templates
-- **Parameter Validation**: Validate template parameters for consistency
-
-### MCP Resources
-
-- **Theme Information**: Access detailed theme specifications and colors
-- **Configuration Schema**: Get JSON schema for configuration validation
-- **Documentation**: Access comprehensive diagram type documentation
-- **Examples**: Browse example diagrams for each diagram type
-
-### MCP Prompts
-
-- **Generation Prompts**: Reusable prompts for diagram generation
-- **Analysis Prompts**: Prompts for diagram quality analysis
-- **Optimization Prompts**: Prompts for diagram improvement suggestions
-
-## Installation
-
-1. Install FastMCP (required for MCP functionality):
+### Installation
 
 ```bash
-pip install fastmcp>=2.0.0
+# Install with all features
+pip install mermaid-render[all]
+
+# Or install with specific features
+pip install mermaid-render fastmcp
 ```
 
-2. Install optional AI features:
+### Start the Server
 
 ```bash
-pip install mermaid-render[ai]
-```
-
-3. Install optional template features:
-
-```bash
-pip install mermaid-render[templates]
-```
-
-## Usage
-
-### Command Line
-
-Start the enhanced MCP server:
-
-```bash
-# Using stdio transport (default)
+# Using stdio transport (default, for desktop apps)
 mermaid-render-mcp
 
-# Using SSE transport
+# Using SSE transport (for web integrations)
 mermaid-render-mcp --transport sse --port 8080
 
-# Using WebSocket transport
-mermaid-render-mcp --transport websocket --host 0.0.0.0 --port 9000
+# Using WebSocket transport (for real-time apps)
+mermaid-render-mcp --transport websocket --port 9000
 ```
 
-#### Programmatic Usage
+## Features Overview
+
+### Tools (26 total)
+
+#### Core Tools
+
+| Tool | Description |
+|------|-------------|
+| `render_diagram` | Render Mermaid diagrams to SVG/PNG/PDF |
+| `validate_diagram` | Validate diagram syntax and structure |
+| `list_themes` | List available themes with details |
+
+#### AI-Powered Tools
+
+| Tool | Description |
+|------|-------------|
+| `generate_diagram_from_text` | Generate diagrams from natural language |
+| `optimize_diagram` | Optimize diagram layout and structure |
+| `analyze_diagram` | Analyze diagram quality and complexity |
+| `get_diagram_suggestions` | Get AI-powered improvement suggestions |
+
+#### Template Tools
+
+| Tool | Description |
+|------|-------------|
+| `create_from_template` | Create diagrams from templates |
+| `list_available_templates` | List all available templates |
+| `get_template_details` | Get detailed template information |
+| `create_custom_template` | Create custom templates |
+
+#### Extended Tools
+
+| Tool | Description |
+|------|-------------|
+| `convert_diagram_format` | Convert between output formats |
+| `merge_diagrams` | Merge multiple diagrams into one |
+| `extract_diagram_elements` | Extract nodes and edges from diagrams |
+| `compare_diagrams` | Compare two diagrams for differences |
+| `export_to_markdown` | Export diagram with documentation |
+| `transform_diagram_style` | Apply style presets to diagrams |
+| `generate_diagram_variants` | Generate layout/style variants |
+
+#### Management Tools
+
+| Tool | Description |
+|------|-------------|
+| `get_configuration` | Get current configuration |
+| `update_configuration` | Update configuration settings |
+| `get_system_information` | Get system capabilities |
+| `save_diagram_to_file` | Save rendered diagram to file |
+| `batch_render_diagrams` | Render multiple diagrams in batch |
+| `manage_cache_operations` | Manage cache (stats, clear, cleanup) |
+| `list_diagram_types` | List supported diagram types |
+| `get_diagram_examples` | Get example code for diagram types |
+
+### Prompts (21 total)
+
+#### Generation Prompts
+
+| Prompt | Description |
+|--------|-------------|
+| `generate_flowchart` | Generate flowchart from process description |
+| `generate_sequence` | Generate sequence diagram from interactions |
+| `generate_class_diagram` | Generate class diagram from system description |
+| `generate_er_diagram` | Generate ER diagram from database schema |
+| `generate_state_diagram` | Generate state diagram from state machine |
+| `generate_gantt_chart` | Generate Gantt chart from project plan |
+| `generate_mindmap` | Generate mind map from topic |
+| `generate_timeline` | Generate timeline from events |
+| `generate_pie_chart` | Generate pie chart from data |
+| `generate_git_graph` | Generate git graph from workflow |
+| `generate_c4_diagram` | Generate C4 architecture diagram |
+
+#### Analysis & Optimization Prompts
+
+| Prompt | Description |
+|--------|-------------|
+| `analyze_diagram_quality` | Analyze diagram for quality and best practices |
+| `suggest_improvements` | Suggest improvements for a diagram |
+| `optimize_layout` | Optimize diagram layout |
+| `simplify_diagram` | Simplify complex diagrams |
+| `refactor_diagram` | Refactor and improve diagram structure |
+
+#### Documentation Prompts
+
+| Prompt | Description |
+|--------|-------------|
+| `explain_diagram` | Generate explanation of a diagram |
+| `create_diagram_documentation` | Create comprehensive documentation |
+| `document_architecture` | Create architecture documentation |
+
+#### Transformation Prompts
+
+| Prompt | Description |
+|--------|-------------|
+| `translate_diagram` | Translate diagram labels to another language |
+| `convert_to_diagram` | Convert other formats to Mermaid diagrams |
+
+### Resources (13 total)
+
+| URI | Description |
+|-----|-------------|
+| `mermaid://themes` | List of all available themes |
+| `mermaid://themes/{name}` | Details for specific theme |
+| `mermaid://templates` | List of all templates |
+| `mermaid://templates/{name}` | Details for specific template |
+| `mermaid://config/schema` | Configuration JSON schema |
+| `mermaid://config/defaults` | Default configuration values |
+| `mermaid://docs/diagram-types` | Diagram type documentation |
+| `mermaid://examples/{type}` | Examples for diagram types |
+| `mermaid://syntax/{type}` | Syntax reference for diagram types |
+| `mermaid://best-practices` | Best practices guide |
+| `mermaid://capabilities` | Server capabilities and features |
+| `mermaid://changelog` | Version changelog |
+| `mermaid://shortcuts` | Quick reference for common patterns |
+
+## Usage Examples
+
+### Programmatic Usage
 
 ```python
 from mermaid_render.mcp import create_mcp_server
 import asyncio
 
 async def main():
-    # Create MCP server
+    # Create MCP server with all features
     mcp = create_mcp_server(
         name="mermaid-render",
-        version="1.0.0",
-        description="Mermaid diagram generation and validation"
+        version="1.0.0"
     )
-
+    
     # Run with stdio transport
     await mcp.run_stdio()
 
@@ -97,105 +173,143 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-### Using MCP Tools Directly
+### Using Tools Directly
 
 ```python
-from mermaid_render.mcp.tools import render_diagram, validate_diagram, list_themes
+from mermaid_render.mcp import (
+    render_diagram,
+    validate_diagram,
+    merge_diagrams,
+    export_to_markdown
+)
 
 # Render a diagram
 result = render_diagram(
-    diagram_code="""
-    flowchart TD
-        A[Start] --> B[Process]
-        B --> C[End]
-    """,
+    diagram_code="flowchart TD\n    A[Start] --> B[End]",
     output_format="svg",
     theme="dark"
 )
 
-if result["success"]:
-    print(f"Rendered {result['format']} diagram")
-    print(f"Data length: {len(result['data'])}")
-else:
-    print(f"Error: {result['error']}")
+# Merge multiple diagrams
+result = merge_diagrams(
+    diagrams=[
+        {"code": "flowchart TD\n    A --> B", "name": "Process 1"},
+        {"code": "flowchart TD\n    C --> D", "name": "Process 2"}
+    ],
+    merge_strategy="subgraph"
+)
 
-# Validate diagram syntax
-result = validate_diagram("""
-    sequenceDiagram
-        Alice->>Bob: Hello!
-        Bob-->>Alice: Hi there!
-""")
-
-print(f"Valid: {result['valid']}")
-if result['errors']:
-    print(f"Errors: {result['errors']}")
-
-# List available themes
-themes = list_themes()
-print(f"Available themes: {list(themes['themes'].keys())}")
+# Export to Markdown
+result = export_to_markdown(
+    diagram_code="flowchart TD\n    A --> B",
+    title="My Diagram",
+    description="This diagram shows...",
+    include_elements=True
+)
 ```
 
 ## Configuration
 
-The MCP server can be configured through command-line arguments:
+### Command-Line Options
 
-- `--transport`: Transport type (stdio, sse, websocket)
-- `--host`: Host address for network transports
-- `--port`: Port number for network transports
-- `--name`: Server name
-- `--version`: Server version
-- `--description`: Server description
-- `--log-level`: Logging level (DEBUG, INFO, WARNING, ERROR)
+```bash
+mermaid-render-mcp [OPTIONS]
 
-## Error Handling
+Options:
+  --transport [stdio|sse|websocket]  Transport type (default: stdio)
+  --host TEXT                        Host address (default: localhost)
+  --port INTEGER                     Port number (default: 8000)
+  --name TEXT                        Server name (default: mermaid-render)
+  --version TEXT                     Server version (default: 1.0.0)
+  --log-level [DEBUG|INFO|WARNING|ERROR]  Logging level (default: INFO)
+```
 
-All MCP tools return a consistent response format:
+### Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `OPENAI_API_KEY` | OpenAI API key for AI features |
+| `ANTHROPIC_API_KEY` | Anthropic API key for AI features |
+| `MERMAID_RENDER_CACHE_DIR` | Cache directory path |
+| `MERMAID_RENDER_LOG_LEVEL` | Logging level |
+
+## Response Format
+
+All tools return a consistent response format:
 
 ```python
 {
-    "success": bool,           # Whether the operation succeeded
-    "error": str,             # Error message (if success=False)
-    "error_type": str,        # Error type (if success=False)
-    # ... tool-specific data (if success=True)
+    "success": True,           # Operation status
+    "data": {...},             # Tool-specific data
+    "metadata": {...},         # Additional metadata
+    "timestamp": "...",        # ISO timestamp
+    "performance": {           # Performance metrics
+        "execution_time_ms": 42.5
+    }
 }
 ```
 
-## Development
-
-### Testing
-
-To test the MCP tools without a full server setup:
+Error responses:
 
 ```python
-# Test individual tools
-from mermaid_render.mcp.tools import render_diagram
-
-result = render_diagram("graph TD; A-->B", output_format="svg")
-assert result["success"] is True
+{
+    "success": False,
+    "error": "Error message",
+    "error_type": "ValidationError",
+    "error_category": "ValidationError",
+    "suggestions": ["Suggestion 1", "Suggestion 2"],
+    "context": {...}
+}
 ```
 
-### Adding New Tools
+## Module Structure
 
-1. Implement the tool function in `tools.py`
-2. Add parameter validation using Pydantic models
-3. Register the tool in `register_all_tools()`
-4. Add comprehensive error handling
-5. Update documentation
+```
+mermaid_render/mcp/
+├── __init__.py           # Package exports
+├── server.py             # MCP server implementation
+├── tools.py              # Core tool implementations
+├── extended_tools.py     # Extended tool implementations
+├── prompts.py            # Core prompt implementations
+├── extended_prompts.py   # Extended prompt implementations
+├── resources.py          # Core resource implementations
+├── extended_resources.py # Extended resource implementations
+└── README.md             # This file
+```
 
 ## Troubleshooting
 
 ### FastMCP Not Found
 
+```bash
+pip install fastmcp>=2.0.0
 ```
-ImportError: FastMCP is required for MCP server functionality
+
+### AI Features Not Available
+
+```bash
+pip install mermaid-render[ai]
+# Set API keys
+export OPENAI_API_KEY=your_key
 ```
 
-Install FastMCP: `pip install fastmcp>=2.0.0`
+### Template Features Not Available
 
-### Rendering Errors
+```bash
+pip install mermaid-render[templates]
+```
 
-Check that the underlying mermaid-render dependencies are properly installed and configured.
+### Debug Mode
 
-### Network Transport Issues
+```bash
+mermaid-render-mcp --log-level DEBUG
+```
 
-Ensure the specified host and port are available and not blocked by firewalls.
+## Contributing
+
+1. Add new tools in `extended_tools.py`
+2. Add new prompts in `extended_prompts.py`
+3. Add new resources in `extended_resources.py`
+4. Register in respective `register_*` functions
+5. Update this README
+6. Add tests in `tests/integration/test_mcp_server_integration.py`

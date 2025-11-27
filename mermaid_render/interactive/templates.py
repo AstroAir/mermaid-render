@@ -5,7 +5,8 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
-from .builder import DiagramBuilder, DiagramType, ElementType, Position, Size
+from .builder import DiagramBuilder
+from .models import DiagramType, ElementType, Position, Size
 
 
 @dataclass

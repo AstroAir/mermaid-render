@@ -25,8 +25,34 @@ Example:
     >>> # Build diagrams visually and export code
 """
 
-from .builder import DiagramBuilder, DiagramConnection, DiagramElement
+# Core builder class and sub-components - from new builder package
+from .builder import (
+    ClassDiagramGenerator,
+    CodeGenerator,
+    ConnectionManager,
+    DiagramBuilder,
+    DiagramParser,
+    DiagramSerializer,
+    ElementManager,
+    EventManager,
+    FlowchartGenerator,
+    FlowchartParser,
+    SequenceDiagramGenerator,
+)
 from .export import ExportFormat, ExportManager
+from .models import (
+    DiagramConnection,
+    DiagramElement,
+    DiagramType,
+    ElementType,
+    Position,
+    Size,
+)
+from .routes import (
+    create_elements_router,
+    create_preview_router,
+    create_sessions_router,
+)
 from .server import InteractiveServer, create_app, start_server
 from .templates import InteractiveTemplate, TemplateLibrary
 from .ui_components import (
@@ -38,8 +64,6 @@ from .ui_components import (
     ToolboxComponent,
     UIComponent,
 )
-
-# Convenience functions
 from .utils import (
     create_interactive_session,
     export_diagram_code,
@@ -47,19 +71,49 @@ from .utils import (
     load_diagram_from_code,
     validate_diagram_live,
 )
-from .websocket_handler import DiagramSession, WebSocketHandler
+from .websocket import (
+    BroadcastService,
+    DiagramSession,
+    MessageDispatcher,
+    SessionManager,
+    WebSocketHandler,
+)
 
 __all__ = [
     # Core classes
     "DiagramBuilder",
     "DiagramElement",
     "DiagramConnection",
+    # Builder sub-components
+    "ElementManager",
+    "ConnectionManager",
+    "EventManager",
+    "DiagramSerializer",
+    "CodeGenerator",
+    "FlowchartGenerator",
+    "SequenceDiagramGenerator",
+    "ClassDiagramGenerator",
+    "DiagramParser",
+    "FlowchartParser",
+    # WebSocket sub-components
+    "SessionManager",
+    "BroadcastService",
+    "MessageDispatcher",
+    # Model types
+    "DiagramType",
+    "ElementType",
+    "Position",
+    "Size",
     # Server components
     "InteractiveServer",
     "start_server",
     "create_app",
     "WebSocketHandler",
     "DiagramSession",
+    # Route factories
+    "create_sessions_router",
+    "create_elements_router",
+    "create_preview_router",
     # UI components
     "UIComponent",
     "NodeComponent",

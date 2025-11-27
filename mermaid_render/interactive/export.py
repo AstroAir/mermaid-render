@@ -114,7 +114,7 @@ class ExportManager:
 
     def _create_builder_from_data(self, diagram_data: dict[str, Any]) -> DiagramBuilder:
         """Create DiagramBuilder from data dictionary."""
-        from .builder import DiagramType
+        from .models import DiagramType
 
         builder = DiagramBuilder()
 

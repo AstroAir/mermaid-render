@@ -9,12 +9,14 @@ import json
 import time
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from fastapi import WebSocket
 
-from .builder import DiagramBuilder
 from .security import InputSanitizer, SecurityValidator, websocket_rate_limiter
+
+if TYPE_CHECKING:
+    from .builder import DiagramBuilder
 
 
 @dataclass
@@ -22,12 +24,12 @@ class DiagramSession:
     """Represents an active diagram editing session."""
 
     session_id: str
-    builder: DiagramBuilder
+    builder: "DiagramBuilder"
     created_at: datetime
     updated_at: datetime
     connected_clients: set[WebSocket]
 
-    def __init__(self, session_id: str, builder: DiagramBuilder) -> None:
+    def __init__(self, session_id: str, builder: "DiagramBuilder") -> None:
         self.session_id = session_id
         self.builder = builder
         self.created_at = datetime.now()
@@ -91,7 +93,8 @@ class WebSocketHandler:
 
             # Create session if it doesn't exist
             if session_id not in self.sessions:
-                from .builder import DiagramBuilder, DiagramType
+                from .builder import DiagramBuilder
+                from .models import DiagramType
 
                 builder = DiagramBuilder(DiagramType.FLOWCHART)
                 self.sessions[session_id] = DiagramSession(session_id, builder)
@@ -288,7 +291,7 @@ class WebSocketHandler:
 
         if element_id and updates:
             # Apply updates to builder
-            from .builder import Position, Size
+            from .models import Position, Size
 
             update_params: dict[str, Any] = {}
             if "label" in updates:

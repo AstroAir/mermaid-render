@@ -1,0 +1,174 @@
+{
+  "name": "mermaid-render",
+  "version": "1.0.0",
+  "description": "MCP server for Mermaid diagram generation, validation, and manipulation with AI-powered features",
+  "author": "Max Qian <astro_air@126.com>",
+  "license": "MIT",
+  "repository": "https://github.com/AstroAir/mermaid-render",
+  "homepage": "https://github.com/AstroAir/mermaid-render",
+  "keywords": [
+    "mermaid",
+    "diagrams",
+    "visualization",
+    "flowchart",
+    "sequence",
+    "uml",
+    "ai",
+    "mcp"
+  ],
+  "capabilities": {
+    "tools": true,
+    "resources": true,
+    "prompts": true
+  },
+  "transport": {
+    "stdio": {
+      "command": "mermaid-render-mcp",
+      "args": []
+    },
+    "sse": {
+      "command": "mermaid-render-mcp",
+      "args": ["--transport", "sse", "--port", "8000"]
+    },
+    "websocket": {
+      "command": "mermaid-render-mcp",
+      "args": ["--transport", "websocket", "--port", "9000"]
+    }
+  },
+  "tools": [
+    {
+      "name": "render_diagram",
+      "description": "Render a Mermaid diagram to SVG, PNG, or PDF format"
+    },
+    {
+      "name": "validate_diagram",
+      "description": "Validate Mermaid diagram syntax and structure"
+    },
+    {
+      "name": "list_themes",
+      "description": "List available Mermaid themes"
+    },
+    {
+      "name": "generate_diagram_from_text",
+      "description": "Generate a Mermaid diagram from natural language description using AI"
+    },
+    {
+      "name": "optimize_diagram",
+      "description": "Optimize a Mermaid diagram for better readability"
+    },
+    {
+      "name": "analyze_diagram",
+      "description": "Analyze a Mermaid diagram and provide metrics and insights"
+    },
+    {
+      "name": "get_diagram_suggestions",
+      "description": "Get AI-powered suggestions for improving a diagram"
+    },
+    {
+      "name": "create_from_template",
+      "description": "Create a diagram from a predefined template"
+    },
+    {
+      "name": "list_diagram_types",
+      "description": "List all supported diagram types"
+    },
+    {
+      "name": "get_diagram_examples",
+      "description": "Get example code for diagram types"
+    },
+    {
+      "name": "convert_diagram_format",
+      "description": "Convert diagram between different output formats"
+    },
+    {
+      "name": "merge_diagrams",
+      "description": "Merge multiple diagrams into one"
+    },
+    {
+      "name": "extract_diagram_elements",
+      "description": "Extract nodes and edges from a diagram"
+    },
+    {
+      "name": "compare_diagrams",
+      "description": "Compare two diagrams for differences"
+    },
+    {
+      "name": "export_to_markdown",
+      "description": "Export diagram with documentation to Markdown"
+    }
+  ],
+  "resources": [
+    {
+      "uri": "mermaid://themes",
+      "name": "Available Themes",
+      "description": "List of all available Mermaid themes"
+    },
+    {
+      "uri": "mermaid://templates",
+      "name": "Available Templates",
+      "description": "List of all available diagram templates"
+    },
+    {
+      "uri": "mermaid://docs/diagram-types",
+      "name": "Diagram Types",
+      "description": "Documentation for all supported diagram types"
+    },
+    {
+      "uri": "mermaid://syntax/{diagram_type}",
+      "name": "Syntax Reference",
+      "description": "Syntax reference for specific diagram types"
+    },
+    {
+      "uri": "mermaid://best-practices",
+      "name": "Best Practices",
+      "description": "Best practices for creating diagrams"
+    },
+    {
+      "uri": "mermaid://capabilities",
+      "name": "Server Capabilities",
+      "description": "Server capabilities and features"
+    }
+  ],
+  "prompts": [
+    {
+      "name": "generate_flowchart",
+      "description": "Generate a flowchart from process description"
+    },
+    {
+      "name": "generate_sequence",
+      "description": "Generate a sequence diagram from interaction description"
+    },
+    {
+      "name": "generate_class_diagram",
+      "description": "Generate a class diagram from system description"
+    },
+    {
+      "name": "generate_er_diagram",
+      "description": "Generate an ER diagram from database description"
+    },
+    {
+      "name": "generate_state_diagram",
+      "description": "Generate a state diagram from state machine description"
+    },
+    {
+      "name": "generate_gantt_chart",
+      "description": "Generate a Gantt chart from project description"
+    },
+    {
+      "name": "generate_mindmap",
+      "description": "Generate a mind map from topic description"
+    },
+    {
+      "name": "analyze_diagram_quality",
+      "description": "Analyze diagram quality and best practices"
+    },
+    {
+      "name": "explain_diagram",
+      "description": "Generate explanation of what a diagram represents"
+    },
+    {
+      "name": "refactor_diagram",
+      "description": "Refactor and improve diagram structure"
+    }
+  ]
+}

@@ -18,9 +18,9 @@ except ImportError:
     FastMCP = None
     _FASTMCP_AVAILABLE = False
 
-from .prompts import register_all_prompts
-from .resources import register_all_resources
-from .tools import register_all_tools
+from .prompts import register_all_prompts, register_extended_prompts
+from .resources import register_all_resources, register_extended_resources
+from .tools import register_all_tools, register_extended_tools
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -65,6 +65,11 @@ def create_mcp_server(
     register_all_tools(mcp)
     register_all_resources(mcp)
     register_all_prompts(mcp)
+
+    # Register extended components
+    register_extended_tools(mcp)
+    register_extended_resources(mcp)
+    register_extended_prompts(mcp)
 
     logger.info(
         f"Created MCP server '{name}' v{version} with tools, resources, and prompts"

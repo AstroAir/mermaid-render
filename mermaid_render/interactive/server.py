@@ -8,13 +8,12 @@ for real-time updates and live preview.
 import json
 import logging
 import traceback
-import uuid
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
 import uvicorn
-from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -22,8 +21,13 @@ from fastapi.templating import Jinja2Templates
 
 from ..core import MermaidRenderer
 from ..validators.validator import MermaidValidator
-from .builder import DiagramBuilder, DiagramType, ElementType, Position, Size
-from .security import InputSanitizer, SecurityValidator, api_rate_limiter
+from .models import DiagramType
+from .routes import (
+    create_elements_router,
+    create_preview_router,
+    create_sessions_router,
+)
+from .security import SecurityValidator, api_rate_limiter
 from .websocket_handler import DiagramSession, WebSocketHandler
 
 
@@ -100,6 +104,25 @@ class InteractiveServer:
         )
 
         # Add security middleware
+        self._setup_security_middleware(app)
+
+        # Add global exception handler
+        self._setup_exception_handler(app)
+
+        # Setup templates and page routes
+        self._setup_page_routes(app)
+
+        # Register API routers
+        self._register_api_routers(app)
+
+        # Setup WebSocket endpoint
+        self._setup_websocket_endpoint(app)
+
+        return app
+
+    def _setup_security_middleware(self, app: FastAPI) -> None:
+        """Setup security middleware for rate limiting and origin validation."""
+
         @app.middleware("http")  # type: ignore[misc]
         async def security_middleware(
             request: Request, call_next: Callable[..., Any]
@@ -141,7 +164,12 @@ class InteractiveServer:
 
             return response
 
-        # Add global exception handler
+        # Reference the middleware to avoid linter warnings
+        _ = security_middleware
+
+    def _setup_exception_handler(self, app: FastAPI) -> None:
+        """Setup global exception handler."""
+
         @app.exception_handler(Exception)  # type: ignore[misc]
         async def global_exception_handler(
             request: Request, exc: Exception
@@ -159,10 +187,15 @@ class InteractiveServer:
                 },
             )
 
-        # Setup templates
+        # Reference the handler to avoid linter warnings
+        _ = global_exception_handler
+
+    def _setup_page_routes(self, app: FastAPI) -> None:
+        """Setup HTML page routes."""
+        from fastapi import HTTPException
+
         templates = Jinja2Templates(directory=str(self.templates_dir))
 
-        # Routes
         @app.get("/", response_class=HTMLResponse)  # type: ignore
         async def index(request: Request) -> HTMLResponse:
             """Main builder interface."""
@@ -184,253 +217,37 @@ class InteractiveServer:
                 },
             )
 
-        @app.post("/api/sessions")  # type: ignore
-        async def create_session(diagram_type: str = "flowchart") -> dict[str, Any]:
-            """Create new diagram session."""
-            try:
-                # Check resource limits (simplified - removed external dependency)
-                max_sessions = 100  # Default limit
-                if len(self.sessions) >= max_sessions:
-                    raise HTTPException(
-                        status_code=503, detail="Maximum number of sessions reached"
-                    )
+        # Reference the routes to avoid linter warnings
+        _ = (index, builder)
 
-                session_id = str(uuid.uuid4())
-                builder_obj = DiagramBuilder(DiagramType(diagram_type))
-                session = DiagramSession(session_id, builder_obj)
+    def _register_api_routers(self, app: FastAPI) -> None:
+        """Register API routers."""
+        # Create and register session routes
+        sessions_router = create_sessions_router(
+            sessions=self.sessions,
+            websocket_handler=self.websocket_handler,
+            max_sessions=100,
+        )
+        app.include_router(sessions_router)
 
-                self.sessions[session_id] = session
+        # Create and register element routes
+        elements_router = create_elements_router(
+            sessions=self.sessions,
+            websocket_handler=self.websocket_handler,
+        )
+        app.include_router(elements_router)
 
-                return {
-                    "session_id": session_id,
-                    "diagram_type": diagram_type,
-                    "created_at": session.created_at.isoformat(),
-                }
-            except ValueError as e:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Invalid diagram type '{diagram_type}': {str(e)}",
-                )
-            except Exception as e:
-                logging.error(f"Failed to create session: {e}")
-                raise HTTPException(status_code=500, detail="Failed to create session")
+        # Create and register preview routes
+        preview_router = create_preview_router(
+            sessions=self.sessions,
+            renderer=self.renderer,
+            validator=self.validator,
+        )
+        app.include_router(preview_router)
 
-        @app.get("/api/sessions/{session_id}")  # type: ignore
-        async def get_session(session_id: str) -> dict[str, Any]:
-            """Get session information."""
-            if session_id not in self.sessions:
-                raise HTTPException(status_code=404, detail="Session not found")
+    def _setup_websocket_endpoint(self, app: FastAPI) -> None:
+        """Setup WebSocket endpoint for real-time updates."""
 
-            session = self.sessions[session_id]
-            builder_state = session.builder.to_dict()
-            return {
-                "session_id": session_id,
-                "diagram_type": session.builder.diagram_type.value,
-                "elements": builder_state["elements"],
-                "connections": builder_state["connections"],
-                "metadata": session.builder.metadata,
-            }
-
-        @app.post("/api/sessions/{session_id}/elements")  # type: ignore
-        async def add_element(
-            session_id: str, element_data: dict[str, Any]
-        ) -> dict[str, Any]:
-            """Add element to diagram."""
-            try:
-                # Sanitize session ID
-                session_id = InputSanitizer.sanitize_session_id(session_id)
-
-                if session_id not in self.sessions:
-                    raise HTTPException(status_code=404, detail="Session not found")
-
-                session = self.sessions[session_id]
-
-                # Sanitize and validate element data
-                sanitized_data = InputSanitizer.sanitize_element_data(element_data)
-
-                element = session.builder.add_element(
-                    element_type=ElementType(sanitized_data["element_type"]),
-                    label=sanitized_data["label"],
-                    position=Position.from_dict(sanitized_data["position"]),
-                    size=Size.from_dict(
-                        sanitized_data.get("size", {"width": 120, "height": 60})
-                    ),
-                    properties=sanitized_data.get("properties", {}),
-                    style=sanitized_data.get("style", {}),
-                )
-
-                # Broadcast update to connected clients
-                await self.websocket_handler.broadcast_to_session(
-                    session_id,
-                    {
-                        "type": "element_added",
-                        "element": element.to_dict(),
-                    },
-                )
-
-                return element.to_dict()
-
-            except ValueError as e:
-                raise HTTPException(
-                    status_code=400, detail=f"Invalid element data: {str(e)}"
-                )
-            except KeyError as e:
-                raise HTTPException(
-                    status_code=400, detail=f"Missing required field: {str(e)}"
-                )
-            except Exception as e:
-                logging.error(f"Failed to add element: {e}")
-                raise HTTPException(status_code=500, detail="Failed to add element")
-
-        @app.put("/api/sessions/{session_id}/elements/{element_id}")  # type: ignore
-        async def update_element(
-            session_id: str, element_id: str, element_data: dict[str, Any]
-        ) -> dict[str, Any]:
-            """Update element in diagram."""
-            if session_id not in self.sessions:
-                raise HTTPException(status_code=404, detail="Session not found")
-
-            session = self.sessions[session_id]
-
-            # Extract update parameters
-            update_params: dict[str, Any] = {}
-            if "label" in element_data:
-                update_params["label"] = element_data["label"]
-            if "position" in element_data:
-                update_params["position"] = Position.from_dict(element_data["position"])
-            if "size" in element_data:
-                update_params["size"] = Size.from_dict(element_data["size"])
-            if "properties" in element_data:
-                update_params["properties"] = element_data["properties"]
-            if "style" in element_data:
-                update_params["style"] = element_data["style"]
-
-            success = session.builder.update_element(element_id, **update_params)
-
-            if not success:
-                raise HTTPException(status_code=404, detail="Element not found")
-
-            # Broadcast update to connected clients
-            await self.websocket_handler.broadcast_to_session(
-                session_id,
-                {
-                    "type": "element_updated",
-                    "element_id": element_id,
-                    "updates": element_data,
-                },
-            )
-
-            return {"success": True}
-
-        @app.delete("/api/sessions/{session_id}/elements/{element_id}")  # type: ignore
-        async def remove_element(session_id: str, element_id: str) -> dict[str, Any]:
-            """Remove element from diagram."""
-            if session_id not in self.sessions:
-                raise HTTPException(status_code=404, detail="Session not found")
-
-            session = self.sessions[session_id]
-            success = session.builder.remove_element(element_id)
-
-            if not success:
-                raise HTTPException(status_code=404, detail="Element not found")
-
-            # Broadcast update to connected clients
-            await self.websocket_handler.broadcast_to_session(
-                session_id,
-                {
-                    "type": "element_removed",
-                    "element_id": element_id,
-                },
-            )
-
-            return {"success": True}
-
-        @app.post("/api/sessions/{session_id}/connections")  # type: ignore
-        async def add_connection(
-            session_id: str, connection_data: dict[str, Any]
-        ) -> dict[str, Any]:
-            """Add connection to diagram."""
-            if session_id not in self.sessions:
-                raise HTTPException(status_code=404, detail="Session not found")
-
-            session = self.sessions[session_id]
-
-            connection = session.builder.add_connection(
-                source_id=connection_data["source_id"],
-                target_id=connection_data["target_id"],
-                label=connection_data.get("label", ""),
-                connection_type=connection_data.get("connection_type", "default"),
-                style=connection_data.get("style", {}),
-                properties=connection_data.get("properties", {}),
-            )
-
-            if not connection:
-                raise HTTPException(status_code=400, detail="Invalid connection")
-
-            # Broadcast update to connected clients
-            await self.websocket_handler.broadcast_to_session(
-                session_id,
-                {
-                    "type": "connection_added",
-                    "connection": connection.to_dict(),
-                },
-            )
-
-            return connection.to_dict()
-
-        @app.get("/api/sessions/{session_id}/code")  # type: ignore
-        async def get_mermaid_code(session_id: str) -> dict[str, Any]:
-            """Get generated Mermaid code for session."""
-            if session_id not in self.sessions:
-                raise HTTPException(status_code=404, detail="Session not found")
-
-            session = self.sessions[session_id]
-
-            try:
-                code = session.builder.generate_mermaid_code()
-                validation_result = self.validator.validate(code)
-
-                return {
-                    "code": code,
-                    "validation": {
-                        "is_valid": validation_result.is_valid,
-                        "errors": validation_result.errors,
-                        "warnings": validation_result.warnings,
-                    },
-                }
-            except Exception as e:
-                return {
-                    "code": "",
-                    "validation": {
-                        "is_valid": False,
-                        "errors": [str(e)],
-                        "warnings": [],
-                    },
-                }
-
-        @app.get("/api/sessions/{session_id}/preview")  # type: ignore
-        async def get_preview(session_id: str, format: str = "svg") -> dict[str, Any]:
-            """Get rendered preview of diagram."""
-            if session_id not in self.sessions:
-                raise HTTPException(status_code=404, detail="Session not found")
-
-            session = self.sessions[session_id]
-
-            try:
-                code = session.builder.generate_mermaid_code()
-                rendered_content = self.renderer.render_raw(code, format)
-
-                return {
-                    "format": format,
-                    "content": rendered_content,
-                    "generated_at": session.updated_at.isoformat(),
-                }
-            except Exception as e:
-                raise HTTPException(
-                    status_code=500, detail=f"Rendering failed: {str(e)}"
-                )
-
-        # WebSocket endpoint for real-time updates
         @app.websocket("/ws/{session_id}")  # type: ignore
         async def websocket_endpoint(websocket: WebSocket, session_id: str) -> None:
             """WebSocket endpoint for real-time updates."""
@@ -447,22 +264,8 @@ class InteractiveServer:
             except WebSocketDisconnect:
                 self.websocket_handler.disconnect(websocket, session_id)
 
-        # Assign to variables to ensure the functions are referenced (for strict linters)
-        _ = (
-            index,
-            builder,
-            create_session,
-            get_session,
-            add_element,
-            update_element,
-            remove_element,
-            add_connection,
-            get_mermaid_code,
-            get_preview,
-            websocket_endpoint,
-        )
-
-        return app
+        # Reference the endpoint to avoid linter warnings
+        _ = websocket_endpoint
 
     def run(self, **kwargs: Any) -> None:
         """Run the server.

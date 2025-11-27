@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "mermaid-render": {
+      "command": "mermaid-render-mcp",
+      "args": [],
+      "env": {}
+    }
+  }
+}

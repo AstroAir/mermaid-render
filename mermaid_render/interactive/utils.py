@@ -3,7 +3,8 @@
 from typing import Any
 
 from ..validators.validator import MermaidValidator
-from .builder import DiagramBuilder, DiagramType
+from .builder import DiagramBuilder
+from .models import DiagramType
 
 
 def create_interactive_session(diagram_type: str = "flowchart") -> DiagramBuilder:
