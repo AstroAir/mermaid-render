@@ -1,12 +1,69 @@
-// Main JavaScript for Mermaid Interactive Builder
+/**
+ * Main JavaScript for Mermaid Interactive Builder
+ * Refactored to use modular components
+ * @module main
+ */
 
+// Initialize application when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize the application
     initializeApp();
 });
 
+/**
+ * Initialize the application
+ */
 function initializeApp() {
-    // Add click handlers for diagram type cards
+    // Initialize UI components
+    initializeQuickNavigation();
+    initializeNotifications();
+    initializeAnimations();
+    initializeDiagramCards();
+    initializeNavigation();
+}
+
+/**
+ * Initialize quick navigation
+ */
+function initializeQuickNavigation() {
+    // Quick navigation is now handled by QuickNavigation module
+    // Create instance if not on builder page
+    if (!document.getElementById('diagram-canvas')) {
+        window.quickNav = new QuickNavigation();
+    }
+}
+
+/**
+ * Initialize notification system
+ */
+function initializeNotifications() {
+    // Notification manager is auto-initialized by Notification module
+    // Just ensure it's available globally
+    if (!window.notificationManager) {
+        window.notificationManager = new Notification();
+    }
+}
+
+/**
+ * Initialize scroll animations
+ */
+function initializeAnimations() {
+    // Use AnimationObserver for scroll-based animations
+    const animationObserver = new AnimationObserver({
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    });
+
+    // Setup default animations
+    animationObserver.setupDefaultAnimations();
+
+    // Store reference
+    window.animationObserver = animationObserver;
+}
+
+/**
+ * Initialize diagram type cards
+ */
+function initializeDiagramCards() {
     const diagramCards = document.querySelectorAll('.diagram-type-card');
     diagramCards.forEach(card => {
         card.addEventListener('click', function() {
@@ -16,15 +73,29 @@ function initializeApp() {
                 card.style.transform = '';
             }, 150);
         });
-    });
 
-    // Add smooth scrolling for navigation
+        // Add keyboard support
+        card.setAttribute('tabindex', '0');
+        card.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                card.click();
+            }
+        });
+    });
+}
+
+/**
+ * Initialize smooth scrolling navigation
+ */
+function initializeNavigation() {
     const navLinks = document.querySelectorAll('.nav-link');
     navLinks.forEach(link => {
         link.addEventListener('click', function(e) {
-            if (this.getAttribute('href').startsWith('#')) {
+            const href = this.getAttribute('href');
+            if (href && href.startsWith('#')) {
                 e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
+                const target = document.querySelector(href);
                 if (target) {
                     target.scrollIntoView({
                         behavior: 'smooth',
@@ -34,225 +105,46 @@ function initializeApp() {
             }
         });
     });
-
-    // Add intersection observer for animations
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.opacity = '1';
-                entry.target.style.transform = 'translateY(0)';
-            }
-        });
-    }, observerOptions);
-
-    // Observe elements for animation
-    const animatedElements = document.querySelectorAll('.diagram-type-card, .feature-item');
-    animatedElements.forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(20px)';
-        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-        observer.observe(el);
-    });
-
-    // Add keyboard shortcuts
-    document.addEventListener('keydown', function(e) {
-        // Ctrl/Cmd + K for quick navigation
-        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-            e.preventDefault();
-            showQuickNavigation();
-        }
-    });
 }
 
-function showQuickNavigation() {
-    // Create a simple quick navigation modal
-    const modal = document.createElement('div');
-    modal.className = 'modal show';
-    modal.innerHTML = `
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Quick Navigation</h3>
-                <button class="modal-close">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="quick-nav-options">
-                    <a href="/builder/flowchart" class="quick-nav-item">
-                        <span class="nav-icon">📊</span>
-                        <span class="nav-text">Flowchart Builder</span>
-                    </a>
-                    <a href="/builder/sequence" class="quick-nav-item">
-                        <span class="nav-icon">🔄</span>
-                        <span class="nav-text">Sequence Diagram</span>
-                    </a>
-                    <a href="/builder/class" class="quick-nav-item">
-                        <span class="nav-icon">🏗️</span>
-                        <span class="nav-text">Class Diagram</span>
-                    </a>
-                    <a href="/api/docs" class="quick-nav-item">
-                        <span class="nav-icon">📚</span>
-                        <span class="nav-text">API Documentation</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-    `;
-
-    // Add styles for quick navigation
-    const style = document.createElement('style');
-    style.textContent = `
-        .quick-nav-options {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-        .quick-nav-item {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 1rem;
-            border: 1px solid #e0e0e0;
-            border-radius: 6px;
-            text-decoration: none;
-            color: #333;
-            transition: all 0.2s;
-        }
-        .quick-nav-item:hover {
-            background: #f8f9fa;
-            border-color: #667eea;
-            transform: translateX(5px);
-        }
-        .nav-icon {
-            font-size: 1.5rem;
-        }
-        .nav-text {
-            font-weight: 500;
-        }
-    `;
-    document.head.appendChild(style);
-
-    document.body.appendChild(modal);
-
-    // Add event listeners
-    const closeBtn = modal.querySelector('.modal-close');
-    closeBtn.addEventListener('click', () => {
-        modal.remove();
-        style.remove();
-    });
-
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            modal.remove();
-            style.remove();
-        }
-    });
-
-    // Focus first item
-    const firstItem = modal.querySelector('.quick-nav-item');
-    if (firstItem) {
-        firstItem.focus();
-    }
-
-    // Add keyboard navigation
-    const items = modal.querySelectorAll('.quick-nav-item');
-    let currentIndex = 0;
-
-    modal.addEventListener('keydown', (e) => {
-        switch (e.key) {
-            case 'ArrowDown':
-                e.preventDefault();
-                currentIndex = (currentIndex + 1) % items.length;
-                items[currentIndex].focus();
-                break;
-            case 'ArrowUp':
-                e.preventDefault();
-                currentIndex = (currentIndex - 1 + items.length) % items.length;
-                items[currentIndex].focus();
-                break;
-            case 'Enter':
-                e.preventDefault();
-                items[currentIndex].click();
-                break;
-            case 'Escape':
-                modal.remove();
-                style.remove();
-                break;
-        }
-    });
-}
-
-// Utility functions
+/**
+ * Legacy showNotification function for backward compatibility
+ * @param {string} message - Notification message
+ * @param {string} [type='info'] - Notification type
+ */
 function showNotification(message, type = 'info') {
-    const notification = document.createElement('div');
-    notification.className = `notification notification-${type}`;
-    notification.textContent = message;
+    if (window.notificationManager) {
+        return window.notificationManager.show(message, type);
+    }
 
-    // Add styles
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 1rem 1.5rem;
-        border-radius: 6px;
-        color: white;
-        font-weight: 500;
-        z-index: 1000;
-        animation: slideInRight 0.3s ease;
-    `;
-
-    // Set background color based on type
-    const colors = {
-        info: '#17a2b8',
-        success: '#28a745',
-        warning: '#ffc107',
-        error: '#dc3545'
-    };
-    notification.style.backgroundColor = colors[type] || colors.info;
-
-    document.body.appendChild(notification);
-
-    // Auto remove after 3 seconds
-    setTimeout(() => {
-        notification.style.animation = 'slideOutRight 0.3s ease';
-        setTimeout(() => {
-            notification.remove();
-        }, 300);
-    }, 3000);
+    // Fallback if notification manager not available
+    console.log(`[${type}] ${message}`);
 }
 
-// Add CSS animations
-const animationStyles = document.createElement('style');
-animationStyles.textContent = `
-    @keyframes slideInRight {
-        from {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
+/**
+ * Legacy showQuickNavigation function for backward compatibility
+ */
+function showQuickNavigation() {
+    if (window.quickNav) {
+        window.quickNav.show();
+    } else {
+        // Create temporary instance
+        const quickNav = new QuickNavigation();
+        quickNav.show();
     }
-
-    @keyframes slideOutRight {
-        from {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        to {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-    }
-`;
-document.head.appendChild(animationStyles);
+}
 
 // Export utility functions for use in other scripts
 window.MermaidInteractive = {
     showNotification,
-    showQuickNavigation
+    showQuickNavigation,
+
+    // Expose module classes
+    QuickNavigation: window.QuickNavigation,
+    Notification: window.Notification,
+    AnimationObserver: window.AnimationObserver,
+
+    // Version info
+    version: '2.0.0',
+    modulesLoaded: true
 };

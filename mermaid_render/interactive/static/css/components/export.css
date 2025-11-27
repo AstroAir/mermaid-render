@@ -1,0 +1,234 @@
+/**
+ * Export Component Styles
+ */
+
+/* Export Options */
+.export-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.export-options label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.export-options label:hover {
+    background: #f8f9fa;
+    border-color: #667eea;
+}
+
+.export-options label.selected {
+    background: #f0f4ff;
+    border-color: #667eea;
+}
+
+.export-options input[type="radio"] {
+    margin: 0;
+    width: 18px;
+    height: 18px;
+    accent-color: #667eea;
+}
+
+.export-options input[type="radio"]:checked + span {
+    color: #667eea;
+    font-weight: 500;
+}
+
+/* Export Option Icon */
+.export-option-icon {
+    font-size: 1.25rem;
+    width: 24px;
+    text-align: center;
+}
+
+/* Export Option Text */
+.export-option-text {
+    flex: 1;
+}
+
+.export-option-text .option-title {
+    font-weight: 500;
+    color: #333;
+}
+
+.export-option-text .option-description {
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 2px;
+}
+
+/* Export Settings */
+.export-settings {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e0e0e0;
+}
+
+.export-settings h4 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.export-settings label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.export-settings input[type="text"],
+.export-settings input[type="number"],
+.export-settings select {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    transition: border-color 0.2s;
+}
+
+.export-settings input:focus,
+.export-settings select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Export Settings Grid */
+.export-settings-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+/* Export Quality Slider */
+.export-quality {
+    margin-top: 1rem;
+}
+
+.export-quality input[type="range"] {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: #e0e0e0;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.export-quality input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #667eea;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.export-quality input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+}
+
+.export-quality-value {
+    text-align: right;
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 0.25rem;
+}
+
+/* Export Preview */
+.export-preview {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #e0e0e0;
+}
+
+.export-preview-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #666;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.export-preview-content {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 1rem;
+    text-align: center;
+    min-height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.export-preview-content svg {
+    max-width: 100%;
+    max-height: 150px;
+}
+
+/* Export Progress */
+.export-progress {
+    margin-top: 1rem;
+}
+
+.export-progress-bar {
+    height: 4px;
+    background: #e0e0e0;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.export-progress-fill {
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+.export-progress-text {
+    font-size: 0.8rem;
+    color: #666;
+    text-align: center;
+    margin-top: 0.5rem;
+}
+
+/* Export Actions */
+.export-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.export-actions .btn {
+    flex: 1;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    .export-settings-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .export-options label {
+        padding: 0.5rem 0.75rem;
+    }
+}

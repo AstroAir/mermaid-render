@@ -1,0 +1,238 @@
+/**
+ * Code Editor Styles
+ */
+
+/* Code Editor Container */
+.code-editor-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Code Editor Textarea */
+#code-editor {
+    flex: 1;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 1rem;
+    resize: none;
+    background: #f8f9fa;
+    color: #333;
+    tab-size: 4;
+}
+
+#code-editor:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+#code-editor::placeholder {
+    color: #999;
+}
+
+/* Code Editor with Line Numbers */
+.code-editor-with-lines {
+    display: flex;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.code-editor-lines {
+    background: #f0f0f0;
+    padding: 1rem 0.5rem;
+    text-align: right;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: #999;
+    user-select: none;
+    border-right: 1px solid #ddd;
+    min-width: 40px;
+}
+
+.code-editor-with-lines #code-editor {
+    border: none;
+    border-radius: 0;
+    flex: 1;
+}
+
+/* Code Actions */
+.code-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid #e0e0e0;
+}
+
+/* Code Editor Toolbar */
+.code-editor-toolbar {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e0e0e0;
+    border-radius: 4px 4px 0 0;
+}
+
+.code-editor-toolbar + #code-editor {
+    border-radius: 0 0 4px 4px;
+}
+
+/* Code Editor Status Bar */
+.code-editor-status {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.25rem 0.5rem;
+    background: #f0f0f0;
+    border-top: 1px solid #ddd;
+    font-size: 0.75rem;
+    color: #666;
+}
+
+.code-editor-status-left,
+.code-editor-status-right {
+    display: flex;
+    gap: 1rem;
+}
+
+/* Syntax Highlighting (for display only) */
+.code-highlight {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 4px;
+    overflow-x: auto;
+}
+
+.code-highlight .keyword {
+    color: #d73a49;
+    font-weight: 500;
+}
+
+.code-highlight .string {
+    color: #032f62;
+}
+
+.code-highlight .comment {
+    color: #6a737d;
+    font-style: italic;
+}
+
+.code-highlight .number {
+    color: #005cc5;
+}
+
+.code-highlight .operator {
+    color: #d73a49;
+}
+
+.code-highlight .function {
+    color: #6f42c1;
+}
+
+.code-highlight .variable {
+    color: #e36209;
+}
+
+/* Code Block */
+.code-block {
+    position: relative;
+    margin: 1rem 0;
+}
+
+.code-block-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background: #e9ecef;
+    border-radius: 4px 4px 0 0;
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.code-block-language {
+    font-weight: 500;
+}
+
+.code-block-copy {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    color: #666;
+    border-radius: 3px;
+}
+
+.code-block-copy:hover {
+    background: #ddd;
+}
+
+.code-block pre {
+    margin: 0;
+    border-radius: 0 0 4px 4px;
+}
+
+/* Read-only Code Editor */
+.code-editor-readonly {
+    background: #f0f0f0;
+    cursor: default;
+}
+
+/* Code Editor Error State */
+.code-editor-error #code-editor {
+    border-color: #dc3545;
+    background: #fff5f5;
+}
+
+.code-editor-error-message {
+    color: #dc3545;
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+}
+
+/* Code Editor Dark Theme */
+.code-editor-dark #code-editor {
+    background: #1e1e1e;
+    color: #d4d4d4;
+    border-color: #333;
+}
+
+.code-editor-dark .code-editor-lines {
+    background: #252525;
+    color: #858585;
+    border-color: #333;
+}
+
+.code-editor-dark .code-editor-toolbar,
+.code-editor-dark .code-editor-status {
+    background: #252525;
+    border-color: #333;
+    color: #aaa;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    #code-editor {
+        font-size: 0.8rem;
+        padding: 0.75rem;
+    }
+
+    .code-actions {
+        flex-wrap: wrap;
+    }
+
+    .code-actions .btn {
+        flex: 1;
+        min-width: 100px;
+    }
+}

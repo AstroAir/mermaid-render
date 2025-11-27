@@ -1,0 +1,297 @@
+/**
+ * Diagram Elements Styles
+ */
+
+/* Diagram Element Base */
+.diagram-element {
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.diagram-element:hover {
+    filter: brightness(1.1);
+}
+
+.diagram-element.selected {
+    stroke: #667eea;
+    stroke-width: 2;
+    stroke-dasharray: 5, 5;
+    animation: dash 1s linear infinite;
+}
+
+.diagram-element.dragging {
+    opacity: 0.7;
+    cursor: grabbing;
+}
+
+.diagram-element.highlighted {
+    filter: drop-shadow(0 0 8px rgba(102, 126, 234, 0.5));
+}
+
+/* Node Shapes */
+.node-rectangle {
+    fill: #f8f9fa;
+    stroke: #333;
+    stroke-width: 2;
+    rx: 4;
+    ry: 4;
+}
+
+.node-rectangle:hover {
+    fill: #e9ecef;
+}
+
+.node-circle {
+    fill: #f8f9fa;
+    stroke: #333;
+    stroke-width: 2;
+}
+
+.node-circle:hover {
+    fill: #e9ecef;
+}
+
+.node-diamond {
+    fill: #f8f9fa;
+    stroke: #333;
+    stroke-width: 2;
+}
+
+.node-diamond:hover {
+    fill: #e9ecef;
+}
+
+.node-hexagon {
+    fill: #f8f9fa;
+    stroke: #333;
+    stroke-width: 2;
+}
+
+.node-hexagon:hover {
+    fill: #e9ecef;
+}
+
+.node-rounded {
+    fill: #f8f9fa;
+    stroke: #333;
+    stroke-width: 2;
+    rx: 20;
+    ry: 20;
+}
+
+.node-stadium {
+    fill: #f8f9fa;
+    stroke: #333;
+    stroke-width: 2;
+}
+
+/* Node Text */
+.node-text {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 14px;
+    fill: #333;
+    text-anchor: middle;
+    dominant-baseline: central;
+    pointer-events: none;
+    user-select: none;
+}
+
+/* Connection Lines */
+.connection-line {
+    stroke: #333;
+    stroke-width: 2;
+    fill: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.connection-line:hover {
+    stroke: #667eea;
+    stroke-width: 3;
+}
+
+.connection-line.selected {
+    stroke: #667eea;
+    stroke-width: 3;
+    stroke-dasharray: 5, 5;
+    animation: dash 1s linear infinite;
+}
+
+.connection-line.dotted {
+    stroke-dasharray: 5, 5;
+}
+
+.connection-line.thick {
+    stroke-width: 4;
+}
+
+/* Connection Label */
+.connection-label {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 12px;
+    fill: #666;
+    text-anchor: middle;
+    pointer-events: none;
+}
+
+/* Connection Preview Line */
+.connection-preview-line {
+    stroke: #667eea;
+    stroke-width: 2;
+    stroke-dasharray: 5, 5;
+    fill: none;
+    pointer-events: none;
+}
+
+/* Resize Handles */
+.resize-handle {
+    fill: #667eea;
+    stroke: white;
+    stroke-width: 1;
+    cursor: nw-resize;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.diagram-element:hover .resize-handle,
+.diagram-element.selected .resize-handle {
+    opacity: 1;
+}
+
+.resize-handle.nw {
+    cursor: nw-resize;
+}
+
+.resize-handle.ne {
+    cursor: ne-resize;
+}
+
+.resize-handle.sw {
+    cursor: sw-resize;
+}
+
+.resize-handle.se {
+    cursor: se-resize;
+}
+
+.resize-handle.n,
+.resize-handle.s {
+    cursor: ns-resize;
+}
+
+.resize-handle.e,
+.resize-handle.w {
+    cursor: ew-resize;
+}
+
+/* Connection Points */
+.connection-point {
+    fill: #667eea;
+    stroke: white;
+    stroke-width: 2;
+    opacity: 0;
+    cursor: crosshair;
+    transition: opacity 0.2s, r 0.2s;
+}
+
+.diagram-element:hover .connection-point {
+    opacity: 0.7;
+}
+
+.connection-point:hover {
+    opacity: 1;
+    r: 6;
+}
+
+/* Selection Rectangle */
+.selection-rectangle {
+    fill: rgba(102, 126, 234, 0.1);
+    stroke: #667eea;
+    stroke-width: 1;
+    stroke-dasharray: 5, 5;
+}
+
+/* Grid Lines */
+.grid-line {
+    stroke: #e0e0e0;
+    stroke-width: 1;
+    opacity: 0.5;
+}
+
+.grid-major {
+    stroke: #d0d0d0;
+    stroke-width: 1;
+    opacity: 0.7;
+}
+
+/* Remote User Indicators */
+.remote-selection {
+    stroke: var(--user-color, #ff6b6b);
+    stroke-width: 2;
+    stroke-dasharray: 3, 3;
+    fill: none;
+    opacity: 0.7;
+}
+
+/* Animations */
+@keyframes dash {
+    to {
+        stroke-dashoffset: -10;
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* Node States */
+.node-error {
+    stroke: #dc3545 !important;
+    stroke-width: 3 !important;
+}
+
+.node-warning {
+    stroke: #ffc107 !important;
+    stroke-width: 3 !important;
+}
+
+.node-success {
+    stroke: #28a745 !important;
+    stroke-width: 3 !important;
+}
+
+/* Node Colors */
+.node-primary {
+    fill: #e3f2fd;
+    stroke: #1976d2;
+}
+
+.node-secondary {
+    fill: #f3e5f5;
+    stroke: #7b1fa2;
+}
+
+.node-success {
+    fill: #e8f5e9;
+    stroke: #388e3c;
+}
+
+.node-danger {
+    fill: #ffebee;
+    stroke: #d32f2f;
+}
+
+.node-warning {
+    fill: #fff3e0;
+    stroke: #f57c00;
+}
+
+.node-info {
+    fill: #e1f5fe;
+    stroke: #0288d1;
+}

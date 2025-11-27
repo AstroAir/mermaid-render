@@ -1,0 +1,197 @@
+/**
+ * Minimap Component Styles
+ */
+
+/* Minimap Container */
+.minimap {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 200px;
+    height: 150px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    z-index: 100;
+}
+
+/* Minimap Header */
+.minimap-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.25rem 0.5rem;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 0.7rem;
+    color: #666;
+}
+
+.minimap-header-title {
+    font-weight: 500;
+}
+
+.minimap-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px;
+    color: #999;
+    font-size: 0.8rem;
+}
+
+.minimap-toggle:hover {
+    color: #666;
+}
+
+/* Minimap Canvas */
+.minimap-canvas {
+    width: 100%;
+    height: calc(100% - 24px);
+    background: #fafafa;
+}
+
+/* Minimap Viewport Indicator */
+.minimap-viewport {
+    fill: rgba(102, 126, 234, 0.2);
+    stroke: #667eea;
+    stroke-width: 2;
+    cursor: move;
+}
+
+.minimap-viewport:hover {
+    fill: rgba(102, 126, 234, 0.3);
+}
+
+/* Minimap Elements */
+.minimap-element {
+    fill: #e0e0e0;
+    stroke: #999;
+    stroke-width: 0.5;
+}
+
+.minimap-connection {
+    stroke: #ccc;
+    stroke-width: 0.5;
+    fill: none;
+}
+
+/* Minimap States */
+.minimap.collapsed {
+    width: 40px;
+    height: 40px;
+}
+
+.minimap.collapsed .minimap-canvas,
+.minimap.collapsed .minimap-header-title {
+    display: none;
+}
+
+.minimap.collapsed .minimap-header {
+    justify-content: center;
+    height: 100%;
+    border-bottom: none;
+}
+
+/* Minimap Dragging */
+.minimap.dragging .minimap-viewport {
+    cursor: grabbing;
+}
+
+/* Minimap Zoom Indicator */
+.minimap-zoom {
+    position: absolute;
+    bottom: 4px;
+    left: 4px;
+    font-size: 0.65rem;
+    color: #999;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 1px 4px;
+    border-radius: 2px;
+}
+
+/* Minimap Resize Handle */
+.minimap-resize {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 10px;
+    height: 10px;
+    cursor: nw-resize;
+}
+
+/* Minimap Sizes */
+.minimap.small {
+    width: 150px;
+    height: 100px;
+}
+
+.minimap.large {
+    width: 250px;
+    height: 180px;
+}
+
+/* Minimap Position Variants */
+.minimap.top-left {
+    bottom: auto;
+    right: auto;
+    top: 20px;
+    left: 20px;
+}
+
+.minimap.top-right {
+    bottom: auto;
+    top: 20px;
+}
+
+.minimap.bottom-left {
+    right: auto;
+    left: 20px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .minimap {
+        width: 120px;
+        height: 90px;
+        bottom: 10px;
+        right: 10px;
+    }
+
+    .minimap-header {
+        display: none;
+    }
+
+    .minimap-canvas {
+        height: 100%;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    .minimap {
+        background: #2d2d2d;
+        border-color: #444;
+    }
+
+    .minimap-header {
+        background: #333;
+        border-color: #444;
+        color: #aaa;
+    }
+
+    .minimap-canvas {
+        background: #252525;
+    }
+
+    .minimap-element {
+        fill: #444;
+        stroke: #666;
+    }
+
+    .minimap-connection {
+        stroke: #555;
+    }
+}

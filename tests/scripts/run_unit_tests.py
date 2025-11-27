@@ -106,6 +106,49 @@ def get_test_suites() -> List[str]:
 
         # Interactive module tests
         "tests/unit/interactive/test_builder.py",
+        "tests/unit/interactive/test_export.py",
+        "tests/unit/interactive/test_security.py",
+        "tests/unit/interactive/test_templates.py",
+        "tests/unit/interactive/test_ui_components.py",
+        "tests/unit/interactive/test_utils.py",
+        # Interactive builder tests
+        "tests/unit/interactive/builder/test_diagram_builder.py",
+        "tests/unit/interactive/builder/test_element_manager.py",
+        "tests/unit/interactive/builder/test_connection_manager.py",
+        "tests/unit/interactive/builder/test_event_manager.py",
+        "tests/unit/interactive/builder/test_serialization.py",
+        # Interactive builder codegen tests
+        "tests/unit/interactive/builder/codegen/test_base.py",
+        "tests/unit/interactive/builder/codegen/test_flowchart.py",
+        "tests/unit/interactive/builder/codegen/test_sequence.py",
+        "tests/unit/interactive/builder/codegen/test_class_diagram.py",
+        # Interactive builder parsers tests
+        "tests/unit/interactive/builder/parsers/test_base.py",
+        "tests/unit/interactive/builder/parsers/test_flowchart.py",
+        "tests/unit/interactive/builder/parsers/test_sequence.py",
+        "tests/unit/interactive/builder/parsers/test_class_diagram.py",
+        "tests/unit/interactive/builder/parsers/test_er_diagram.py",
+        "tests/unit/interactive/builder/parsers/test_state_diagram.py",
+        # Interactive models tests
+        "tests/unit/interactive/models/test_elements.py",
+        "tests/unit/interactive/models/test_enums.py",
+        "tests/unit/interactive/models/test_geometry.py",
+        # Interactive routes tests
+        "tests/unit/interactive/routes/test_elements.py",
+        "tests/unit/interactive/routes/test_preview.py",
+        "tests/unit/interactive/routes/test_sessions.py",
+        # Interactive server tests
+        "tests/unit/interactive/server/test_interactive_server.py",
+        "tests/unit/interactive/server/test_app_factory.py",
+        "tests/unit/interactive/server/test_middleware.py",
+        "tests/unit/interactive/server/test_page_routes.py",
+        "tests/unit/interactive/server/test_router_registration.py",
+        "tests/unit/interactive/server/test_websocket_endpoint.py",
+        # Interactive websocket tests
+        "tests/unit/interactive/websocket/test_websocket_handler.py",
+        "tests/unit/interactive/websocket/test_session_manager.py",
+        "tests/unit/interactive/websocket/test_message_dispatcher.py",
+        "tests/unit/interactive/websocket/test_broadcast_service.py",
 
         # Validator tests
         "tests/unit/validators/test_validator.py",

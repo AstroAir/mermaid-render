@@ -1,0 +1,184 @@
+/**
+ * Context Menu Styles
+ */
+
+/* Context Menu Container */
+.context-menu {
+    position: absolute;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    padding: 0.5rem 0;
+    min-width: 180px;
+    z-index: 1000;
+    display: none;
+    animation: contextMenuFadeIn 0.15s ease;
+}
+
+.context-menu.show {
+    display: block;
+}
+
+/* Context Menu Item */
+.context-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.5rem 1rem;
+    border: none;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #333;
+    transition: background-color 0.2s;
+}
+
+.context-menu-item:hover {
+    background: #f8f9fa;
+}
+
+.context-menu-item:active {
+    background: #e9ecef;
+}
+
+.context-menu-item:disabled {
+    color: #999;
+    cursor: not-allowed;
+}
+
+.context-menu-item:disabled:hover {
+    background: none;
+}
+
+/* Context Menu Item Icon */
+.context-menu-item-icon {
+    width: 20px;
+    text-align: center;
+    font-size: 1rem;
+    opacity: 0.8;
+}
+
+/* Context Menu Item Text */
+.context-menu-item-text {
+    flex: 1;
+}
+
+/* Context Menu Item Shortcut */
+.context-menu-item-shortcut {
+    font-size: 0.75rem;
+    color: #999;
+    margin-left: auto;
+}
+
+/* Context Menu Separator */
+.context-menu-separator {
+    height: 1px;
+    background: #e0e0e0;
+    margin: 0.5rem 0;
+}
+
+/* Context Menu Submenu */
+.context-menu-submenu {
+    position: relative;
+}
+
+.context-menu-submenu::after {
+    content: '▶';
+    font-size: 0.6rem;
+    color: #999;
+    margin-left: auto;
+}
+
+.context-menu-submenu-content {
+    position: absolute;
+    left: 100%;
+    top: 0;
+    display: none;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    padding: 0.5rem 0;
+    min-width: 150px;
+}
+
+.context-menu-submenu:hover .context-menu-submenu-content {
+    display: block;
+}
+
+/* Context Menu Header */
+.context-menu-header {
+    padding: 0.5rem 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Context Menu Checkbox Item */
+.context-menu-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.context-menu-checkbox input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #667eea;
+}
+
+/* Context Menu Radio Item */
+.context-menu-radio {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.context-menu-radio input[type="radio"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #667eea;
+}
+
+/* Context Menu with Icons */
+.context-menu-with-icons .context-menu-item {
+    padding-left: 2.5rem;
+}
+
+.context-menu-with-icons .context-menu-item-icon {
+    position: absolute;
+    left: 0.75rem;
+}
+
+/* Danger Item */
+.context-menu-item.danger {
+    color: #dc3545;
+}
+
+.context-menu-item.danger:hover {
+    background: #fff5f5;
+}
+
+/* Animation */
+@keyframes contextMenuFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Responsive - Touch Devices */
+@media (hover: none) {
+    .context-menu-item {
+        padding: 0.75rem 1rem;
+    }
+}

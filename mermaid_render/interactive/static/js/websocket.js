@@ -102,6 +102,12 @@ class WebSocketClient {
             case 'connection_updated':
                 this.handleConnectionUpdate(message);
                 break;
+            case 'connection_added':
+                this.handleConnectionAdded(message);
+                break;
+            case 'connection_removed':
+                this.handleConnectionRemoved(message);
+                break;
             case 'client_update':
                 this.handleClientUpdate(message);
                 break;
@@ -159,6 +165,28 @@ class WebSocketClient {
         }
 
         this.emit('connection_update', message);
+    }
+
+    handleConnectionAdded(message) {
+        console.log('Connection added:', message);
+
+        // Add connection to local diagram builder
+        if (window.diagramBuilder && message.connection) {
+            window.diagramBuilder.addConnectionFromRemote(message.connection);
+        }
+
+        this.emit('connection_added', message);
+    }
+
+    handleConnectionRemoved(message) {
+        console.log('Connection removed:', message);
+
+        // Remove connection from local diagram builder
+        if (window.diagramBuilder && message.connection_id) {
+            window.diagramBuilder.removeConnectionFromRemote(message.connection_id);
+        }
+
+        this.emit('connection_removed', message);
     }
 
     handleClientUpdate(message) {

@@ -1,0 +1,272 @@
+/**
+ * Tabs Component Styles
+ */
+
+/* Tab Container */
+.panel-tabs {
+    display: flex;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+/* Tab Button */
+.tab-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #666;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.tab-btn:hover {
+    background: #e9ecef;
+    color: #333;
+}
+
+.tab-btn.active {
+    color: #667eea;
+    border-bottom-color: #667eea;
+    background: white;
+}
+
+.tab-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Tab Badge */
+.tab-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    margin-left: 0.5rem;
+    background: #dc3545;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 600;
+    border-radius: 9px;
+}
+
+.tab-btn.active .tab-badge {
+    background: #667eea;
+}
+
+/* Tab Content */
+.tab-content {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Tab Pane */
+.tab-pane {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 1rem;
+    display: none;
+    overflow: auto;
+}
+
+.tab-pane.active {
+    display: block;
+}
+
+/* Tab Pane Animations */
+.tab-pane.fade {
+    opacity: 0;
+    transition: opacity 0.15s linear;
+}
+
+.tab-pane.fade.active {
+    opacity: 1;
+}
+
+.tab-pane.slide {
+    transform: translateX(20px);
+    opacity: 0;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.tab-pane.slide.active {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+/* Vertical Tabs */
+.tabs-vertical {
+    display: flex;
+}
+
+.tabs-vertical .panel-tabs {
+    flex-direction: column;
+    border-bottom: none;
+    border-right: 1px solid #e0e0e0;
+    min-width: 150px;
+}
+
+.tabs-vertical .tab-btn {
+    border-bottom: none;
+    border-left: 2px solid transparent;
+    text-align: left;
+}
+
+.tabs-vertical .tab-btn.active {
+    border-left-color: #667eea;
+    border-bottom: none;
+}
+
+.tabs-vertical .tab-content {
+    flex: 1;
+}
+
+/* Pill Tabs */
+.tabs-pills .panel-tabs {
+    background: transparent;
+    border-bottom: none;
+    gap: 0.5rem;
+    padding: 0.5rem;
+}
+
+.tabs-pills .tab-btn {
+    border-radius: 20px;
+    border-bottom: none;
+    padding: 0.5rem 1rem;
+}
+
+.tabs-pills .tab-btn.active {
+    background: #667eea;
+    color: white;
+}
+
+/* Boxed Tabs */
+.tabs-boxed .panel-tabs {
+    background: transparent;
+    border-bottom: none;
+    gap: 0;
+}
+
+.tabs-boxed .tab-btn {
+    border: 1px solid #e0e0e0;
+    border-bottom: none;
+    margin-right: -1px;
+    border-radius: 4px 4px 0 0;
+}
+
+.tabs-boxed .tab-btn.active {
+    background: white;
+    border-bottom: 1px solid white;
+    margin-bottom: -1px;
+}
+
+/* Centered Tabs */
+.tabs-centered .panel-tabs {
+    justify-content: center;
+}
+
+/* Right-aligned Tabs */
+.tabs-right .panel-tabs {
+    justify-content: flex-end;
+}
+
+/* Full-width Tabs */
+.tabs-full .tab-btn {
+    flex: 1;
+    text-align: center;
+}
+
+/* Tab Icon */
+.tab-icon {
+    margin-right: 0.5rem;
+}
+
+/* Tab Close Button */
+.tab-close {
+    margin-left: 0.5rem;
+    padding: 2px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    opacity: 0.5;
+    font-size: 0.8rem;
+    line-height: 1;
+}
+
+.tab-close:hover {
+    opacity: 1;
+}
+
+/* Scrollable Tabs */
+.tabs-scrollable {
+    position: relative;
+}
+
+.tabs-scrollable .panel-tabs {
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.tabs-scrollable .panel-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.tabs-scroll-btn {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 30px;
+    background: linear-gradient(to right, white, transparent);
+    border: none;
+    cursor: pointer;
+    z-index: 1;
+}
+
+.tabs-scroll-btn.left {
+    left: 0;
+}
+
+.tabs-scroll-btn.right {
+    right: 0;
+    background: linear-gradient(to left, white, transparent);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .tab-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+    }
+
+    .tabs-vertical {
+        flex-direction: column;
+    }
+
+    .tabs-vertical .panel-tabs {
+        flex-direction: row;
+        border-right: none;
+        border-bottom: 1px solid #e0e0e0;
+        min-width: auto;
+        overflow-x: auto;
+    }
+
+    .tabs-vertical .tab-btn {
+        border-left: none;
+        border-bottom: 2px solid transparent;
+    }
+
+    .tabs-vertical .tab-btn.active {
+        border-left: none;
+        border-bottom-color: #667eea;
+    }
+}

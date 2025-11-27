@@ -20,6 +20,7 @@ anthropic>=0.60.0
 ipython>=8.18.1
 uvicorn>=0.35.0
 fastapi>=0.116.1
+websockets>=11.0.0
 
 # Image processing dependencies
 cairosvg>=2.8.2

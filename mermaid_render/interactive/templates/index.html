@@ -4,8 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mermaid Interactive Builder</title>
+    
+    <!-- Base Styles -->
     <link rel="stylesheet" href="/static/css/main.css">
-    <link rel="stylesheet" href="/static/css/components.css">
+    
+    <!-- Component Styles -->
+    <link rel="stylesheet" href="/static/css/components/modal.css">
+    <link rel="stylesheet" href="/static/css/components/tooltip.css">
+    
+    <!-- Mermaid Library -->
     <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
 </head>
 <body>
@@ -99,6 +106,12 @@
         </footer>
     </div>
 
+    <!-- UI Modules -->
+    <script src="/static/js/ui/QuickNavigation.js"></script>
+    <script src="/static/js/ui/Notification.js"></script>
+    <script src="/static/js/ui/AnimationObserver.js"></script>
+    
+    <!-- Main Application -->
     <script src="/static/js/main.js"></script>
 </body>
 </html>

@@ -4,9 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ diagram_type.title() }} Builder - Mermaid Interactive</title>
+    
+    <!-- Base Styles -->
     <link rel="stylesheet" href="/static/css/main.css">
     <link rel="stylesheet" href="/static/css/builder.css">
-    <link rel="stylesheet" href="/static/css/components.css">
+    
+    <!-- Component Styles -->
+    <link rel="stylesheet" href="/static/css/components/modal.css">
+    <link rel="stylesheet" href="/static/css/components/export.css">
+    <link rel="stylesheet" href="/static/css/components/diagram-elements.css">
+    <link rel="stylesheet" href="/static/css/components/context-menu.css">
+    <link rel="stylesheet" href="/static/css/components/minimap.css">
+    <link rel="stylesheet" href="/static/css/components/tooltip.css">
+    <link rel="stylesheet" href="/static/css/components/toolbox.css">
+    <link rel="stylesheet" href="/static/css/components/properties.css">
+    <link rel="stylesheet" href="/static/css/components/tabs.css">
+    <link rel="stylesheet" href="/static/css/components/code-editor.css">
+    <link rel="stylesheet" href="/static/css/components/preview.css">
+    <link rel="stylesheet" href="/static/css/components/validation.css">
+    
+    <!-- Mermaid Library -->
     <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
 </head>
 <body>
@@ -197,7 +214,48 @@
         // Pass diagram type to JavaScript
         window.DIAGRAM_TYPE = '{{ diagram_type }}';
     </script>
-    <script src="/static/js/builder.js"></script>
-    <script src="/static/js/websocket.js"></script>
+    
+    <!-- Canvas Modules -->
+    <script src="/static/js/canvas/CanvasManager.js"></script>
+    <script src="/static/js/canvas/NodeRenderer.js"></script>
+    
+    <!-- Tool Modules -->
+    <script src="/static/js/tools/ToolManager.js"></script>
+    
+    <!-- Panel Modules -->
+    <script src="/static/js/panels/PropertiesPanel.js"></script>
+    <script src="/static/js/panels/TabManager.js"></script>
+    
+    <!-- Code Modules -->
+    <script src="/static/js/code/CodeGenerator.js"></script>
+    <script src="/static/js/code/CodeValidator.js"></script>
+    
+    <!-- Preview Module -->
+    <script src="/static/js/preview/PreviewManager.js"></script>
+    
+    <!-- Export Module -->
+    <script src="/static/js/export/ExportManager.js"></script>
+    
+    <!-- Template Module -->
+    <script src="/static/js/templates/TemplateManager.js"></script>
+    
+    <!-- Input Modules -->
+    <script src="/static/js/input/KeyboardHandler.js"></script>
+    <script src="/static/js/input/MouseHandler.js"></script>
+    
+    <!-- UI Modules -->
+    <script src="/static/js/ui/QuickNavigation.js"></script>
+    <script src="/static/js/ui/Notification.js"></script>
+    <script src="/static/js/ui/AnimationObserver.js"></script>
+    
+    <!-- WebSocket Modules -->
+    <script src="/static/js/websocket/EventEmitter.js"></script>
+    <script src="/static/js/websocket/WebSocketConnection.js"></script>
+    <script src="/static/js/websocket/MessageHandler.js"></script>
+    <script src="/static/js/websocket/CursorSync.js"></script>
+    
+    <!-- Main Application -->
+    <script src="/static/js/DiagramBuilder.js"></script>
+    <script src="/static/js/WebSocketClient.js"></script>
 </body>
 </html>

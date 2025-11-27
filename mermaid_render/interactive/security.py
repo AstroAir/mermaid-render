@@ -243,10 +243,16 @@ class SecurityValidator:
     """Validates security aspects of requests."""
 
     ALLOWED_ORIGINS: set[str] = {
+        # Default FastAPI dev server ports
         "http://localhost:8000",
         "http://127.0.0.1:8000",
         "https://localhost:8000",
         "https://127.0.0.1:8000",
+        # Interactive builder defaults
+        "http://localhost:8080",
+        "http://127.0.0.1:8080",
+        "https://localhost:8080",
+        "https://127.0.0.1:8080",
     }
 
     @classmethod

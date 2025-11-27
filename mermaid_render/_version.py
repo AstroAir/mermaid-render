@@ -12,10 +12,11 @@ __all__ = [
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
+    from typing import Tuple
     from typing import Union
 
-    VERSION_TUPLE = tuple[int | str, ...]
-    COMMIT_ID = Union[str, None]  # noqa: UP007
+    VERSION_TUPLE = Tuple[Union[int, str], ...]
+    COMMIT_ID = Union[str, None]
 else:
     VERSION_TUPLE = object
     COMMIT_ID = object
@@ -27,7 +28,7 @@ version_tuple: VERSION_TUPLE
 commit_id: COMMIT_ID
 __commit_id__: COMMIT_ID
 
-__version__ = version = "0.0.1.dev18+g0d41bc655.d20250922"
-__version_tuple__ = version_tuple = (0, 0, 1, "dev18", "g0d41bc655.d20250922")
+__version__ = version = '0.0.1.dev20+g6e5f2e9b4.d20251127'
+__version_tuple__ = version_tuple = (0, 0, 1, 'dev20', 'g6e5f2e9b4.d20251127')
 
 __commit_id__ = commit_id = None
