@@ -1,6 +1,6 @@
-# Mermaid Render - Plugin-Based Renderer System
+# Renderers Module
 
-This directory contains the plugin-based renderer architecture for Mermaid Render, providing a flexible and extensible system for rendering Mermaid diagrams using multiple backends.
+This module contains the plugin-based renderer architecture for Mermaid Render, providing a flexible and extensible system for rendering Mermaid diagrams using multiple backends.
 
 ## Architecture Overview
 

@@ -1,4 +1,6 @@
-# Mermaid Render API Documentation
+# API Overview
+
+This guide provides a comprehensive overview of the Mermaid Render API.
 
 ## Core API
 

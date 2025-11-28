@@ -160,6 +160,11 @@ nav:
       - Collaboration: user-guide/collaboration.md
       - Interactive Features: user-guide/interactive.md
       - Templates: user-guide/templates.md
+  - Guides:
+      - guides/index.md
+      - Quick Start Guide: guides/quick-start.md
+      - API Overview: guides/api-overview.md
+      - AI Enhancement: guides/ai-enhancement.md
   - Examples:
       - examples/index.md
       - Flowcharts: examples/flowcharts.md
@@ -167,6 +172,20 @@ nav:
       - Class Diagrams: examples/class-diagrams.md
       - State Diagrams: examples/state-diagrams.md
       - Other Types: examples/other-types.md
+  - Architecture:
+      - architecture/index.md
+      - System Overview: architecture/overview.md
+      - Modules:
+          - architecture/modules/index.md
+          - AI Module: architecture/modules/ai.md
+          - Config Module: architecture/modules/config.md
+          - Interactive Module: architecture/modules/interactive.md
+          - MCP Server: architecture/modules/mcp.md
+          - Models Module: architecture/modules/models.md
+          - Renderers Module: architecture/modules/renderers.md
+          - Templates Module: architecture/modules/templates.md
+          - Utils Module: architecture/modules/utils.md
+          - Validators Module: architecture/modules/validators.md
   - API Reference:
       - api-reference/index.md
       - Core: api-reference/core.md
@@ -187,6 +206,8 @@ nav:
       - Development Setup: development/setup.md
       - Testing: development/testing.md
       - Release Process: development/release.md
+  - Internal:
+      - internal/index.md
 
 # Extra
 extra:

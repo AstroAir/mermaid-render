@@ -1,6 +1,6 @@
-# Enhanced MCP Server for Mermaid Render
+# MCP Server Module
 
-This directory contains the comprehensive Model Context Protocol (MCP) server implementation for mermaid-render, featuring AI-powered tools, resources, and prompts.
+This module contains the comprehensive Model Context Protocol (MCP) server implementation for mermaid-render, featuring AI-powered tools, resources, and prompts.
 
 ## Quick Start
 
@@ -273,8 +273,7 @@ mermaid_render/mcp/
 ├── prompts.py            # Core prompt implementations
 ├── extended_prompts.py   # Extended prompt implementations
 ├── resources.py          # Core resource implementations
-├── extended_resources.py # Extended resource implementations
-└── README.md             # This file
+└── extended_resources.py # Extended resource implementations
 ```
 
 ## Troubleshooting
@@ -311,5 +310,5 @@ mermaid-render-mcp --log-level DEBUG
 2. Add new prompts in `extended_prompts.py`
 3. Add new resources in `extended_resources.py`
 4. Register in respective `register_*` functions
-5. Update this README
+5. Update this documentation
 6. Add tests in `tests/integration/test_mcp_server_integration.py`

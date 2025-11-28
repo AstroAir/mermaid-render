@@ -1,15 +1,15 @@
-# AI Module Improvement Guide
+# AI Module Enhancement Guide
 
-This document describes the improved AI module features in mermaid-render, including new providers, custom provider support, and utility functions.
+This guide describes the enhanced AI module features in mermaid-render, including new providers, custom provider support, and utility functions.
 
 ## Overview
 
-The improved AI module provides:
+The enhanced AI module provides:
 
 1. **Optimized Core Providers**: Improved OpenAI and Anthropic providers with better error handling
 2. **OpenRouter Integration**: Access to hundreds of AI models through OpenRouter's unified API
 3. **Custom Provider Architecture**: Flexible framework for integrating any AI API
-4. **Improved Utilities**: New functions for batch processing, performance comparison, and validation
+4. **Enhanced Utilities**: New functions for batch processing, performance comparison, and validation
 5. **Provider Management**: Automatic fallback and multi-provider support
 
 ## Quick Start
@@ -216,7 +216,7 @@ validation_result = validate_diagram_with_ai(
 )
 ```
 
-## Configuration Examples
+## Configuration
 
 ### Environment Variables
 
@@ -345,6 +345,14 @@ config = ProviderConfig(api_key="key", model="gpt-4")
 provider = OpenAIProvider(config)
 ```
 
+## Key Benefits
+
+1. **Reliability**: Automatic fallback between providers
+2. **Flexibility**: Support for any AI API through custom providers
+3. **Performance**: Batch processing and performance monitoring
+4. **Quality**: AI-powered validation and optimization
+5. **Cost Optimization**: Access to hundreds of models via OpenRouter
+
 ## Troubleshooting
 
 ### Common Issues
@@ -362,9 +370,3 @@ Enable debug logging:
 import logging
 logging.basicConfig(level=logging.DEBUG)
 ```
-
-## Next Steps
-
-- Explore the examples in `/examples/ai_features_showcase.py`
-- Check the API reference for detailed parameter descriptions
-- Join our community for support and feature requests
