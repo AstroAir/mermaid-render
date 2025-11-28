@@ -37,6 +37,7 @@ for theme in themes:
 ```
 
 Common built-in themes:
+
 - **default**: Clean, professional appearance
 - **dark**: Dark mode with light text
 - **neutral**: Minimal, grayscale design

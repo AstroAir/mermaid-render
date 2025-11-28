@@ -31,8 +31,8 @@ class TestEdgeCaseHandling:
         assert isinstance(mermaid_code, str)
         assert "flowchart" in mermaid_code
 
-        # Should be renderable without errors
-        renderer = MermaidRenderer()
+        # Should be renderable without errors (use legacy mode for direct mocking)
+        renderer = MermaidRenderer(use_plugin_system=False)
         with patch("mermaid_render.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
             mock_obj = Mock()
             mock_obj.__str__ = Mock(return_value="<svg>empty diagram</svg>")
@@ -52,8 +52,8 @@ class TestEdgeCaseHandling:
         assert "single" in mermaid_code
         assert "Single Node" in mermaid_code
 
-        # Should render without issues
-        renderer = MermaidRenderer()
+        # Should render without issues (use legacy mode for direct mocking)
+        renderer = MermaidRenderer(use_plugin_system=False)
         with patch("mermaid_render.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
             mock_obj = Mock()
             mock_obj.__str__ = Mock(return_value="<svg>single node</svg>")
@@ -399,7 +399,7 @@ class TestRenderingRegressions:
     def test_rendering_empty_diagram(self) -> None:
         """Test rendering completely empty diagrams."""
         diagram = FlowchartDiagram()
-        renderer = MermaidRenderer()
+        renderer = MermaidRenderer(use_plugin_system=False)
 
         with patch("mermaid_render.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
             mock_obj = Mock()
@@ -419,7 +419,7 @@ class TestRenderingRegressions:
         diagram = FlowchartDiagram()
         diagram.add_node("A", "Node A")
 
-        renderer = MermaidRenderer()
+        renderer = MermaidRenderer(use_plugin_system=False)
 
         with patch("mermaid_render.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
             mock_obj = Mock()
@@ -440,7 +440,7 @@ class TestRenderingRegressions:
             if i > 0:
                 diagram.add_edge(f"node_{i-1}", f"node_{i}")
 
-        renderer = MermaidRenderer()
+        renderer = MermaidRenderer(use_plugin_system=False)
 
         with patch("mermaid_render.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
             mock_obj = Mock()
@@ -458,7 +458,7 @@ class TestConfigurationRegressions:
 
     def test_default_configuration(self) -> None:
         """Test that default configuration works."""
-        renderer = MermaidRenderer()
+        renderer = MermaidRenderer(use_plugin_system=False)
         diagram = FlowchartDiagram()
         diagram.add_node("test", "Test")
 
@@ -474,8 +474,8 @@ class TestConfigurationRegressions:
 
     def test_multiple_renderer_instances(self) -> None:
         """Test that multiple renderer instances work independently."""
-        renderer1 = MermaidRenderer()
-        renderer2 = MermaidRenderer()
+        renderer1 = MermaidRenderer(use_plugin_system=False)
+        renderer2 = MermaidRenderer(use_plugin_system=False)
 
         diagram = FlowchartDiagram()
         diagram.add_node("test", "Test")

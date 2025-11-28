@@ -123,7 +123,8 @@ class TestBasicWorkflows:
             mock_obj.__str__ = Mock(return_value="<svg>quick render</svg>")
             mock_mermaid.return_value = mock_obj
 
-            result = quick_render(mermaid_code, format="svg")
+            # Use legacy mode for direct mocking
+            result = quick_render(mermaid_code, format="svg", use_plugin_system=False)
 
             assert (
                 result == '<svg xmlns="http://www.w3.org/2000/svg">quick render</svg>'
@@ -300,8 +301,8 @@ class TestComplexWorkflows:
         assert result.endswith("</svg>")
 
         # Test unsupported formats should raise RenderingError (wrapping UnsupportedFormatError)
-        for unsupported_format in ["png", "pdf"]:
-            with pytest.raises(RenderingError):
+        for unsupported_format in ["webp", "gif", "bmp"]:
+            with pytest.raises((RenderingError, UnsupportedFormatError)):
                 renderer.render(diagram, format=unsupported_format)
 
     def test_theme_variation_workflow(self) -> None:

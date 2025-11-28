@@ -235,6 +235,7 @@ mermaid_render/
    - Add examples
 
 4. **Export in **init**.py**
+
    ```python
    from .models.new_diagram import NewDiagram
    __all__ = [..., "NewDiagram"]
@@ -394,7 +395,7 @@ We value all contributions and recognize contributors in:
 - **Core Contributor**: Significant ongoing contributions
 - **Maintainer**: Commit access and release responsibilities
 
-## Thank You!
+## Thank You
 
 Every contribution, no matter how small, helps make Mermaid Render better for everyone. We appreciate your time and effort in improving the project!
 

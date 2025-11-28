@@ -210,7 +210,8 @@ class TestMermaidRenderer:
     ) -> None:
         """Test rendering with validation disabled."""
         config = MermaidConfig(validate_syntax=False)
-        renderer = MermaidRenderer(config=config)
+        # Use legacy mode for direct mocking
+        renderer = MermaidRenderer(config=config, use_plugin_system=False)
 
         mock_instance = Mock()
         mock_instance.__str__ = Mock(return_value="<svg>test</svg>")
@@ -338,9 +339,10 @@ class TestMermaidRenderer:
     def test_render_raw_with_theme(self, temp_dir: Any) -> None:
         """Test render_raw with theme configuration."""
         theme = MermaidTheme("dark", primaryColor="#custom")
-        renderer = MermaidRenderer(theme=theme)
+        # Use legacy mode for direct mocking
+        renderer = MermaidRenderer(theme=theme, use_plugin_system=False)
 
-        with patch("mermaid_render.core.md.Mermaid") as mock_mermaid:
+        with patch("mermaid_render.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
             mock_instance = Mock()
             mock_instance.__str__ = Mock(return_value="<svg>themed</svg>")
             mock_mermaid.return_value = mock_instance
@@ -351,9 +353,9 @@ class TestMermaidRenderer:
 
     def test_render_raw_unsupported_format(self, mermaid_renderer: Any) -> None:
         """Test render_raw with unsupported format."""
-        # render_raw only supports svg format, png should raise error
+        # Test with an actually unsupported format
         with pytest.raises((RenderingError, UnsupportedFormatError)):
-            mermaid_renderer.render_raw("flowchart TD\n    A --> B", format="png")
+            mermaid_renderer.render_raw("flowchart TD\n    A --> B", format="webp")
 
     def test_render_raw_exception_handling(self, mermaid_renderer: Any) -> None:
         """Test render_raw exception handling."""

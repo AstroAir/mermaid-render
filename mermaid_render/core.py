@@ -857,8 +857,10 @@ class MermaidRenderer:
 
                 if format == "svg":
                     # Use SVG renderer
+                    # Pass validate_syntax config to SVG renderer
+                    validate = self.config.get("validate_syntax", True)
                     return self._svg_renderer.render(
-                        mermaid_code, theme=theme_name, config=options
+                        mermaid_code, theme=theme_name, config=options, validate=validate
                     )
                 elif format == "png":
                     # Use PNG renderer

@@ -206,7 +206,13 @@ class TestRendererManager:
     def test_render_success(self) -> None:
         """Test successful rendering."""
         registry = RendererRegistry()
-        registry.register(MockRenderer, "test_renderer")
+        
+        # Create a custom renderer class that uses the correct name
+        class TestRenderer(MockRenderer):
+            def __init__(self, **config: Any) -> None:
+                super().__init__(name="test_renderer", **config)
+        
+        registry.register(TestRenderer, "test_renderer")
         
         manager = RendererManager(registry=registry)
         
@@ -234,8 +240,13 @@ class TestRendererManager:
                 info.priority = RendererPriority.HIGHEST
                 return info
         
+        # Create a working renderer with correct name
+        class WorkingRenderer(MockRenderer):
+            def __init__(self, **config: Any) -> None:
+                super().__init__(name="working", **config)
+        
         registry.register(FailingRenderer, "failing")
-        registry.register(MockRenderer, "working")
+        registry.register(WorkingRenderer, "working")
         
         manager = RendererManager(registry=registry)
         

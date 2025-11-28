@@ -45,8 +45,8 @@ class TestEndToEndWorkflow:
         flowchart.add_edge("decision", "success", label="Yes")
         flowchart.add_edge("decision", "error", label="No")
 
-        # Render to SVG
-        renderer = MermaidRenderer()
+        # Render to SVG (use legacy mode for direct mocking)
+        renderer = MermaidRenderer(use_plugin_system=False)
         svg_content = renderer.render(flowchart, format="svg")
 
         assert (
@@ -90,8 +90,8 @@ class TestEndToEndWorkflow:
         # Add note
         sequence.add_note("Token expires in 1 hour", "auth", "right of")
 
-        # Render and save
-        renderer = MermaidRenderer(theme="dark")
+        # Render and save (use legacy mode for direct mocking)
+        renderer = MermaidRenderer(theme="dark", use_plugin_system=False)
         output_path = temp_dir / "sequence.svg"
         renderer.save(sequence, output_path)
 
@@ -114,13 +114,13 @@ flowchart TD
     D --> E
 """
 
-        # Test rendering without saving
-        result = quick_render(diagram_code, format="svg", theme="forest")
+        # Test rendering without saving (use legacy mode for direct mocking)
+        result = quick_render(diagram_code, format="svg", theme="forest", use_plugin_system=False)
         assert result == '<svg xmlns="http://www.w3.org/2000/svg">quick render</svg>'
 
         # Test rendering with saving
         output_path = temp_dir / "quick.svg"
-        result = quick_render(diagram_code, output_path=output_path, format="svg")
+        result = quick_render(diagram_code, output_path=output_path, format="svg", use_plugin_system=False)
 
         assert output_path.exists()
         # The content might be different due to different mock instances
@@ -143,9 +143,9 @@ flowchart TD
         flowchart.add_node("B", "Node B")
         flowchart.add_edge("A", "B")
 
-        # Export to file
+        # Export to file (use legacy mode for direct mocking)
         output_path = temp_dir / "exported.svg"
-        export_to_file(flowchart, output_path, theme="neutral")
+        export_to_file(flowchart, output_path, theme="neutral", use_plugin_system=False)
 
         assert output_path.exists()
         assert (
@@ -248,7 +248,7 @@ flowchart TD
         base_path = temp_dir / "diagram"
         formats = ["svg"]  # Only test SVG for now since others need mocking
 
-        paths = export_multiple_formats(flowchart, base_path, formats)
+        paths = export_multiple_formats(flowchart, base_path, formats, use_plugin_system=False)
 
         assert "svg" in paths
         assert paths["svg"].exists()

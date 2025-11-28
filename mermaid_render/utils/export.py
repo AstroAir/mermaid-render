@@ -18,6 +18,7 @@ def export_to_file(
     theme: str | None = None,
     config: dict[str, Any] | None = None,
     renderer: MermaidRenderer | None = None,
+    use_plugin_system: bool = True,
     **options: Any,
 ) -> None:
     """
@@ -66,7 +67,7 @@ def export_to_file(
         renderer_config = MermaidConfig()
         if config:
             renderer_config.update(config)
-        renderer = MermaidRenderer(config=renderer_config)
+        renderer = MermaidRenderer(config=renderer_config, use_plugin_system=use_plugin_system)
 
     # Set theme if provided
     if theme:
@@ -82,6 +83,7 @@ def export_multiple_formats(
     formats: list[str],
     theme: str | None = None,
     config: dict[str, Any] | None = None,
+    use_plugin_system: bool = True,
     **options: Any,
 ) -> dict[str, Path]:
     """
@@ -150,7 +152,7 @@ def export_multiple_formats(
     renderer_config = MermaidConfig()
     if config:
         renderer_config.update(config)
-    renderer = MermaidRenderer(config=renderer_config)
+    renderer = MermaidRenderer(config=renderer_config, use_plugin_system=use_plugin_system)
 
     if theme:
         renderer.set_theme(theme)

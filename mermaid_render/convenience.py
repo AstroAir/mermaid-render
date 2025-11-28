@@ -18,6 +18,7 @@ def quick_render(
     format: str = "svg",
     theme: str | None = None,
     config: dict[str, Any] | None = None,
+    use_plugin_system: bool = True,
 ) -> str | bytes:
     """
     Quick utility function to render Mermaid diagram code.
@@ -110,7 +111,7 @@ def quick_render(
     if config:
         renderer_config.update(config)
 
-    renderer = MermaidRenderer(config=renderer_config)
+    renderer = MermaidRenderer(config=renderer_config, use_plugin_system=use_plugin_system)
 
     if theme:
         renderer.set_theme(theme)
@@ -135,6 +136,7 @@ def render_to_file(
     format: str | None = None,
     theme: str | None = None,
     config: dict[str, Any] | None = None,
+    use_plugin_system: bool = True,
 ) -> bool:
     """
     Render diagram directly to file.
@@ -170,6 +172,7 @@ def render_to_file(
             theme=theme,
             config=config,
             output_path=output_path,
+            use_plugin_system=use_plugin_system,
         )
         return True
     except Exception:

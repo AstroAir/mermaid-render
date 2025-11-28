@@ -5,9 +5,15 @@ This module provides access to pre-built templates for common diagram
 patterns and use cases, as well as community-contributed templates.
 """
 
+import json
+import logging
 from datetime import datetime
+from pathlib import Path
 from typing import Any
+from urllib.error import URLError
+from urllib.request import Request, urlopen
 
+logger = logging.getLogger(__name__)
 
 class BuiltInTemplates:
     """
@@ -414,7 +420,235 @@ class CommunityTemplates:
         return False
 
     def _load_online_templates(self) -> None:
-        """Load templates from online community repository."""
-        # In a real implementation, this would fetch from a remote API
-        # For now, return empty - this is a placeholder for future functionality
-        pass
+        """
+        Load templates from online community repository.
+
+        Fetches templates from the configured community repository URL.
+        Falls back to cached templates if network is unavailable.
+        """
+        # Default community repository URL (can be configured)
+        repository_url = self._get_repository_url()
+        cache_file = self._get_cache_file()
+
+        try:
+            # Try to fetch from online repository
+            templates = self._fetch_online_templates(repository_url)
+
+            if templates:
+                # Update local templates
+                for template in templates:
+                    template_name = template.get("name")
+                    if template_name:
+                        # Add metadata
+                        template["source"] = "community"
+                        template["fetched_at"] = datetime.now().isoformat()
+                        self._templates[template_name] = template
+
+                # Cache the templates for offline use
+                self._cache_templates(templates, cache_file)
+
+                logger.info(
+                    f"Loaded {len(templates)} templates from community repository"
+                )
+
+        except (URLError, TimeoutError, json.JSONDecodeError) as e:
+            logger.warning(f"Failed to fetch online templates: {e}")
+            # Try to load from cache
+            self._load_cached_templates(cache_file)
+
+    def _get_repository_url(self) -> str:
+        """
+        Get the community repository URL.
+
+        Returns:
+            Repository URL string
+        """
+        # Default URL - can be overridden via environment variable or config
+        import os
+
+        return os.environ.get(
+            "MERMAID_COMMUNITY_TEMPLATES_URL",
+            "https://raw.githubusercontent.com/mermaid-js/mermaid/develop/packages/mermaid/src/docs/syntax/examples.json",
+        )
+
+    def _get_cache_file(self) -> Path:
+        """
+        Get the cache file path for offline templates.
+
+        Returns:
+            Path to cache file
+        """
+        cache_dir = Path.home() / ".mermaid_render_cache"
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        return cache_dir / "community_templates.json"
+
+    def _fetch_online_templates(self, url: str) -> list[dict[str, Any]]:
+        """
+        Fetch templates from online repository.
+
+        Args:
+            url: Repository URL
+
+        Returns:
+            List of template dictionaries
+        """
+        request = Request(
+            url,
+            headers={
+                "User-Agent": "mermaid-render/1.0.0",
+                "Accept": "application/json",
+            },
+        )
+
+        with urlopen(request, timeout=10) as response:
+            if response.status == 200:
+                data = json.loads(response.read().decode("utf-8"))
+
+                # Handle different response formats
+                if isinstance(data, list):
+                    return self._normalize_templates(data)
+                elif isinstance(data, dict):
+                    # If it's a dict with templates key
+                    if "templates" in data:
+                        return self._normalize_templates(data["templates"])
+                    # If it's a dict of templates by name
+                    return self._normalize_templates(list(data.values()))
+
+        return []
+
+    def _normalize_templates(self, raw_templates: list[Any]) -> list[dict[str, Any]]:
+        """
+        Normalize templates to consistent format.
+
+        Args:
+            raw_templates: Raw template data from various sources
+
+        Returns:
+            List of normalized template dictionaries
+        """
+        normalized = []
+
+        for item in raw_templates:
+            if not isinstance(item, dict):
+                continue
+
+            template = {
+                "id": item.get("id", f"community_{len(normalized)}"),
+                "name": item.get("name", item.get("title", f"Template {len(normalized)}")),
+                "description": item.get("description", ""),
+                "diagram_type": item.get("diagram_type", item.get("type", "flowchart")),
+                "template_content": item.get(
+                    "template_content", item.get("content", item.get("code", ""))
+                ),
+                "parameters": item.get("parameters", {}),
+                "tags": item.get("tags", []),
+                "author": item.get("author", "Community"),
+                "version": item.get("version", "1.0.0"),
+            }
+
+            # Only include templates with actual content
+            if template["template_content"]:
+                normalized.append(template)
+
+        return normalized
+
+    def _cache_templates(
+        self, templates: list[dict[str, Any]], cache_file: Path
+    ) -> None:
+        """
+        Cache templates to local file for offline use.
+
+        Args:
+            templates: Templates to cache
+            cache_file: Path to cache file
+        """
+        try:
+            cache_data = {
+                "cached_at": datetime.now().isoformat(),
+                "templates": templates,
+            }
+            with open(cache_file, "w", encoding="utf-8") as f:
+                json.dump(cache_data, f, indent=2)
+            logger.debug(f"Cached {len(templates)} templates to {cache_file}")
+        except OSError as e:
+            logger.warning(f"Failed to cache templates: {e}")
+
+    def _load_cached_templates(self, cache_file: Path) -> None:
+        """
+        Load templates from local cache.
+
+        Args:
+            cache_file: Path to cache file
+        """
+        if not cache_file.exists():
+            logger.debug("No cached templates found")
+            return
+
+        try:
+            with open(cache_file, encoding="utf-8") as f:
+                cache_data = json.load(f)
+
+            templates = cache_data.get("templates", [])
+            for template in templates:
+                template_name = template.get("name")
+                if template_name:
+                    template["source"] = "cache"
+                    self._templates[template_name] = template
+
+            logger.info(f"Loaded {len(templates)} templates from cache")
+
+        except (json.JSONDecodeError, OSError) as e:
+            logger.warning(f"Failed to load cached templates: {e}")
+
+    def refresh_templates(self) -> int:
+        """
+        Force refresh templates from online repository.
+
+        Returns:
+            Number of templates loaded
+        """
+        self._templates.clear()
+        self._load_online_templates()
+        return len(self._templates)
+
+    def search_templates(
+        self,
+        query: str | None = None,
+        diagram_type: str | None = None,
+        tags: list[str] | None = None,
+    ) -> list[dict[str, Any]]:
+        """
+        Search community templates.
+
+        Args:
+            query: Search query string
+            diagram_type: Filter by diagram type
+            tags: Filter by tags
+
+        Returns:
+            List of matching templates
+        """
+        results = []
+
+        for template in self._templates.values():
+            # Filter by diagram type
+            if diagram_type and template.get("diagram_type") != diagram_type:
+                continue
+
+            # Filter by tags
+            if tags:
+                template_tags = template.get("tags", [])
+                if not any(tag in template_tags for tag in tags):
+                    continue
+
+            # Filter by query
+            if query:
+                query_lower = query.lower()
+                name = template.get("name", "").lower()
+                description = template.get("description", "").lower()
+                if query_lower not in name and query_lower not in description:
+                    continue
+
+            results.append(template)
+
+        return results

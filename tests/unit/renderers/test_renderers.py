@@ -493,7 +493,8 @@ class TestPDFRenderer:
 
             renderer = PDFRenderer()
 
-            with pytest.raises(RenderingError, match="PDF rendering failed"):
+            # UnsupportedFormatError is bubbled up directly, not wrapped in RenderingError
+            with pytest.raises(UnsupportedFormatError, match="PDF rendering requires"):
                 renderer.render("flowchart TD\n    A --> B")
 
     def test_render_svg_failure(self) -> None:

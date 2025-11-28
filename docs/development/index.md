@@ -245,7 +245,7 @@ We recognize all contributors in:
 - 🧪 **Tests**: Look at existing tests for patterns
 - 📝 **Issues**: Check existing issues for context
 
-## 🎉 Welcome!
+## 🎉 Welcome
 
 We're excited to have you contribute to Mermaid Render! Whether you're:
 

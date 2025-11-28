@@ -4,6 +4,15 @@
 
 Mermaid Render is a comprehensive Python library designed with a modular, extensible architecture that supports multiple diagram types, rendering formats, and advanced features. The library follows clean architecture principles with clear separation of concerns and well-defined interfaces.
 
+**Key Architectural Patterns:**
+
+- **Plugin Registry Pattern**: Renderers register themselves with RendererRegistry, enabling runtime discovery and dynamic fallback chains
+- **Chain of Responsibility**: RendererManager tries multiple renderers in sequence if primary fails
+- **Template Method**: BaseRenderer defines rendering skeleton; subclasses implement specifics
+- **Factory**: RendererRegistry creates renderer instances based on requirements
+- **Strategy**: Different cache backends and AI providers implement common interfaces
+- **Facade**: MermaidRenderer simplifies complex plugin system for basic use cases
+
 ## System Architecture
 
 ```mermaid
@@ -12,10 +21,12 @@ graph TB
         CLI[CLI Interface]
         API[Python API]
         Interactive[Interactive Web UI]
+        MCP[MCP Server]
     end
 
     subgraph "Core Layer"
         Renderer[MermaidRenderer]
+        PluginRenderer[PluginMermaidRenderer]
         Config[Configuration]
         Themes[Theme Management]
     end
@@ -25,6 +36,7 @@ graph TB
         Sequence[SequenceDiagram]
         Class[ClassDiagram]
         State[StateDiagram]
+        Timeline[TimelineDiagram]
         Other[Other Diagrams...]
     end
 
@@ -33,37 +45,53 @@ graph TB
         Export[Export Service]
         Cache[Cache Service]
         AI[AI Service]
+        Templates[Template Service]
     end
 
     subgraph "Infrastructure Layer"
-        Renderers[Format Renderers]
+        RendererRegistry[Renderer Registry]
+        RendererManager[Renderer Manager]
+        SVGRenderer[SVG Renderer]
+        PNGRenderer[PNG Renderer]
+        PDFRenderer[PDF Renderer]
+        PlaywrightRenderer[Playwright Renderer]
+        NodeJSRenderer[Node.js Renderer]
+        GraphvizRenderer[Graphviz Renderer]
         Storage[Storage Backends]
         Providers[AI Providers]
-        External[External Services]
     end
 
     CLI --> Renderer
     API --> Renderer
-    Interactive --> Renderer
+    Interactive --> PluginRenderer
+    MCP --> PluginRenderer
 
     Renderer --> Config
     Renderer --> Themes
-    Renderer --> Validation
+    PluginRenderer --> RendererManager
+
+    RendererManager --> RendererRegistry
+    RendererRegistry --> SVGRenderer
+    RendererRegistry --> PNGRenderer
+    RendererRegistry --> PDFRenderer
+    RendererRegistry --> PlaywrightRenderer
+    RendererRegistry --> NodeJSRenderer
+    RendererRegistry --> GraphvizRenderer
 
     Renderer --> Flowchart
     Renderer --> Sequence
     Renderer --> Class
     Renderer --> State
+    Renderer --> Timeline
     Renderer --> Other
 
     Validation --> Export
     Export --> Cache
     Cache --> AI
+    AI --> Templates
 
-    Export --> Renderers
     Cache --> Storage
     AI --> Providers
-    Renderers --> External
 ```
 
 ## Core Components
@@ -86,6 +114,24 @@ The central rendering engine that orchestrates the entire rendering process.
 - `render()`: Main rendering method
 - `save()`: Render and save to file
 - `set_theme()`: Apply themes
+
+#### PluginMermaidRenderer
+
+Advanced renderer with plugin-based architecture and automatic fallback.
+
+**Responsibilities:**
+
+- Manage multiple rendering backends
+- Automatic renderer selection based on format and availability
+- Fallback chain execution when primary renderer fails
+- Health monitoring and benchmarking
+
+**Key Methods:**
+
+- `render()`: Render with automatic backend selection
+- `get_available_renderers()`: List available rendering backends
+- `get_renderer_status()`: Get health status of all renderers
+- `benchmark_renderers()`: Performance comparison of renderers
 
 #### Configuration System
 
@@ -201,6 +247,50 @@ Advanced AI-powered features for diagram generation and optimization.
 - Diagram optimization and layout
 - Smart suggestions and improvements
 - Automated diagram generation
+- Multi-provider support (OpenAI, Anthropic, OpenRouter)
+
+**Key Classes:**
+
+- `DiagramGenerator`: Generate diagrams from text descriptions
+- `DiagramAnalyzer`: Analyze diagram quality and complexity
+- `DiagramOptimizer`: Optimize diagram layout and structure
+- `SuggestionEngine`: Generate improvement suggestions
+- `NLProcessor`: Natural language processing for intent classification
+
+#### Template Service
+
+Template-based diagram generation from data sources.
+
+**Capabilities:**
+
+- Pre-built templates for common patterns
+- Custom template creation
+- Data source integration (JSON, CSV, Database, API)
+- Template validation and schema checking
+
+**Key Classes:**
+
+- `TemplateManager`: Manage and generate from templates
+- `FlowchartGenerator`, `SequenceGenerator`, etc.: Specialized generators
+- `JSONDataSource`, `CSVDataSource`, `DatabaseDataSource`: Data loading
+
+#### MCP Service
+
+Model Context Protocol server for AI assistant integration.
+
+**Capabilities:**
+
+- Expose rendering tools to AI assistants
+- Template and AI tool integration
+- Resource and prompt management
+- Real-time diagram generation
+
+**Key Components:**
+
+- `create_mcp_server()`: Server factory
+- Tool registrations for render, validate, generate
+- Prompt templates for diagram generation
+- Resource providers for themes and templates
 
 ## Data Flow
 
@@ -278,17 +368,37 @@ class CustomDiagram(MermaidDiagram):
 
 ### Custom Renderers
 
-To add support for new output formats:
+To add support for new output formats using the plugin architecture:
 
-1. Implement renderer interface
-2. Register with renderer factory
-3. Handle format-specific options
+1. Inherit from `BaseRenderer`
+2. Implement required abstract methods
+3. Register with `RendererRegistry`
+4. Define capabilities and health checks
 
 ```python
-class CustomRenderer:
-    def render(self, mermaid_code: str, **options) -> bytes:
+from mermaid_render.renderers import BaseRenderer, RendererCapability, RendererInfo
+
+class CustomRenderer(BaseRenderer):
+    @classmethod
+    def get_info(cls) -> RendererInfo:
+        return RendererInfo(
+            name="custom",
+            description="Custom renderer",
+            capabilities=[RendererCapability.SVG, RendererCapability.PNG],
+            priority=50
+        )
+
+    def render(self, mermaid_code: str, format: str, **options) -> bytes:
         # Custom rendering logic
         pass
+
+    def check_health(self) -> bool:
+        # Return True if renderer is available
+        return True
+
+# Register with global registry
+from mermaid_render.renderers import register_renderer
+register_renderer(CustomRenderer)
 ```
 
 ### Custom Themes
@@ -387,6 +497,31 @@ New AI providers can be added by:
 - Caching for performance
 - Offline capability
 
+## Module Interaction Flow
+
+```
+User Code
+  ↓
+MermaidRenderer (facade) or PluginMermaidRenderer
+  ↓
+RendererManager (orchestration)
+  ↓
+RendererRegistry (discovery) → BaseRenderer implementations
+  ↓
+Validation → Caching → Actual rendering backend
+```
+
+## Available Renderers
+
+| Renderer | Description | Formats | Dependencies |
+|----------|-------------|---------|--------------|
+| **SVG** | Default web-based renderer using mermaid.ink | SVG | requests |
+| **PNG** | Web-based PNG renderer | PNG | requests |
+| **PDF** | PDF converter from SVG | PDF | cairosvg |
+| **Playwright** | High-fidelity browser-based renderer | SVG, PNG, PDF | playwright |
+| **Node.js** | Local Mermaid CLI renderer | SVG, PNG, PDF | Node.js + @mermaid-js/mermaid-cli |
+| **Graphviz** | Alternative renderer for flowcharts | SVG, PNG, PDF | graphviz |
+
 ## Future Enhancements
 
 ### Planned Features
@@ -398,7 +533,7 @@ New AI providers can be added by:
 
 ### Extensibility
 
-- Plugin architecture
+- Plugin architecture (implemented)
 - Custom element types
 - Advanced styling options
 - Integration APIs

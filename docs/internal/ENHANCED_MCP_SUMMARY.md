@@ -7,32 +7,38 @@ The mermaid-render project has been successfully enhanced with comprehensive Mod
 ## ✅ What Was Implemented
 
 ### 1. Core MCP Tools (✅ Complete)
+
 - **render_diagram**: Render Mermaid diagrams to various formats (SVG, PNG, PDF)
 - **validate_diagram**: Validate Mermaid diagram syntax and structure
 - **list_themes**: List and manage available themes
 
 ### 2. AI-Powered Tools (✅ Complete)
+
 - **generate_diagram_from_text**: Generate diagrams from natural language descriptions
 - **analyze_diagram**: Analyze diagram quality, complexity, and best practices
 - **optimize_diagram**: Optimize diagrams for better readability and structure
 - **get_diagram_suggestions**: Get AI-powered suggestions for improvements
 
 ### 3. Template-Based Tools (✅ Complete)
+
 - **create_from_template**: Create diagrams from predefined templates with parameter validation
 
 ### 4. MCP Resources (✅ Complete)
+
 - **Theme Resources**: `mermaid://themes` and `mermaid://themes/{theme_name}`
 - **Template Resources**: `mermaid://templates` and `mermaid://templates/{template_name}`
 - **Configuration Resources**: `mermaid://config/schema` and `mermaid://config/defaults`
 - **Documentation Resources**: `mermaid://docs/diagram-types` and `mermaid://examples/{diagram_type}`
 
 ### 5. MCP Prompts (✅ Complete)
+
 - **Generation Prompts**: `generate_flowchart`, `generate_sequence`, `generate_class_diagram`
 - **Analysis Prompts**: `analyze_diagram_quality`, `suggest_improvements`
 - **Optimization Prompts**: `optimize_layout`, `simplify_diagram`
 - **Documentation Prompts**: `explain_diagram`, `create_diagram_documentation`
 
 ### 6. Enhanced Server Infrastructure (✅ Complete)
+
 - **FastMCP Integration**: Full FastMCP 2.0+ compatibility
 - **Multiple Transports**: stdio, SSE, WebSocket support
 - **Comprehensive Error Handling**: Consistent error format with request IDs
@@ -43,6 +49,7 @@ The mermaid-render project has been successfully enhanced with comprehensive Mod
 ## 🔧 Technical Implementation Details
 
 ### File Structure
+
 ```
 mermaid_render/mcp/
 ├── __init__.py          # Module initialization with optional imports
@@ -56,11 +63,13 @@ mermaid_render/mcp/
 ### Key Features Implemented
 
 #### 1. Graceful Degradation
+
 - Optional dependencies (FastMCP, AI features, templates)
 - Graceful handling when features are not available
 - Clear error messages guiding users to install missing dependencies
 
 #### 2. Comprehensive Parameter Validation
+
 ```python
 class RenderDiagramParams(BaseModel):
     diagram_code: str = Field(description="Mermaid diagram code to render")
@@ -71,6 +80,7 @@ class RenderDiagramParams(BaseModel):
 ```
 
 #### 3. Enhanced Error Handling
+
 ```python
 {
     "success": False,
@@ -83,7 +93,9 @@ class RenderDiagramParams(BaseModel):
 ```
 
 #### 4. Context Integration
+
 All tools support MCP Context for enhanced functionality:
+
 ```python
 def tool_function(param1: str, ctx: Optional[Context] = None) -> Dict[str, Any]:
     # Access request ID, client info, etc.
@@ -111,6 +123,7 @@ Tests passed: 6/6
 ## 🚀 Usage Examples
 
 ### Starting the Enhanced MCP Server
+
 ```bash
 # Basic usage
 mermaid-render-mcp
@@ -120,6 +133,7 @@ mermaid-render-mcp --transport sse --port 8080 --log-level DEBUG
 ```
 
 ### Using AI-Powered Features
+
 ```python
 # Generate diagram from text
 result = generate_diagram_from_text(
@@ -136,6 +150,7 @@ result = analyze_diagram(
 ```
 
 ### Accessing Resources
+
 ```python
 # Get theme information
 themes = await get_themes_resource(ctx)
@@ -148,6 +163,7 @@ examples = await get_diagram_examples(ctx, "flowchart")
 ```
 
 ### Using Prompts
+
 ```python
 # Generate flowchart prompt
 prompt = generate_flowchart_prompt(
@@ -160,12 +176,14 @@ prompt = generate_flowchart_prompt(
 ## 📊 Performance & Quality
 
 ### Performance Optimizations
+
 - **Async Operations**: All MCP operations are async for better concurrency
 - **Caching Support**: Built-in caching for repeated requests
 - **Resource Management**: Proper cleanup and resource management
 - **Error Recovery**: Graceful degradation when optional features unavailable
 
 ### Code Quality
+
 - **Type Safety**: Full type annotations with Pydantic validation
 - **Error Handling**: Comprehensive error handling with proper recovery
 - **Documentation**: Extensive documentation and examples

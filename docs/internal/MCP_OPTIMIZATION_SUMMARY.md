@@ -9,6 +9,7 @@ This document summarizes the comprehensive optimization of the MCP (Model Contex
 ### 1. Enhanced Parameter Validation and Error Handling
 
 #### Parameter Models
+
 - **Comprehensive Pydantic Models**: All tools now use detailed Pydantic models with:
   - Field constraints (min/max length, value ranges)
   - Enum validation for controlled values
@@ -16,6 +17,7 @@ This document summarizes the comprehensive optimization of the MCP (Model Contex
   - Default values and examples
 
 #### Error Handling Infrastructure
+
 - **Structured Error Responses**: Standardized error format with:
   - Error categorization (ValidationError, RenderingError, etc.)
   - Contextual information
@@ -26,11 +28,13 @@ This document summarizes the comprehensive optimization of the MCP (Model Contex
 ### 2. Core Tool Enhancements
 
 #### Existing Tools Improved
+
 - **render_diagram**: Enhanced with complexity scoring, quality assessment, and metadata
 - **validate_diagram**: Added detailed validation reports and syntax analysis
 - **list_themes**: Comprehensive theme information with usage recommendations
 
 #### New Tools Implemented
+
 1. **Configuration Management**
    - `get_configuration`: Retrieve current settings with filtering
    - `update_configuration`: Update settings with validation
@@ -59,16 +63,19 @@ This document summarizes the comprehensive optimization of the MCP (Model Contex
 ### 3. Advanced Features
 
 #### AI Integration Support
+
 - Parameter models ready for AI-powered features
 - Structured responses for AI analysis
 - Quality assessment and optimization suggestions
 
 #### Template System Integration
+
 - Full template lifecycle management
 - Parameter schema generation
 - Usage examples and documentation
 
 #### Performance Optimization
+
 - Parallel processing capabilities
 - Performance measurement and reporting
 - Caching support with management tools
@@ -76,12 +83,14 @@ This document summarizes the comprehensive optimization of the MCP (Model Contex
 ### 4. Interface Design Improvements
 
 #### Usability Enhancements
+
 - Clear, descriptive tool names and descriptions
 - Comprehensive parameter documentation
 - Actionable error messages with suggestions
 - Consistent response formats
 
 #### MCP Protocol Compliance
+
 - Proper tool registration with tags
 - Resource exposure for themes, templates, and configuration
 - Standardized error handling
@@ -102,6 +111,7 @@ mermaid_render/mcp/
 ## Consolidation Update
 
 **✅ COMPLETED: File Consolidation**
+
 - Successfully merged `additional_tools.py` into `tools.py`
 - All functionality preserved without any loss of features
 - Removed duplicate imports and dependencies
@@ -111,12 +121,14 @@ mermaid_render/mcp/
 ## Key Technical Features
 
 ### Parameter Validation
+
 - **Enum-based validation** for controlled values (themes, formats, diagram types)
 - **Range constraints** for numeric values (timeouts, dimensions, workers)
 - **String validation** with length limits and patterns
 - **Complex object validation** for nested parameters
 
 ### Error Categorization
+
 - `ValidationError`: Parameter and input validation issues
 - `RenderingError`: Diagram rendering failures
 - `ConfigurationError`: Configuration-related problems
@@ -126,7 +138,9 @@ mermaid_render/mcp/
 - `SystemError`: General system problems
 
 ### Response Format
+
 All tools return standardized responses with:
+
 - `success`: Boolean indicating operation success
 - `data`: Main response data
 - `metadata`: Additional information (timestamps, metrics, etc.)
@@ -136,11 +150,13 @@ All tools return standardized responses with:
 ## Testing and Validation
 
 ### Compatibility
+
 - **Graceful degradation** when optional dependencies are missing
 - **Fallback implementations** for testing without FastMCP
 - **Import safety** with proper error handling
 
 ### Quality Assurance
+
 - Comprehensive parameter validation
 - Detailed error messages
 - Performance measurement
@@ -149,6 +165,7 @@ All tools return standardized responses with:
 ## Usage Examples
 
 ### Basic Rendering
+
 ```python
 result = render_diagram(
     diagram_code="flowchart TD\n    A[Start] --> B[End]",
@@ -158,6 +175,7 @@ result = render_diagram(
 ```
 
 ### Batch Processing
+
 ```python
 diagrams = [
     {"code": "flowchart TD\n    A --> B", "format": "svg"},
@@ -167,6 +185,7 @@ result = batch_render_diagrams(diagrams, parallel=True)
 ```
 
 ### Configuration Management
+
 ```python
 # Get current configuration
 config = get_configuration()
@@ -178,6 +197,7 @@ result = update_configuration("default_theme", "dark")
 ## Future Enhancements
 
 The implementation provides a solid foundation for:
+
 - AI-powered diagram generation and optimization
 - Advanced template system with custom templates
 - Real-time collaboration features

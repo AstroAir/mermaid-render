@@ -7,35 +7,43 @@ This document describes the comprehensive testing framework for the MCP (Model C
 ## Test Files
 
 ### 1. `test_mcp_server_integration.py`
+
 **Main comprehensive test suite** - Contains the complete testing framework with all test categories.
 
 ### 2. `test_mcp_mock_demo.py`
+
 **Mock demonstration** - Shows the testing framework structure using mock objects (works without FastMCP installation).
 
 ### 3. `run_mcp_tests.py`
+
 **Simple test runner** - Provides an easy way to run tests without requiring pytest.
 
 ## Testing Framework Features
 
 ### ✅ **Complete Tool Coverage**
+
 Tests all 19 consolidated MCP tools:
 
 **Core Rendering Tools (3)**
+
 - `render_diagram` - Enhanced diagram rendering with quality assessment
 - `validate_diagram` - Comprehensive diagram validation
 - `list_themes` - Theme information and recommendations
 
 **AI-Powered Tools (4)**
+
 - `generate_diagram_from_text` - AI diagram generation
 - `optimize_diagram` - AI-powered optimization
 - `analyze_diagram` - Quality assessment and metrics
 - `get_diagram_suggestions` - AI improvement suggestions
 
 **Configuration Management (2)**
+
 - `get_configuration` - Retrieve settings with filtering
 - `update_configuration` - Update settings with validation
 
 **Template Management (5)**
+
 - `list_available_templates` - List templates with filtering
 - `get_template_details` - Detailed template information
 - `create_custom_template` - Create new templates
@@ -43,6 +51,7 @@ Tests all 19 consolidated MCP tools:
 - `list_diagram_types` - Comprehensive diagram type information
 
 **Information & Operations (5)**
+
 - `get_diagram_examples` - Examples and best practices
 - `get_system_information` - System capabilities and features
 - `save_diagram_to_file` - File operations with validation
@@ -93,6 +102,7 @@ Tests all 19 consolidated MCP tools:
 ## Usage
 
 ### Quick Test (Basic Validation)
+
 ```bash
 # Using the test runner
 python run_mcp_tests.py quick
@@ -102,6 +112,7 @@ pytest test_mcp_server_integration.py::test_mcp_server_connectivity -v
 ```
 
 ### Full Test Suite (Comprehensive)
+
 ```bash
 # Using the test runner
 python run_mcp_tests.py
@@ -111,12 +122,14 @@ pytest test_mcp_server_integration.py -v
 ```
 
 ### Mock Demo (No Dependencies)
+
 ```bash
 # Demonstrates framework without requiring FastMCP
 python test_mcp_mock_demo.py
 ```
 
 ### Individual Test Categories
+
 ```bash
 # Test specific functionality
 pytest test_mcp_server_integration.py::test_mcp_core_tools -v
@@ -127,6 +140,7 @@ pytest test_mcp_server_integration.py::test_mcp_error_handling -v
 ## Test Results Interpretation
 
 ### Success Criteria
+
 - **Connectivity**: 100% success required
 - **Tool Discovery**: 100% success required (all 19 tools found)
 - **Core Tools**: 80% success required (rendering functionality)
@@ -141,18 +155,21 @@ pytest test_mcp_server_integration.py::test_mcp_error_handling -v
 ### Expected Outputs
 
 **✅ Successful Test Run:**
+
 ```
 🎉 ALL TESTS PASSED - MCP Server is production ready!
 Overall Success Rate: 10/10 (100%)
 ```
 
 **⚠️ Partial Success:**
+
 ```
 ⚠️ Some tests failed - Review results above
 Overall Success Rate: 8/10 (80%)
 ```
 
 **❌ Major Issues:**
+
 ```
 ❌ Critical failures detected
 Overall Success Rate: 4/10 (40%)
@@ -161,6 +178,7 @@ Overall Success Rate: 4/10 (40%)
 ## Integration with CI/CD
 
 ### GitHub Actions Example
+
 ```yaml
 - name: Run MCP Integration Tests
   run: |
@@ -169,6 +187,7 @@ Overall Success Rate: 4/10 (40%)
 ```
 
 ### Local Development
+
 ```bash
 # Install dependencies
 pip install fastmcp pytest
@@ -201,6 +220,7 @@ python run_mcp_tests.py
    - Check system performance and load
 
 ### Debug Mode
+
 ```bash
 # Enable verbose logging
 python run_mcp_tests.py --verbose
@@ -212,6 +232,7 @@ pytest test_mcp_server_integration.py -v -s --tb=long
 ## Framework Architecture
 
 ### Class Structure
+
 ```python
 MCPServerTestSuite
 ├── setup_server_and_client()
@@ -230,6 +251,7 @@ MCPServerTestSuite
 ```
 
 ### Mock Framework
+
 ```python
 MockMCPClient
 ├── Simulates real FastMCP Client behavior

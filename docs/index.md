@@ -3,19 +3,24 @@
 [![PyPI version](https://badge.fury.io/py/mermaid-render.svg)](https://badge.fury.io/py/mermaid-render)
 [![Python Support](https://img.shields.io/pypi/pyversions/mermaid-render.svg)](https://pypi.org/project/mermaid-render/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://github.com/mermaid-render/mermaid-render/workflows/Tests/badge.svg)](https://github.com/mermaid-render/mermaid-render/actions)
-[![Coverage](https://codecov.io/gh/mermaid-render/mermaid-render/branch/main/graph/badge.svg)](https://codecov.io/gh/mermaid-render/mermaid-render)
+[![Tests](https://github.com/AstroAir/mermaid-render/workflows/Tests/badge.svg)](https://github.com/AstroAir/mermaid-render/actions)
+[![Coverage](https://codecov.io/gh/AstroAir/mermaid-render/branch/main/graph/badge.svg)](https://codecov.io/gh/AstroAir/mermaid-render)
 
-A comprehensive, production-ready Python library for generating Mermaid diagrams with clean APIs, validation, and multiple output formats.
+A comprehensive, production-ready Python library for generating Mermaid diagrams with clean APIs, validation, multiple output formats, AI-powered generation, and MCP server integration.
 
 ## ✨ Key Features
 
-- **Complete Diagram Support**: All major Mermaid diagram types (flowchart, sequence, class, state, ER, etc.)
+- **Complete Diagram Support**: All major Mermaid diagram types (flowchart, sequence, class, state, ER, journey, gantt, pie, gitgraph, mindmap, timeline)
 - **Multiple Output Formats**: SVG, PNG, PDF with high-quality rendering
-- **Syntax Validation**: Built-in validation with helpful error messages
+- **Plugin-Based Architecture**: Extensible renderer system with automatic fallback
+- **Enhanced Validation**: Multi-level validation with detailed error reporting
 - **Theme Management**: Built-in themes plus custom theme support
 - **Flexible Configuration**: Environment variables, config files, runtime options
-- **Type Safety**: Full type hints and mypy compatibility
+- **AI-Powered Generation**: Natural language to diagram conversion with OpenAI, Anthropic, OpenRouter
+- **Template System**: Pre-built templates and data-driven diagram generation
+- **Interactive Builder**: Web-based visual diagram builder with real-time preview
+- **MCP Server**: Model Context Protocol server for AI assistant integration
+- **Type Safety**: Full type hints and strict mypy compatibility
 - **Rich Documentation**: Comprehensive docs with examples
 - **Thoroughly Tested**: 95%+ test coverage with unit and integration tests
 
@@ -81,6 +86,7 @@ print("✅ Diagram saved as login_flow.svg")
 | Pie Chart    | `PieChartDiagram`    | Data visualization                   |
 | Git Graph    | `GitGraphDiagram`    | Git branching visualization          |
 | Mindmap      | `MindmapDiagram`     | Hierarchical information             |
+| Timeline     | `TimelineDiagram`    | Timeline visualization               |
 
 ## 🎯 Why Choose Mermaid Render?
 
@@ -104,7 +110,48 @@ print("✅ Diagram saved as login_flow.svg")
 - Built-in and custom themes
 - AI-powered diagram generation
 - Interactive web interface
-- Collaboration features
+- MCP server for AI assistant integration
+- Template system for data-driven diagrams
+
+## 🔌 Advanced Features
+
+### AI-Powered Generation
+
+```python
+from mermaid_render.ai import generate_from_text
+
+diagram = generate_from_text(
+    "Create a flowchart showing the user registration process"
+)
+```
+
+### Template System
+
+```python
+from mermaid_render.templates import generate_from_template
+
+diagram = generate_from_template("software_architecture", {
+    "title": "My System",
+    "services": [{"id": "api", "name": "API Gateway"}],
+    "connections": [{"from": "api", "to": "db"}]
+})
+```
+
+### Interactive Builder
+
+```python
+from mermaid_render.interactive import start_server
+
+start_server(host="localhost", port=8080)
+# Access at http://localhost:8080
+```
+
+### MCP Server
+
+```bash
+# Start MCP server for AI assistant integration
+mermaid-render-mcp
+```
 
 ## 📚 Documentation
 
@@ -112,25 +159,27 @@ print("✅ Diagram saved as login_flow.svg")
 - **[User Guide](user-guide/)** - Comprehensive tutorials and examples
 - **[API Reference](api-reference/)** - Complete API documentation
 - **[Examples](examples/)** - Real-world usage examples
+- **[Architecture](architecture/)** - System architecture and design
 - **[Development](development/)** - Contributing and development setup
 
 ## 🤝 Community & Support
 
 - 📖 **Documentation**: [Full API Documentation](https://mermaid-render.readthedocs.io)
-- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/mermaid-render/mermaid-render/issues)
-- 💬 **Questions**: [GitHub Discussions](https://github.com/mermaid-render/mermaid-render/discussions)
-- 📧 **Email**: [support@mermaid-render.dev](mailto:support@mermaid-render.dev)
+- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/AstroAir/mermaid-render/issues)
+- 💬 **Questions**: [GitHub Discussions](https://github.com/AstroAir/mermaid-render/discussions)
+- 📧 **Email**: [astro_air@126.com](mailto:astro_air@126.com)
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](https://github.com/mermaid-render/mermaid-render/blob/main/LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/AstroAir/mermaid-render/blob/main/LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
 - [Mermaid.js](https://mermaid.js.org/) - The amazing diagramming library
 - [mermaid-py](https://github.com/ouhammmourachid/mermaid-py) - Python interface to Mermaid
 - [mermaid.ink](https://mermaid.ink/) - Online Mermaid rendering service
+- [FastMCP](https://github.com/jlowin/fastmcp) - Model Context Protocol framework
 
 ---
 
-Made with ❤️ by the Mermaid Render team
+Made with ❤️ by Max Qian

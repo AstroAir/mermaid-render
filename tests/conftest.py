@@ -112,9 +112,14 @@ def mock_mermaid_environment(monkeypatch: pytest.MonkeyPatch) -> None:
     )
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture
 def mock_core_renderer_manager(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Provide a lightweight RendererManager implementation for core tests."""
+    """Provide a lightweight RendererManager implementation for core tests.
+
+    This fixture is NOT autouse - tests that need it should explicitly request it.
+    Tests with their own mocking strategy (e.g., regression tests, plugin architecture tests)
+    should not use this fixture.
+    """
     from mermaid_render.exceptions import UnsupportedFormatError
     from mermaid_render.renderers.base import RenderResult
 
@@ -162,7 +167,10 @@ def mock_core_renderer_manager(monkeypatch: pytest.MonkeyPatch) -> None:
         def cleanup(self) -> None:
             self._active_renderers.clear()
 
-    monkeypatch.setattr("mermaid_render.core.RendererManager", FakeRendererManager)
+    monkeypatch.setattr("mermaid_render.renderers.RendererManager", FakeRendererManager)
+    monkeypatch.setattr(
+        "mermaid_render.renderers.manager.RendererManager", FakeRendererManager
+    )
 
 
 @pytest.fixture

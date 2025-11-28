@@ -26,6 +26,12 @@ class DiagramBuilder {
         this.connectionStartNode = null;
         this.pendingConnectionType = null;
 
+        // Undo/Redo history management
+        this._historyStack = [];      // Stack of past states
+        this._redoStack = [];         // Stack of undone states
+        this._maxHistorySize = 50;    // Maximum history entries
+        this._isUndoRedoAction = false; // Flag to prevent recording during undo/redo
+
         // Initialize sub-modules
         this._initializeModules();
 
@@ -434,6 +440,9 @@ class DiagramBuilder {
      * @param {number} y - Y position
      */
     createNode(type, x, y) {
+        // Save state before creating node
+        this._saveStateToHistory();
+
         const id = `node_${Date.now()}`;
         const node = {
             id,
@@ -500,6 +509,9 @@ class DiagramBuilder {
      * @param {string} elementId - Element ID
      */
     removeElement(elementId) {
+        // Save state before removing element
+        this._saveStateToHistory();
+
         this.nodeRenderer.removeNode(elementId);
         this.elements.delete(elementId);
         this.selectedElements.delete(elementId);
@@ -528,6 +540,9 @@ class DiagramBuilder {
      * @returns {Object|null} The created connection or null if invalid
      */
     addConnection(sourceId, targetId, label = '', type = 'arrow') {
+        // Save state before adding connection
+        this._saveStateToHistory();
+
         // Validate that both elements exist
         if (!this.elements.has(sourceId) || !this.elements.has(targetId)) {
             console.warn('Cannot create connection: source or target element not found');
@@ -577,6 +592,9 @@ class DiagramBuilder {
         if (!this.connections.has(connectionId)) {
             return false;
         }
+
+        // Save state before removing connection
+        this._saveStateToHistory();
 
         this.nodeRenderer.removeConnection(connectionId);
         this.connections.delete(connectionId);
@@ -788,6 +806,11 @@ class DiagramBuilder {
      * @private
      */
     _moveSelectedElements(dx, dy) {
+        if (this.selectedElements.size === 0) return;
+
+        // Save state before moving elements
+        this._saveStateToHistory();
+
         this.selectedElements.forEach(id => {
             const element = this.elements.get(id);
             if (element) {
@@ -807,6 +830,9 @@ class DiagramBuilder {
     _duplicateElement(elementId) {
         const original = this.elements.get(elementId);
         if (!original) return;
+
+        // Save state before duplicating
+        this._saveStateToHistory();
 
         const newId = `node_${Date.now()}`;
         const duplicate = {
@@ -847,6 +873,9 @@ class DiagramBuilder {
      */
     _pasteElements() {
         if (!this.clipboard || this.clipboard.length === 0) return;
+
+        // Save state before pasting
+        this._saveStateToHistory();
 
         this._deselectAll();
 
@@ -922,24 +951,156 @@ class DiagramBuilder {
     }
 
     /**
-     * Undo last action
+     * Save current state to history for undo functionality
      * @private
      */
-    _undo() {
-        // TODO: Implement undo functionality
-        if (window.notificationManager) {
-            window.notificationManager.info('Undo not yet implemented');
+    _saveStateToHistory() {
+        if (this._isUndoRedoAction) {
+            return; // Don't record state changes during undo/redo
+        }
+
+        const state = this._captureState();
+        this._historyStack.push(state);
+
+        // Limit history size
+        if (this._historyStack.length > this._maxHistorySize) {
+            this._historyStack.shift();
+        }
+
+        // Clear redo stack when new action is performed
+        this._redoStack = [];
+
+        // Update button states
+        this._updateUndoRedoButtons();
+    }
+
+    /**
+     * Capture current diagram state
+     * @returns {Object} State snapshot
+     * @private
+     */
+    _captureState() {
+        return {
+            elements: new Map(Array.from(this.elements.entries()).map(
+                ([id, el]) => [id, { ...el }]
+            )),
+            connections: new Map(Array.from(this.connections.entries()).map(
+                ([id, conn]) => [id, { ...conn }]
+            )),
+            timestamp: Date.now()
+        };
+    }
+
+    /**
+     * Restore diagram state from snapshot
+     * @param {Object} state - State snapshot to restore
+     * @private
+     */
+    _restoreState(state) {
+        this._isUndoRedoAction = true;
+
+        try {
+            // Clear current state
+            this.elements.clear();
+            this.connections.clear();
+            this.nodeRenderer.clearCanvas();
+            this.selectedElements.clear();
+
+            // Restore elements
+            state.elements.forEach((el, id) => {
+                this.elements.set(id, { ...el });
+                this.nodeRenderer.renderNode({ ...el }, (nodeId) => this.selectElement(nodeId));
+            });
+
+            // Restore connections
+            state.connections.forEach((conn, id) => {
+                this.connections.set(id, { ...conn });
+            });
+
+            // Render all connections
+            this._renderAllConnections();
+
+            // Update code editor
+            this.updateCode();
+
+            // Update properties panel
+            this.propertiesPanel.update(this.selectedElements);
+        } finally {
+            this._isUndoRedoAction = false;
         }
     }
 
     /**
-     * Redo last action
+     * Update undo/redo button states
+     * @private
+     */
+    _updateUndoRedoButtons() {
+        const undoBtn = document.getElementById('undo');
+        const redoBtn = document.getElementById('redo');
+
+        if (undoBtn) {
+            undoBtn.disabled = this._historyStack.length === 0;
+            undoBtn.classList.toggle('disabled', this._historyStack.length === 0);
+        }
+        if (redoBtn) {
+            redoBtn.disabled = this._redoStack.length === 0;
+            redoBtn.classList.toggle('disabled', this._redoStack.length === 0);
+        }
+    }
+
+    /**
+     * Undo last action
+     * @private
+     */
+    _undo() {
+        if (this._historyStack.length === 0) {
+            if (window.notificationManager) {
+                window.notificationManager.info('Nothing to undo');
+            }
+            return;
+        }
+
+        // Save current state to redo stack before undoing
+        const currentState = this._captureState();
+        this._redoStack.push(currentState);
+
+        // Pop and restore previous state
+        const previousState = this._historyStack.pop();
+        this._restoreState(previousState);
+
+        // Update button states
+        this._updateUndoRedoButtons();
+
+        if (window.notificationManager) {
+            window.notificationManager.info('Undo successful');
+        }
+    }
+
+    /**
+     * Redo last undone action
      * @private
      */
     _redo() {
-        // TODO: Implement redo functionality
+        if (this._redoStack.length === 0) {
+            if (window.notificationManager) {
+                window.notificationManager.info('Nothing to redo');
+            }
+            return;
+        }
+
+        // Save current state to history stack before redoing
+        const currentState = this._captureState();
+        this._historyStack.push(currentState);
+
+        // Pop and restore redo state
+        const redoState = this._redoStack.pop();
+        this._restoreState(redoState);
+
+        // Update button states
+        this._updateUndoRedoButtons();
+
         if (window.notificationManager) {
-            window.notificationManager.info('Redo not yet implemented');
+            window.notificationManager.info('Redo successful');
         }
     }
 

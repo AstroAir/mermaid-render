@@ -3,23 +3,27 @@
 [![PyPI version](https://badge.fury.io/py/mermaid-render.svg)](https://badge.fury.io/py/mermaid-render)
 [![Python Support](https://img.shields.io/pypi/pyversions/mermaid-render.svg)](https://pypi.org/project/mermaid-render/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://github.com/mermaid-render/mermaid-render/workflows/Tests/badge.svg)](https://github.com/mermaid-render/mermaid-render/actions)
-[![Coverage](https://codecov.io/gh/mermaid-render/mermaid-render/branch/main/graph/badge.svg)](https://codecov.io/gh/mermaid-render/mermaid-render)
+[![Tests](https://github.com/AstroAir/mermaid-render/workflows/Tests/badge.svg)](https://github.com/AstroAir/mermaid-render/actions)
+[![Coverage](https://codecov.io/gh/AstroAir/mermaid-render/branch/main/graph/badge.svg)](https://codecov.io/gh/AstroAir/mermaid-render)
 
-A comprehensive, production-ready Python library for generating Mermaid diagrams with clean APIs, validation, and multiple output formats.
+A comprehensive, production-ready Python library for generating Mermaid diagrams with clean APIs, validation, multiple output formats, AI-powered generation, and MCP server integration.
 
 ## Features
 
-✨ **Complete Diagram Support**: All major Mermaid diagram types (flowchart, sequence, class, state, ER, etc.)
+✨ **Complete Diagram Support**: All major Mermaid diagram types (flowchart, sequence, class, state, ER, journey, gantt, pie, gitgraph, mindmap, timeline)
 🎨 **Multiple Output Formats**: SVG, PNG, PDF with high-quality rendering
-🔧 **Plugin-Based Architecture**: Extensible renderer system with multiple backends
+🔧 **Plugin-Based Architecture**: Extensible renderer system with automatic fallback
 🔍 **Enhanced Validation**: Multi-level validation with detailed error reporting
 🎭 **Theme Management**: Built-in themes plus custom theme support
 ⚙️ **Flexible Configuration**: Environment variables, config files, runtime options
 🛡️ **Robust Error Handling**: Comprehensive error handling with fallback mechanisms
-🚀 **Multiple Rendering Backends**: Choose from SVG, PNG, PDF, Playwright, Node.js, and Graphviz renderers
-📊 **Performance Monitoring**: Built-in performance tracking and metrics
-🛡️ **Type Safety**: Full type hints and mypy compatibility
+🚀 **Multiple Rendering Backends**: SVG, PNG, PDF, Playwright, Node.js, and Graphviz renderers
+🤖 **AI-Powered Generation**: Natural language to diagram conversion with OpenAI, Anthropic, and OpenRouter
+📝 **Template System**: Pre-built templates and data-driven diagram generation
+🌐 **Interactive Builder**: Web-based visual diagram builder with real-time preview
+🔌 **MCP Server**: Model Context Protocol server for AI assistant integration
+📊 **Performance Monitoring**: Built-in caching and performance tracking
+🛡️ **Type Safety**: Full type hints and strict mypy compatibility
 📚 **Rich Documentation**: Comprehensive docs with examples
 🧪 **Thoroughly Tested**: 95%+ test coverage with unit and integration tests
 
@@ -73,7 +77,7 @@ pip install graphviz
 
 #### System Requirements
 
-- **Python**: 3.8 or higher
+- **Python**: 3.10 or higher
 - **Operating System**: Windows, macOS, Linux
 - **Memory**: Minimum 512MB RAM (2GB+ recommended for AI features)
 - **Network**: Internet connection required for online rendering services
@@ -82,10 +86,12 @@ pip install graphviz
 
 | Feature | Package | Purpose |
 |---------|---------|---------|
-| PDF Export | `cairosvg` | Convert SVG to PDF format |
-| Redis Cache | `redis` | High-performance caching |
-| AI Features | `openai`, `anthropic` | Natural language processing |
-| Interactive UI | `fastapi`, `websockets` | Web-based diagram builder |
+| PDF Export | `cairosvg`, `reportlab` | Convert SVG to PDF format |
+| Redis Cache | `redis`, `diskcache` | High-performance caching |
+| AI Features | `openai`, `anthropic`, `tiktoken` | Natural language processing |
+| Interactive UI | `fastapi`, `uvicorn`, `websockets` | Web-based diagram builder |
+| Renderers | `playwright`, `graphviz` | Additional rendering backends |
+| MCP Server | `fastmcp` | Model Context Protocol server |
 
 ### Basic Usage
 
@@ -160,6 +166,7 @@ svg_content = quick_render(diagram_code, format="svg", theme="dark")
 | Pie Chart | `PieChartDiagram` | Data visualization |
 | Git Graph | `GitGraphDiagram` | Git branching visualization |
 | Mindmap | `MindmapDiagram` | Hierarchical information |
+| Timeline | `TimelineDiagram` | Timeline visualization |
 
 ## API Reference
 
@@ -415,6 +422,237 @@ diagrams = {
 batch_export(diagrams, "output/", format="png", theme="forest")
 ```
 
+## AI-Powered Features
+
+Generate diagrams from natural language descriptions using multiple AI providers.
+
+### Natural Language to Diagram
+
+```python
+from mermaid_render.ai import DiagramGenerator, generate_from_text
+
+# Quick generation
+diagram = generate_from_text(
+    "Create a flowchart showing the user registration process with email verification"
+)
+
+# Using DiagramGenerator for more control
+generator = DiagramGenerator(provider="openai")  # or "anthropic", "openrouter"
+result = generator.from_text(
+    "Design a class diagram for an e-commerce system with User, Product, and Order classes",
+    diagram_type="class"
+)
+print(result.diagram_code)
+```
+
+### AI Providers
+
+```python
+from mermaid_render.ai import (
+    OpenAIProvider,
+    AnthropicProvider,
+    OpenRouterProvider,
+    ProviderManager
+)
+
+# Use specific provider
+provider = OpenAIProvider(api_key="your-api-key", model="gpt-4")
+
+# Or use provider manager for automatic fallback
+manager = ProviderManager()
+manager.add_provider(OpenAIProvider(api_key="..."))
+manager.add_provider(AnthropicProvider(api_key="..."))  # Fallback
+```
+
+### Diagram Analysis & Optimization
+
+```python
+from mermaid_render.ai import DiagramAnalyzer, DiagramOptimizer, get_suggestions
+
+# Analyze diagram quality
+analyzer = DiagramAnalyzer()
+report = analyzer.analyze(my_diagram)
+print(f"Complexity: {report.complexity}")
+print(f"Quality Score: {report.quality_metrics.overall_score}")
+
+# Get improvement suggestions
+suggestions = get_suggestions(my_diagram)
+for suggestion in suggestions:
+    print(f"[{suggestion.priority}] {suggestion.message}")
+
+# Optimize diagram layout
+optimizer = DiagramOptimizer()
+optimized = optimizer.optimize_layout(my_diagram)
+```
+
+## Template System
+
+Create diagrams from pre-built templates or define custom templates.
+
+### Using Built-in Templates
+
+```python
+from mermaid_render.templates import TemplateManager, generate_from_template
+
+# List available templates
+manager = TemplateManager()
+templates = manager.list_templates()
+print(templates)  # ['software_architecture', 'user_journey', 'api_sequence', ...]
+
+# Generate from template
+diagram = generate_from_template("software_architecture", {
+    "title": "My System Architecture",
+    "services": [
+        {"id": "api", "name": "API Gateway"},
+        {"id": "auth", "name": "Auth Service"},
+        {"id": "db", "name": "Database"}
+    ],
+    "databases": [{"id": "postgres", "name": "PostgreSQL"}],
+    "connections": [
+        {"from": "api", "to": "auth"},
+        {"from": "auth", "to": "postgres"}
+    ]
+})
+```
+
+### Template Generators
+
+```python
+from mermaid_render.templates import (
+    FlowchartGenerator,
+    SequenceGenerator,
+    ClassDiagramGenerator,
+    ArchitectureGenerator
+)
+
+# Generate flowchart from data
+generator = FlowchartGenerator()
+flowchart = generator.generate({
+    "nodes": [
+        {"id": "start", "label": "Start", "type": "circle"},
+        {"id": "process", "label": "Process Data", "type": "rectangle"},
+        {"id": "end", "label": "End", "type": "circle"}
+    ],
+    "edges": [
+        {"from": "start", "to": "process"},
+        {"from": "process", "to": "end"}
+    ]
+})
+```
+
+### Data Sources
+
+```python
+from mermaid_render.templates import JSONDataSource, CSVDataSource, DatabaseDataSource
+
+# Load data from JSON
+json_source = JSONDataSource("data/architecture.json")
+data = json_source.load()
+
+# Load from CSV
+csv_source = CSVDataSource("data/nodes.csv")
+nodes = csv_source.load()
+
+# Load from database
+db_source = DatabaseDataSource(connection_string="postgresql://...")
+data = db_source.query("SELECT * FROM diagram_data")
+```
+
+## Interactive Web Builder
+
+Build diagrams visually with real-time preview and collaboration features.
+
+### Starting the Interactive Server
+
+```python
+from mermaid_render.interactive import DiagramBuilder, start_server
+
+# Create builder and start server
+builder = DiagramBuilder()
+start_server(builder, host="localhost", port=8080)
+
+# Access at http://localhost:8080
+```
+
+### Programmatic Usage
+
+```python
+from mermaid_render.interactive import (
+    DiagramBuilder,
+    create_interactive_session,
+    export_diagram_code
+)
+
+# Create a session
+session = create_interactive_session()
+
+# Build diagram programmatically
+builder = DiagramBuilder()
+builder.add_element("node", id="A", label="Start", position=(100, 100))
+builder.add_element("node", id="B", label="Process", position=(100, 200))
+builder.add_connection("A", "B", label="next")
+
+# Export to Mermaid code
+code = export_diagram_code(builder)
+print(code)
+```
+
+## MCP Server Integration
+
+Expose mermaid-render capabilities through the Model Context Protocol for AI assistant integration.
+
+### Running the MCP Server
+
+```bash
+# Start MCP server
+mermaid-render-mcp
+
+# Or programmatically
+python -m mermaid_render.mcp
+```
+
+### MCP Configuration
+
+Add to your Claude Desktop or other MCP client configuration:
+
+```json
+{
+  "mcpServers": {
+    "mermaid-render": {
+      "command": "mermaid-render-mcp",
+      "args": []
+    }
+  }
+}
+```
+
+### Available MCP Tools
+
+The MCP server exposes these tool categories:
+
+**Core Tools:**
+
+- `render_diagram` - Render Mermaid diagrams to SVG/PNG/PDF
+- `validate_diagram` - Validate diagram syntax and structure
+- `list_themes` - List available themes
+
+**AI-Powered Tools:**
+
+- `generate_diagram_from_text` - Generate diagrams from natural language
+- `optimize_diagram` - Optimize diagram layout and structure
+- `analyze_diagram` - Analyze diagram quality and complexity
+
+**Template Tools:**
+
+- `create_from_template` - Create diagrams from templates
+- `list_available_templates` - List available templates
+
+**Extended Tools:**
+
+- `convert_diagram_format` - Convert between output formats
+- `merge_diagrams` - Merge multiple diagrams
+- `export_to_markdown` - Export with documentation
+
 ## Configuration
 
 ### Environment Variables
@@ -472,7 +710,7 @@ The Mermaid Render library is designed with a modular, plugin-based architecture
 
 - **`ai/`** - AI-powered diagram generation and optimization
 - **`interactive/`** - Web-based interactive diagram builder
-
+- **`mcp/`** - Model Context Protocol server for AI assistant integration
 - **`templates/`** - Template system for generating diagrams from data
 - **`cache/`** - Caching system with multiple backends
 
@@ -532,34 +770,48 @@ except UnsupportedFormatError as e:
 
 ### Core Dependencies
 
-- **Python**: 3.8 or higher
+- **Python**: 3.10 or higher
 - **mermaid-py**: >= 0.8.0 (Mermaid diagram processing)
 - **requests**: >= 2.25.0 (HTTP client for rendering services)
+- **jinja2**: >= 3.0.0 (Template rendering)
+- **jsonschema**: >= 4.0.0 (Schema validation)
 
 ### Additional Dependencies for Extended Features
 
 For PDF export support:
 
 ```bash
-pip install mermaid-render[pdf]  # Installs cairosvg
+pip install mermaid-render[pdf]  # Installs cairosvg, reportlab
 # OR
-pip install cairosvg  # Direct installation
+pip install cairosvg reportlab  # Direct installation
 ```
 
 For Redis caching:
 
 ```bash
-pip install mermaid-render[cache]  # Installs redis
+pip install mermaid-render[cache]  # Installs redis, diskcache
 # OR
-pip install redis  # Direct installation
+pip install redis diskcache  # Direct installation
 ```
 
 For AI-powered features:
 
 ```bash
-pip install mermaid-render[ai]  # Installs openai, anthropic
+pip install mermaid-render[ai]  # Installs openai, anthropic, tiktoken
 # OR
-pip install openai anthropic  # Direct installation
+pip install openai anthropic tiktoken  # Direct installation
+```
+
+For interactive web builder:
+
+```bash
+pip install mermaid-render[interactive]  # Installs fastapi, uvicorn, websockets
+```
+
+For additional rendering backends:
+
+```bash
+pip install mermaid-render[renderers]  # Installs playwright, graphviz
 ```
 
 ## Development
@@ -567,37 +819,58 @@ pip install openai anthropic  # Direct installation
 ### Setup
 
 ```bash
-git clone https://github.com/mermaid-render/mermaid-render.git
+git clone https://github.com/AstroAir/mermaid-render.git
 cd mermaid-render
 pip install -e ".[dev]"
+
+# Or use make for complete setup
+make setup-dev
 ```
 
 ### Testing
 
 ```bash
-# Run all tests
+# Run all tests with coverage
+make test
+
+# Or using pytest directly
 pytest
 
-# Run with coverage
+# Run with coverage report
 pytest --cov=mermaid_render --cov-report=html
 
 # Run specific test categories
 pytest -m unit          # Unit tests only
 pytest -m integration   # Integration tests only
 pytest -m "not slow"    # Skip slow tests
+make test-fast          # Quick tests via make
+
+# Run specific test file or function
+pytest tests/unit/test_core.py
+pytest -k "test_flowchart_basic"
 ```
 
 ### Code Quality
 
 ```bash
 # Format code
+make format
+# Or directly
 black mermaid_render tests
+ruff format mermaid_render tests
 
 # Lint code
+make lint
+# Or directly
 ruff check mermaid_render tests
 
 # Type checking
+make type-check
+# Or directly
 mypy mermaid_render
+
+# Run all quality checks
+make check-all
 ```
 
 ## Troubleshooting
@@ -661,12 +934,51 @@ config = MermaidConfig(cache_enabled=True)
 renderer = MermaidRenderer(config=config)
 ```
 
+#### AI Features Issues
+
+**Issue**: AI generation not working
+
+```python
+# Solution: Ensure API keys are configured
+import os
+os.environ["OPENAI_API_KEY"] = "your-api-key"
+# Or for Anthropic
+os.environ["ANTHROPIC_API_KEY"] = "your-api-key"
+```
+
+**Issue**: MCP server not starting
+
+```bash
+# Solution: Ensure fastmcp is installed
+pip install mermaid-render[all]
+# Or install fastmcp directly
+pip install fastmcp
+```
+
+#### Renderer Issues
+
+**Issue**: Playwright renderer not available
+
+```bash
+# Solution: Install Playwright and browser
+pip install playwright
+playwright install chromium
+```
+
+**Issue**: Graphviz renderer not working
+
+```bash
+# Solution: Install both Python package and system binary
+pip install graphviz
+# Then install system binary from https://graphviz.org/download/
+```
+
 ### Getting Help
 
 - 📖 **Documentation**: [Full API Documentation](https://mermaid-render.readthedocs.io)
-- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/mermaid-render/mermaid-render/issues)
-- 💬 **Questions**: [GitHub Discussions](https://github.com/mermaid-render/mermaid-render/discussions)
-- 📧 **Email**: [support@mermaid-render.dev](mailto:support@mermaid-render.dev)
+- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/AstroAir/mermaid-render/issues)
+- 💬 **Questions**: [GitHub Discussions](https://github.com/AstroAir/mermaid-render/discussions)
+- 📧 **Email**: [astro_air@126.com](mailto:astro_air@126.com)
 
 ## Contributing
 
@@ -716,14 +1028,15 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Mermaid.js](https://mermaid.js.org/) - The amazing diagramming library
 - [mermaid-py](https://github.com/ouhammmourachid/mermaid-py) - Python interface to Mermaid
 - [mermaid.ink](https://mermaid.ink/) - Online Mermaid rendering service
+- [FastMCP](https://github.com/jlowin/fastmcp) - Model Context Protocol framework
 
 ## Support
 
 - 📖 [Documentation](https://mermaid-render.readthedocs.io)
-- 🐛 [Issue Tracker](https://github.com/mermaid-render/mermaid-render/issues)
-- 💬 [Discussions](https://github.com/mermaid-render/mermaid-render/discussions)
-- 📧 [Email Support](mailto:support@mermaid-render.dev)
+- 🐛 [Issue Tracker](https://github.com/AstroAir/mermaid-render/issues)
+- 💬 [Discussions](https://github.com/AstroAir/mermaid-render/discussions)
+- 📧 [Email Support](mailto:astro_air@126.com)
 
 ---
 
-Made with ❤️ by the Mermaid Render team
+Made with ❤️ by Max Qian

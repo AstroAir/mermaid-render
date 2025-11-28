@@ -33,6 +33,7 @@ result.save("diagram.svg")
 ```
 
 **SVG Options:**
+
 ```python
 # Advanced SVG configuration
 result = renderer.render(diagram, format="svg", options={
