@@ -5,7 +5,6 @@ Tests the WebSocketHandler class.
 """
 
 import pytest
-from unittest.mock import AsyncMock, Mock, patch
 
 from mermaid_render.interactive.websocket.websocket_handler import WebSocketHandler
 
@@ -18,56 +17,37 @@ class TestWebSocketHandler:
         """Test WebSocketHandler initialization."""
         handler = WebSocketHandler()
         assert handler is not None
+        assert handler._session_manager is not None
+        assert handler._broadcast_service is not None
+        assert handler._message_dispatcher is not None
 
-    @pytest.mark.asyncio
-    async def test_handle_connection(self) -> None:
-        """Test handling WebSocket connection."""
+    def test_initialization_with_max_sessions(self) -> None:
+        """Test WebSocketHandler initialization with custom max sessions."""
+        handler = WebSocketHandler(max_sessions=50)
+        assert handler._session_manager.max_sessions == 50
+
+    def test_sessions_property(self) -> None:
+        """Test sessions property returns session manager sessions."""
         handler = WebSocketHandler()
-        mock_websocket = AsyncMock()
-        mock_websocket.accept = AsyncMock()
-        mock_websocket.receive_json = AsyncMock(side_effect=Exception("Connection closed"))
+        assert handler.sessions == handler._session_manager.sessions
 
-        # Should handle connection without raising
-        try:
-            await handler.handle(mock_websocket)
-        except Exception:
-            pass  # Expected to handle gracefully
-
-    @pytest.mark.asyncio
-    async def test_send_message(self) -> None:
-        """Test sending message through WebSocket."""
+    def test_get_session_info_nonexistent(self) -> None:
+        """Test getting info for non-existent session."""
         handler = WebSocketHandler()
-        mock_websocket = AsyncMock()
+        info = handler.get_session_info("nonexistent")
+        assert info is None
 
-        await handler.send_message(mock_websocket, {"type": "update", "data": {}})
-        mock_websocket.send_json.assert_called_once()
-
-    @pytest.mark.asyncio
-    async def test_broadcast(self) -> None:
-        """Test broadcasting to multiple connections."""
+    def test_get_all_sessions_empty(self) -> None:
+        """Test getting all sessions when empty."""
         handler = WebSocketHandler()
-        mock_ws1 = AsyncMock()
-        mock_ws2 = AsyncMock()
+        sessions = handler.get_all_sessions()
+        assert sessions == []
 
-        handler.connections = [mock_ws1, mock_ws2]
-        await handler.broadcast({"type": "update"})
+    def test_get_client_session_unknown(self) -> None:
+        """Test getting session for unknown client."""
+        from unittest.mock import Mock
 
-        mock_ws1.send_json.assert_called()
-        mock_ws2.send_json.assert_called()
-
-    def test_add_connection(self) -> None:
-        """Test adding connection to handler."""
         handler = WebSocketHandler()
-        mock_websocket = Mock()
-
-        handler.add_connection(mock_websocket)
-        assert mock_websocket in handler.connections
-
-    def test_remove_connection(self) -> None:
-        """Test removing connection from handler."""
-        handler = WebSocketHandler()
-        mock_websocket = Mock()
-
-        handler.add_connection(mock_websocket)
-        handler.remove_connection(mock_websocket)
-        assert mock_websocket not in handler.connections
+        mock_ws = Mock()
+        session_id = handler.get_client_session(mock_ws)
+        assert session_id is None

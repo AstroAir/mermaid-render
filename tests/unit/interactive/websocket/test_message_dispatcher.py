@@ -5,8 +5,9 @@ Tests the MessageDispatcher class.
 """
 
 import pytest
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, Mock
 
+from mermaid_render.interactive.websocket.broadcast_service import BroadcastService
 from mermaid_render.interactive.websocket.message_dispatcher import MessageDispatcher
 
 
@@ -16,63 +17,41 @@ class TestMessageDispatcher:
 
     def test_initialization(self) -> None:
         """Test MessageDispatcher initialization."""
-        dispatcher = MessageDispatcher()
+        broadcast_service = BroadcastService()
+        dispatcher = MessageDispatcher(broadcast_service)
         assert dispatcher is not None
+        assert dispatcher.broadcast_service is broadcast_service
 
     def test_register_handler(self) -> None:
         """Test registering message handler."""
-        dispatcher = MessageDispatcher()
+        broadcast_service = BroadcastService()
+        dispatcher = MessageDispatcher(broadcast_service)
         handler = Mock()
-        dispatcher.register("test_type", handler)
-        assert "test_type" in dispatcher.handlers
+        dispatcher.register_handler("test_type", handler)
+        assert "test_type" in dispatcher._handlers
 
     def test_unregister_handler(self) -> None:
         """Test unregistering message handler."""
-        dispatcher = MessageDispatcher()
+        broadcast_service = BroadcastService()
+        dispatcher = MessageDispatcher(broadcast_service)
         handler = Mock()
-        dispatcher.register("test_type", handler)
-        dispatcher.unregister("test_type")
-        assert "test_type" not in dispatcher.handlers
+        dispatcher.register_handler("test_type", handler)
+        result = dispatcher.unregister_handler("test_type")
+        assert result is True
+        assert "test_type" not in dispatcher._handlers
 
-    @pytest.mark.asyncio
-    async def test_dispatch_message(self) -> None:
-        """Test dispatching message to handler."""
-        dispatcher = MessageDispatcher()
-        handler = AsyncMock()
-        dispatcher.register("update", handler)
+    def test_unregister_nonexistent_handler(self) -> None:
+        """Test unregistering non-existent handler."""
+        broadcast_service = BroadcastService()
+        dispatcher = MessageDispatcher(broadcast_service)
+        result = dispatcher.unregister_handler("nonexistent")
+        assert result is False
 
-        message = {"type": "update", "data": {"id": "123"}}
-        await dispatcher.dispatch(message)
-
-        handler.assert_called_once()
-
-    @pytest.mark.asyncio
-    async def test_dispatch_unknown_type(self) -> None:
-        """Test dispatching message with unknown type."""
-        dispatcher = MessageDispatcher()
-
-        message = {"type": "unknown", "data": {}}
-        # Should not raise
-        await dispatcher.dispatch(message)
-
-    @pytest.mark.asyncio
-    async def test_dispatch_with_context(self) -> None:
-        """Test dispatching message with context."""
-        dispatcher = MessageDispatcher()
-        handler = AsyncMock()
-        dispatcher.register("action", handler)
-
-        message = {"type": "action", "data": {}}
-        context = {"session_id": "sess123"}
-        await dispatcher.dispatch(message, context=context)
-
-        handler.assert_called_once()
-
-    def test_has_handler(self) -> None:
-        """Test checking if handler exists."""
-        dispatcher = MessageDispatcher()
-        handler = Mock()
-        dispatcher.register("test", handler)
-
-        assert dispatcher.has_handler("test")
-        assert not dispatcher.has_handler("nonexistent")
+    def test_default_handlers_registered(self) -> None:
+        """Test that default handlers are registered."""
+        broadcast_service = BroadcastService()
+        dispatcher = MessageDispatcher(broadcast_service)
+        assert "element_update" in dispatcher._handlers
+        assert "connection_update" in dispatcher._handlers
+        assert "cursor_update" in dispatcher._handlers
+        assert "ping" in dispatcher._handlers

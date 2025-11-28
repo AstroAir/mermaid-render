@@ -5,9 +5,10 @@ Tests the WebSocket endpoint setup.
 """
 
 import pytest
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
 from mermaid_render.interactive.server.websocket_endpoint import setup_websocket_endpoint
+from mermaid_render.interactive.websocket import WebSocketHandler
 
 
 @pytest.mark.unit
@@ -17,13 +18,15 @@ class TestWebSocketEndpoint:
     def test_setup_websocket_endpoint(self) -> None:
         """Test setting up WebSocket endpoint."""
         mock_app = Mock()
-        setup_websocket_endpoint(mock_app)
+        websocket_handler = WebSocketHandler()
+        setup_websocket_endpoint(mock_app, websocket_handler)
         # Should add WebSocket route
-        assert mock_app.websocket.called or mock_app.add_websocket_route.called or True
+        assert mock_app.websocket.called
 
     def test_websocket_path(self) -> None:
         """Test WebSocket endpoint path."""
         mock_app = Mock()
-        setup_websocket_endpoint(mock_app)
-        # Should set up at expected path
-        assert True  # Path verification depends on implementation
+        websocket_handler = WebSocketHandler()
+        setup_websocket_endpoint(mock_app, websocket_handler)
+        # Should set up at expected path /ws/{session_id}
+        mock_app.websocket.assert_called_with("/ws/{session_id}")

@@ -4,14 +4,14 @@ Unit tests for interactive.builder.serialization module.
 Tests the DiagramSerializer class for diagram serialization/deserialization.
 """
 
-import pytest
 import json
-from unittest.mock import Mock, patch
+
+import pytest
 
 from mermaid_render.interactive.builder.serialization import DiagramSerializer
 from mermaid_render.interactive.models import (
-    DiagramElement,
     DiagramConnection,
+    DiagramElement,
     DiagramType,
     ElementType,
     Position,
@@ -24,16 +24,15 @@ class TestDiagramSerializer:
     """Unit tests for DiagramSerializer class."""
 
     def test_serialize_element(self) -> None:
-        """Test serializing a single element."""
+        """Test serializing a single element via to_dict."""
         element = DiagramElement(
+            id="elem1",
             element_type=ElementType.NODE,
             position=Position(10, 20),
             size=Size(100, 50),
-            label="Test Node"
+            label="Test Node",
         )
-        
-        result = DiagramSerializer.serialize_element(element)
-        
+        result = element.to_dict()
         assert result["element_type"] == "node"
         assert result["position"]["x"] == 10
         assert result["position"]["y"] == 20
@@ -50,11 +49,9 @@ class TestDiagramSerializer:
             "size": {"width": 80, "height": 60},
             "label": "Deserialized",
             "properties": {},
-            "style": {}
+            "style": {},
         }
-        
-        element = DiagramSerializer.deserialize_element(data)
-        
+        element = DiagramElement.from_dict(data)
         assert element.id == "elem1"
         assert element.element_type == ElementType.NODE
         assert element.position.x == 15
@@ -63,62 +60,62 @@ class TestDiagramSerializer:
     def test_serialize_connection(self) -> None:
         """Test serializing a connection."""
         connection = DiagramConnection(
+            id="conn1",
             source_id="source",
             target_id="target",
-            label="connects to"
+            label="connects to",
         )
-        
-        result = DiagramSerializer.serialize_connection(connection)
-        
+        result = connection.to_dict()
         assert result["source_id"] == "source"
         assert result["target_id"] == "target"
         assert result["label"] == "connects to"
 
     def test_deserialize_connection(self) -> None:
         """Test deserializing a connection."""
+        from datetime import datetime
+
+        now = datetime.now().isoformat()
         data = {
             "id": "conn1",
             "source_id": "src",
             "target_id": "tgt",
             "label": "arrow",
-            "properties": {}
+            "connection_type": "default",
+            "properties": {},
+            "style": {},
+            "created_at": now,
+            "updated_at": now,
         }
-        
-        connection = DiagramSerializer.deserialize_connection(data)
-        
+        connection = DiagramConnection.from_dict(data)
         assert connection.id == "conn1"
         assert connection.source_id == "src"
         assert connection.target_id == "tgt"
 
     def test_serialize_diagram(self) -> None:
         """Test serializing complete diagram."""
-        elements = [
-            DiagramElement(
-                element_type=ElementType.NODE,
-                position=Position(10, 20),
-                size=Size(100, 50),
-                label="Node 1"
-            ),
-            DiagramElement(
-                element_type=ElementType.NODE,
-                position=Position(200, 20),
-                size=Size(100, 50),
-                label="Node 2"
-            )
-        ]
-        connections = [
-            DiagramConnection(
-                source_id=elements[0].id,
-                target_id=elements[1].id
-            )
-        ]
-        
-        result = DiagramSerializer.serialize_diagram(
+        elem1 = DiagramElement(
+            id="e1",
+            element_type=ElementType.NODE,
+            position=Position(10, 20),
+            size=Size(100, 50),
+            label="Node 1",
+        )
+        elem2 = DiagramElement(
+            id="e2",
+            element_type=ElementType.NODE,
+            position=Position(200, 20),
+            size=Size(100, 50),
+            label="Node 2",
+        )
+        elements = {elem1.id: elem1, elem2.id: elem2}
+        conn = DiagramConnection(id="c1", source_id=elem1.id, target_id=elem2.id)
+        connections = {conn.id: conn}
+        result = DiagramSerializer.to_dict(
             diagram_type=DiagramType.FLOWCHART,
             elements=elements,
-            connections=connections
+            connections=connections,
+            metadata={},
         )
-        
         assert result["diagram_type"] == "flowchart"
         assert len(result["elements"]) == 2
         assert len(result["connections"]) == 1
@@ -127,59 +124,58 @@ class TestDiagramSerializer:
         """Test deserializing complete diagram."""
         data = {
             "diagram_type": "sequence",
-            "elements": [
-                {
+            "elements": {
+                "e1": {
                     "id": "e1",
                     "element_type": "node",
                     "position": {"x": 0, "y": 0},
                     "size": {"width": 50, "height": 50},
                     "label": "A",
                     "properties": {},
-                    "style": {}
+                    "style": {},
                 }
-            ],
-            "connections": []
+            },
+            "connections": {},
+            "metadata": {},
         }
-        
-        diagram_type, elements, connections = DiagramSerializer.deserialize_diagram(data)
-        
+        diagram_type, elements, connections, metadata = DiagramSerializer.from_dict(data)
         assert diagram_type == DiagramType.SEQUENCE
         assert len(elements) == 1
         assert len(connections) == 0
 
     def test_to_json(self) -> None:
         """Test converting diagram to JSON string."""
-        elements = [
-            DiagramElement(
-                element_type=ElementType.NODE,
-                position=Position(10, 20),
-                size=Size(100, 50),
-                label="Test"
-            )
-        ]
-        
-        json_str = DiagramSerializer.to_json(
+        elem = DiagramElement(
+            id="e1",
+            element_type=ElementType.NODE,
+            position=Position(10, 20),
+            size=Size(100, 50),
+            label="Test",
+        )
+        elements = {elem.id: elem}
+        json_str = DiagramSerializer.export_to_json(
             diagram_type=DiagramType.FLOWCHART,
             elements=elements,
-            connections=[]
+            connections={},
+            metadata={},
         )
-        
         # Should be valid JSON
         parsed = json.loads(json_str)
         assert parsed["diagram_type"] == "flowchart"
 
     def test_from_json(self) -> None:
         """Test creating diagram from JSON string."""
-        json_str = '''
+        json_str = """
         {
             "diagram_type": "class",
-            "elements": [],
-            "connections": []
+            "elements": {},
+            "connections": {},
+            "metadata": {}
         }
-        '''
-        
-        diagram_type, elements, connections = DiagramSerializer.from_json(json_str)
-        
+        """
+        diagram_type, elements, connections, metadata = DiagramSerializer.import_from_json(
+            json_str
+        )
         assert diagram_type == DiagramType.CLASS
         assert len(elements) == 0
         assert len(connections) == 0
@@ -187,4 +183,4 @@ class TestDiagramSerializer:
     def test_invalid_json(self) -> None:
         """Test handling invalid JSON."""
         with pytest.raises(json.JSONDecodeError):
-            DiagramSerializer.from_json("invalid json")
+            DiagramSerializer.import_from_json("invalid json")

@@ -34,10 +34,10 @@ class TestInteractiveUtils:
     def test_export_diagram_code(self) -> None:
         """Test exporting diagram code."""
         mock_builder = Mock()
-        mock_builder.generate_code.return_value = "flowchart TD\n    A --> B"
+        mock_builder.generate_mermaid_code.return_value = "flowchart TD\n    A --> B"
         
         code = export_diagram_code(mock_builder)
-        assert "flowchart" in code.lower() or code is not None
+        assert "flowchart" in code.lower()
 
     def test_validate_diagram_live(self) -> None:
         """Test live diagram validation."""

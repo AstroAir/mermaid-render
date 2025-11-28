@@ -1,5 +1,3 @@
-from typing import Any
-
 """
 Tests for the PluginMermaidRenderer.
 
@@ -7,12 +5,14 @@ This module tests the plugin-based renderer that integrates the plugin-based
 architecture with the existing MermaidRenderer interface.
 """
 
+from typing import Any
 from unittest.mock import Mock, patch
 
 import pytest
 
 from mermaid_render.core import MermaidConfig, MermaidTheme
 from mermaid_render.exceptions import ConfigurationError, RenderingError
+from mermaid_render.models import FlowchartDiagram
 from mermaid_render.plugin_renderer import PluginMermaidRenderer
 
 
@@ -111,17 +111,19 @@ class TestPluginMermaidRenderer:
         mock_manager.render.return_value = mock_result
         mock_manager_class.return_value = mock_manager
 
-        # Mock MermaidDiagram
-        mock_diagram = Mock()
-        mock_diagram.to_mermaid.return_value = "graph TD\n    A --> B"
-        mock_diagram.validate.return_value = True
+        diagram = FlowchartDiagram()
+        diagram.add_node("A", "Start")
+        diagram.add_node("B", "End")
+        diagram.add_edge("A", "B")
 
         renderer = PluginMermaidRenderer()
-        result = renderer.render(mock_diagram, format="svg")
+        result = renderer.render(diagram, format="svg")
 
         assert result == "<svg>test</svg>"
-        mock_diagram.to_mermaid.assert_called_once()
-        mock_diagram.validate.assert_called_once()
+        mock_manager.render.assert_called_once()
+        args, kwargs = mock_manager.render.call_args
+        assert "mermaid_code" in kwargs
+        assert "flowchart" in kwargs["mermaid_code"]
 
     @patch("mermaid_render.plugin_renderer.RendererManager")
     @patch("pathlib.Path.mkdir")
@@ -151,20 +153,18 @@ class TestPluginMermaidRenderer:
         assert result["size_bytes"] == 100
         mock_file.write.assert_called_once_with("<svg>test</svg>")
 
+    @patch("mermaid_render.plugin_renderer.get_global_registry")
     @patch("mermaid_render.plugin_renderer.RendererManager")
-    def test_get_available_renderers(self, mock_manager_class: Any) -> None:
+    def test_get_available_renderers(self, mock_manager_class: Any, mock_registry_fn: Any) -> None:
         """Test getting available renderers."""
-        # Mock the renderer manager
-        mock_manager = Mock()
-        mock_manager.registry.list_renderers.return_value = ["svg", "png", "playwright"]
-        mock_manager_class.return_value = mock_manager
+        mock_registry = Mock()
+        mock_registry.list_renderers.return_value = ["svg", "png", "playwright"]
+        mock_registry_fn.return_value = mock_registry
 
         renderer = PluginMermaidRenderer()
         renderers = renderer.get_available_renderers()
 
-        assert "svg" in renderers
-        assert "png" in renderers
-        assert "playwright" in renderers
+        assert renderers == ["svg", "png", "playwright"]
 
     @patch("mermaid_render.plugin_renderer.RendererManager")
     def test_test_renderer(self, mock_manager_class: Any) -> None:
@@ -187,14 +187,15 @@ class TestPluginMermaidRenderer:
         assert test_result["render_time"] == 0.5
         assert test_result["content_size"] > 0
 
+    @patch("mermaid_render.plugin_renderer.get_global_registry")
     @patch("mermaid_render.plugin_renderer.RendererManager")
-    def test_benchmark_renderers(self, mock_manager_class: Any) -> None:
+    def test_benchmark_renderers(self, mock_manager_class: Any, mock_registry_fn: Any) -> None:
         """Test benchmarking all renderers."""
-        # Mock the renderer manager
-        mock_manager = Mock()
-        mock_manager.registry.list_renderers.return_value = ["svg", "playwright"]
+        mock_registry = Mock()
+        mock_registry.list_renderers.return_value = ["svg", "playwright"]
+        mock_registry_fn.return_value = mock_registry
 
-        # Mock successful rendering
+        mock_manager = Mock()
         mock_result = Mock()
         mock_result.success = True
         mock_result.render_time = 0.3
@@ -205,13 +206,9 @@ class TestPluginMermaidRenderer:
         renderer = PluginMermaidRenderer()
         benchmark_results = renderer.benchmark_renderers()
 
-        assert "svg" in benchmark_results
-        assert "playwright" in benchmark_results
-
-        # Check that each renderer was tested with multiple diagrams and formats
-        svg_results = benchmark_results["svg"]
-        assert len(svg_results) > 0
-        assert all(result["success"] for result in svg_results)
+        assert set(benchmark_results.keys()) == {"svg", "playwright"}
+        assert all(entry["success"]
+                   for result in benchmark_results.values() for entry in result)
 
     def test_context_manager(self) -> None:
         """Test context manager functionality."""
@@ -236,7 +233,7 @@ class TestBackwardCompatibility:
         mock_png.return_value.render.return_value = b"png_data"
 
         # Create renderer in legacy mode (default)
-        renderer = MermaidRenderer()
+        renderer = MermaidRenderer(use_plugin_system=False)
 
         # Test SVG rendering
         result = renderer.render_raw("graph TD\n    A --> B", "svg")

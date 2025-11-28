@@ -5,7 +5,6 @@ Tests the ExportManager and ExportFormat classes.
 """
 
 import pytest
-from unittest.mock import Mock, patch
 
 from mermaid_render.interactive.export import ExportFormat, ExportManager
 
@@ -26,6 +25,14 @@ class TestExportFormat:
         """Test PDF export format."""
         assert ExportFormat.PDF.value == "pdf"
 
+    def test_mermaid_format(self) -> None:
+        """Test Mermaid export format."""
+        assert ExportFormat.MERMAID.value == "mermaid"
+
+    def test_json_format(self) -> None:
+        """Test JSON export format."""
+        assert ExportFormat.JSON.value == "json"
+
 
 @pytest.mark.unit
 class TestExportManager:
@@ -35,32 +42,12 @@ class TestExportManager:
         """Test ExportManager initialization."""
         manager = ExportManager()
         assert manager is not None
-
-    def test_export_to_png(self) -> None:
-        """Test exporting to PNG format."""
-        manager = ExportManager()
-        diagram_code = "flowchart TD\n    A --> B"
-        # Should not raise
-        result = manager.export(diagram_code, ExportFormat.PNG)
-        assert result is not None or True
-
-    def test_export_to_svg(self) -> None:
-        """Test exporting to SVG format."""
-        manager = ExportManager()
-        diagram_code = "flowchart TD\n    A --> B"
-        result = manager.export(diagram_code, ExportFormat.SVG)
-        assert result is not None or True
+        assert manager.renderer is not None
 
     def test_supported_formats(self) -> None:
         """Test getting supported formats."""
         manager = ExportManager()
-        formats = manager.supported_formats()
+        formats = manager.supported_formats
         assert len(formats) > 0
-
-    def test_export_with_options(self) -> None:
-        """Test exporting with custom options."""
-        manager = ExportManager()
-        diagram_code = "flowchart TD\n    A --> B"
-        options = {"width": 800, "height": 600}
-        result = manager.export(diagram_code, ExportFormat.PNG, options=options)
-        assert result is not None or True
+        assert ExportFormat.SVG in formats
+        assert ExportFormat.PNG in formats

@@ -124,6 +124,7 @@ class MermaidValidator:
     # Known diagram types and their patterns
     DIAGRAM_TYPES = {
         "flowchart": r"^flowchart\s+(TD|TB|BT|RL|LR)",
+        "graph": r"^graph\s+(TD|TB|BT|RL|LR)",
         "sequenceDiagram": r"^sequenceDiagram",
         "classDiagram": r"^classDiagram",
         "stateDiagram": r"^stateDiagram(-v2)?",
@@ -286,7 +287,7 @@ class MermaidValidator:
 
     def _validate_diagram_type(self, lines: list[str], diagram_type: str) -> None:
         """Validate diagram-specific syntax."""
-        if diagram_type == "flowchart":
+        if diagram_type in {"flowchart", "graph"}:
             self._validate_flowchart(lines)
         elif diagram_type == "sequenceDiagram":
             self._validate_sequence_diagram(lines)

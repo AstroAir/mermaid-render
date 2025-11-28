@@ -5,9 +5,10 @@ Tests the router registration functions.
 """
 
 import pytest
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
 from mermaid_render.interactive.server.router_registration import register_api_routers
+from mermaid_render.interactive.websocket import WebSocketHandler
 
 
 @pytest.mark.unit
@@ -17,13 +18,21 @@ class TestRouterRegistration:
     def test_register_api_routers(self) -> None:
         """Test registering API routers."""
         mock_app = Mock()
-        register_api_routers(mock_app)
+        sessions: dict = {}
+        websocket_handler = WebSocketHandler()
+        renderer = Mock()
+        validator = Mock()
+        register_api_routers(mock_app, sessions, websocket_handler, renderer, validator)
         # Should include routers
-        assert mock_app.include_router.called or True
+        assert mock_app.include_router.called
 
     def test_registers_multiple_routers(self) -> None:
         """Test that multiple routers are registered."""
         mock_app = Mock()
-        register_api_routers(mock_app)
-        # Should have called include_router multiple times
-        assert True  # Implementation may vary
+        sessions: dict = {}
+        websocket_handler = WebSocketHandler()
+        renderer = Mock()
+        validator = Mock()
+        register_api_routers(mock_app, sessions, websocket_handler, renderer, validator)
+        # Should have called include_router multiple times (3 routers)
+        assert mock_app.include_router.call_count >= 3

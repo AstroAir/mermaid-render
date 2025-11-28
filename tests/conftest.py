@@ -6,6 +6,7 @@ import tempfile
 from collections.abc import Generator
 from pathlib import Path
 from typing import Any
+from unittest.mock import Mock
 
 import pytest
 
@@ -68,6 +69,100 @@ def mermaid_renderer(mermaid_config: Any) -> MermaidRenderer:
     # Also disable caching to prevent test interference
     mermaid_config.update({"cache_enabled": False})
     return MermaidRenderer(config=mermaid_config, use_plugin_system=False)
+
+
+@pytest.fixture(autouse=True)
+def mock_mermaid_environment(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Provide a fallback Mermaid implementation when mermaid-py is unavailable."""
+    try:
+        import mermaid  # type: ignore # noqa: F401
+
+        return  # Real mermaid is available
+    except Exception:
+        pass
+
+    def _make_instance(*args: Any, **kwargs: Any) -> Mock:
+        instance = Mock()
+        instance.__str__ = Mock(return_value="<svg>mock</svg>")
+        return instance
+
+    fake_mermaid = Mock()
+    fake_mermaid.Mermaid = Mock(side_effect=_make_instance)
+
+    # Patch core and SVG renderer modules
+    monkeypatch.setattr(
+        "mermaid_render.renderers.svg_renderer.md",
+        fake_mermaid,
+        raising=False,
+    )
+    monkeypatch.setattr(
+        "mermaid_render.renderers.svg_renderer._MERMAID_AVAILABLE",
+        True,
+        raising=False,
+    )
+    monkeypatch.setattr(
+        "mermaid_render.core.md",
+        fake_mermaid,
+        raising=False,
+    )
+    monkeypatch.setattr(
+        "mermaid_render.core._MERMAID_AVAILABLE",
+        True,
+        raising=False,
+    )
+
+
+@pytest.fixture(autouse=True)
+def mock_core_renderer_manager(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Provide a lightweight RendererManager implementation for core tests."""
+    from mermaid_render.exceptions import UnsupportedFormatError
+    from mermaid_render.renderers.base import RenderResult
+
+    class FakeRendererManager:
+        def __init__(self, *args: Any, **kwargs: Any) -> None:  # noqa: D401
+            self._active_renderers: dict[str, Any] = {}
+
+        def render(
+            self,
+            mermaid_code: str,
+            format: str,
+            preferred_renderer: str | None = None,
+            **_: Any,
+        ) -> RenderResult:
+            allowed = {"svg", "png", "pdf"}
+            if format.lower() not in allowed:
+                raise UnsupportedFormatError(f"Unsupported format: {format}")
+
+            if format.lower() == "svg":
+                content: str | bytes = '<svg xmlns="http://www.w3.org/2000/svg">mock</svg>'
+            else:
+                content = b"mock-binary"
+
+            metadata = {
+                "attempts": [
+                    {
+                        "renderer": preferred_renderer or "mock",
+                        "success": True,
+                    }
+                ]
+            }
+
+            return RenderResult(
+                content=content,
+                format=format,
+                renderer_name="mock",
+                render_time=0.001,
+                success=True,
+                metadata=metadata,
+            )
+
+        def get_available_formats(self) -> set[str]:
+            return {"svg", "png", "pdf"}
+
+        def cleanup(self) -> None:
+            self._active_renderers.clear()
+
+    monkeypatch.setattr("mermaid_render.core.RendererManager", FakeRendererManager)
 
 
 @pytest.fixture

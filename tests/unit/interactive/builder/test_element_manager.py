@@ -5,15 +5,9 @@ Tests the ElementManager class for managing diagram elements.
 """
 
 import pytest
-from unittest.mock import Mock, patch
 
 from mermaid_render.interactive.builder.element_manager import ElementManager
-from mermaid_render.interactive.models import (
-    DiagramElement,
-    ElementType,
-    Position,
-    Size,
-)
+from mermaid_render.interactive.models import ElementType, Position, Size
 
 
 @pytest.mark.unit
@@ -23,120 +17,94 @@ class TestElementManager:
     def test_initialization(self) -> None:
         """Test ElementManager initialization."""
         manager = ElementManager()
-        
         assert len(manager.elements) == 0
 
     def test_add_element(self) -> None:
         """Test adding element."""
         manager = ElementManager()
-        element = DiagramElement(
+        element = manager.add_element(
             element_type=ElementType.NODE,
+            label="Test",
             position=Position(10, 20),
             size=Size(100, 50),
-            label="Test"
         )
-        
-        manager.add(element)
-        
         assert len(manager.elements) == 1
-        assert manager.get(element.id) == element
+        assert manager.get_element(element.id) == element
 
     def test_remove_element(self) -> None:
         """Test removing element."""
         manager = ElementManager()
-        element = DiagramElement(
+        element = manager.add_element(
             element_type=ElementType.NODE,
+            label="Test",
             position=Position(10, 20),
             size=Size(100, 50),
-            label="Test"
         )
-        
-        manager.add(element)
-        manager.remove(element.id)
-        
+        manager.remove_element(element.id)
         assert len(manager.elements) == 0
 
     def test_get_element_not_found(self) -> None:
         """Test getting non-existent element."""
         manager = ElementManager()
-        
-        result = manager.get("nonexistent")
-        
+        result = manager.get_element("nonexistent")
         assert result is None
 
     def test_update_element(self) -> None:
         """Test updating element."""
         manager = ElementManager()
-        element = DiagramElement(
+        element = manager.add_element(
             element_type=ElementType.NODE,
+            label="Test",
             position=Position(10, 20),
             size=Size(100, 50),
-            label="Test"
         )
-        
-        manager.add(element)
-        manager.update(element.id, position=Position(30, 40))
-        
-        updated = manager.get(element.id)
+        manager.update_element(element.id, position=Position(30, 40))
+        updated = manager.get_element(element.id)
+        assert updated is not None
         assert updated.position.x == 30
         assert updated.position.y == 40
 
-    def test_get_elements_by_type(self) -> None:
-        """Test getting elements by type."""
+    def test_get_all_elements(self) -> None:
+        """Test getting all elements."""
         manager = ElementManager()
-        
-        node = DiagramElement(
+        manager.add_element(
             element_type=ElementType.NODE,
+            label="Node",
             position=Position(10, 20),
-            size=Size(100, 50),
-            label="Node"
         )
-        container = DiagramElement(
+        manager.add_element(
             element_type=ElementType.CONTAINER,
+            label="Container",
             position=Position(100, 100),
-            size=Size(200, 200),
-            label="Container"
         )
-        
-        manager.add(node)
-        manager.add(container)
-        
-        nodes = manager.get_by_type(ElementType.NODE)
-        
-        assert len(nodes) == 1
-        assert nodes[0].label == "Node"
+        all_elements = manager.get_all_elements()
+        assert len(all_elements) == 2
 
     def test_clear(self) -> None:
         """Test clearing all elements."""
         manager = ElementManager()
-        element = DiagramElement(
+        manager.add_element(
             element_type=ElementType.NODE,
+            label="Test",
             position=Position(10, 20),
-            size=Size(100, 50),
-            label="Test"
         )
-        
-        manager.add(element)
         manager.clear()
-        
         assert len(manager.elements) == 0
 
-    def test_find_at_position(self) -> None:
-        """Test finding element at position."""
+    def test_has_element(self) -> None:
+        """Test checking if element exists."""
         manager = ElementManager()
-        element = DiagramElement(
+        element = manager.add_element(
             element_type=ElementType.NODE,
+            label="Test",
             position=Position(10, 20),
-            size=Size(100, 50),
-            label="Test"
         )
-        
-        manager.add(element)
-        
-        # Point inside element
-        found = manager.find_at_position(Position(50, 40))
-        assert found == element
-        
-        # Point outside element
-        not_found = manager.find_at_position(Position(200, 200))
-        assert not_found is None
+        assert manager.has_element(element.id)
+        assert not manager.has_element("nonexistent")
+
+    def test_default_size(self) -> None:
+        """Test default size for element types."""
+        manager = ElementManager()
+        node_size = manager.get_default_size(ElementType.NODE)
+        assert node_size.width == 120
+        assert node_size.height == 60

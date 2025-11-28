@@ -21,57 +21,48 @@ class TestClassDiagramParser:
     def test_parse_empty_diagram(self) -> None:
         """Test parsing empty class diagram."""
         parser = ClassDiagramParser()
-        elements, connections = parser.parse("classDiagram")
-        assert isinstance(elements, list)
-        assert isinstance(connections, list)
+        elements, connections = parser.parse([])
+        assert isinstance(elements, dict)
+        assert isinstance(connections, dict)
 
     def test_parse_single_class(self) -> None:
         """Test parsing class diagram with single class."""
         parser = ClassDiagramParser()
-        code = """classDiagram
-            class User"""
-        elements, connections = parser.parse(code)
+        lines = ["class User"]
+        elements, connections = parser.parse(lines)
         assert len(elements) >= 1
 
     def test_parse_class_with_members(self) -> None:
         """Test parsing class with members."""
         parser = ClassDiagramParser()
-        code = """classDiagram
-            class User {
-                +String name
-                +login()
-            }"""
-        elements, connections = parser.parse(code)
+        lines = ["class User {", "+String name", "+login()", "}"]
+        elements, connections = parser.parse(lines)
         assert len(elements) >= 1
 
     def test_parse_inheritance(self) -> None:
         """Test parsing class inheritance."""
         parser = ClassDiagramParser()
-        code = """classDiagram
-            Animal <|-- Dog"""
-        elements, connections = parser.parse(code)
+        lines = ["Animal <|-- Dog"]
+        elements, connections = parser.parse(lines)
         assert len(connections) >= 1
 
     def test_parse_association(self) -> None:
         """Test parsing class association."""
         parser = ClassDiagramParser()
-        code = """classDiagram
-            Order --> Product"""
-        elements, connections = parser.parse(code)
+        lines = ["Order --> Product"]
+        elements, connections = parser.parse(lines)
         assert len(connections) >= 1
 
     def test_parse_composition(self) -> None:
         """Test parsing class composition."""
         parser = ClassDiagramParser()
-        code = """classDiagram
-            Car *-- Engine"""
-        elements, connections = parser.parse(code)
+        lines = ["Car *-- Engine"]
+        elements, connections = parser.parse(lines)
         assert len(connections) >= 1
 
     def test_parse_aggregation(self) -> None:
         """Test parsing class aggregation."""
         parser = ClassDiagramParser()
-        code = """classDiagram
-            Library o-- Book"""
-        elements, connections = parser.parse(code)
+        lines = ["Library o-- Book"]
+        elements, connections = parser.parse(lines)
         assert len(connections) >= 1

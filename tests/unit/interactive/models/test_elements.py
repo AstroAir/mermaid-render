@@ -83,35 +83,40 @@ class TestDiagramConnection:
     def test_initialization(self) -> None:
         """Test DiagramConnection initialization."""
         connection = DiagramConnection(
+            id="conn1",
             source_id="source",
-            target_id="target"
+            target_id="target",
         )
         assert connection.source_id == "source"
         assert connection.target_id == "target"
 
     def test_id_generation(self) -> None:
-        """Test that ID is auto-generated."""
+        """Test that ID is auto-generated when empty."""
         connection = DiagramConnection(
+            id="",
             source_id="source",
-            target_id="target"
+            target_id="target",
         )
         assert connection.id is not None
+        assert len(connection.id) > 0
 
     def test_with_label(self) -> None:
         """Test connection with label."""
         connection = DiagramConnection(
+            id="conn1",
             source_id="source",
             target_id="target",
-            label="connects"
+            label="connects",
         )
         assert connection.label == "connects"
 
     def test_to_dict(self) -> None:
         """Test serialization to dictionary."""
         connection = DiagramConnection(
+            id="conn1",
             source_id="source",
             target_id="target",
-            label="arrow"
+            label="arrow",
         )
         result = connection.to_dict()
         assert result["source_id"] == "source"
@@ -120,12 +125,20 @@ class TestDiagramConnection:
 
     def test_from_dict(self) -> None:
         """Test deserialization from dictionary."""
+        from datetime import datetime
+
+        now = datetime.now().isoformat()
         data = {
             "id": "conn1",
             "source_id": "src",
             "target_id": "tgt",
             "label": "link",
-            "properties": {}
+            "connection_type": "default",
+            "properties": {},
+            "style": {},
+            "control_points": [],
+            "created_at": now,
+            "updated_at": now,
         }
         connection = DiagramConnection.from_dict(data)
         assert connection.id == "conn1"

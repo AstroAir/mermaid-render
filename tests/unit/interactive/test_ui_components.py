@@ -5,7 +5,6 @@ Tests the UI component classes.
 """
 
 import pytest
-from unittest.mock import Mock, patch
 
 from mermaid_render.interactive.ui_components import (
     CodeEditor,
@@ -14,24 +13,7 @@ from mermaid_render.interactive.ui_components import (
     PreviewPanel,
     PropertiesPanel,
     ToolboxComponent,
-    UIComponent,
 )
-
-
-@pytest.mark.unit
-class TestUIComponent:
-    """Unit tests for UIComponent base class."""
-
-    def test_initialization(self) -> None:
-        """Test UIComponent initialization."""
-        component = UIComponent(component_id="test")
-        assert component.component_id == "test"
-
-    def test_render(self) -> None:
-        """Test component rendering."""
-        component = UIComponent(component_id="test")
-        html = component.render()
-        assert html is not None
 
 
 @pytest.mark.unit
@@ -40,15 +22,16 @@ class TestNodeComponent:
 
     def test_initialization(self) -> None:
         """Test NodeComponent initialization."""
-        node = NodeComponent(node_id="node1", label="Test Node")
-        assert node.node_id == "node1"
-        assert node.label == "Test Node"
+        node = NodeComponent(node_type="rectangle", label="Test Node")
+        assert node.component_type == "node"
+        assert node.properties["label"] == "Test Node"
 
     def test_render(self) -> None:
         """Test node rendering."""
-        node = NodeComponent(node_id="node1", label="Test")
-        html = node.render()
-        assert html is not None
+        node = NodeComponent(node_type="rectangle", label="Test")
+        result = node.render()
+        assert result is not None
+        assert result["type"] == "node"
 
 
 @pytest.mark.unit
@@ -57,15 +40,16 @@ class TestEdgeComponent:
 
     def test_initialization(self) -> None:
         """Test EdgeComponent initialization."""
-        edge = EdgeComponent(source="node1", target="node2")
-        assert edge.source == "node1"
-        assert edge.target == "node2"
+        edge = EdgeComponent(edge_type="arrow")
+        assert edge.component_type == "edge"
+        assert edge.properties["edge_type"] == "arrow"
 
     def test_render(self) -> None:
         """Test edge rendering."""
-        edge = EdgeComponent(source="a", target="b")
-        html = edge.render()
-        assert html is not None
+        edge = EdgeComponent(edge_type="line")
+        result = edge.render()
+        assert result is not None
+        assert result["type"] == "edge"
 
 
 @pytest.mark.unit
@@ -76,12 +60,20 @@ class TestToolboxComponent:
         """Test ToolboxComponent initialization."""
         toolbox = ToolboxComponent()
         assert toolbox is not None
+        assert toolbox.component_type == "toolbox"
 
-    def test_get_tools(self) -> None:
-        """Test getting available tools."""
+    def test_has_tools(self) -> None:
+        """Test that toolbox has tools."""
         toolbox = ToolboxComponent()
-        tools = toolbox.get_tools()
-        assert isinstance(tools, list)
+        assert hasattr(toolbox, "tools")
+        assert isinstance(toolbox.tools, list)
+
+    def test_render(self) -> None:
+        """Test toolbox rendering."""
+        toolbox = ToolboxComponent()
+        result = toolbox.render()
+        assert result is not None
+        assert "tools" in result
 
 
 @pytest.mark.unit
@@ -92,13 +84,13 @@ class TestPropertiesPanel:
         """Test PropertiesPanel initialization."""
         panel = PropertiesPanel()
         assert panel is not None
+        assert panel.component_type == "properties"
 
-    def test_set_element(self) -> None:
-        """Test setting element for properties panel."""
+    def test_render(self) -> None:
+        """Test properties panel rendering."""
         panel = PropertiesPanel()
-        mock_element = Mock()
-        panel.set_element(mock_element)
-        assert panel.current_element == mock_element
+        result = panel.render()
+        assert result is not None
 
 
 @pytest.mark.unit
@@ -109,19 +101,13 @@ class TestCodeEditor:
         """Test CodeEditor initialization."""
         editor = CodeEditor()
         assert editor is not None
+        assert editor.component_type == "code_editor"
 
-    def test_set_code(self) -> None:
-        """Test setting code in editor."""
+    def test_render(self) -> None:
+        """Test code editor rendering."""
         editor = CodeEditor()
-        editor.set_code("flowchart TD\n    A --> B")
-        assert editor.get_code() == "flowchart TD\n    A --> B"
-
-    def test_get_code(self) -> None:
-        """Test getting code from editor."""
-        editor = CodeEditor()
-        editor.set_code("graph LR")
-        code = editor.get_code()
-        assert code == "graph LR"
+        result = editor.render()
+        assert result is not None
 
 
 @pytest.mark.unit
@@ -132,10 +118,10 @@ class TestPreviewPanel:
         """Test PreviewPanel initialization."""
         panel = PreviewPanel()
         assert panel is not None
+        assert panel.component_type == "preview"
 
-    def test_update_preview(self) -> None:
-        """Test updating preview."""
+    def test_render(self) -> None:
+        """Test preview panel rendering."""
         panel = PreviewPanel()
-        panel.update_preview("flowchart TD\n    A --> B")
-        # Should not raise
-        assert True
+        result = panel.render()
+        assert result is not None

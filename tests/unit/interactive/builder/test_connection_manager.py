@@ -25,7 +25,7 @@ class TestConnectionManager:
         """Test adding connection."""
         manager = ConnectionManager()
         
-        connection = manager.add("source_id", "target_id")
+        connection = manager.add_connection("source_id", "target_id")
         
         assert len(manager.connections) == 1
         assert connection.source_id == "source_id"
@@ -34,18 +34,18 @@ class TestConnectionManager:
     def test_remove_connection(self) -> None:
         """Test removing connection."""
         manager = ConnectionManager()
-        connection = manager.add("source_id", "target_id")
+        connection = manager.add_connection("source_id", "target_id")
         
-        manager.remove(connection.id)
+        manager.remove_connection(connection.id)
         
         assert len(manager.connections) == 0
 
     def test_get_connection(self) -> None:
         """Test getting connection by ID."""
         manager = ConnectionManager()
-        connection = manager.add("source_id", "target_id")
+        connection = manager.add_connection("source_id", "target_id")
         
-        result = manager.get(connection.id)
+        result = manager.get_connection(connection.id)
         
         assert result == connection
 
@@ -53,7 +53,7 @@ class TestConnectionManager:
         """Test getting non-existent connection."""
         manager = ConnectionManager()
         
-        result = manager.get("nonexistent")
+        result = manager.get_connection("nonexistent")
         
         assert result is None
 
@@ -61,11 +61,11 @@ class TestConnectionManager:
         """Test getting connections from source element."""
         manager = ConnectionManager()
         
-        manager.add("source1", "target1")
-        manager.add("source1", "target2")
-        manager.add("source2", "target3")
+        manager.add_connection("source1", "target1")
+        manager.add_connection("source1", "target2")
+        manager.add_connection("source2", "target3")
         
-        connections = manager.get_from_source("source1")
+        connections = manager.get_connections_from("source1")
         
         assert len(connections) == 2
 
@@ -73,11 +73,11 @@ class TestConnectionManager:
         """Test getting connections to target element."""
         manager = ConnectionManager()
         
-        manager.add("source1", "target1")
-        manager.add("source2", "target1")
-        manager.add("source3", "target2")
+        manager.add_connection("source1", "target1")
+        manager.add_connection("source2", "target1")
+        manager.add_connection("source3", "target2")
         
-        connections = manager.get_to_target("target1")
+        connections = manager.get_connections_to("target1")
         
         assert len(connections) == 2
 
@@ -85,11 +85,11 @@ class TestConnectionManager:
         """Test removing all connections for an element."""
         manager = ConnectionManager()
         
-        manager.add("elem1", "elem2")
-        manager.add("elem2", "elem3")
-        manager.add("elem3", "elem1")
+        manager.add_connection("elem1", "elem2")
+        manager.add_connection("elem2", "elem3")
+        manager.add_connection("elem3", "elem1")
         
-        manager.remove_for_element("elem1")
+        manager.remove_connections_for_element("elem1")
         
         # Should remove connections where elem1 is source or target
         assert len(manager.connections) == 1
@@ -98,8 +98,8 @@ class TestConnectionManager:
         """Test clearing all connections."""
         manager = ConnectionManager()
         
-        manager.add("source1", "target1")
-        manager.add("source2", "target2")
+        manager.add_connection("source1", "target1")
+        manager.add_connection("source2", "target2")
         
         manager.clear()
         
@@ -108,19 +108,18 @@ class TestConnectionManager:
     def test_update_connection_label(self) -> None:
         """Test updating connection label."""
         manager = ConnectionManager()
-        connection = manager.add("source_id", "target_id")
+        connection = manager.add_connection("source_id", "target_id")
         
-        manager.update(connection.id, label="New Label")
+        manager.update_connection(connection.id, label="New Label")
         
-        updated = manager.get(connection.id)
+        updated = manager.get_connection(connection.id)
         assert updated.label == "New Label"
 
     def test_connection_exists(self) -> None:
         """Test checking if connection exists."""
         manager = ConnectionManager()
         
-        manager.add("source", "target")
+        conn = manager.add_connection("source", "target")
         
-        assert manager.exists("source", "target")
-        assert not manager.exists("target", "source")
-        assert not manager.exists("other", "target")
+        assert manager.has_connection(conn.id)
+        assert not manager.has_connection("nonexistent")

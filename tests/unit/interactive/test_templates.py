@@ -5,9 +5,25 @@ Tests the InteractiveTemplate and TemplateLibrary classes.
 """
 
 import pytest
-from unittest.mock import Mock, patch
 
 from mermaid_render.interactive.templates import InteractiveTemplate, TemplateLibrary
+
+
+def create_test_template(
+    template_id: str = "test1",
+    name: str = "Test Template",
+    description: str = "A test template",
+) -> InteractiveTemplate:
+    """Create a test template with required fields."""
+    return InteractiveTemplate(
+        id=template_id,
+        name=name,
+        description=description,
+        diagram_type="flowchart",
+        elements=[],
+        connections=[],
+        metadata={},
+    )
 
 
 @pytest.mark.unit
@@ -16,33 +32,27 @@ class TestInteractiveTemplate:
 
     def test_initialization(self) -> None:
         """Test InteractiveTemplate initialization."""
-        template = InteractiveTemplate(
-            name="Basic Flowchart",
-            code="flowchart TD\n    A --> B"
-        )
+        template = create_test_template(name="Basic Flowchart")
         assert template.name == "Basic Flowchart"
-        assert "flowchart" in template.code
+        assert template.diagram_type == "flowchart"
 
     def test_template_has_name(self) -> None:
         """Test that template has name."""
-        template = InteractiveTemplate(name="Test", code="graph TD")
+        template = create_test_template(name="Test")
         assert template.name == "Test"
 
     def test_template_has_code(self) -> None:
-        """Test that template has code."""
-        template = InteractiveTemplate(name="Test", code="sequenceDiagram")
-        assert template.code == "sequenceDiagram"
+        """Test that template has diagram_type."""
+        template = create_test_template()
+        template.diagram_type = "sequence"
+        assert template.diagram_type == "sequence"
 
     def test_template_to_dict(self) -> None:
         """Test template serialization."""
-        template = InteractiveTemplate(
-            name="Test",
-            code="flowchart LR",
-            description="A test template"
-        )
+        template = create_test_template(name="Test", description="A test template")
         result = template.to_dict()
         assert result["name"] == "Test"
-        assert result["code"] == "flowchart LR"
+        assert result["description"] == "A test template"
 
 
 @pytest.mark.unit
@@ -54,52 +64,45 @@ class TestTemplateLibrary:
         library = TemplateLibrary()
         assert library is not None
 
-    def test_get_templates(self) -> None:
-        """Test getting all templates."""
+    def test_list_templates(self) -> None:
+        """Test listing all templates."""
         library = TemplateLibrary()
-        templates = library.get_templates()
+        templates = library.list_templates()
         assert isinstance(templates, list)
 
-    def test_get_template_by_name(self) -> None:
-        """Test getting template by name."""
+    def test_get_template_by_id(self) -> None:
+        """Test getting template by ID."""
         library = TemplateLibrary()
-        # Add a template first
-        template = InteractiveTemplate(name="Test", code="graph TD")
+        template = create_test_template(template_id="test1", name="Test")
         library.add_template(template)
-        
-        retrieved = library.get_template("Test")
+        retrieved = library.get_template("test1")
         assert retrieved is not None
         assert retrieved.name == "Test"
 
     def test_add_template(self) -> None:
         """Test adding template to library."""
         library = TemplateLibrary()
-        template = InteractiveTemplate(name="New", code="flowchart TD")
+        template = create_test_template(template_id="new1", name="New")
         library.add_template(template)
-        
-        assert library.get_template("New") is not None
+        assert library.get_template("new1") is not None
 
     def test_remove_template(self) -> None:
         """Test removing template from library."""
         library = TemplateLibrary()
-        template = InteractiveTemplate(name="ToRemove", code="graph LR")
+        template = create_test_template(template_id="remove1", name="ToRemove")
         library.add_template(template)
-        library.remove_template("ToRemove")
-        
-        assert library.get_template("ToRemove") is None
+        result = library.remove_template("remove1")
+        assert result is True
+        assert library.get_template("remove1") is None
 
-    def test_get_templates_by_category(self) -> None:
-        """Test getting templates by category."""
+    def test_list_templates_by_category(self) -> None:
+        """Test listing templates by category."""
         library = TemplateLibrary()
-        templates = library.get_templates_by_category("flowchart")
+        templates = library.list_templates(category="flowchart")
         assert isinstance(templates, list)
 
-    def test_template_count(self) -> None:
-        """Test template count."""
+    def test_get_categories(self) -> None:
+        """Test getting template categories."""
         library = TemplateLibrary()
-        initial_count = library.template_count()
-        
-        template = InteractiveTemplate(name="Count Test", code="graph TD")
-        library.add_template(template)
-        
-        assert library.template_count() >= initial_count
+        categories = library.get_categories()
+        assert isinstance(categories, list)
