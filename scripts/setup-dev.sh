@@ -168,7 +168,7 @@ run_initial_tests() {
     log_info "Running initial tests to verify setup..."
 
     # Run a quick test
-    if python -c "import mermaid_render; print('✅ Import successful')"; then
+    if python -c "import diagramaid; print('✅ Import successful')"; then
         log_success "Package import test passed."
     else
         log_error "Package import test failed."

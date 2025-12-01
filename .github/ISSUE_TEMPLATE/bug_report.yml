@@ -63,7 +63,7 @@ body:
       description: Minimal code sample that reproduces the issue
       render: python
       placeholder: |
-        from mermaid_render import MermaidRenderer
+        from diagramaid import MermaidRenderer
 
         # Your code here
     validations:

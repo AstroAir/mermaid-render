@@ -27,7 +27,7 @@ class VersionManager:
         self.project_root = project_root or Path(__file__).parent.parent
         self.pyproject_path = self.project_root / "pyproject.toml"
         self.changelog_path = self.project_root / "CHANGELOG.md"
-        self.init_path = self.project_root / "mermaid_render" / "__init__.py"
+        self.init_path = self.project_root / "diagramaid" / "__init__.py"
 
     def get_current_version(self) -> str:
         """Get the current version from git tags."""
@@ -322,12 +322,12 @@ class VersionManager:
         if not dry_run:
             try:
                 subprocess.run(
-                    ["python", "-m", "ruff", "check", "mermaid_render"],
+                    ["python", "-m", "ruff", "check", "diagramaid"],
                     check=True,
                     cwd=self.project_root,
                 )
                 subprocess.run(
-                    ["python", "-m", "black", "--check", "mermaid_render"],
+                    ["python", "-m", "black", "--check", "diagramaid"],
                     check=True,
                     cwd=self.project_root,
                 )

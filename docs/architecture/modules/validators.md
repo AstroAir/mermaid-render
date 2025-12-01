@@ -35,7 +35,7 @@ The validator supports all major Mermaid diagram types:
 ## Usage Example
 
 ```python
-from mermaid_render.validators import MermaidValidator
+from diagramaid.validators import MermaidValidator
 
 # Create validator
 validator = MermaidValidator()

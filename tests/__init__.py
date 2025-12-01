@@ -1,5 +1,5 @@
 """
-Test package for mermaid-render.
+Test package for diagramaid.
 
 This package contains all tests organized into logical categories:
 - unit: Unit tests for individual components

@@ -80,7 +80,7 @@ If applicable, add screenshots or code examples to help explain your changes.
 
 ```python
 # Example of new functionality
-from mermaid_render import NewFeature
+from diagramaid import NewFeature
 
 feature = NewFeature()
 result = feature.new_method()

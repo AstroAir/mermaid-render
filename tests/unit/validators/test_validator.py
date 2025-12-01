@@ -9,7 +9,7 @@ import pytest
 from typing import Dict, List, Optional
 from unittest.mock import Mock, patch
 
-from mermaid_render.validators.validator import (
+from diagramaid.validators.validator import (
     ValidationResult,
     MermaidValidator,
 )

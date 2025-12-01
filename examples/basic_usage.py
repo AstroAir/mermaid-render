@@ -8,7 +8,7 @@ diagram creation, rendering, and saving to files.
 
 from pathlib import Path
 
-from mermaid_render import (
+from diagramaid import (
     FlowchartDiagram,
     MermaidRenderer,
     SequenceDiagram,
@@ -158,7 +158,7 @@ def validation_example() -> None:
     """Demonstrate diagram validation."""
     print("Validation example...")
 
-    from mermaid_render.utils import validate_mermaid_syntax
+    from diagramaid.utils import validate_mermaid_syntax
 
     # Valid diagram
     valid_code = """

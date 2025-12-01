@@ -6,7 +6,7 @@ Tests for diagram documentation prompts.
 
 import pytest
 
-from mermaid_render.mcp.prompts.documentation import (
+from diagramaid.mcp.prompts.documentation import (
     create_diagram_documentation_prompt,
     explain_diagram_prompt,
 )

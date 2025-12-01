@@ -12,8 +12,8 @@ from unittest.mock import Mock, mock_open, patch
 
 import pytest
 
-from mermaid_render.convenience import quick_render, render, render_to_file
-from mermaid_render.exceptions import (
+from diagramaid.convenience import quick_render, render, render_to_file
+from diagramaid.exceptions import (
     ConfigurationError,
     RenderingError,
     UnsupportedFormatError,
@@ -29,7 +29,7 @@ class TestQuickRender:
         diagram_code = "flowchart TD\n    A --> B"
         expected_svg = '<svg xmlns="http://www.w3.org/2000/svg">test</svg>'
 
-        with patch("mermaid_render.convenience.MermaidRenderer") as mock_renderer_class:
+        with patch("diagramaid.convenience.MermaidRenderer") as mock_renderer_class:
             mock_renderer = Mock()
             mock_renderer.render_raw.return_value = expected_svg
             mock_renderer_class.return_value = mock_renderer
@@ -44,7 +44,7 @@ class TestQuickRender:
         diagram_code = "flowchart TD\n    A --> B"
         expected_png = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR"
 
-        with patch("mermaid_render.convenience.MermaidRenderer") as mock_renderer_class:
+        with patch("diagramaid.convenience.MermaidRenderer") as mock_renderer_class:
             mock_renderer = Mock()
             mock_renderer.render_raw.return_value = expected_png
             mock_renderer_class.return_value = mock_renderer
@@ -59,7 +59,7 @@ class TestQuickRender:
         diagram_code = "flowchart TD\n    A --> B"
         expected_pdf = b"%PDF-1.4\n1 0 obj"
 
-        with patch("mermaid_render.convenience.MermaidRenderer") as mock_renderer_class:
+        with patch("diagramaid.convenience.MermaidRenderer") as mock_renderer_class:
             mock_renderer = Mock()
             mock_renderer.render_raw.return_value = expected_pdf
             mock_renderer_class.return_value = mock_renderer
@@ -73,7 +73,7 @@ class TestQuickRender:
         """Test rendering with theme."""
         diagram_code = "flowchart TD\n    A --> B"
 
-        with patch("mermaid_render.convenience.MermaidRenderer") as mock_renderer_class:
+        with patch("diagramaid.convenience.MermaidRenderer") as mock_renderer_class:
             mock_renderer = Mock()
             mock_renderer.render_raw.return_value = "<svg>test</svg>"
             mock_renderer_class.return_value = mock_renderer
@@ -87,7 +87,7 @@ class TestQuickRender:
         diagram_code = "flowchart TD\n    A --> B"
         config = {"timeout": 60, "validate_syntax": True}
 
-        with patch("mermaid_render.convenience.MermaidRenderer") as mock_renderer_class:
+        with patch("diagramaid.convenience.MermaidRenderer") as mock_renderer_class:
             mock_renderer = Mock()
             mock_renderer.render_raw.return_value = "<svg>test</svg>"
             mock_renderer_class.return_value = mock_renderer
@@ -103,7 +103,7 @@ class TestQuickRender:
         output_path = temp_dir / "test.svg"
         expected_svg = "<svg>test</svg>"
 
-        with patch("mermaid_render.convenience.MermaidRenderer") as mock_renderer_class:
+        with patch("diagramaid.convenience.MermaidRenderer") as mock_renderer_class:
             with patch("builtins.open", mock_open()) as mock_file:
                 mock_renderer = Mock()
                 mock_renderer.render_raw.return_value = expected_svg
@@ -141,7 +141,7 @@ class TestQuickRender:
         """Test that rendering errors are properly propagated."""
         diagram_code = "flowchart TD\n    A --> B"
 
-        with patch("mermaid_render.convenience.MermaidRenderer") as mock_renderer_class:
+        with patch("diagramaid.convenience.MermaidRenderer") as mock_renderer_class:
             mock_renderer = Mock()
             # quick_render calls render_raw, not render
             mock_renderer.render_raw.side_effect = RenderingError("Rendering failed")
@@ -154,7 +154,7 @@ class TestQuickRender:
         """Test that configuration errors are properly propagated."""
         diagram_code = "flowchart TD\n    A --> B"
 
-        with patch("mermaid_render.convenience.MermaidRenderer") as mock_renderer_class:
+        with patch("diagramaid.convenience.MermaidRenderer") as mock_renderer_class:
             mock_renderer_class.side_effect = ConfigurationError("Invalid config")
 
             with pytest.raises(ConfigurationError, match="Invalid config"):
@@ -165,7 +165,7 @@ class TestQuickRender:
         diagram_code = "flowchart TD\n    A --> B"
         output_path = Path(temp_dir) / "test.svg"
 
-        with patch("mermaid_render.convenience.MermaidRenderer") as mock_renderer_class:
+        with patch("diagramaid.convenience.MermaidRenderer") as mock_renderer_class:
             mock_renderer = Mock()
             mock_renderer.render_raw.return_value = "<svg>test</svg>"
             mock_renderer_class.return_value = mock_renderer
@@ -187,7 +187,7 @@ class TestQuickRender:
         diagram_code = "flowchart TD\n    A --> B"
         output_path = str(temp_dir / "test.svg")
 
-        with patch("mermaid_render.convenience.MermaidRenderer") as mock_renderer_class:
+        with patch("diagramaid.convenience.MermaidRenderer") as mock_renderer_class:
             mock_renderer = Mock()
             mock_renderer.render_raw.return_value = "<svg>test</svg>"
             mock_renderer_class.return_value = mock_renderer
@@ -219,7 +219,7 @@ class TestQuickRender:
             style E fill:#bbf,stroke:#333,stroke-width:2px
         """
 
-        with patch("mermaid_render.convenience.MermaidRenderer") as mock_renderer_class:
+        with patch("diagramaid.convenience.MermaidRenderer") as mock_renderer_class:
             mock_renderer = Mock()
             mock_renderer.render_raw.return_value = "<svg>complex</svg>"
             mock_renderer_class.return_value = mock_renderer
@@ -242,7 +242,7 @@ class TestQuickRender:
             D --> E
         """
 
-        with patch("mermaid_render.convenience.MermaidRenderer") as mock_renderer_class:
+        with patch("diagramaid.convenience.MermaidRenderer") as mock_renderer_class:
             mock_renderer = Mock()
             mock_renderer.render_raw.return_value = "<svg>unicode</svg>"
             mock_renderer_class.return_value = mock_renderer
@@ -263,7 +263,7 @@ class TestRenderToFile:
         diagram_code = "flowchart TD\n    A --> B"
         output_path = temp_dir / "test.svg"
 
-        with patch("mermaid_render.convenience.quick_render") as mock_quick_render:
+        with patch("diagramaid.convenience.quick_render") as mock_quick_render:
             mock_quick_render.return_value = "<svg>test</svg>"
 
             result = render_to_file(diagram_code, output_path)
@@ -283,7 +283,7 @@ class TestRenderToFile:
         diagram_code = "flowchart TD\n    A --> B"
         output_path = temp_dir / "test.svg"
 
-        with patch("mermaid_render.convenience.quick_render") as mock_quick_render:
+        with patch("diagramaid.convenience.quick_render") as mock_quick_render:
             mock_quick_render.return_value = "<svg>test</svg>"
 
             render_to_file(diagram_code, output_path)
@@ -296,7 +296,7 @@ class TestRenderToFile:
         diagram_code = "flowchart TD\n    A --> B"
         output_path = temp_dir / "test.png"
 
-        with patch("mermaid_render.convenience.quick_render") as mock_quick_render:
+        with patch("diagramaid.convenience.quick_render") as mock_quick_render:
             mock_quick_render.return_value = b"png_data"
 
             render_to_file(diagram_code, output_path)
@@ -309,7 +309,7 @@ class TestRenderToFile:
         diagram_code = "flowchart TD\n    A --> B"
         output_path = temp_dir / "test.pdf"
 
-        with patch("mermaid_render.convenience.quick_render") as mock_quick_render:
+        with patch("diagramaid.convenience.quick_render") as mock_quick_render:
             mock_quick_render.return_value = b"pdf_data"
 
             render_to_file(diagram_code, output_path)
@@ -322,7 +322,7 @@ class TestRenderToFile:
         diagram_code = "flowchart TD\n    A --> B"
         output_path = temp_dir / "test.unknown"
 
-        with patch("mermaid_render.convenience.quick_render") as mock_quick_render:
+        with patch("diagramaid.convenience.quick_render") as mock_quick_render:
             mock_quick_render.return_value = "<svg>test</svg>"
 
             render_to_file(diagram_code, output_path)
@@ -335,7 +335,7 @@ class TestRenderToFile:
         diagram_code = "flowchart TD\n    A --> B"
         output_path = temp_dir / "test.svg"  # SVG extension
 
-        with patch("mermaid_render.convenience.quick_render") as mock_quick_render:
+        with patch("diagramaid.convenience.quick_render") as mock_quick_render:
             mock_quick_render.return_value = b"png_data"
 
             render_to_file(diagram_code, output_path, format="png")  # Override to PNG
@@ -348,7 +348,7 @@ class TestRenderToFile:
         diagram_code = "flowchart TD\n    A --> B"
         output_path = temp_dir / "test.svg"
 
-        with patch("mermaid_render.convenience.quick_render") as mock_quick_render:
+        with patch("diagramaid.convenience.quick_render") as mock_quick_render:
             mock_quick_render.return_value = "<svg>test</svg>"
 
             render_to_file(diagram_code, output_path, theme="dark")
@@ -362,7 +362,7 @@ class TestRenderToFile:
         output_path = temp_dir / "test.svg"
         config = {"timeout": 60}
 
-        with patch("mermaid_render.convenience.quick_render") as mock_quick_render:
+        with patch("diagramaid.convenience.quick_render") as mock_quick_render:
             mock_quick_render.return_value = "<svg>test</svg>"
 
             render_to_file(diagram_code, output_path, config=config)
@@ -375,7 +375,7 @@ class TestRenderToFile:
         diagram_code = "flowchart TD\n    A --> B"
         output_path = temp_dir / "test.svg"
 
-        with patch("mermaid_render.convenience.quick_render") as mock_quick_render:
+        with patch("diagramaid.convenience.quick_render") as mock_quick_render:
             mock_quick_render.side_effect = RenderingError("Rendering failed")
 
             result = render_to_file(diagram_code, output_path)
@@ -387,7 +387,7 @@ class TestRenderToFile:
         diagram_code = "flowchart TD\n    A --> B"
         output_path = str(temp_dir / "test.svg")
 
-        with patch("mermaid_render.convenience.quick_render") as mock_quick_render:
+        with patch("diagramaid.convenience.quick_render") as mock_quick_render:
             mock_quick_render.return_value = "<svg>test</svg>"
 
             render_to_file(diagram_code, output_path)
@@ -400,7 +400,7 @@ class TestRenderToFile:
         diagram_code = "flowchart TD\n    A --> B"
         output_path = temp_dir / "test.SVG"  # Uppercase extension
 
-        with patch("mermaid_render.convenience.quick_render") as mock_quick_render:
+        with patch("diagramaid.convenience.quick_render") as mock_quick_render:
             mock_quick_render.return_value = "<svg>test</svg>"
 
             render_to_file(diagram_code, output_path)
@@ -414,7 +414,7 @@ class TestBackwardCompatibility:
 
     def test_render_alias(self) -> None:
         """Test that render is an alias for quick_render."""
-        from mermaid_render.convenience import quick_render, render
+        from diagramaid.convenience import quick_render, render
 
         assert render is quick_render
 
@@ -422,7 +422,7 @@ class TestBackwardCompatibility:
         """Test that render alias works identically to quick_render."""
         diagram_code = "flowchart TD\n    A --> B"
 
-        with patch("mermaid_render.convenience.MermaidRenderer") as mock_renderer_class:
+        with patch("diagramaid.convenience.MermaidRenderer") as mock_renderer_class:
             mock_renderer = Mock()
             mock_renderer.render_raw.return_value = "<svg>test</svg>"
             mock_renderer_class.return_value = mock_renderer
@@ -444,7 +444,7 @@ class TestEdgeCases:
         ]  # A->B, B->C, etc.
         long_diagram = "flowchart TD\n" + "\n".join(nodes)
 
-        with patch("mermaid_render.convenience.MermaidRenderer") as mock_renderer_class:
+        with patch("diagramaid.convenience.MermaidRenderer") as mock_renderer_class:
             mock_renderer = Mock()
             mock_renderer.render_raw.return_value = "<svg>long</svg>"
             mock_renderer_class.return_value = mock_renderer
@@ -459,7 +459,7 @@ class TestEdgeCases:
         diagram_code = "flowchart TD\n    A --> B"
         output_path = temp_dir / "test with spaces & symbols!.svg"
 
-        with patch("mermaid_render.convenience.quick_render") as mock_quick_render:
+        with patch("diagramaid.convenience.quick_render") as mock_quick_render:
             mock_quick_render.return_value = "<svg>test</svg>"
 
             result = render_to_file(diagram_code, output_path)
@@ -471,7 +471,7 @@ class TestEdgeCases:
         """Test handling of None values for optional parameters."""
         diagram_code = "flowchart TD\n    A --> B"
 
-        with patch("mermaid_render.convenience.MermaidRenderer") as mock_renderer_class:
+        with patch("diagramaid.convenience.MermaidRenderer") as mock_renderer_class:
             mock_renderer = Mock()
             mock_renderer.render_raw.return_value = "<svg>test</svg>"
             mock_renderer_class.return_value = mock_renderer

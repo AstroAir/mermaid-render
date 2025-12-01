@@ -290,7 +290,7 @@ install-hooks:
 
 # Version management
 version:
-	@python -c "import mermaid_render; print(f'Version: {mermaid_render.__version__}')"
+	@python -c "import diagramaid; print(f'Version: {diagramaid.__version__}')"
 
 # Check if all required tools are available
 check-tools:

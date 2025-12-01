@@ -17,7 +17,7 @@ Diagram Object → Mermaid Syntax → Validation → Rendering → Output Format
 **Best for:** Web pages, documentation sites, scalable graphics
 
 ```python
-from mermaid_render import MermaidRenderer, FlowchartDiagram
+from diagramaid import MermaidRenderer, FlowchartDiagram
 
 diagram = FlowchartDiagram()
 diagram.add_node("A", "Start")
@@ -108,7 +108,7 @@ renderer.save(diagram, "diagram.pdf", format="pdf", page_size="A4")
 ### Quality Settings
 
 ```python
-from mermaid_render import MermaidConfig, MermaidRenderer
+from diagramaid import MermaidConfig, MermaidRenderer
 
 # High-quality configuration
 config = MermaidConfig(
@@ -163,7 +163,7 @@ result2 = renderer.render(diagram, format="svg")
 Render multiple diagrams efficiently:
 
 ```python
-from mermaid_render.utils import batch_render
+from diagramaid.utils import batch_render
 
 diagrams = {
     "process_flow": flowchart_diagram,
@@ -186,7 +186,7 @@ For high-throughput applications:
 
 ```python
 import asyncio
-from mermaid_render import AsyncMermaidRenderer
+from diagramaid import AsyncMermaidRenderer
 
 async def render_many_diagrams(diagrams):
     renderer = AsyncMermaidRenderer()
@@ -209,7 +209,7 @@ results = asyncio.run(render_many_diagrams(diagrams))
 ### Common Rendering Issues
 
 ```python
-from mermaid_render.exceptions import (
+from diagramaid.exceptions import (
     RenderingError,
     ValidationError,
     UnsupportedFormatError,
@@ -262,7 +262,7 @@ if not validation_result.is_valid:
 Create custom rendering backends:
 
 ```python
-from mermaid_render.renderers import BaseRenderer
+from diagramaid.renderers import BaseRenderer
 
 class CustomRenderer(BaseRenderer):
     def render(self, diagram, format="svg", **options):
@@ -282,7 +282,7 @@ For web applications:
 
 ```python
 from flask import Flask, Response
-from mermaid_render import quick_render
+from diagramaid import quick_render
 
 app = Flask(__name__)
 
@@ -303,7 +303,7 @@ def generate_diagram(diagram_type):
 
 ```python
 # sphinx_mermaid_extension.py
-from mermaid_render import quick_render
+from diagramaid import quick_render
 
 def render_mermaid_directive(diagram_code, output_path):
     svg_content = quick_render(diagram_code, format="svg")
@@ -316,7 +316,7 @@ def render_mermaid_directive(diagram_code, output_path):
 ```python
 # mkdocs_mermaid_plugin.py
 from mkdocs.plugins import BasePlugin
-from mermaid_render import quick_render
+from diagramaid import quick_render
 
 class MermaidPlugin(BasePlugin):
     def on_page_markdown(self, markdown, page, config, files):

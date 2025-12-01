@@ -59,7 +59,7 @@ class QualityChecker:
                 "black",
                 "--check",
                 "--diff",
-                "mermaid_render",
+                "diagramaid",
                 "tests",
             ]
         )
@@ -70,7 +70,7 @@ class QualityChecker:
 
         # Ruff linting
         success, stdout, stderr = self.run_command(
-            [sys.executable, "-m", "ruff", "check", "mermaid_render", "tests"]
+            [sys.executable, "-m", "ruff", "check", "diagramaid", "tests"]
         )
         if success:
             results.append((True, "✅ Ruff linting passed"))
@@ -79,7 +79,7 @@ class QualityChecker:
 
         # MyPy type checking
         success, stdout, stderr = self.run_command(
-            [sys.executable, "-m", "mypy", "mermaid_render"]
+            [sys.executable, "-m", "mypy", "diagramaid"]
         )
         if success:
             results.append((True, "✅ MyPy type checking passed"))
@@ -123,7 +123,7 @@ class QualityChecker:
         )
         if success:
             success, stdout, stderr = self.run_command(
-                [sys.executable, "-m", "bandit", "-r", "mermaid_render", "-f", "json"]
+                [sys.executable, "-m", "bandit", "-r", "diagramaid", "-f", "json"]
             )
             if success:
                 try:
@@ -218,7 +218,7 @@ class QualityChecker:
                 sys.executable,
                 "-m",
                 "pytest",
-                "--cov=mermaid_render",
+                "--cov=diagramaid",
                 "--cov-report=json",
                 "--cov-report=term",
                 "-v",
@@ -273,7 +273,7 @@ class QualityChecker:
         try:
             # Import time benchmark
             start_time = time.time()
-            import mermaid_render
+            import diagramaid
 
             import_time = time.time() - start_time
 
@@ -287,7 +287,7 @@ class QualityChecker:
             # Basic functionality benchmark
             start_time = time.time()
             try:
-                renderer = mermaid_render.MermaidRenderer()
+                renderer = diagramaid.MermaidRenderer()
                 # This might fail without proper setup, but we're testing object creation
                 creation_time = time.time() - start_time
 

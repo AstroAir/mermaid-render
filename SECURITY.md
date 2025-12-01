@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-We actively support the following versions of Mermaid Render with security updates:
+We actively support the following versions of DiagramAid with security updates:
 
 | Version | Supported          |
 | ------- | ------------------ |
@@ -11,14 +11,14 @@ We actively support the following versions of Mermaid Render with security updat
 
 ## Reporting a Vulnerability
 
-We take security vulnerabilities seriously. If you discover a security vulnerability in Mermaid Render, please report it responsibly.
+We take security vulnerabilities seriously. If you discover a security vulnerability in DiagramAid, please report it responsibly.
 
 ### How to Report
 
 **Please do NOT report security vulnerabilities through public GitHub issues.**
 
 Instead, please report security vulnerabilities by emailing:
-**[security@mermaid-render.dev](mailto:security@mermaid-render.dev)**
+**[security@diagramaid.dev](mailto:security@diagramaid.dev)**
 
 ### What to Include
 
@@ -50,7 +50,7 @@ When reporting a vulnerability, please include:
 
 ### For Users
 
-When using Mermaid Render in your applications:
+When using DiagramAid in your applications:
 
 1. **Keep Updated**: Always use the latest version with security patches
 2. **Validate Input**: Validate and sanitize user-provided diagram code
@@ -62,7 +62,7 @@ When using Mermaid Render in your applications:
 ### Input Validation
 
 ```python
-from mermaid_render import validate_mermaid_syntax, ValidationError
+from diagramaid import validate_mermaid_syntax, ValidationError
 
 # Always validate user input
 def safe_render(user_diagram_code):
@@ -83,7 +83,7 @@ def safe_render(user_diagram_code):
 
 ```python
 import os
-from mermaid_render import MermaidConfig
+from diagramaid import MermaidConfig
 
 # Use environment variables for sensitive configuration
 config = MermaidConfig(
@@ -97,7 +97,7 @@ config = MermaidConfig(
 
 ### External Dependencies
 
-Mermaid Render relies on external services and libraries:
+DiagramAid relies on external services and libraries:
 
 1. **mermaid.ink**: Default rendering service (can be configured)
 2. **Third-party APIs**: AI features may use external APIs
@@ -159,8 +159,8 @@ We maintain a security hall of fame to recognize researchers who help improve ou
 
 For security-related questions or concerns:
 
-- **Security Team**: [security@mermaid-render.dev](mailto:security@mermaid-render.dev)
-- **General Contact**: [contact@mermaid-render.dev](mailto:contact@mermaid-render.dev)
+- **Security Team**: [security@diagramaid.dev](mailto:security@diagramaid.dev)
+- **General Contact**: [contact@diagramaid.dev](mailto:contact@diagramaid.dev)
 - **GitHub Security**: Use GitHub's private vulnerability reporting feature
 
 ## Legal
@@ -172,4 +172,4 @@ This security policy is subject to our terms of service and privacy policy. By r
 3. Act in good faith and avoid privacy violations or service disruption
 4. Provide reasonable time for us to address the issue before disclosure
 
-Thank you for helping keep Mermaid Render secure! 🔒
+Thank you for helping keep DiagramAid secure! 🔒

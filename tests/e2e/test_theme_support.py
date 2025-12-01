@@ -5,7 +5,7 @@ Test enhanced theme support functionality.
 
 import requests
 from unittest.mock import patch, Mock
-from mermaid_render.renderers.svg_renderer import SVGRenderer
+from diagramaid.renderers.svg_renderer import SVGRenderer
 import sys
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))

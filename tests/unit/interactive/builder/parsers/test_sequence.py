@@ -6,7 +6,7 @@ Tests the SequenceDiagramParser class.
 
 import pytest
 
-from mermaid_render.interactive.builder.parsers.sequence import SequenceDiagramParser
+from diagramaid.interactive.builder.parsers.sequence import SequenceDiagramParser
 
 
 @pytest.mark.unit

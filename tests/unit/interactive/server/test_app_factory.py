@@ -7,7 +7,7 @@ Tests the FastAPI app factory.
 import pytest
 from unittest.mock import Mock, patch
 
-from mermaid_render.interactive.server.app_factory import create_fastapi_app
+from diagramaid.interactive.server.app_factory import create_fastapi_app
 
 
 @pytest.mark.unit

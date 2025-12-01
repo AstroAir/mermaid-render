@@ -6,7 +6,7 @@ Tests for configuration and system management tools.
 
 import pytest
 
-from mermaid_render.mcp.tools.config import (
+from diagramaid.mcp.tools.config import (
     get_configuration,
     get_system_information,
     manage_cache_operations,
@@ -91,7 +91,7 @@ class TestGetSystemInformation:
         result = get_system_information()
         if result["success"]:
             assert "data" in result
-            assert "system" in result["data"] or "mermaid_render_version" in str(
+            assert "system" in result["data"] or "diagramaid_version" in str(
                 result["data"]
             )
 

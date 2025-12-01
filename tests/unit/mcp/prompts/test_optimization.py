@@ -6,7 +6,7 @@ Tests for diagram optimization prompts.
 
 import pytest
 
-from mermaid_render.mcp.prompts.optimization import (
+from diagramaid.mcp.prompts.optimization import (
     optimize_layout_prompt,
     simplify_diagram_prompt,
 )

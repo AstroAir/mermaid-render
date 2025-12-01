@@ -21,7 +21,7 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from mermaid_render.ai import (
+from diagramaid.ai import (
     # Improved providers
     CustomProviderConfig,
     # Utility functions
@@ -47,7 +47,7 @@ def demo_openrouter_provider() -> None:
             api_key=api_key,
             model="anthropic/claude-3-opus",
             custom_headers={
-                "HTTP-Referer": "https://mermaid-render.dev",
+                "HTTP-Referer": "https://diagramaid.dev",
                 "X-Title": "Mermaid Render AI Features",
             },
         )

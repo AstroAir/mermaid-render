@@ -6,7 +6,7 @@ Tests for diagram analysis prompts.
 
 import pytest
 
-from mermaid_render.mcp.prompts.analysis import (
+from diagramaid.mcp.prompts.analysis import (
     analyze_diagram_quality_prompt,
     suggest_improvements_prompt,
 )

@@ -91,7 +91,7 @@ pytest tests/unit/test_core.py
 pytest tests/e2e/test_svg_rendering.py
 
 # Run with coverage
-pytest --cov=mermaid_render --cov-report=html
+pytest --cov=diagramaid --cov-report=html
 ```
 
 ### Using Test Scripts

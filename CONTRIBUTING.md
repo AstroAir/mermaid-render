@@ -1,6 +1,6 @@
-# Contributing to Mermaid Render
+# Contributing to DiagramAid
 
-Thank you for your interest in contributing to Mermaid Render! We welcome contributions from the community and are grateful for your help in making this project better.
+Thank you for your interest in contributing to DiagramAid! We welcome contributions from the community and are grateful for your help in making this project better.
 
 ## Table of Contents
 
@@ -16,7 +16,7 @@ Thank you for your interest in contributing to Mermaid Render! We welcome contri
 
 ## Code of Conduct
 
-This project adheres to a code of conduct. By participating, you are expected to uphold this code. Please report unacceptable behavior to [contact@mermaid-render.dev](mailto:contact@mermaid-render.dev).
+This project adheres to a code of conduct. By participating, you are expected to uphold this code. Please report unacceptable behavior to [contact@diagramaid.dev](mailto:contact@diagramaid.dev).
 
 ## Getting Started
 
@@ -40,8 +40,8 @@ This project adheres to a code of conduct. By participating, you are expected to
 
 ```bash
 # Clone your fork
-git clone https://github.com/YOUR_USERNAME/mermaid-render.git
-cd mermaid-render
+git clone https://github.com/YOUR_USERNAME/diagramaid.git
+cd diagramaid
 
 # Create and activate virtual environment
 python -m venv .venv
@@ -64,9 +64,9 @@ python demo.py
 pytest
 
 # Check code style
-black --check mermaid_render tests
-ruff check mermaid_render tests
-mypy mermaid_render
+black --check diagramaid tests
+ruff check diagramaid tests
+mypy diagramaid
 ```
 
 ## Making Changes
@@ -101,7 +101,7 @@ We maintain high test coverage and require tests for all new features.
 pytest
 
 # Run with coverage
-pytest --cov=mermaid_render --cov-report=html
+pytest --cov=diagramaid --cov-report=html
 
 # Run specific test categories
 pytest -m unit          # Unit tests only
@@ -149,19 +149,19 @@ We use several tools to maintain code quality:
 
 ```bash
 # Format code
-black mermaid_render tests
+black diagramaid tests
 
 # Check formatting
-black --check mermaid_render tests
+black --check diagramaid tests
 
 # Lint code
-ruff check mermaid_render tests
+ruff check diagramaid tests
 
 # Fix linting issues
-ruff check --fix mermaid_render tests
+ruff check --fix diagramaid tests
 
 # Type checking
-mypy mermaid_render
+mypy diagramaid
 ```
 
 ### Code style guidelines
@@ -222,7 +222,7 @@ When reporting bugs, please include:
 
 ### Security Issues
 
-For security vulnerabilities, please email [security@mermaid-render.dev](mailto:security@mermaid-render.dev) instead of creating a public issue.
+For security vulnerabilities, please email [security@diagramaid.dev](mailto:security@diagramaid.dev) instead of creating a public issue.
 
 ## Feature Requests
 
@@ -237,7 +237,7 @@ We welcome feature requests! Please:
 
 ### Adding New Diagram Types
 
-1. Create model class in `mermaid_render/models/`
+1. Create model class in `diagramaid/models/`
 2. Add validation logic
 3. Include comprehensive tests
 4. Update documentation and examples
@@ -245,7 +245,7 @@ We welcome feature requests! Please:
 
 ### Adding New Renderers
 
-1. Create renderer class in `mermaid_render/renderers/`
+1. Create renderer class in `diagramaid/renderers/`
 2. Implement required interface methods
 3. Add error handling and validation
 4. Include unit and integration tests
@@ -266,6 +266,6 @@ If you have questions about contributing, please:
 1. Check the documentation
 2. Search existing issues
 3. Ask in GitHub Discussions
-4. Email [contact@mermaid-render.dev](mailto:contact@mermaid-render.dev)
+4. Email [contact@diagramaid.dev](mailto:contact@diagramaid.dev)
 
-Thank you for contributing to Mermaid Render! 🎉
+Thank you for contributing to DiagramAid! 🎉

@@ -17,7 +17,7 @@ Interactive features include:
 ### Basic Setup
 
 ```python
-from mermaid_render.interactive import WebInterface
+from diagramaid.interactive import WebInterface
 
 # Create web interface
 web_interface = WebInterface(
@@ -49,7 +49,7 @@ web_interface = WebInterface(
 
 ```python
 from flask import Flask
-from mermaid_render.interactive import create_blueprint
+from diagramaid.interactive import create_blueprint
 
 app = Flask(__name__)
 
@@ -68,7 +68,7 @@ app.register_blueprint(mermaid_bp)
 ### Visual Editor
 
 ```python
-from mermaid_render.interactive import DiagramBuilder
+from diagramaid.interactive import DiagramBuilder
 
 # Create diagram builder
 builder = DiagramBuilder(
@@ -106,7 +106,7 @@ builder.addNodeType('process', {
 
 ```python
 # Build diagram programmatically
-from mermaid_render.interactive import ProgrammaticBuilder
+from diagramaid.interactive import ProgrammaticBuilder
 
 builder = ProgrammaticBuilder()
 
@@ -128,7 +128,7 @@ diagram = builder.build()
 ### Live Editor
 
 ```python
-from mermaid_render.interactive import LiveEditor
+from diagramaid.interactive import LiveEditor
 
 editor = LiveEditor(
     auto_save=True,
@@ -144,7 +144,7 @@ web_interface.add_editor(editor)
 ### WebSocket Updates
 
 ```python
-from mermaid_render.interactive import WebSocketManager
+from diagramaid.interactive import WebSocketManager
 
 ws_manager = WebSocketManager()
 
@@ -174,7 +174,7 @@ async def handle_diagram_change(session_id, diagram_content):
 ### Clickable Diagrams
 
 ```python
-from mermaid_render.interactive import InteractiveDiagram
+from diagramaid.interactive import InteractiveDiagram
 
 # Create interactive diagram
 interactive = InteractiveDiagram(
@@ -225,7 +225,7 @@ interactive.add_edge("C", "D", "leads to")
 ### Interactive Export
 
 ```python
-from mermaid_render.interactive import ExportTool
+from diagramaid.interactive import ExportTool
 
 export_tool = ExportTool(
     supported_formats=['svg', 'png', 'pdf', 'jpg'],
@@ -255,7 +255,7 @@ results = export_tool.batch_export(diagram, export_options)
 ### Themes and Styling
 
 ```python
-from mermaid_render.interactive import ThemeManager
+from diagramaid.interactive import ThemeManager
 
 theme_manager = ThemeManager()
 
@@ -275,7 +275,7 @@ web_interface.apply_theme(custom_theme)
 ### Custom Components
 
 ```python
-from mermaid_render.interactive import CustomComponent
+from diagramaid.interactive import CustomComponent
 
 class DiagramStatsComponent(CustomComponent):
     def __init__(self):
@@ -302,7 +302,7 @@ web_interface.add_component(DiagramStatsComponent())
 ### REST API
 
 ```python
-from mermaid_render.interactive import APIManager
+from diagramaid.interactive import APIManager
 
 api_manager = APIManager(web_interface)
 
@@ -326,7 +326,7 @@ def get_diagram(diagram_id):
 ### GraphQL API
 
 ```python
-from mermaid_render.interactive import GraphQLManager
+from diagramaid.interactive import GraphQLManager
 import graphene
 
 class DiagramType(graphene.ObjectType):
@@ -410,7 +410,7 @@ web_interface.configure_caching(
 ### Authentication
 
 ```python
-from mermaid_render.interactive import AuthManager
+from diagramaid.interactive import AuthManager
 
 auth_manager = AuthManager(
     provider="oauth2",

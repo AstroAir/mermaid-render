@@ -62,7 +62,7 @@ This module provides a comprehensive interactive web-based diagram builder for M
 ## Usage Example
 
 ```python
-from mermaid_render.interactive import InteractiveServer, DiagramBuilder
+from diagramaid.interactive import InteractiveServer, DiagramBuilder
 
 # Start interactive server
 server = InteractiveServer(port=8080)
@@ -83,7 +83,7 @@ session.connect("start", "end")
 This module requires the `interactive` optional dependency group:
 
 ```bash
-pip install mermaid-render[interactive]
+pip install diagramaid[interactive]
 ```
 
 ## Web Interface
@@ -99,7 +99,7 @@ The interactive module provides a complete web interface accessible at:
 Interactive features can be configured:
 
 ```python
-from mermaid_render import MermaidConfig
+from diagramaid import MermaidConfig
 
 config = MermaidConfig()
 config.set_interactive_port(8080)

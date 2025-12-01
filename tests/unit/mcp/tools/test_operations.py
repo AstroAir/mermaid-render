@@ -2,11 +2,12 @@
 Unit tests for mcp.tools.operations module.
 
 Tests for batch operations, file operations, and format conversion tools.
+These include async functions that use FastMCP Context support.
 """
 
 import pytest
 
-from mermaid_render.mcp.tools.operations import (
+from diagramaid.mcp.tools.operations import (
     batch_render_diagrams,
     convert_diagram_format,
     export_to_markdown,
@@ -18,50 +19,51 @@ from mermaid_render.mcp.tools.operations import (
 
 
 @pytest.mark.unit
+@pytest.mark.asyncio
 class TestConvertDiagramFormat:
     """Tests for convert_diagram_format function."""
 
-    def test_returns_dict(self):
+    async def test_returns_dict(self):
         """Test function returns a dictionary."""
-        result = convert_diagram_format("flowchart TD\n    A --> B")
+        result = await convert_diagram_format("flowchart TD\n    A --> B")
         assert isinstance(result, dict)
 
-    def test_has_success_key(self):
+    async def test_has_success_key(self):
         """Test result has success key."""
-        result = convert_diagram_format("flowchart TD\n    A --> B")
+        result = await convert_diagram_format("flowchart TD\n    A --> B")
         assert "success" in result
 
-    def test_convert_to_png(self):
+    async def test_convert_to_png(self):
         """Test conversion to PNG format."""
-        result = convert_diagram_format(
+        result = await convert_diagram_format(
             "flowchart TD\n    A --> B", target_format="png"
         )
         assert isinstance(result, dict)
 
-    def test_convert_to_svg(self):
+    async def test_convert_to_svg(self):
         """Test conversion to SVG format."""
-        result = convert_diagram_format(
+        result = await convert_diagram_format(
             "flowchart TD\n    A --> B", target_format="svg"
         )
         assert isinstance(result, dict)
 
-    def test_convert_to_pdf(self):
+    async def test_convert_to_pdf(self):
         """Test conversion to PDF format."""
-        result = convert_diagram_format(
+        result = await convert_diagram_format(
             "flowchart TD\n    A --> B", target_format="pdf"
         )
         assert isinstance(result, dict)
 
-    def test_invalid_format(self):
+    async def test_invalid_format(self):
         """Test invalid target format."""
-        result = convert_diagram_format(
+        result = await convert_diagram_format(
             "flowchart TD\n    A --> B", target_format="invalid"
         )
         assert result["success"] is False
 
-    def test_with_theme(self):
+    async def test_with_theme(self):
         """Test conversion with theme."""
-        result = convert_diagram_format(
+        result = await convert_diagram_format(
             "flowchart TD\n    A --> B", target_format="svg", theme="dark"
         )
         assert isinstance(result, dict)
@@ -142,125 +144,128 @@ class TestMergeDiagrams:
 
 
 @pytest.mark.unit
+@pytest.mark.asyncio
 class TestExportToMarkdown:
     """Tests for export_to_markdown function."""
 
-    def test_returns_dict(self):
+    async def test_returns_dict(self):
         """Test function returns a dictionary."""
-        result = export_to_markdown("flowchart TD\n    A --> B")
+        result = await export_to_markdown("flowchart TD\n    A --> B")
         assert isinstance(result, dict)
 
-    def test_has_success_key(self):
+    async def test_has_success_key(self):
         """Test result has success key."""
-        result = export_to_markdown("flowchart TD\n    A --> B")
+        result = await export_to_markdown("flowchart TD\n    A --> B")
         assert "success" in result
 
-    def test_with_title(self):
+    async def test_with_title(self):
         """Test export with title."""
-        result = export_to_markdown(
+        result = await export_to_markdown(
             "flowchart TD\n    A --> B", title="My Diagram"
         )
         assert isinstance(result, dict)
 
-    def test_with_description(self):
+    async def test_with_description(self):
         """Test export with description."""
-        result = export_to_markdown(
+        result = await export_to_markdown(
             "flowchart TD\n    A --> B", description="A simple flowchart"
         )
         assert isinstance(result, dict)
 
-    def test_include_code(self):
+    async def test_include_code(self):
         """Test export with code included."""
-        result = export_to_markdown(
+        result = await export_to_markdown(
             "flowchart TD\n    A --> B", include_code=True
         )
         if result["success"]:
             assert "mermaid" in result["data"]["markdown"].lower()
 
-    def test_include_preview(self):
+    async def test_include_preview(self):
         """Test export with preview included."""
-        result = export_to_markdown(
+        result = await export_to_markdown(
             "flowchart TD\n    A --> B", include_preview=True
         )
         assert isinstance(result, dict)
 
-    def test_include_elements(self):
+    async def test_include_elements(self):
         """Test export with elements included."""
-        result = export_to_markdown(
+        result = await export_to_markdown(
             "flowchart TD\n    A --> B", include_elements=True
         )
         assert isinstance(result, dict)
 
-    def test_result_has_markdown(self):
+    async def test_result_has_markdown(self):
         """Test result includes markdown content."""
-        result = export_to_markdown("flowchart TD\n    A --> B")
+        result = await export_to_markdown("flowchart TD\n    A --> B")
         if result["success"]:
             assert "data" in result
             assert "markdown" in result["data"]
 
 
 @pytest.mark.unit
+@pytest.mark.asyncio
 class TestSaveDiagramToFile:
     """Tests for save_diagram_to_file function."""
 
-    def test_returns_dict(self):
+    async def test_returns_dict(self):
         """Test function returns a dictionary."""
-        result = save_diagram_to_file(
+        result = await save_diagram_to_file(
             "flowchart TD\n    A --> B", "/tmp/test_diagram.svg"
         )
         assert isinstance(result, dict)
 
-    def test_has_success_key(self):
+    async def test_has_success_key(self):
         """Test result has success key."""
-        result = save_diagram_to_file(
+        result = await save_diagram_to_file(
             "flowchart TD\n    A --> B", "/tmp/test_diagram.svg"
         )
         assert "success" in result
 
 
 @pytest.mark.unit
+@pytest.mark.asyncio
 class TestBatchRenderDiagrams:
     """Tests for batch_render_diagrams function."""
 
-    def test_returns_dict(self):
+    async def test_returns_dict(self):
         """Test function returns a dictionary."""
         diagrams = [{"code": "flowchart TD\n    A --> B", "format": "svg"}]
-        result = batch_render_diagrams(diagrams)
+        result = await batch_render_diagrams(diagrams)
         assert isinstance(result, dict)
 
-    def test_has_success_key(self):
+    async def test_has_success_key(self):
         """Test result has success key."""
         diagrams = [{"code": "flowchart TD\n    A --> B", "format": "svg"}]
-        result = batch_render_diagrams(diagrams)
+        result = await batch_render_diagrams(diagrams)
         assert "success" in result
 
-    def test_parallel_processing(self):
+    async def test_parallel_processing(self):
         """Test parallel processing."""
         diagrams = [
             {"code": "flowchart TD\n    A --> B", "format": "svg"},
             {"code": "flowchart TD\n    C --> D", "format": "svg"},
         ]
-        result = batch_render_diagrams(diagrams, parallel=True)
+        result = await batch_render_diagrams(diagrams, parallel=True)
         assert isinstance(result, dict)
 
-    def test_sequential_processing(self):
+    async def test_sequential_processing(self):
         """Test sequential processing."""
         diagrams = [
             {"code": "flowchart TD\n    A --> B", "format": "svg"},
             {"code": "flowchart TD\n    C --> D", "format": "svg"},
         ]
-        result = batch_render_diagrams(diagrams, parallel=False)
+        result = await batch_render_diagrams(diagrams, parallel=False)
         assert isinstance(result, dict)
 
-    def test_empty_diagrams(self):
+    async def test_empty_diagrams(self):
         """Test with empty diagrams list."""
-        result = batch_render_diagrams([])
+        result = await batch_render_diagrams([])
         assert result["success"] is False
 
-    def test_result_has_summary(self):
+    async def test_result_has_summary(self):
         """Test result includes summary."""
         diagrams = [{"code": "flowchart TD\n    A --> B", "format": "svg"}]
-        result = batch_render_diagrams(diagrams)
+        result = await batch_render_diagrams(diagrams)
         if result["success"]:
             assert "data" in result
             assert "summary" in result["data"]

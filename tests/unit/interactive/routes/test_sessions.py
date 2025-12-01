@@ -6,8 +6,8 @@ Tests the sessions API router.
 
 import pytest
 
-from mermaid_render.interactive.routes.sessions import create_sessions_router
-from mermaid_render.interactive.websocket import WebSocketHandler
+from diagramaid.interactive.routes.sessions import create_sessions_router
+from diagramaid.interactive.websocket import WebSocketHandler
 
 
 @pytest.mark.unit

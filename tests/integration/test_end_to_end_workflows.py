@@ -8,14 +8,14 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from mermaid_render import (
+from diagramaid import (
     ClassDiagram,
     FlowchartDiagram,
     MermaidRenderer,
     SequenceDiagram,
     quick_render,
 )
-from mermaid_render.exceptions import (
+from diagramaid.exceptions import (
     RenderingError,
     UnsupportedFormatError,
 )
@@ -45,7 +45,7 @@ class TestBasicWorkflows:
         renderer = MermaidRenderer(use_plugin_system=False)
 
         # Mock the mermaid-py library to avoid actual rendering
-        with patch("mermaid_render.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
+        with patch("diagramaid.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
             mock_obj = Mock()
             mock_obj.__str__ = Mock(return_value="<svg>test content</svg>")
             mock_mermaid.return_value = mock_obj
@@ -76,7 +76,7 @@ class TestBasicWorkflows:
 
         # Render (PNG not implemented in current version, so test SVG)
         renderer = MermaidRenderer(use_plugin_system=False)
-        with patch("mermaid_render.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
+        with patch("diagramaid.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
             mock_obj = Mock()
             mock_obj.__str__ = Mock(return_value="<svg>sequence diagram</svg>")
             mock_mermaid.return_value = mock_obj
@@ -105,7 +105,7 @@ class TestBasicWorkflows:
 
         # Render
         renderer = MermaidRenderer(use_plugin_system=False)
-        with patch("mermaid_render.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
+        with patch("diagramaid.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
             mock_obj = Mock()
             mock_obj.__str__ = Mock(return_value="<svg>PDF data</svg>")
             mock_mermaid.return_value = mock_obj
@@ -118,7 +118,7 @@ class TestBasicWorkflows:
         """Test quick render utility function."""
         mermaid_code = "flowchart TD\n    A --> B\n    B --> C"
 
-        with patch("mermaid_render.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
+        with patch("diagramaid.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
             mock_obj = Mock()
             mock_obj.__str__ = Mock(return_value="<svg>quick render</svg>")
             mock_mermaid.return_value = mock_obj
@@ -144,7 +144,7 @@ class TestBasicWorkflows:
             output_path = Path(temp_dir) / "test_diagram.svg"
 
             with patch(
-                "mermaid_render.renderers.svg_renderer.md.Mermaid"
+                "diagramaid.renderers.svg_renderer.md.Mermaid"
             ) as mock_mermaid:
                 mock_obj = Mock()
                 mock_obj.__str__ = Mock(return_value="<svg>file content</svg>")
@@ -234,7 +234,7 @@ class TestComplexWorkflows:
         renderer = MermaidRenderer(use_plugin_system=False)
         results = []
 
-        with patch("mermaid_render.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
+        with patch("diagramaid.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
             mock_objects = []
             for i in range(3):
                 mock_obj = Mock()
@@ -314,7 +314,7 @@ class TestComplexWorkflows:
 
         themes = ["default", "dark", "forest"]
 
-        with patch("mermaid_render.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
+        with patch("diagramaid.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
             mock_objects = []
             for theme in themes:
                 mock_obj = Mock()
@@ -350,7 +350,7 @@ class TestPerformanceWorkflows:
 
         # Render
         renderer = MermaidRenderer(use_plugin_system=False)
-        with patch("mermaid_render.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
+        with patch("diagramaid.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
             mock_obj = Mock()
             mock_obj.__str__ = Mock(return_value="<svg>large diagram</svg>")
             mock_mermaid.return_value = mock_obj
@@ -370,7 +370,7 @@ class TestPerformanceWorkflows:
 
         renderer = MermaidRenderer(use_plugin_system=False)
 
-        with patch("mermaid_render.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
+        with patch("diagramaid.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
             mock_objects = []
             for i in range(5):
                 mock_obj = Mock()
@@ -408,7 +408,7 @@ class TestRegressionWorkflows:
         assert "quotes" in mermaid_code
 
         renderer = MermaidRenderer(use_plugin_system=False)
-        with patch("mermaid_render.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
+        with patch("diagramaid.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
             mock_obj = Mock()
             mock_obj.__str__ = Mock(return_value="<svg>special chars</svg>")
             mock_mermaid.return_value = mock_obj
@@ -428,7 +428,7 @@ class TestRegressionWorkflows:
         assert "🚀" in mermaid_code
 
         renderer = MermaidRenderer(use_plugin_system=False)
-        with patch("mermaid_render.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
+        with patch("diagramaid.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
             mock_obj = Mock()
             mock_obj.__str__ = Mock(return_value="<svg>unicode content</svg>")
             mock_mermaid.return_value = mock_obj

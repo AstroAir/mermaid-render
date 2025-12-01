@@ -1,6 +1,6 @@
 # AI Module Enhancement Guide
 
-This guide describes the enhanced AI module features in mermaid-render, including new providers, custom provider support, and utility functions.
+This guide describes the enhanced AI module features in diagramaid, including new providers, custom provider support, and utility functions.
 
 ## Overview
 
@@ -17,7 +17,7 @@ The enhanced AI module provides:
 ### Basic Usage with OpenRouter
 
 ```python
-from mermaid_render.ai import create_openrouter_provider, generate_from_text
+from diagramaid.ai import create_openrouter_provider, generate_from_text
 
 # Create OpenRouter provider
 provider = create_openrouter_provider(
@@ -37,7 +37,7 @@ result = generate_from_text(
 ### Multi-Provider Setup with Fallback
 
 ```python
-from mermaid_render.ai import setup_multi_provider_generation
+from diagramaid.ai import setup_multi_provider_generation
 
 # Configure multiple providers
 provider_configs = [
@@ -69,7 +69,7 @@ result = manager.generate_text("Create a sequence diagram for API calls")
 Enhanced with better error handling, retry logic, and configuration options.
 
 ```python
-from mermaid_render.ai import OpenAIProvider, ProviderConfig
+from diagramaid.ai import OpenAIProvider, ProviderConfig
 
 config = ProviderConfig(
     api_key="your-openai-key",
@@ -86,7 +86,7 @@ provider = OpenAIProvider(config)
 Improved Claude integration with support for latest models.
 
 ```python
-from mermaid_render.ai import AnthropicProvider, ProviderConfig
+from diagramaid.ai import AnthropicProvider, ProviderConfig
 
 config = ProviderConfig(
     api_key="your-anthropic-key",
@@ -102,7 +102,7 @@ provider = AnthropicProvider(config)
 Access to hundreds of models through OpenRouter's unified API.
 
 ```python
-from mermaid_render.ai import OpenRouterProvider, ProviderConfig
+from diagramaid.ai import OpenRouterProvider, ProviderConfig
 
 config = ProviderConfig(
     api_key="your-openrouter-key",
@@ -125,7 +125,7 @@ models = provider.list_models()
 Flexible architecture for integrating any AI API.
 
 ```python
-from mermaid_render.ai import CustomProvider, CustomProviderConfig
+from diagramaid.ai import CustomProvider, CustomProviderConfig
 
 config = CustomProviderConfig(
     name="my-custom-api",
@@ -154,7 +154,7 @@ provider = CustomProvider(config)
 Process multiple prompts efficiently:
 
 ```python
-from mermaid_render.ai import batch_generate_diagrams
+from diagramaid.ai import batch_generate_diagrams
 
 texts = [
     "Create a flowchart for user registration",
@@ -179,7 +179,7 @@ results = batch_generate_diagrams(
 Compare different providers on your use cases:
 
 ```python
-from mermaid_render.ai import compare_provider_performance
+from diagramaid.ai import compare_provider_performance
 
 test_prompts = [
     "Create a simple flowchart",
@@ -201,7 +201,7 @@ comparison = compare_provider_performance(test_prompts, provider_configs)
 Use AI to validate and improve diagrams:
 
 ```python
-from mermaid_render.ai import validate_diagram_with_ai
+from diagramaid.ai import validate_diagram_with_ai
 
 diagram_code = """
 flowchart TD
@@ -280,7 +280,7 @@ providers:
 The enhanced AI module provides comprehensive error handling:
 
 ```python
-from mermaid_render.ai import (
+from diagramaid.ai import (
     ProviderError,
     AuthenticationError,
     RateLimitError,
@@ -316,13 +316,13 @@ The enhanced module is backward compatible. Update your imports:
 
 ```python
 # Old
-from mermaid_render.ai import OpenAIProvider
+from diagramaid.ai import OpenAIProvider
 
 # New (same, but enhanced)
-from mermaid_render.ai import OpenAIProvider, ProviderConfig
+from diagramaid.ai import OpenAIProvider, ProviderConfig
 
 # New features
-from mermaid_render.ai import (
+from diagramaid.ai import (
     OpenRouterProvider,
     CustomProvider,
     ProviderManager,

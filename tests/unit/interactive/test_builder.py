@@ -11,8 +11,8 @@ from datetime import datetime
 from typing import Dict, List, Optional, Any
 from unittest.mock import Mock, patch, MagicMock
 
-from mermaid_render.interactive.builder import DiagramBuilder
-from mermaid_render.interactive.models import (
+from diagramaid.interactive.builder import DiagramBuilder
+from diagramaid.interactive.models import (
     ElementType,
     DiagramType,
     Position,
@@ -20,7 +20,7 @@ from mermaid_render.interactive.models import (
     DiagramElement,
     DiagramConnection,
 )
-from mermaid_render.exceptions import DiagramError
+from diagramaid.exceptions import DiagramError
 
 
 class TestElementType:

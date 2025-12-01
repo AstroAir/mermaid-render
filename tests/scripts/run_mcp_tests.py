@@ -18,7 +18,7 @@ try:
     from tests.mcp.test_mcp_server_integration import run_quick_test, run_full_test_suite
 except ImportError as e:
     print(f"❌ Failed to import test modules: {e}")
-    print("Make sure FastMCP and mermaid-render are properly installed.")
+    print("Make sure FastMCP and diagramaid are properly installed.")
     sys.exit(1)
 
 

@@ -17,8 +17,8 @@ Configuration in Mermaid Render covers:
 ### Quick Configuration
 
 ```python
-from mermaid_render import MermaidRenderer
-from mermaid_render.config import Config
+from diagramaid import MermaidRenderer
+from diagramaid.config import Config
 
 # Basic configuration
 config = Config(
@@ -49,7 +49,7 @@ config = Config.from_env()
 ### Renderer Configuration
 
 ```python
-from mermaid_render.config import RendererConfig
+from diagramaid.config import RendererConfig
 
 renderer_config = RendererConfig(
     # Output format
@@ -80,7 +80,7 @@ renderer_config = RendererConfig(
 ### Theme Configuration
 
 ```python
-from mermaid_render.config import ThemeConfig
+from diagramaid.config import ThemeConfig
 
 theme_config = ThemeConfig(
     # Default theme
@@ -107,7 +107,7 @@ theme_config = ThemeConfig(
 ### Performance Configuration
 
 ```python
-from mermaid_render.config import PerformanceConfig
+from diagramaid.config import PerformanceConfig
 
 performance_config = PerformanceConfig(
     # Caching
@@ -164,7 +164,7 @@ security:
 logging:
   level: INFO
   format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-  file: mermaid_render.log
+  file: diagramaid.log
 ```
 
 ### JSON Configuration
@@ -196,13 +196,13 @@ logging:
 
 ```bash
 # Environment configuration
-export MERMAID_RENDER_THEME=dark
-export MERMAID_RENDER_FORMAT=svg
-export MERMAID_RENDER_WIDTH=1200
-export MERMAID_RENDER_HEIGHT=800
-export MERMAID_RENDER_CACHE_BACKEND=redis
-export MERMAID_RENDER_CACHE_TTL=7200
-export MERMAID_RENDER_LOG_LEVEL=DEBUG
+export diagramaid_THEME=dark
+export diagramaid_FORMAT=svg
+export diagramaid_WIDTH=1200
+export diagramaid_HEIGHT=800
+export diagramaid_CACHE_BACKEND=redis
+export diagramaid_CACHE_TTL=7200
+export diagramaid_LOG_LEVEL=DEBUG
 ```
 
 ## Advanced Configuration
@@ -210,7 +210,7 @@ export MERMAID_RENDER_LOG_LEVEL=DEBUG
 ### Security Configuration
 
 ```python
-from mermaid_render.config import SecurityConfig
+from diagramaid.config import SecurityConfig
 
 security_config = SecurityConfig(
     # Input validation
@@ -239,7 +239,7 @@ security_config = SecurityConfig(
 ### Logging Configuration
 
 ```python
-from mermaid_render.config import LoggingConfig
+from diagramaid.config import LoggingConfig
 
 logging_config = LoggingConfig(
     # Log level
@@ -248,7 +248,7 @@ logging_config = LoggingConfig(
     # Output
     console_output=True,
     file_output=True,
-    log_file="mermaid_render.log",
+    log_file="diagramaid.log",
 
     # Format
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -267,7 +267,7 @@ logging_config = LoggingConfig(
 ### Database Configuration
 
 ```python
-from mermaid_render.config import DatabaseConfig
+from diagramaid.config import DatabaseConfig
 
 database_config = DatabaseConfig(
     # Connection
@@ -355,7 +355,7 @@ renderer.reload_config()
 ### Configuration Validation
 
 ```python
-from mermaid_render.config import validate_config
+from diagramaid.config import validate_config
 
 # Validate configuration
 validation_result = validate_config(config)
@@ -369,7 +369,7 @@ if not validation_result.is_valid:
 ### Web Server Configuration
 
 ```python
-from mermaid_render.config import WebConfig
+from diagramaid.config import WebConfig
 
 web_config = WebConfig(
     # Server settings
@@ -402,7 +402,7 @@ web_config = WebConfig(
 ### API Configuration
 
 ```python
-from mermaid_render.config import APIConfig
+from diagramaid.config import APIConfig
 
 api_config = APIConfig(
     # Versioning

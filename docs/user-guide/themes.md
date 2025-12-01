@@ -17,7 +17,7 @@ The theming system includes:
 ### Default Theme
 
 ```python
-from mermaid_render import MermaidRenderer
+from diagramaid import MermaidRenderer
 
 # Use default theme
 renderer = MermaidRenderer(theme="default")
@@ -28,7 +28,7 @@ result = renderer.render(diagram)
 ### Available Themes
 
 ```python
-from mermaid_render.themes import get_available_themes
+from diagramaid.themes import get_available_themes
 
 # List all available themes
 themes = get_available_themes()
@@ -58,7 +58,7 @@ result = renderer.render(diagram, theme="dark")
 ### Theme Configuration
 
 ```python
-from mermaid_render.config import ThemeConfig
+from diagramaid.config import ThemeConfig
 
 # Configure theme settings
 theme_config = ThemeConfig(
@@ -76,7 +76,7 @@ renderer = MermaidRenderer(theme_config=theme_config)
 ### Creating Custom Themes
 
 ```python
-from mermaid_render.themes import Theme, ColorPalette
+from diagramaid.themes import Theme, ColorPalette
 
 # Define color palette
 palette = ColorPalette(
@@ -139,7 +139,7 @@ theme = Theme(
 ### Extending Existing Themes
 
 ```python
-from mermaid_render.themes import extend_theme
+from diagramaid.themes import extend_theme
 
 # Extend the dark theme
 my_dark_theme = extend_theme("dark", {
@@ -286,7 +286,7 @@ class_theme = Theme(
 ### Theme Registry
 
 ```python
-from mermaid_render.themes import ThemeRegistry
+from diagramaid.themes import ThemeRegistry
 
 # Register custom theme
 registry = ThemeRegistry()
@@ -299,7 +299,7 @@ theme = registry.get("corporate")
 ### Theme Validation
 
 ```python
-from mermaid_render.themes import validate_theme
+from diagramaid.themes import validate_theme
 
 # Validate theme configuration
 validation_result = validate_theme(custom_theme)
@@ -391,7 +391,7 @@ for theme_name in themes:
 
 ```python
 # Cache themes for better performance
-from mermaid_render.themes import ThemeCache
+from diagramaid.themes import ThemeCache
 
 cache = ThemeCache()
 cached_theme = cache.get_or_create("corporate", create_corporate_theme)
@@ -417,7 +417,7 @@ for diagram in test_diagrams:
 ### Global Theme Settings
 
 ```python
-from mermaid_render.config import GlobalConfig
+from diagramaid.config import GlobalConfig
 
 GlobalConfig.set_default_theme("corporate")
 GlobalConfig.set_theme_directory("./themes")

@@ -6,8 +6,8 @@ Tests the DiagramBuilder class for managing diagram elements and connections.
 
 import pytest
 
-from mermaid_render.interactive.builder.diagram_builder import DiagramBuilder
-from mermaid_render.interactive.models import DiagramType, ElementType, Position, Size
+from diagramaid.interactive.builder.diagram_builder import DiagramBuilder
+from diagramaid.interactive.models import DiagramType, ElementType, Position, Size
 
 
 @pytest.mark.unit

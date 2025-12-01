@@ -1,21 +1,21 @@
 # MCP Configuration Files
 
-This directory contains configuration files for integrating mermaid-render MCP server with various AI assistants and IDE extensions.
+This directory contains configuration files for integrating diagramaid MCP server with various AI assistants and IDE extensions.
 
 ## Quick Start
 
 ### Prerequisites
 
-1. Install mermaid-render with MCP support:
+1. Install diagramaid with MCP support:
 ```bash
-pip install mermaid-render[all]
+pip install diagramaid[all]
 # or
-pip install mermaid-render fastmcp
+pip install diagramaid fastmcp
 ```
 
 2. Verify installation:
 ```bash
-mermaid-render-mcp --help
+diagramaid-mcp --help
 ```
 
 ## Configuration for Different Clients
@@ -63,19 +63,19 @@ Use `mcp.json` as a reference for configuring any MCP-compatible client.
 
 ### stdio (Default)
 ```bash
-mermaid-render-mcp
+diagramaid-mcp
 ```
 Best for local integrations with desktop applications.
 
 ### SSE (Server-Sent Events)
 ```bash
-mermaid-render-mcp --transport sse --host localhost --port 8000
+diagramaid-mcp --transport sse --host localhost --port 8000
 ```
 Best for web-based integrations.
 
 ### WebSocket
 ```bash
-mermaid-render-mcp --transport websocket --host localhost --port 9000
+diagramaid-mcp --transport websocket --host localhost --port 9000
 ```
 Best for real-time bidirectional communication.
 
@@ -129,12 +129,12 @@ Best for real-time bidirectional communication.
 
 ### Server not starting
 ```bash
-# Check if mermaid-render-mcp is in PATH
-which mermaid-render-mcp  # Unix
-where mermaid-render-mcp  # Windows
+# Check if diagramaid-mcp is in PATH
+which diagramaid-mcp  # Unix
+where diagramaid-mcp  # Windows
 
 # Run with debug logging
-mermaid-render-mcp --log-level DEBUG
+diagramaid-mcp --log-level DEBUG
 ```
 
 ### Connection issues
@@ -145,19 +145,19 @@ mermaid-render-mcp --log-level DEBUG
 ### Missing features
 ```bash
 # Install all optional dependencies
-pip install mermaid-render[all]
+pip install diagramaid[all]
 ```
 
 ## Environment Variables
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `MERMAID_RENDER_LOG_LEVEL` | Logging level | INFO |
-| `MERMAID_RENDER_CACHE_DIR` | Cache directory | ~/.mermaid_render_cache |
+| `diagramaid_LOG_LEVEL` | Logging level | INFO |
+| `diagramaid_CACHE_DIR` | Cache directory | ~/.diagramaid_cache |
 | `OPENAI_API_KEY` | OpenAI API key for AI features | - |
 | `ANTHROPIC_API_KEY` | Anthropic API key for AI features | - |
 
 ## Support
 
-- GitHub Issues: https://github.com/AstroAir/mermaid-render/issues
-- Documentation: https://mermaid-render.readthedocs.io
+- GitHub Issues: https://github.com/AstroAir/diagramaid/issues
+- Documentation: https://diagramaid.readthedocs.io

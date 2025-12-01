@@ -1,6 +1,6 @@
 # MCP Server Module
 
-This module contains the comprehensive Model Context Protocol (MCP) server implementation for mermaid-render, featuring AI-powered tools, resources, and prompts.
+This module contains the comprehensive Model Context Protocol (MCP) server implementation for diagramaid, featuring AI-powered tools, resources, and prompts.
 
 ## Quick Start
 
@@ -16,23 +16,23 @@ Configuration files for popular AI assistants are available in the `mcp-config/`
 
 ```bash
 # Install with all features
-pip install mermaid-render[all]
+pip install diagramaid[all]
 
 # Or install with specific features
-pip install mermaid-render fastmcp
+pip install diagramaid fastmcp
 ```
 
 ### Start the Server
 
 ```bash
 # Using stdio transport (default, for desktop apps)
-mermaid-render-mcp
+diagramaid-mcp
 
 # Using SSE transport (for web integrations)
-mermaid-render-mcp --transport sse --port 8080
+diagramaid-mcp --transport sse --port 8080
 
 # Using WebSocket transport (for real-time apps)
-mermaid-render-mcp --transport websocket --port 9000
+diagramaid-mcp --transport websocket --port 9000
 ```
 
 ## Features Overview
@@ -156,13 +156,13 @@ mermaid-render-mcp --transport websocket --port 9000
 ### Programmatic Usage
 
 ```python
-from mermaid_render.mcp import create_mcp_server
+from diagramaid.mcp import create_mcp_server
 import asyncio
 
 async def main():
     # Create MCP server with all features
     mcp = create_mcp_server(
-        name="mermaid-render",
+        name="diagramaid",
         version="1.0.0"
     )
     
@@ -176,7 +176,7 @@ if __name__ == "__main__":
 ### Using Tools Directly
 
 ```python
-from mermaid_render.mcp import (
+from diagramaid.mcp import (
     render_diagram,
     validate_diagram,
     merge_diagrams,
@@ -213,13 +213,13 @@ result = export_to_markdown(
 ### Command-Line Options
 
 ```bash
-mermaid-render-mcp [OPTIONS]
+diagramaid-mcp [OPTIONS]
 
 Options:
   --transport [stdio|sse|websocket]  Transport type (default: stdio)
   --host TEXT                        Host address (default: localhost)
   --port INTEGER                     Port number (default: 8000)
-  --name TEXT                        Server name (default: mermaid-render)
+  --name TEXT                        Server name (default: diagramaid)
   --version TEXT                     Server version (default: 1.0.0)
   --log-level [DEBUG|INFO|WARNING|ERROR]  Logging level (default: INFO)
 ```
@@ -230,8 +230,8 @@ Options:
 |----------|-------------|
 | `OPENAI_API_KEY` | OpenAI API key for AI features |
 | `ANTHROPIC_API_KEY` | Anthropic API key for AI features |
-| `MERMAID_RENDER_CACHE_DIR` | Cache directory path |
-| `MERMAID_RENDER_LOG_LEVEL` | Logging level |
+| `diagramaid_CACHE_DIR` | Cache directory path |
+| `diagramaid_LOG_LEVEL` | Logging level |
 
 ## Response Format
 
@@ -265,7 +265,7 @@ Error responses:
 ## Module Structure
 
 ```
-mermaid_render/mcp/
+diagramaid/mcp/
 ├── __init__.py           # Package exports
 ├── server.py             # MCP server implementation
 ├── tools.py              # Core tool implementations
@@ -287,7 +287,7 @@ pip install fastmcp>=2.0.0
 ### AI Features Not Available
 
 ```bash
-pip install mermaid-render[ai]
+pip install diagramaid[ai]
 # Set API keys
 export OPENAI_API_KEY=your_key
 ```
@@ -295,13 +295,13 @@ export OPENAI_API_KEY=your_key
 ### Template Features Not Available
 
 ```bash
-pip install mermaid-render[templates]
+pip install diagramaid[templates]
 ```
 
 ### Debug Mode
 
 ```bash
-mermaid-render-mcp --log-level DEBUG
+diagramaid-mcp --log-level DEBUG
 ```
 
 ## Contributing

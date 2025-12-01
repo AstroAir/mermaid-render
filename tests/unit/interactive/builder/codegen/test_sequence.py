@@ -6,8 +6,8 @@ Tests the SequenceDiagramGenerator class.
 
 import pytest
 
-from mermaid_render.interactive.builder.codegen.sequence import SequenceDiagramGenerator
-from mermaid_render.interactive.models import (
+from diagramaid.interactive.builder.codegen.sequence import SequenceDiagramGenerator
+from diagramaid.interactive.models import (
     DiagramConnection,
     DiagramElement,
     ElementType,

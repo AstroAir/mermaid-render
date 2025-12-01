@@ -7,7 +7,7 @@ Tests the EventManager class for handling diagram events.
 import pytest
 from unittest.mock import Mock
 
-from mermaid_render.interactive.builder.event_manager import EventManager
+from diagramaid.interactive.builder.event_manager import EventManager
 
 
 @pytest.mark.unit

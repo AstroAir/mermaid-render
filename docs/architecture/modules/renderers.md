@@ -50,7 +50,7 @@ Each renderer supports different capabilities:
 ### Basic Plugin System Usage
 
 ```python
-from mermaid_render.renderers import RendererManager, get_global_registry
+from diagramaid.renderers import RendererManager, get_global_registry
 
 # Get the global registry
 registry = get_global_registry()
@@ -73,7 +73,7 @@ print(f"Render time: {result.render_time:.3f}s")
 ### Renderer-Specific Configuration
 
 ```python
-from mermaid_render.renderers import RendererConfigManager
+from diagramaid.renderers import RendererConfigManager
 
 # Configure Playwright renderer
 config_manager = RendererConfigManager()
@@ -91,13 +91,13 @@ config_manager.save_renderer_config("playwright", config_manager.get_renderer_co
 ### Error Handling and Debugging
 
 ```python
-from mermaid_render.renderers import setup_logging, ErrorHandler
+from diagramaid.renderers import setup_logging, ErrorHandler
 
 # Enable detailed logging
-setup_logging(level="DEBUG", log_file="mermaid_render.log")
+setup_logging(level="DEBUG", log_file="diagramaid.log")
 
 # Create debug session
-from mermaid_render.renderers.logging_config import create_debug_session
+from diagramaid.renderers.logging_config import create_debug_session
 debug_session = create_debug_session("my_debug_session")
 
 # Handle errors with detailed context
@@ -114,7 +114,7 @@ except Exception as e:
 To create a custom renderer, inherit from `BaseRenderer`:
 
 ```python
-from mermaid_render.renderers.base import BaseRenderer, RendererInfo, RenderResult
+from diagramaid.renderers.base import BaseRenderer, RendererInfo, RenderResult
 
 class MyCustomRenderer(BaseRenderer):
     def get_info(self):
@@ -141,7 +141,7 @@ class MyCustomRenderer(BaseRenderer):
         return True  # Check if your renderer dependencies are available
 
 # Register your custom renderer
-from mermaid_render.renderers import register_renderer
+from diagramaid.renderers import register_renderer
 register_renderer(MyCustomRenderer, "custom")
 ```
 
@@ -226,17 +226,17 @@ The plugin architecture is designed for easy extension:
 
 ```python
 # Old way
-from mermaid_render import MermaidRenderer
+from diagramaid import MermaidRenderer
 renderer = MermaidRenderer()
 result = renderer.render_raw("graph TD\n    A --> B", "svg")
 
 # New way (plugin-based features)
-from mermaid_render import PluginMermaidRenderer
+from diagramaid import PluginMermaidRenderer
 renderer = PluginMermaidRenderer()
 result = renderer.render("graph TD\n    A --> B", format="svg")
 
 # Hybrid approach (legacy renderer with plugin system)
-from mermaid_render import MermaidRenderer
+from diagramaid import MermaidRenderer
 renderer = MermaidRenderer(use_plugin_system=True, preferred_renderer="playwright")
 result = renderer.render_raw("graph TD\n    A --> B", "svg")
 ```

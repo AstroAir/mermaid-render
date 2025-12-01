@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Mermaid Render is a production-ready Python library for generating Mermaid diagrams with a plugin-based architecture supporting multiple rendering backends, comprehensive validation, AI integration, and MCP server capabilities.
+DiagramAid is a production-ready Python library for generating Mermaid diagrams with a plugin-based architecture supporting multiple rendering backends, comprehensive validation, AI integration, and MCP server capabilities.
 
 ## Development Commands
 
@@ -62,17 +62,17 @@ pytest -vv tests/unit/renderers/test_base.py
 ### Core Layer Structure
 
 **Entry Points:**
-- `mermaid_render/__init__.py` - Main public API exports
-- `mermaid_render/core.py` - Core classes (MermaidRenderer, MermaidConfig, MermaidDiagram)
-- `mermaid_render/plugin_renderer.py` - Plugin-based renderer system (PluginMermaidRenderer)
-- `mermaid_render/convenience.py` - Quick rendering functions (quick_render, render_to_file)
+- `diagramaid/__init__.py` - Main public API exports
+- `diagramaid/core.py` - Core classes (MermaidRenderer, MermaidConfig, MermaidDiagram)
+- `diagramaid/plugin_renderer.py` - Plugin-based renderer system (PluginMermaidRenderer)
+- `diagramaid/convenience.py` - Quick rendering functions (quick_render, render_to_file)
 
-**Diagram Models** (`mermaid_render/models/`):
+**Diagram Models** (`diagramaid/models/`):
 - 10+ diagram types: Flowchart, Sequence, Class, State, ER, Journey, Gantt, Pie, GitGraph, Mindmap, Timeline
 - Each model provides type-safe construction, validation, and Mermaid syntax generation
 - Base class: `MermaidDiagram` with caching and validation hooks
 
-**Rendering System** (`mermaid_render/renderers/`):
+**Rendering System** (`diagramaid/renderers/`):
 - `base.py` - Abstract BaseRenderer with template method pattern
 - `registry.py` - RendererRegistry for plugin registration and discovery
 - `manager.py` - RendererManager orchestrates fallback chains and renderer selection
@@ -126,7 +126,7 @@ Validation → Caching → Actual rendering backend
 ### Testing Organization
 
 Tests mirror source structure under `tests/`:
-- `unit/` - Mirrors `mermaid_render/` structure (e.g., `unit/ai/`, `unit/renderers/`)
+- `unit/` - Mirrors `diagramaid/` structure (e.g., `unit/ai/`, `unit/renderers/`)
 - `integration/` - Multi-component interaction tests
 - `e2e/` - Full workflow tests
 - `performance/` - Benchmarks and load tests
@@ -166,7 +166,7 @@ The project recently underwent major cleanup:
 
 ### AI Module Architecture
 
-The AI system (`mermaid_render/ai/`) uses:
+The AI system (`diagramaid/ai/`) uses:
 - `providers.py` - Abstract AIProvider with OpenAI/Anthropic/OpenRouter implementations
 - `diagram_generator.py` - Natural language → Mermaid conversion
 - `compatibility.py` - Feature detection and provider capability checking
@@ -174,9 +174,9 @@ The AI system (`mermaid_render/ai/`) uses:
 
 ### MCP Server Integration
 
-The MCP server (`mermaid_render/mcp/`) exposes tools to Claude:
+The MCP server (`diagramaid/mcp/`) exposes tools to Claude:
 - Rendering, validation, generation, theme management, batch export
-- Entry point: `mermaid_render.mcp_server:main`
+- Entry point: `diagramaid.mcp_server:main`
 - Resources expose templates and themes
 - Prompts provide diagram type examples
 

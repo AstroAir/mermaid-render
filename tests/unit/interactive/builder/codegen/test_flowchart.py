@@ -6,8 +6,8 @@ Tests the FlowchartGenerator class.
 
 import pytest
 
-from mermaid_render.interactive.builder.codegen.flowchart import FlowchartGenerator
-from mermaid_render.interactive.models import (
+from diagramaid.interactive.builder.codegen.flowchart import FlowchartGenerator
+from diagramaid.interactive.models import (
     DiagramConnection,
     DiagramElement,
     ElementType,

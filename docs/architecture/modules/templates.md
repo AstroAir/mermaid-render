@@ -40,7 +40,7 @@ This module provides a comprehensive template system for generating Mermaid diag
 ## Usage Example
 
 ```python
-from mermaid_render.templates import TemplateManager, FlowchartGenerator
+from diagramaid.templates import TemplateManager, FlowchartGenerator
 
 # Use built-in generator
 generator = FlowchartGenerator()
@@ -64,7 +64,7 @@ diagram = template_manager.generate_from_template(
 The module supports multiple data sources:
 
 ```python
-from mermaid_render.templates import JSONDataSource, APIDataSource
+from diagramaid.templates import JSONDataSource, APIDataSource
 
 # JSON data source
 json_source = JSONDataSource("data.json")

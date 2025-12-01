@@ -6,7 +6,7 @@ Tests for parameter models and enums.
 
 import pytest
 
-from mermaid_render.mcp.tools.params import (
+from diagramaid.mcp.tools.params import (
     AnalyzeDiagramParams,
     BatchRenderParams,
     CacheManagementParams,

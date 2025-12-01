@@ -6,8 +6,8 @@ Tests the CodeGenerator base class.
 
 import pytest
 
-from mermaid_render.interactive.builder.codegen.base import CodeGenerator
-from mermaid_render.interactive.models import DiagramElement, ElementType, Position, Size
+from diagramaid.interactive.builder.codegen.base import CodeGenerator
+from diagramaid.interactive.models import DiagramElement, ElementType, Position, Size
 
 
 @pytest.mark.unit

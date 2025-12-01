@@ -7,7 +7,7 @@ Get up and running with Mermaid Render in just a few minutes! This guide will wa
 Let's create a simple flowchart using the object-oriented API:
 
 ```python
-from mermaid_render import MermaidRenderer, FlowchartDiagram
+from diagramaid import MermaidRenderer, FlowchartDiagram
 
 # Create a flowchart
 flowchart = FlowchartDiagram()
@@ -32,7 +32,7 @@ print("✅ Diagram created successfully!")
 If you prefer working with raw Mermaid syntax:
 
 ```python
-from mermaid_render import quick_render
+from diagramaid import quick_render
 
 # Write your diagram in Mermaid syntax
 diagram_code = """
@@ -55,7 +55,7 @@ quick_render(diagram_code, output_path="decision_flow.png", format="png")
 ### Sequence Diagram
 
 ```python
-from mermaid_render import SequenceDiagram
+from diagramaid import SequenceDiagram
 
 sequence = SequenceDiagram(title="User Login")
 sequence.add_participant("user", "User")
@@ -74,8 +74,8 @@ renderer.save(sequence, "login_sequence.svg")
 ### Class Diagram
 
 ```python
-from mermaid_render import ClassDiagram
-from mermaid_render.models.class_diagram import ClassMethod, ClassAttribute
+from diagramaid import ClassDiagram
+from diagramaid.models.class_diagram import ClassMethod, ClassAttribute
 
 class_diagram = ClassDiagram()
 
@@ -100,7 +100,7 @@ renderer.save(class_diagram, "class_hierarchy.svg")
 Mermaid Render supports multiple output formats:
 
 ```python
-from mermaid_render import MermaidRenderer, FlowchartDiagram
+from diagramaid import MermaidRenderer, FlowchartDiagram
 
 flowchart = FlowchartDiagram()
 flowchart.add_node("A", "Start")
@@ -124,7 +124,7 @@ renderer.save(flowchart, "diagram.pdf", format="pdf")
 Apply different themes to your diagrams:
 
 ```python
-from mermaid_render import MermaidRenderer
+from diagramaid import MermaidRenderer
 
 renderer = MermaidRenderer()
 
@@ -140,7 +140,7 @@ for theme in themes:
 Mermaid Render includes built-in validation:
 
 ```python
-from mermaid_render.utils import validate_mermaid_syntax
+from diagramaid.utils import validate_mermaid_syntax
 
 diagram_code = """
 flowchart TD
@@ -163,7 +163,7 @@ else:
 Customize the rendering behavior:
 
 ```python
-from mermaid_render import MermaidConfig, MermaidRenderer
+from diagramaid import MermaidConfig, MermaidRenderer
 
 config = MermaidConfig(
     timeout=60,              # Increase timeout for complex diagrams
@@ -180,8 +180,8 @@ renderer = MermaidRenderer(config=config)
 Handle errors gracefully:
 
 ```python
-from mermaid_render import MermaidRenderer
-from mermaid_render.exceptions import ValidationError, RenderingError
+from diagramaid import MermaidRenderer
+from diagramaid.exceptions import ValidationError, RenderingError
 
 try:
     renderer = MermaidRenderer()

@@ -7,7 +7,7 @@ Generates test SVGs and provides guidance for browser testing.
 
 import requests
 from unittest.mock import patch, Mock
-from mermaid_render.renderers.svg_renderer import SVGRenderer
+from diagramaid.renderers.svg_renderer import SVGRenderer
 import sys
 import os
 import tempfile
@@ -318,7 +318,7 @@ def create_compatibility_report() -> Path:
     guide_content = '''# Cross-Browser SVG Compatibility Testing Guide
 
 ## Overview
-This guide helps you test the SVG output from mermaid-render across different browsers and viewing contexts.
+This guide helps you test the SVG output from diagramaid across different browsers and viewing contexts.
 
 ## Test Files Generated
 - `basic_flowchart.svg` - Tests basic shapes, text, and arrows

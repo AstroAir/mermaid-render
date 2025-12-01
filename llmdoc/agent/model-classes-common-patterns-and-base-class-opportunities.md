@@ -4,7 +4,7 @@
 
 ### Code Section: FlowchartNode Validation and Escaping
 
-**File:** `mermaid_render/models/flowchart.py`
+**File:** `diagramaid/models/flowchart.py`
 **Lines:** 65-134
 **Purpose:** Initialize node and generate Mermaid syntax with HTML escaping
 
@@ -42,7 +42,7 @@ def to_mermaid(self) -> str:
 
 ### Code Section: SequenceParticipant Mermaid Generation
 
-**File:** `mermaid_render/models/sequence.py`
+**File:** `diagramaid/models/sequence.py`
 **Lines:** 43-82
 **Purpose:** Initialize participant and generate Mermaid syntax
 
@@ -64,7 +64,7 @@ def to_mermaid(self) -> str:
 
 ### Code Section: ClassMethod Mermaid Generation
 
-**File:** `mermaid_render/models/class_diagram.py`
+**File:** `diagramaid/models/class_diagram.py`
 **Lines:** 43-64
 **Purpose:** Generate Mermaid syntax for class methods
 
@@ -99,7 +99,7 @@ def to_mermaid(self) -> str:
 
 ### Code Section: ClassAttribute Mermaid Generation
 
-**File:** `mermaid_render/models/class_diagram.py`
+**File:** `diagramaid/models/class_diagram.py`
 **Lines:** 90-106
 **Purpose:** Generate Mermaid syntax for class attributes
 
@@ -129,7 +129,7 @@ def to_mermaid(self) -> str:
 
 ### Code Section: FlowchartDiagram Base Structure
 
-**File:** `mermaid_render/models/flowchart.py`
+**File:** `diagramaid/models/flowchart.py`
 **Lines:** 347-383
 **Purpose:** Initialize diagram with validation
 
@@ -158,7 +158,7 @@ def __init__(
 
 ### Code Section: SequenceDiagram Base Structure
 
-**File:** `mermaid_render/models/sequence.py`
+**File:** `diagramaid/models/sequence.py`
 **Lines:** 291-305
 **Purpose:** Initialize diagram with collections
 
@@ -180,7 +180,7 @@ def __init__(self, title: Optional[str] = None, autonumber: bool = False) -> Non
 
 ### Code Section: ClassDiagram Base Structure
 
-**File:** `mermaid_render/models/class_diagram.py`
+**File:** `diagramaid/models/class_diagram.py`
 **Lines:** 253-257
 **Purpose:** Initialize diagram with collections
 
@@ -198,7 +198,7 @@ def __init__(self, title: Optional[str] = None) -> None:
 
 ### Code Section: FlowchartDiagram Element Addition
 
-**File:** `mermaid_render/models/flowchart.py`
+**File:** `diagramaid/models/flowchart.py`
 **Lines:** 388-461
 **Purpose:** Add node with validation
 
@@ -225,7 +225,7 @@ def add_node(
 
 ### Code Section: SequenceDiagram Element Addition
 
-**File:** `mermaid_render/models/sequence.py`
+**File:** `diagramaid/models/sequence.py`
 **Lines:** 311-329
 **Purpose:** Add participant with validation
 
@@ -248,7 +248,7 @@ def add_participant(
 
 ### Code Section: ClassDiagram Element Addition
 
-**File:** `mermaid_render/models/class_diagram.py`
+**File:** `diagramaid/models/class_diagram.py`
 **Lines:** 263-276
 **Purpose:** Add class with validation
 
@@ -275,7 +275,7 @@ def add_class(
 
 ### Code Section: FlowchartDiagram Relationship Validation
 
-**File:** `mermaid_render/models/flowchart.py`
+**File:** `diagramaid/models/flowchart.py`
 **Lines:** 463-551
 **Purpose:** Add edge with node existence validation
 
@@ -305,7 +305,7 @@ def add_edge(
 
 ### Code Section: ClassDiagram Relationship Validation
 
-**File:** `mermaid_render/models/class_diagram.py`
+**File:** `diagramaid/models/class_diagram.py`
 **Lines:** 278-302
 **Purpose:** Add relationship with class existence validation
 

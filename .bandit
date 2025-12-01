@@ -128,7 +128,7 @@ sql_statements = [
 ]
 
 # Custom rules for our specific use cases
-[bandit.mermaid_render_custom]
+[bandit.diagramaid_custom]
 # Allow certain patterns that are safe in our context
 safe_patterns = [
     # Mermaid diagram code is user input but processed safely

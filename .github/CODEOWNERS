@@ -2,35 +2,35 @@
 # For more info: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
 
 # Default owners for everything
-* @mermaid-render/core-team
+* @AstroAir/diagramaid-core-team
 
 # Core modules
-/mermaid_render/core.py @mermaid-render/core-maintainers
-/mermaid_render/exceptions.py @mermaid-render/core-maintainers
+/diagramaid/core.py @AstroAir/diagramaid-core-maintainers
+/diagramaid/exceptions.py @AstroAir/diagramaid-core-maintainers
 
 # Diagram models
-/mermaid_render/models/ @mermaid-render/diagram-experts
+/diagramaid/models/ @AstroAir/diagramaid-diagram-experts
 
 # Renderers
-/mermaid_render/renderers/ @mermaid-render/rendering-experts
+/diagramaid/renderers/ @AstroAir/diagramaid-rendering-experts
 
 # Configuration
-/mermaid_render/config/ @mermaid-render/core-maintainers
+/diagramaid/config/ @AstroAir/diagramaid-core-maintainers
 
 # AI features
-/mermaid_render/ai/ @mermaid-render/ai-team
+/diagramaid/ai/ @AstroAir/diagramaid-ai-team
 
 # Interactive features
-/mermaid_render/interactive/ @mermaid-render/interactive-team
+/diagramaid/interactive/ @AstroAir/diagramaid-interactive-team
 
 # Tests
-/tests/ @mermaid-render/qa-team
+/tests/ @AstroAir/diagramaid-qa-team
 
 # Documentation
-/docs/ @mermaid-render/docs-team
+/docs/ @AstroAir/diagramaid-docs-team
 
 # Examples
-/examples/ @mermaid-render/docs-team
+/examples/ @AstroAir/diagramaid-docs-team
 
 # CI/CD
-/.github/workflows/ @mermaid-render/devops-team
+/.github/workflows/ @AstroAir/diagramaid-devops-team

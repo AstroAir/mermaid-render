@@ -7,7 +7,7 @@ Tests the middleware setup functions.
 import pytest
 from unittest.mock import Mock, patch
 
-from mermaid_render.interactive.server.middleware import (
+from diagramaid.interactive.server.middleware import (
     setup_exception_handler,
     setup_security_middleware,
 )

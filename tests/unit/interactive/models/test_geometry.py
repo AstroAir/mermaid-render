@@ -6,7 +6,7 @@ Tests the Position and Size classes.
 
 import pytest
 
-from mermaid_render.interactive.models.geometry import Position, Size
+from diagramaid.interactive.models.geometry import Position, Size
 
 
 @pytest.mark.unit

@@ -9,7 +9,7 @@ custom template creation, and diagram generators for common patterns.
 from pathlib import Path
 from typing import Any, cast
 
-from mermaid_render import MermaidRenderer
+from diagramaid import MermaidRenderer
 
 # Template system (optional imports with fallbacks)
 TEMPLATES_AVAILABLE = False
@@ -180,31 +180,31 @@ class _ArchitectureGeneratorShim:
 
 # Try to import real modules
 try:
-    from mermaid_render.templates import (
+    from diagramaid.templates import (
         ArchitectureGenerator as _ArchitectureGenerator,
     )
-    from mermaid_render.templates import (
+    from diagramaid.templates import (
         ClassDiagramGenerator as _ClassDiagramGenerator,  # noqa: F401
     )
-    from mermaid_render.templates import (
+    from diagramaid.templates import (
         FlowchartGenerator as _FlowchartGenerator,
     )
-    from mermaid_render.templates import (
+    from diagramaid.templates import (
         ProcessFlowGenerator as _ProcessFlowGenerator,  # noqa: F401
     )
-    from mermaid_render.templates import (
+    from diagramaid.templates import (
         SequenceGenerator as _SequenceGenerator,
     )
-    from mermaid_render.templates import (
+    from diagramaid.templates import (
         TemplateManager as _TemplateManager,
     )
-    from mermaid_render.templates import (
+    from diagramaid.templates import (
         generate_from_template as _generate_from_template,
     )
-    from mermaid_render.templates import (
+    from diagramaid.templates import (
         get_template_info as _get_template_info,
     )
-    from mermaid_render.templates import (
+    from diagramaid.templates import (
         list_available_templates as _list_available_templates,
     )
 
@@ -339,7 +339,7 @@ except ImportError:
         )
 
     print(
-        "⚠️  Template system not available. Install with: pip install mermaid-render[templates]"
+        "⚠️  Template system not available. Install with: pip install diagramaid[templates]"
     )
 
 
@@ -897,7 +897,7 @@ def main() -> None:
 
     if not TEMPLATES_AVAILABLE:
         print("⚠️  Template system requires additional dependencies.")
-        print("Install with: pip install mermaid-render[templates]\n")
+        print("Install with: pip install diagramaid[templates]\n")
 
     # Create output directory
     output_dir = create_output_dir()

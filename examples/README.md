@@ -76,7 +76,7 @@ python ai_features_showcase.py
 
 **Key Concepts**: AI integration, natural language processing, optimization
 
-**Dependencies**: `pip install mermaid-render[ai]`
+**Dependencies**: `pip install diagramaid[ai]`
 
 ### 5. [Template System Showcase](template_system_showcase.py)
 
@@ -89,7 +89,7 @@ python ai_features_showcase.py
 
 **Key Concepts**: Template systems, code generation, reusable patterns
 
-**Dependencies**: `pip install mermaid-render[templates]`
+**Dependencies**: `pip install diagramaid[templates]`
 
 ### 6. [Integration Examples](integration_examples.py)
 
@@ -124,7 +124,7 @@ python ai_features_showcase.py
 
 **Key Concepts**: Performance optimization, caching strategies, monitoring
 
-**Dependencies**: `pip install mermaid-render[cache]`
+**Dependencies**: `pip install diagramaid[cache]`
 
 ### 9. [Testing & Validation Showcase](testing_validation_showcase.py)
 
@@ -170,12 +170,12 @@ output/
 
 ### Optional Dependencies
 
-- **AI Features**: `pip install mermaid-render[ai]`
-- **Templates**: `pip install mermaid-render[templates]`
-- **Caching**: `pip install mermaid-render[cache]`
-- **Interactive**: `pip install mermaid-render[interactive]`
+- **AI Features**: `pip install diagramaid[ai]`
+- **Templates**: `pip install diagramaid[templates]`
+- **Caching**: `pip install diagramaid[cache]`
+- **Interactive**: `pip install diagramaid[interactive]`
 
-- **All Features**: `pip install mermaid-render[all]`
+- **All Features**: `pip install diagramaid[all]`
 
 ## 🎯 Learning Path
 
@@ -218,7 +218,7 @@ Detailed explanation of concepts covered and use cases.
 """
 
 from pathlib import Path
-from mermaid_render import MermaidRenderer
+from diagramaid import MermaidRenderer
 
 def create_output_dir():
     """Create output directory for examples."""
@@ -257,7 +257,7 @@ if __name__ == "__main__":
 - **[Documentation](../docs/examples/index.md)**: Complete examples documentation
 - **[API Reference](../docs/api/index.md)**: Detailed API documentation
 - **[User Guide](../docs/guides/index.md)**: Step-by-step tutorials
-- **[GitHub Issues](https://github.com/mermaid-render/mermaid-render/issues)**: Report bugs or request features
+- **[GitHub Issues](https://github.com/diagramaid/diagramaid/issues)**: Report bugs or request features
 
 ---
 

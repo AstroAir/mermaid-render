@@ -6,7 +6,7 @@ Tests the FlowchartParser class.
 
 import pytest
 
-from mermaid_render.interactive.builder.parsers.flowchart import FlowchartParser
+from diagramaid.interactive.builder.parsers.flowchart import FlowchartParser
 
 
 @pytest.mark.unit

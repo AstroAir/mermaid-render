@@ -99,7 +99,7 @@ USER mermaid
 EXPOSE 8000 8080
 
 # Default command for development
-CMD ["uv", "run", "python", "-m", "mermaid_render.interactive"]
+CMD ["uv", "run", "python", "-m", "diagramaid.interactive"]
 
 # =============================================================================
 # Testing Stage - Optimized for CI/CD testing
@@ -116,7 +116,7 @@ COPY . .
 RUN uv pip install .
 
 # Run tests by default
-CMD ["uv", "run", "pytest", "--cov=mermaid_render", "--cov-report=xml", "--cov-report=term"]
+CMD ["uv", "run", "pytest", "--cov=diagramaid", "--cov-report=xml", "--cov-report=term"]
 
 # =============================================================================
 # Production Stage - Minimal production image
@@ -127,7 +127,7 @@ FROM base as production
 COPY --from=dependencies /app/.venv /app/.venv
 
 # Copy source code
-COPY mermaid_render ./mermaid_render
+COPY diagramaid ./diagramaid
 COPY pyproject.toml README.md LICENSE ./
 
 # Install package
@@ -142,13 +142,13 @@ USER mermaid
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python -c "import mermaid_render; print('OK')" || exit 1
+    CMD python -c "import diagramaid; print('OK')" || exit 1
 
 # Expose port
 EXPOSE 8000
 
 # Default command
-CMD ["python", "-m", "mermaid_render.cli", "--help"]
+CMD ["python", "-m", "diagramaid.cli", "--help"]
 
 # =============================================================================
 # Web Server Stage - Production web server
@@ -165,7 +165,7 @@ COPY --chown=mermaid:mermaid docs/static ./static/ 2>/dev/null || true
 EXPOSE 8000
 
 # Start web server
-CMD ["uv", "run", "uvicorn", "mermaid_render.interactive.app:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uv", "run", "uvicorn", "diagramaid.interactive.app:app", "--host", "0.0.0.0", "--port", "8000"]
 
 # =============================================================================
 # Documentation Stage - Documentation building and serving
@@ -181,7 +181,7 @@ COPY mkdocs.yml ./
 COPY README.md LICENSE CHANGELOG.md ./
 
 # Copy source for API documentation
-COPY mermaid_render ./mermaid_render
+COPY diagramaid ./diagramaid
 
 # Build documentation
 RUN uv run mkdocs build
@@ -221,7 +221,7 @@ RUN uv sync --frozen --group security
 COPY . .
 
 # Run security scans
-CMD ["sh", "-c", "uv run safety check && uv run bandit -r mermaid_render/ && uv run pip-audit"]
+CMD ["sh", "-c", "uv run safety check && uv run bandit -r diagramaid/ && uv run pip-audit"]
 
 # =============================================================================
 # Multi-architecture support
@@ -245,12 +245,12 @@ ARG TARGETVARIANT
 # =============================================================================
 LABEL org.opencontainers.image.title="Mermaid Render"
 LABEL org.opencontainers.image.description="A comprehensive Python library for generating Mermaid diagrams"
-LABEL org.opencontainers.image.url="https://github.com/mermaid-render/mermaid-render"
-LABEL org.opencontainers.image.source="https://github.com/mermaid-render/mermaid-render"
-LABEL org.opencontainers.image.documentation="https://mermaid-render.readthedocs.io"
+LABEL org.opencontainers.image.url="https://github.com/diagramaid/diagramaid"
+LABEL org.opencontainers.image.source="https://github.com/diagramaid/diagramaid"
+LABEL org.opencontainers.image.documentation="https://diagramaid.readthedocs.io"
 LABEL org.opencontainers.image.licenses="MIT"
 LABEL org.opencontainers.image.vendor="Mermaid Render Team"
-LABEL maintainer="Mermaid Render Team <contact@mermaid-render.dev>"
+LABEL maintainer="Mermaid Render Team <contact@diagramaid.dev>"
 
 # Build information (will be set by CI/CD)
 ARG BUILD_DATE

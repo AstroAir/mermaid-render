@@ -1,10 +1,10 @@
 # Mermaid Render
 
-[![PyPI version](https://badge.fury.io/py/mermaid-render.svg)](https://badge.fury.io/py/mermaid-render)
-[![Python Support](https://img.shields.io/pypi/pyversions/mermaid-render.svg)](https://pypi.org/project/mermaid-render/)
+[![PyPI version](https://badge.fury.io/py/diagramaid.svg)](https://badge.fury.io/py/diagramaid)
+[![Python Support](https://img.shields.io/pypi/pyversions/diagramaid.svg)](https://pypi.org/project/diagramaid/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://github.com/AstroAir/mermaid-render/workflows/Tests/badge.svg)](https://github.com/AstroAir/mermaid-render/actions)
-[![Coverage](https://codecov.io/gh/AstroAir/mermaid-render/branch/main/graph/badge.svg)](https://codecov.io/gh/AstroAir/mermaid-render)
+[![Tests](https://github.com/AstroAir/diagramaid/workflows/Tests/badge.svg)](https://github.com/AstroAir/diagramaid/actions)
+[![Coverage](https://codecov.io/gh/AstroAir/diagramaid/branch/main/graph/badge.svg)](https://codecov.io/gh/AstroAir/diagramaid)
 
 A comprehensive, production-ready Python library for generating Mermaid diagrams with clean APIs, validation, multiple output formats, AI-powered generation, and MCP server integration.
 
@@ -29,13 +29,13 @@ A comprehensive, production-ready Python library for generating Mermaid diagrams
 ### Installation
 
 ```bash
-pip install mermaid-render
+pip install diagramaid
 ```
 
 ### Basic Usage
 
 ```python
-from mermaid_render import MermaidRenderer, FlowchartDiagram
+from diagramaid import MermaidRenderer, FlowchartDiagram
 
 # Create a flowchart
 flowchart = FlowchartDiagram()
@@ -56,7 +56,7 @@ renderer.save(flowchart, "diagram.png", format="png")
 ### 30-Second Tutorial
 
 ```python
-from mermaid_render import quick_render
+from diagramaid import quick_render
 
 # Write your diagram in Mermaid syntax
 diagram_code = """
@@ -118,7 +118,7 @@ print("✅ Diagram saved as login_flow.svg")
 ### AI-Powered Generation
 
 ```python
-from mermaid_render.ai import generate_from_text
+from diagramaid.ai import generate_from_text
 
 diagram = generate_from_text(
     "Create a flowchart showing the user registration process"
@@ -128,7 +128,7 @@ diagram = generate_from_text(
 ### Template System
 
 ```python
-from mermaid_render.templates import generate_from_template
+from diagramaid.templates import generate_from_template
 
 diagram = generate_from_template("software_architecture", {
     "title": "My System",
@@ -140,7 +140,7 @@ diagram = generate_from_template("software_architecture", {
 ### Interactive Builder
 
 ```python
-from mermaid_render.interactive import start_server
+from diagramaid.interactive import start_server
 
 start_server(host="localhost", port=8080)
 # Access at http://localhost:8080
@@ -150,7 +150,7 @@ start_server(host="localhost", port=8080)
 
 ```bash
 # Start MCP server for AI assistant integration
-mermaid-render-mcp
+diagramaid-mcp
 ```
 
 ## 📚 Documentation
@@ -164,14 +164,14 @@ mermaid-render-mcp
 
 ## 🤝 Community & Support
 
-- 📖 **Documentation**: [Full API Documentation](https://mermaid-render.readthedocs.io)
-- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/AstroAir/mermaid-render/issues)
-- 💬 **Questions**: [GitHub Discussions](https://github.com/AstroAir/mermaid-render/discussions)
+- 📖 **Documentation**: [Full API Documentation](https://diagramaid.readthedocs.io)
+- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/AstroAir/diagramaid/issues)
+- 💬 **Questions**: [GitHub Discussions](https://github.com/AstroAir/diagramaid/discussions)
 - 📧 **Email**: [astro_air@126.com](mailto:astro_air@126.com)
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](https://github.com/AstroAir/mermaid-render/blob/main/LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/AstroAir/diagramaid/blob/main/LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 

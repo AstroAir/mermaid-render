@@ -64,7 +64,7 @@ class QAChecker:
                 "black",
                 "--check",
                 "--diff",
-                "mermaid_render/",
+                "diagramaid/",
                 "tests/",
             ]
         )
@@ -88,7 +88,7 @@ class QAChecker:
         self.log("Checking code linting with ruff...")
 
         exit_code, stdout, stderr = self.run_command(
-            [sys.executable, "-m", "ruff", "check", "mermaid_render/", "tests/"]
+            [sys.executable, "-m", "ruff", "check", "diagramaid/", "tests/"]
         )
 
         result = {
@@ -110,7 +110,7 @@ class QAChecker:
         self.log("Checking type hints with mypy...")
 
         exit_code, stdout, stderr = self.run_command(
-            [sys.executable, "-m", "mypy", "mermaid_render/"]
+            [sys.executable, "-m", "mypy", "diagramaid/"]
         )
 
         result = {
@@ -137,7 +137,7 @@ class QAChecker:
                 "-m",
                 "bandit",
                 "-r",
-                "mermaid_render/",
+                "diagramaid/",
                 "-f",
                 "json",
                 "-o",
@@ -210,7 +210,7 @@ class QAChecker:
                 "-m",
                 "pytest",
                 "tests/",
-                "--cov=mermaid_render",
+                "--cov=diagramaid",
                 "--cov-report=json",
                 "--cov-report=term-missing",
                 "-v",
@@ -319,7 +319,7 @@ class QAChecker:
         """Generate a detailed QA report."""
         report = {
             "timestamp": subprocess.check_output(["date", "-u"]).decode().strip(),
-            "project": "mermaid-render",
+            "project": "diagramaid",
             "qa_results": results,
         }
 

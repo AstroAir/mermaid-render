@@ -9,7 +9,7 @@ diagram generation, code analysis, optimization, and intelligent suggestions.
 from pathlib import Path
 from typing import Any, TypedDict
 
-from mermaid_render import (
+from diagramaid import (
     FlowchartDiagram,
     MermaidRenderer,
     SequenceDiagram,
@@ -69,31 +69,31 @@ get_suggestions: Any | None = None
 optimize_diagram: Any | None = None
 
 try:
-    from mermaid_render.ai import (
+    from diagramaid.ai import (
         DiagramAnalyzer as _DiagramAnalyzer,
     )
-    from mermaid_render.ai import (
+    from diagramaid.ai import (
         DiagramGenerator as _DiagramGenerator,
     )
-    from mermaid_render.ai import (
+    from diagramaid.ai import (
         DiagramOptimizer as _DiagramOptimizer,
     )
-    from mermaid_render.ai import (
+    from diagramaid.ai import (
         NLProcessor as _NLProcessor,
     )
-    from mermaid_render.ai import (
+    from diagramaid.ai import (
         SuggestionEngine as _SuggestionEngine,
     )
-    from mermaid_render.ai import (
+    from diagramaid.ai import (
         analyze_diagram as _analyze_diagram,
     )
-    from mermaid_render.ai import (
+    from diagramaid.ai import (
         generate_from_text as _generate_from_text,
     )
-    from mermaid_render.ai import (
+    from diagramaid.ai import (
         get_suggestions as _get_suggestions,
     )
-    from mermaid_render.ai import (
+    from diagramaid.ai import (
         optimize_diagram as _optimize_diagram,
     )
 
@@ -110,7 +110,7 @@ try:
     AI_AVAILABLE = True
 except ImportError:
     AI_AVAILABLE = False
-    print("⚠️  AI features not available. Install with: pip install mermaid-render[ai]")
+    print("⚠️  AI features not available. Install with: pip install diagramaid[ai]")
 
 
 def create_output_dir() -> Path:
@@ -534,7 +534,7 @@ def main() -> None:
 
     if not AI_AVAILABLE:
         print("⚠️  AI features require additional dependencies.")
-        print("Install with: pip install mermaid-render[ai]\n")
+        print("Install with: pip install diagramaid[ai]\n")
 
     # Create output directory
     output_dir = create_output_dir()

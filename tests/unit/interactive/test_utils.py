@@ -7,7 +7,7 @@ Tests the utility functions for interactive module.
 import pytest
 from unittest.mock import Mock, patch
 
-from mermaid_render.interactive.utils import (
+from diagramaid.interactive.utils import (
     create_interactive_session,
     export_diagram_code,
     get_available_components,

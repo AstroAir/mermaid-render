@@ -37,29 +37,29 @@ def get_submodules(package_name: str) -> list[str]:
 
 # Define the core modules to document
 core_modules = [
-    "mermaid_render",
-    "mermaid_render.core",
-    "mermaid_render.exceptions",
-    "mermaid_render.plugin_renderer",
-    "mermaid_render.convenience",
+    "diagramaid",
+    "diagramaid.core",
+    "diagramaid.exceptions",
+    "diagramaid.plugin_renderer",
+    "diagramaid.convenience",
 ]
 
 # Define optional feature modules
 optional_modules = [
-    "mermaid_render.config",
-    "mermaid_render.ai",
-    "mermaid_render.collaboration",
-    "mermaid_render.interactive",
-    "mermaid_render.templates",
-    "mermaid_render.cache",
+    "diagramaid.config",
+    "diagramaid.ai",
+    "diagramaid.collaboration",
+    "diagramaid.interactive",
+    "diagramaid.templates",
+    "diagramaid.cache",
 ]
 
 # Define modules with submodules that need individual pages
 submodule_groups: dict[str, list[str]] = {
-    "mermaid_render.models": [],
-    "mermaid_render.renderers": [],
-    "mermaid_render.utils": [],
-    "mermaid_render.validators": [],
+    "diagramaid.models": [],
+    "diagramaid.renderers": [],
+    "diagramaid.utils": [],
+    "diagramaid.validators": [],
 }
 
 # Discover available modules
@@ -94,33 +94,33 @@ for module in available_modules:
         fd.write(f"# {module_name}\n\n")
 
         # Add module description
-        if module == "mermaid_render":
+        if module == "diagramaid":
             fd.write("Main package module with core functionality and public API.\n\n")
-        elif module == "mermaid_render.core":
+        elif module == "diagramaid.core":
             fd.write("Core rendering classes and base functionality.\n\n")
-        elif module == "mermaid_render.ai":
+        elif module == "diagramaid.ai":
             fd.write("AI-powered features for diagram generation and optimization.\n\n")
-        elif module == "mermaid_render.cache":
+        elif module == "diagramaid.cache":
             fd.write(
                 "Caching system with multiple backends and performance monitoring.\n\n"
             )
-        elif module == "mermaid_render.collaboration":
+        elif module == "diagramaid.collaboration":
             fd.write(
                 "Collaboration features for multi-user editing and version control.\n\n"
             )
-        elif module == "mermaid_render.interactive":
+        elif module == "diagramaid.interactive":
             fd.write("Interactive web interface and diagram builder.\n\n")
-        elif module == "mermaid_render.templates":
+        elif module == "diagramaid.templates":
             fd.write(
                 "Template system for generating diagrams from structured data.\n\n"
             )
-        elif module == "mermaid_render.config":
+        elif module == "diagramaid.config":
             fd.write("Configuration management and theme system.\n\n")
-        elif module == "mermaid_render.exceptions":
+        elif module == "diagramaid.exceptions":
             fd.write("Exception classes for error handling.\n\n")
-        elif module == "mermaid_render.plugin_renderer":
+        elif module == "diagramaid.plugin_renderer":
             fd.write("Plugin-based renderer with advanced features.\n\n")
-        elif module == "mermaid_render.convenience":
+        elif module == "diagramaid.convenience":
             fd.write("Convenience functions for quick diagram rendering.\n\n")
 
         # Add module docstring

@@ -8,7 +8,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from mermaid_render.mcp.resources.config import (
+from diagramaid.mcp.resources.config import (
     get_config_schema,
     get_default_config,
 )
@@ -83,7 +83,7 @@ class TestGetDefaultConfig:
     @pytest.mark.asyncio
     async def test_returns_string_or_raises(self):
         """Test function returns a string or raises ResourceError."""
-        from mermaid_render.mcp.resources.base import ResourceError
+        from diagramaid.mcp.resources.base import ResourceError
 
         ctx = MagicMock()
         try:
@@ -98,7 +98,7 @@ class TestGetDefaultConfig:
         """Test function returns valid JSON or raises ResourceError."""
         import json
 
-        from mermaid_render.mcp.resources.base import ResourceError
+        from diagramaid.mcp.resources.base import ResourceError
 
         ctx = MagicMock()
         try:

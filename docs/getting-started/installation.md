@@ -7,7 +7,7 @@ This guide covers different ways to install Mermaid Render and its dependencies.
 The simplest way to install Mermaid Render is using pip:
 
 ```bash
-pip install mermaid-render
+pip install diagramaid
 ```
 
 This installs the core library with basic functionality for creating and rendering diagrams to SVG format.
@@ -19,7 +19,7 @@ Mermaid Render offers several optional feature sets that you can install based o
 ### Full Installation (Recommended)
 
 ```bash
-pip install mermaid-render[all]
+pip install diagramaid[all]
 ```
 
 This installs all optional features and is recommended for most users.
@@ -28,25 +28,25 @@ This installs all optional features and is recommended for most users.
 
 ```bash
 # PDF export support
-pip install mermaid-render[pdf]
+pip install diagramaid[pdf]
 
 # Redis caching support
-pip install mermaid-render[cache]
+pip install diagramaid[cache]
 
 # AI-powered features
-pip install mermaid-render[ai]
+pip install diagramaid[ai]
 
 # Interactive web interface
-pip install mermaid-render[interactive]
+pip install diagramaid[interactive]
 
 # Collaboration features
-pip install mermaid-render[collaboration]
+pip install diagramaid[collaboration]
 
 # Development dependencies
-pip install mermaid-render[dev]
+pip install diagramaid[dev]
 
 # Documentation building
-pip install mermaid-render[docs]
+pip install diagramaid[docs]
 ```
 
 ### Combining Features
@@ -54,7 +54,7 @@ pip install mermaid-render[docs]
 You can combine multiple feature sets:
 
 ```bash
-pip install mermaid-render[pdf,cache,ai]
+pip install diagramaid[pdf,cache,ai]
 ```
 
 ## System Requirements
@@ -90,7 +90,7 @@ mermaid_env\Scripts\activate
 source mermaid_env/bin/activate
 
 # Install Mermaid Render
-pip install mermaid-render[all]
+pip install diagramaid[all]
 ```
 
 ## Development Installation
@@ -99,8 +99,8 @@ If you want to contribute to Mermaid Render or need the latest development versi
 
 ```bash
 # Clone the repository
-git clone https://github.com/mermaid-render/mermaid-render.git
-cd mermaid-render
+git clone https://github.com/diagramaid/diagramaid.git
+cd diagramaid
 
 # Install in development mode
 pip install -e ".[dev]"
@@ -111,11 +111,11 @@ pip install -e ".[dev]"
 Verify your installation by running:
 
 ```python
-import mermaid_render
-print(mermaid_render.__version__)
+import diagramaid
+print(diagramaid.__version__)
 
 # Test basic functionality
-from mermaid_render import quick_render
+from diagramaid import quick_render
 
 diagram_code = """
 flowchart TD
@@ -137,7 +137,7 @@ print("✅ Installation successful!")
 ```bash
 python -m venv fresh_env
 source fresh_env/bin/activate  # On Windows: fresh_env\Scripts\activate
-pip install mermaid-render[all]
+pip install diagramaid[all]
 ```
 
 #### PDF Export Not Working
@@ -145,7 +145,7 @@ pip install mermaid-render[all]
 **Solution**: Install PDF dependencies:
 
 ```bash
-pip install mermaid-render[pdf]
+pip install diagramaid[pdf]
 # Or manually install cairosvg
 pip install cairosvg
 ```
@@ -155,7 +155,7 @@ pip install cairosvg
 **Solution**: Run as administrator or use `--user` flag:
 
 ```bash
-pip install --user mermaid-render
+pip install --user diagramaid
 ```
 
 #### Network/Proxy Issues
@@ -163,16 +163,16 @@ pip install --user mermaid-render
 **Solution**: Configure pip for your network:
 
 ```bash
-pip install --proxy http://proxy.company.com:8080 mermaid-render
+pip install --proxy http://proxy.company.com:8080 diagramaid
 ```
 
 ### Getting Help
 
 If you encounter issues not covered here:
 
-1. Check the [GitHub Issues](https://github.com/mermaid-render/mermaid-render/issues)
-2. Search [Stack Overflow](https://stackoverflow.com/questions/tagged/mermaid-render)
-3. Ask in [GitHub Discussions](https://github.com/mermaid-render/mermaid-render/discussions)
+1. Check the [GitHub Issues](https://github.com/diagramaid/diagramaid/issues)
+2. Search [Stack Overflow](https://stackoverflow.com/questions/tagged/diagramaid)
+3. Ask in [GitHub Discussions](https://github.com/diagramaid/diagramaid/discussions)
 
 ## Next Steps
 

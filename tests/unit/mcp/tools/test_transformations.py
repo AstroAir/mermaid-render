@@ -6,7 +6,7 @@ Tests for style and structure transformation tools.
 
 import pytest
 
-from mermaid_render.mcp.tools.transformations import (
+from diagramaid.mcp.tools.transformations import (
     generate_diagram_variants,
     transform_diagram_style,
 )

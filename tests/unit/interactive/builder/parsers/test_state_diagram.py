@@ -6,7 +6,7 @@ Tests the StateDiagramParser class.
 
 import pytest
 
-from mermaid_render.interactive.builder.parsers.state_diagram import StateDiagramParser
+from diagramaid.interactive.builder.parsers.state_diagram import StateDiagramParser
 
 
 @pytest.mark.unit

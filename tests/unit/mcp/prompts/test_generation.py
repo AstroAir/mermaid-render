@@ -6,7 +6,7 @@ Tests for diagram generation prompts.
 
 import pytest
 
-from mermaid_render.mcp.prompts.generation import (
+from diagramaid.mcp.prompts.generation import (
     generate_class_diagram_prompt,
     generate_flowchart_prompt,
     generate_sequence_prompt,

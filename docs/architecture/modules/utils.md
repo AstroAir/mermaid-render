@@ -21,7 +21,7 @@ This module provides utility functions and helper classes for common operations 
 ## Usage Example
 
 ```python
-from mermaid_render.utils import (
+from diagramaid.utils import (
     export_to_file,
     validate_mermaid_syntax,
     get_supported_formats,

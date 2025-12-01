@@ -6,7 +6,7 @@ Tests the security utilities and middleware.
 
 import pytest
 
-from mermaid_render.interactive.security import (
+from diagramaid.interactive.security import (
     InputSanitizer,
     RateLimitConfig,
     RateLimiter,
@@ -19,7 +19,7 @@ class TestSecurity:
 
     def test_import_security_module(self) -> None:
         """Test that security module can be imported."""
-        from mermaid_render.interactive import security
+        from diagramaid.interactive import security
 
         assert security is not None
 

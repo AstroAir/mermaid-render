@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 from unittest.mock import Mock, patch, mock_open
 
-from mermaid_render.config.config_manager import (
+from diagramaid.config.config_manager import (
     ConfigManager,
     ConfigurationError,
 )

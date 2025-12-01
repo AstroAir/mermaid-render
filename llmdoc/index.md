@@ -1,6 +1,6 @@
 # Mermaid Render Documentation Index
 
-This directory contains comprehensive documentation for the mermaid-render project, including architecture guides, analysis reports, and investigation results.
+This directory contains comprehensive documentation for the diagramaid project, including architecture guides, analysis reports, and investigation results.
 
 ## Agent Investigation Reports
 

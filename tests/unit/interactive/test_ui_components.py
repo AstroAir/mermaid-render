@@ -6,7 +6,7 @@ Tests the UI component classes.
 
 import pytest
 
-from mermaid_render.interactive.ui_components import (
+from diagramaid.interactive.ui_components import (
     CodeEditor,
     EdgeComponent,
     NodeComponent,

@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any
 from unittest.mock import Mock, patch
 
-from mermaid_render import (
+from diagramaid import (
     DiagramError,
     MermaidRenderer,
     RenderingError,
@@ -170,7 +170,7 @@ class TestRenderingWithMocks(unittest.TestCase):
         """Set up test fixtures."""
         self.output_dir = create_output_dir()
 
-    @patch("mermaid_render.core.requests.post")
+    @patch("diagramaid.core.requests.post")
     def test_successful_rendering(self, mock_post: Any) -> None:
         """Test successful rendering with mocked HTTP request."""
         # Mock successful response
@@ -190,7 +190,7 @@ class TestRenderingWithMocks(unittest.TestCase):
         # Verify the request was made
         mock_post.assert_called_once()
 
-    @patch("mermaid_render.core.requests.post")
+    @patch("diagramaid.core.requests.post")
     def test_rendering_failure(self, mock_post: Any) -> None:
         """Test rendering failure handling."""
         # Mock failed response
@@ -448,7 +448,7 @@ def error_handling_patterns_example(output_dir: Path) -> None:
                 }
 
             # Step 2: Check format support
-            from mermaid_render.utils import get_supported_formats
+            from diagramaid.utils import get_supported_formats
 
             if format not in get_supported_formats():
                 return {

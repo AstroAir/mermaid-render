@@ -6,7 +6,7 @@ Tests for error categories, response creation, and performance measurement.
 
 import pytest
 
-from mermaid_render.mcp.tools.base import (
+from diagramaid.mcp.tools.base import (
     ErrorCategory,
     create_error_response,
     create_success_response,

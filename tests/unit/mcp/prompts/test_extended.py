@@ -6,7 +6,7 @@ Tests for extended prompts (ER, state, gantt, mindmap, etc.).
 
 import pytest
 
-from mermaid_render.mcp.prompts.extended import (
+from diagramaid.mcp.prompts.extended import (
     convert_to_diagram_prompt,
     document_architecture_prompt,
     generate_c4_diagram_prompt,

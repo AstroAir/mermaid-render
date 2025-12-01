@@ -1,12 +1,12 @@
-site_name: Mermaid Render
+site_name: DiagramAid
 site_description: A comprehensive, production-ready Python library for generating Mermaid diagrams with clean APIs, validation, and multiple output formats
-site_url: https://mermaid-render.readthedocs.io
-repo_url: https://github.com/mermaid-render/mermaid-render
-repo_name: mermaid-render/mermaid-render
+site_url: https://diagramaid.readthedocs.io
+repo_url: https://github.com/diagramaid/diagramaid
+repo_name: diagramaid/diagramaid
 edit_uri: edit/main/docs/
 
 # Copyright
-copyright: Copyright &copy; 2024 Mermaid Render Team
+copyright: Copyright &copy; 2024 DiagramAid Team
 
 # Configuration
 theme:
@@ -73,8 +73,8 @@ markdown_extensions:
   - pymdownx.keys
   - pymdownx.magiclink:
       repo_url_shorthand: true
-      user: mermaid-render
-      repo: mermaid-render
+      user: diagramaid
+      repo: diagramaid
   - pymdownx.mark
   - pymdownx.smartsymbols
   - pymdownx.superfences:
@@ -97,7 +97,7 @@ plugins:
       default_handler: python
       handlers:
         python:
-          paths: [mermaid_render]
+          paths: [diagramaid]
           options:
             # Documentation style
             docstring_style: google
@@ -215,13 +215,13 @@ extra:
     provider: mike
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/mermaid-render/mermaid-render
+      link: https://github.com/diagramaid/diagramaid
     - icon: fontawesome/brands/python
-      link: https://pypi.org/project/mermaid-render/
+      link: https://pypi.org/project/diagramaid/
   analytics:
     provider: google
     property: !ENV GOOGLE_ANALYTICS_KEY
 
 # Watch
 watch:
-  - mermaid_render/
+  - diagramaid/

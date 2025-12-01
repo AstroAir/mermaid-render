@@ -19,7 +19,7 @@ Mermaid Render supports multiple export formats:
 #### SVG (Scalable Vector Graphics)
 
 ```python
-from mermaid_render import MermaidRenderer
+from diagramaid import MermaidRenderer
 
 renderer = MermaidRenderer()
 diagram = "flowchart TD\n    A --> B"
@@ -208,7 +208,7 @@ result = renderer.render(diagram, options={
 ### Multiple Formats
 
 ```python
-from mermaid_render.export import BatchExporter
+from diagramaid.export import BatchExporter
 
 exporter = BatchExporter(renderer)
 
@@ -360,7 +360,7 @@ pdf_options = {
 ### Pre-Export Validation
 
 ```python
-from mermaid_render.export import ExportValidator
+from diagramaid.export import ExportValidator
 
 validator = ExportValidator()
 
@@ -409,7 +409,7 @@ quality_export_options = {
 
 ```python
 # Enable export caching
-from mermaid_render.cache import ExportCache
+from diagramaid.cache import ExportCache
 
 cache = ExportCache()
 renderer = MermaidRenderer(export_cache=cache)

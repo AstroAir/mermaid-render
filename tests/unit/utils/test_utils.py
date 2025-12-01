@@ -9,9 +9,9 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from mermaid_render.exceptions import UnsupportedFormatError
-from mermaid_render.models import FlowchartDiagram
-from mermaid_render.utils import (
+from diagramaid.exceptions import UnsupportedFormatError
+from diagramaid.models import FlowchartDiagram
+from diagramaid.utils import (
     detect_diagram_type,
     ensure_directory,
     export_multiple_formats,
@@ -21,13 +21,13 @@ from mermaid_render.utils import (
     sanitize_filename,
     validate_mermaid_syntax,
 )
-from mermaid_render.utils.export import (
+from diagramaid.utils.export import (
     _detect_format_from_extension,
     _sanitize_filename,
     batch_export,
 )
-from mermaid_render.utils.helpers import _estimate_complexity, get_diagram_stats
-from mermaid_render.utils.validation import (
+from diagramaid.utils.helpers import _estimate_complexity, get_diagram_stats
+from diagramaid.utils.validation import (
     get_validation_errors,
     get_validation_warnings,
     quick_validate,
@@ -49,7 +49,7 @@ class TestExportUtils:
         output_path = temp_dir / "test.svg"
 
         with patch(
-            "mermaid_render.utils.export.MermaidRenderer"
+            "diagramaid.utils.export.MermaidRenderer"
         ) as mock_renderer_class:
             mock_renderer = Mock()
             mock_renderer_class.return_value = mock_renderer
@@ -65,7 +65,7 @@ class TestExportUtils:
         output_path = temp_dir / "test.svg"
 
         with patch(
-            "mermaid_render.utils.export.MermaidRenderer"
+            "diagramaid.utils.export.MermaidRenderer"
         ) as mock_renderer_class:
             mock_renderer = Mock()
             mock_renderer_class.return_value = mock_renderer
@@ -80,7 +80,7 @@ class TestExportUtils:
         output_path = temp_dir / "test.svg"
 
         with patch(
-            "mermaid_render.utils.export.MermaidRenderer"
+            "diagramaid.utils.export.MermaidRenderer"
         ) as mock_renderer_class:
             mock_renderer = Mock()
             mock_renderer_class.return_value = mock_renderer
@@ -103,7 +103,7 @@ class TestExportUtils:
             output_path = temp_dir / filename
 
             with patch(
-                "mermaid_render.utils.export.MermaidRenderer"
+                "diagramaid.utils.export.MermaidRenderer"
             ) as mock_renderer_class:
                 mock_renderer = Mock()
                 mock_renderer_class.return_value = mock_renderer
@@ -121,8 +121,8 @@ class TestExportUtils:
         formats = ["svg"]  # Only test svg to avoid rendering issues
 
         with (
-            patch("mermaid_render.core.MermaidConfig") as mock_config_class,
-            patch("mermaid_render.core.MermaidRenderer") as mock_renderer_class,
+            patch("diagramaid.core.MermaidConfig") as mock_config_class,
+            patch("diagramaid.core.MermaidRenderer") as mock_renderer_class,
         ):
             mock_config = Mock()
             mock_config_class.return_value = mock_config
@@ -143,8 +143,8 @@ class TestExportUtils:
         formats = ["svg"]  # Only test svg
 
         with (
-            patch("mermaid_render.core.MermaidConfig") as mock_config_class,
-            patch("mermaid_render.core.MermaidRenderer") as mock_renderer_class,
+            patch("diagramaid.core.MermaidConfig") as mock_config_class,
+            patch("diagramaid.core.MermaidRenderer") as mock_renderer_class,
         ):
             mock_config = Mock()
             mock_config_class.return_value = mock_config
@@ -164,8 +164,8 @@ class TestExportUtils:
         }
 
         with (
-            patch("mermaid_render.core.MermaidConfig") as mock_config_class,
-            patch("mermaid_render.core.MermaidRenderer") as mock_renderer_class,
+            patch("diagramaid.core.MermaidConfig") as mock_config_class,
+            patch("diagramaid.core.MermaidRenderer") as mock_renderer_class,
         ):
             mock_config = Mock()
             mock_config_class.return_value = mock_config
@@ -365,7 +365,7 @@ class TestValidationUtils:
         valid_code = "flowchart TD\n    A[Start] --> B[End]"
 
         with patch(
-            "mermaid_render.utils.validation._shared_validator"
+            "diagramaid.utils.validation._shared_validator"
         ) as mock_validator:
             mock_result = Mock()
             mock_result.is_valid = True
@@ -382,7 +382,7 @@ class TestValidationUtils:
         invalid_code = "invalid mermaid code"
 
         with patch(
-            "mermaid_render.utils.validation.MermaidValidator"
+            "diagramaid.utils.validation.MermaidValidator"
         ) as mock_validator_class:
             mock_validator = Mock()
             mock_result = Mock()
@@ -401,7 +401,7 @@ class TestValidationUtils:
         valid_code = "flowchart TD\n    A --> B"
 
         with patch(
-            "mermaid_render.utils.validation._shared_validator"
+            "diagramaid.utils.validation._shared_validator"
         ) as mock_validator:
             mock_result = Mock()
             mock_result.is_valid = True
@@ -417,7 +417,7 @@ class TestValidationUtils:
         invalid_code = "invalid code"
 
         with patch(
-            "mermaid_render.utils.validation.validate_mermaid_syntax"
+            "diagramaid.utils.validation.validate_mermaid_syntax"
         ) as mock_validate:
             mock_result = Mock()
             mock_result.is_valid = False
@@ -467,7 +467,7 @@ class TestValidationUtils:
         valid_id = "validNodeId123"
 
         with patch(
-            "mermaid_render.utils.validation._shared_validator"
+            "diagramaid.utils.validation._shared_validator"
         ) as mock_validator:
             mock_validator.validate_node_id.return_value = True
 
@@ -481,7 +481,7 @@ class TestValidationUtils:
         invalid_id = "invalid-node-id!"
 
         with patch(
-            "mermaid_render.utils.validation.MermaidValidator"
+            "diagramaid.utils.validation.MermaidValidator"
         ) as mock_validator_class:
             mock_validator = Mock()
             mock_validator.validate_node_id.return_value = False
@@ -502,7 +502,7 @@ class TestUtilsIntegration:
         output_path = temp_dir / "valid.svg"
 
         with patch(
-            "mermaid_render.utils.validation.MermaidValidator"
+            "diagramaid.utils.validation.MermaidValidator"
         ) as mock_validator_class:
             mock_validator = Mock()
             mock_result = Mock()
@@ -516,7 +516,7 @@ class TestUtilsIntegration:
 
             # Then export
             with patch(
-                "mermaid_render.utils.export.MermaidRenderer"
+                "diagramaid.utils.export.MermaidRenderer"
             ) as mock_renderer_class:
                 mock_renderer = Mock()
                 mock_renderer_class.return_value = mock_renderer
@@ -535,7 +535,7 @@ class TestUtilsIntegration:
 
         # Export with detected type info
         with patch(
-            "mermaid_render.utils.export.MermaidRenderer"
+            "diagramaid.utils.export.MermaidRenderer"
         ) as mock_renderer_class:
             mock_renderer = Mock()
             mock_renderer_class.return_value = mock_renderer
@@ -558,7 +558,7 @@ class TestUtilsIntegration:
         output_path = temp_dir / f"{safe_name}.svg"
 
         with patch(
-            "mermaid_render.utils.export.MermaidRenderer"
+            "diagramaid.utils.export.MermaidRenderer"
         ) as mock_renderer_class:
             mock_renderer = Mock()
             mock_renderer_class.return_value = mock_renderer

@@ -6,8 +6,8 @@ Tests the ElementManager class for managing diagram elements.
 
 import pytest
 
-from mermaid_render.interactive.builder.element_manager import ElementManager
-from mermaid_render.interactive.models import ElementType, Position, Size
+from diagramaid.interactive.builder.element_manager import ElementManager
+from diagramaid.interactive.models import ElementType, Position, Size
 
 
 @pytest.mark.unit

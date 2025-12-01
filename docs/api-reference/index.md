@@ -60,7 +60,7 @@ Mermaid Render is organized into several key modules:
 ### Basic Rendering
 
 ```python
-from mermaid_render import MermaidRenderer, FlowchartDiagram
+from diagramaid import MermaidRenderer, FlowchartDiagram
 
 # Create diagram
 diagram = FlowchartDiagram()
@@ -76,7 +76,7 @@ svg_content = renderer.render(diagram, format="svg")
 ### Configuration
 
 ```python
-from mermaid_render import MermaidConfig, MermaidRenderer
+from diagramaid import MermaidConfig, MermaidRenderer
 
 # Configure
 config = MermaidConfig(
@@ -92,7 +92,7 @@ renderer = MermaidRenderer(config=config)
 ### Error Handling
 
 ```python
-from mermaid_render.exceptions import ValidationError, RenderingError
+from diagramaid.exceptions import ValidationError, RenderingError
 
 try:
     result = renderer.render(diagram)
@@ -108,7 +108,7 @@ Mermaid Render is fully typed with comprehensive type hints:
 
 ```python
 from typing import Optional, Dict, Any
-from mermaid_render import MermaidRenderer, MermaidDiagram
+from diagramaid import MermaidRenderer, MermaidDiagram
 
 def render_diagram(
     diagram: MermaidDiagram,
@@ -123,7 +123,7 @@ def render_diagram(
 ## Module Structure
 
 ```txt
-mermaid_render/
+diagramaid/
 ├── __init__.py          # Main exports
 ├── core.py              # Core classes
 ├── models/              # Diagram models
@@ -168,7 +168,7 @@ Mermaid Render follows semantic versioning:
 
 Found an error or want to improve the documentation?
 
-1. Check the [source code](https://github.com/mermaid-render/mermaid-render) for the latest API
+1. Check the [source code](https://github.com/diagramaid/diagramaid) for the latest API
 2. Submit issues for documentation bugs
 3. Contribute improvements via pull requests
 

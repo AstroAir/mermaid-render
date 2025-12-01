@@ -180,8 +180,8 @@ output/                                     # Generated files
 
    ```bash
    # Clone the repository
-   git clone https://github.com/mermaid-render/mermaid-render.git
-   cd mermaid-render
+   git clone https://github.com/diagramaid/diagramaid.git
+   cd diagramaid
 
    # Install with examples dependencies
    pip install -e ".[dev,examples]"
@@ -204,12 +204,12 @@ output/                                     # Generated files
 Different examples may require additional dependencies:
 
 - **Basic Examples**: No additional dependencies
-- **AI Features**: `pip install mermaid-render[ai]`
-- **Templates**: `pip install mermaid-render[templates]`
-- **Caching**: `pip install mermaid-render[cache]`
-- **Interactive**: `pip install mermaid-render[interactive]`
-- **Collaboration**: `pip install mermaid-render[collaboration]`
-- **All Features**: `pip install mermaid-render[all]`
+- **AI Features**: `pip install diagramaid[ai]`
+- **Templates**: `pip install diagramaid[templates]`
+- **Caching**: `pip install diagramaid[cache]`
+- **Interactive**: `pip install diagramaid[interactive]`
+- **Collaboration**: `pip install diagramaid[collaboration]`
+- **All Features**: `pip install diagramaid[all]`
 
 ## 💡 Tips for Using Examples
 
@@ -258,8 +258,8 @@ We welcome contributions of new examples! To contribute:
 
 - **[API Documentation](../api/index.md)**: Complete API reference
 - **[User Guide](../guides/index.md)**: Step-by-step tutorials
-- **[GitHub Repository](https://github.com/mermaid-render/mermaid-render)**: Source code and issues
-- **[Community Discussions](https://github.com/mermaid-render/mermaid-render/discussions)**: Ask questions and share ideas
+- **[GitHub Repository](https://github.com/diagramaid/diagramaid)**: Source code and issues
+- **[Community Discussions](https://github.com/diagramaid/diagramaid/discussions)**: Ask questions and share ideas
 
 ---
 

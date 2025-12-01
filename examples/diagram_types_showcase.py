@@ -8,7 +8,7 @@ that show real-world use cases for each type.
 
 from pathlib import Path
 
-from mermaid_render import (
+from diagramaid import (
     ERDiagram,
     GanttDiagram,
     GitGraphDiagram,

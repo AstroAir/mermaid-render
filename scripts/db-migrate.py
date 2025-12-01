@@ -36,14 +36,14 @@ class DatabaseMigrator:
     def __init__(self, project_root: Optional[Path] = None, db_url: Optional[str] = None):
         self.project_root = project_root or Path(__file__).parent.parent
         self.migrations_dir = self.project_root / "migrations"
-        self.db_url = db_url or os.getenv("DATABASE_URL", "sqlite:///mermaid_render.db")
+        self.db_url = db_url or os.getenv("DATABASE_URL", "sqlite:///diagramaid.db")
         
         # For simplicity, we'll use SQLite for this example
         # In production, this would support PostgreSQL, MySQL, etc.
         if self.db_url.startswith("sqlite:///"):
             self.db_path = self.project_root / self.db_url.replace("sqlite:///", "")
         else:
-            self.db_path = self.project_root / "mermaid_render.db"
+            self.db_path = self.project_root / "diagramaid.db"
     
     def log(self, message: str, level: str = "INFO") -> None:
         """Log a message."""

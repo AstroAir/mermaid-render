@@ -82,13 +82,13 @@ class DeploymentManager:
         return {
             "environments": {
                 "staging": {
-                    "url": "https://staging.mermaid-render.com",
+                    "url": "https://staging.diagramaid.com",
                     "registry": "staging-registry.example.com",
                     "branch": "develop",
                     "auto_migrate": True
                 },
                 "production": {
-                    "url": "https://mermaid-render.com",
+                    "url": "https://diagramaid.com",
                     "registry": "registry.example.com",
                     "branch": "main",
                     "auto_migrate": False
@@ -120,8 +120,8 @@ class DeploymentManager:
         
         # Try to get version from package
         try:
-            import mermaid_render
-            return getattr(mermaid_render, '__version__', '0.0.0')
+            import diagramaid
+            return getattr(diagramaid, '__version__', '0.0.0')
         except ImportError:
             return '0.0.0'
     
@@ -261,8 +261,8 @@ class DeploymentManager:
             
             # Tag for registry
             exit_code, _, _ = self.run_command([
-                "docker", "tag", "mermaid-render:production",
-                f"{registry}/mermaid-render:latest"
+                "docker", "tag", "diagramaid:production",
+                f"{registry}/diagramaid:latest"
             ])
             
             if exit_code != 0:
@@ -271,7 +271,7 @@ class DeploymentManager:
             
             # Push to registry
             exit_code, _, _ = self.run_command([
-                "docker", "push", f"{registry}/mermaid-render:latest"
+                "docker", "push", f"{registry}/diagramaid:latest"
             ])
             
             if exit_code != 0:

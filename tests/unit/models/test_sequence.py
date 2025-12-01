@@ -9,14 +9,14 @@ import pytest
 from typing import Dict, List, Optional
 from unittest.mock import Mock, patch
 
-from mermaid_render.models.sequence import (
+from diagramaid.models.sequence import (
     SequenceParticipant,
     SequenceMessage,
     SequenceNote,
     SequenceLoop,
     SequenceDiagram,
 )
-from mermaid_render.exceptions import DiagramError
+from diagramaid.exceptions import DiagramError
 
 
 class TestSequenceParticipant:

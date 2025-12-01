@@ -7,7 +7,7 @@ Tests the InteractiveServer class.
 import pytest
 from unittest.mock import AsyncMock, Mock, patch
 
-from mermaid_render.interactive.server.interactive_server import (
+from diagramaid.interactive.server.interactive_server import (
     InteractiveServer,
     create_app,
     start_server,

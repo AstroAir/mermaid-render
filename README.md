@@ -1,10 +1,10 @@
-# Mermaid Render
+# DiagramAid
 
-[![PyPI version](https://badge.fury.io/py/mermaid-render.svg)](https://badge.fury.io/py/mermaid-render)
-[![Python Support](https://img.shields.io/pypi/pyversions/mermaid-render.svg)](https://pypi.org/project/mermaid-render/)
+[![PyPI version](https://badge.fury.io/py/diagramaid.svg)](https://badge.fury.io/py/diagramaid)
+[![Python Support](https://img.shields.io/pypi/pyversions/diagramaid.svg)](https://pypi.org/project/diagramaid/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://github.com/AstroAir/mermaid-render/workflows/Tests/badge.svg)](https://github.com/AstroAir/mermaid-render/actions)
-[![Coverage](https://codecov.io/gh/AstroAir/mermaid-render/branch/main/graph/badge.svg)](https://codecov.io/gh/AstroAir/mermaid-render)
+[![Tests](https://github.com/AstroAir/diagramaid/workflows/Tests/badge.svg)](https://github.com/AstroAir/diagramaid/actions)
+[![Coverage](https://codecov.io/gh/AstroAir/diagramaid/branch/main/graph/badge.svg)](https://codecov.io/gh/AstroAir/diagramaid)
 
 A comprehensive, production-ready Python library for generating Mermaid diagrams with clean APIs, validation, multiple output formats, AI-powered generation, and MCP server integration.
 
@@ -34,27 +34,27 @@ A comprehensive, production-ready Python library for generating Mermaid diagrams
 #### Basic Installation
 
 ```bash
-pip install mermaid-render
+pip install diagramaid
 ```
 
 #### Installation with Optional Features
 
 ```bash
 # Full installation with all features
-pip install mermaid-render[all]
+pip install diagramaid[all]
 
 # Specific feature sets
-pip install mermaid-render[pdf]           # PDF export support
-pip install mermaid-render[cache]         # Redis caching support
-pip install mermaid-render[ai]            # AI-powered features
-pip install mermaid-render[interactive]   # Interactive web interface
+pip install diagramaid[pdf]           # PDF export support
+pip install diagramaid[cache]         # Redis caching support
+pip install diagramaid[ai]            # AI-powered features
+pip install diagramaid[interactive]   # Interactive web interface
 
 
 # Development installation
-pip install mermaid-render[dev]           # Development dependencies
+pip install diagramaid[dev]           # Development dependencies
 
 # Enhanced renderer backends (optional)
-pip install mermaid-render[renderers]     # Playwright and Graphviz renderers
+pip install diagramaid[renderers]     # Playwright and Graphviz renderers
 ```
 
 #### Enhanced Renderer Installation
@@ -96,7 +96,7 @@ pip install graphviz
 ### Basic Usage
 
 ```python
-from mermaid_render import MermaidRenderer, FlowchartDiagram
+from diagramaid import MermaidRenderer, FlowchartDiagram
 
 # Create a flowchart
 flowchart = FlowchartDiagram()
@@ -118,7 +118,7 @@ renderer.save(flowchart, "diagram.png", format="png")
 
 ```python
 # 1. Import the library
-from mermaid_render import quick_render
+from diagramaid import quick_render
 
 # 2. Write your diagram in Mermaid syntax
 diagram_code = """
@@ -137,7 +137,7 @@ print("✅ Diagram saved as login_flow.svg")
 ### Quick Rendering
 
 ```python
-from mermaid_render import quick_render
+from diagramaid import quick_render
 
 # Render raw Mermaid syntax
 diagram_code = """
@@ -177,7 +177,7 @@ svg_content = quick_render(diagram_code, format="svg", theme="dark")
 The main rendering engine for converting Mermaid diagrams to various output formats.
 
 ```python
-from mermaid_render import MermaidRenderer
+from diagramaid import MermaidRenderer
 
 renderer = MermaidRenderer(
     theme="default",           # Built-in theme or custom theme
@@ -201,7 +201,7 @@ renderer.render(diagram, theme="dark", format="png", width=800, height=600)
 Convenient functions for simple rendering tasks.
 
 ```python
-from mermaid_render import quick_render, render_to_file
+from diagramaid import quick_render, render_to_file
 
 # Render Mermaid code directly
 svg_content = quick_render(mermaid_code, format="svg", theme="dark")
@@ -213,7 +213,7 @@ render_to_file(mermaid_code, "diagram.png", format="png", theme="forest")
 ### Configuration Management
 
 ```python
-from mermaid_render.config import ConfigManager, ThemeManager
+from diagramaid.config import ConfigManager, ThemeManager
 
 # Global configuration
 config = ConfigManager()
@@ -229,7 +229,7 @@ custom_theme = theme_manager.create_theme("my_theme", primaryColor="#ff0000")
 
 ## Plugin-Based Renderer System
 
-Mermaid Render now features a powerful plugin-based architecture that supports multiple rendering backends with automatic fallback capabilities.
+DiagramAid now features a powerful plugin-based architecture that supports multiple rendering backends with automatic fallback capabilities.
 
 ### Available Renderers
 
@@ -245,7 +245,7 @@ Mermaid Render now features a powerful plugin-based architecture that supports m
 ### Using the Plugin-Based Renderer
 
 ```python
-from mermaid_render import PluginMermaidRenderer
+from diagramaid import PluginMermaidRenderer
 
 # Create plugin-based renderer with advanced features
 renderer = PluginMermaidRenderer()
@@ -293,7 +293,7 @@ benchmark = renderer.benchmark_renderers()
 The original MermaidRenderer still works exactly as before:
 
 ```python
-from mermaid_render import MermaidRenderer
+from diagramaid import MermaidRenderer
 
 # Legacy mode (default)
 renderer = MermaidRenderer()
@@ -311,7 +311,7 @@ renderer = MermaidRenderer(
 ### Sequence Diagram
 
 ```python
-from mermaid_render import SequenceDiagram
+from diagramaid import SequenceDiagram
 
 sequence = SequenceDiagram(title="User Authentication")
 sequence.add_participant("user", "User")
@@ -331,8 +331,8 @@ renderer.save(sequence, "auth_flow.svg")
 ### Class Diagram
 
 ```python
-from mermaid_render import ClassDiagram
-from mermaid_render.models.class_diagram import ClassMethod, ClassAttribute
+from diagramaid import ClassDiagram
+from diagramaid.models.class_diagram import ClassMethod, ClassAttribute
 
 class_diagram = ClassDiagram()
 
@@ -355,8 +355,8 @@ renderer.save(class_diagram, "class_hierarchy.svg")
 ### Theme Management
 
 ```python
-from mermaid_render import MermaidRenderer, MermaidTheme
-from mermaid_render.config import ThemeManager
+from diagramaid import MermaidRenderer, MermaidTheme
+from diagramaid.config import ThemeManager
 
 # Use built-in themes
 renderer = MermaidRenderer(theme="dark")
@@ -382,7 +382,7 @@ theme_manager.add_custom_theme("corporate", {
 ### Validation
 
 ```python
-from mermaid_render.utils import validate_mermaid_syntax
+from diagramaid.utils import validate_mermaid_syntax
 
 diagram_code = """
 flowchart TD
@@ -403,7 +403,7 @@ else:
 ### Batch Export
 
 ```python
-from mermaid_render.utils import export_multiple_formats, batch_export
+from diagramaid.utils import export_multiple_formats, batch_export
 
 # Export single diagram to multiple formats
 export_multiple_formats(
@@ -429,7 +429,7 @@ Generate diagrams from natural language descriptions using multiple AI providers
 ### Natural Language to Diagram
 
 ```python
-from mermaid_render.ai import DiagramGenerator, generate_from_text
+from diagramaid.ai import DiagramGenerator, generate_from_text
 
 # Quick generation
 diagram = generate_from_text(
@@ -448,7 +448,7 @@ print(result.diagram_code)
 ### AI Providers
 
 ```python
-from mermaid_render.ai import (
+from diagramaid.ai import (
     OpenAIProvider,
     AnthropicProvider,
     OpenRouterProvider,
@@ -467,7 +467,7 @@ manager.add_provider(AnthropicProvider(api_key="..."))  # Fallback
 ### Diagram Analysis & Optimization
 
 ```python
-from mermaid_render.ai import DiagramAnalyzer, DiagramOptimizer, get_suggestions
+from diagramaid.ai import DiagramAnalyzer, DiagramOptimizer, get_suggestions
 
 # Analyze diagram quality
 analyzer = DiagramAnalyzer()
@@ -492,7 +492,7 @@ Create diagrams from pre-built templates or define custom templates.
 ### Using Built-in Templates
 
 ```python
-from mermaid_render.templates import TemplateManager, generate_from_template
+from diagramaid.templates import TemplateManager, generate_from_template
 
 # List available templates
 manager = TemplateManager()
@@ -518,7 +518,7 @@ diagram = generate_from_template("software_architecture", {
 ### Template Generators
 
 ```python
-from mermaid_render.templates import (
+from diagramaid.templates import (
     FlowchartGenerator,
     SequenceGenerator,
     ClassDiagramGenerator,
@@ -543,7 +543,7 @@ flowchart = generator.generate({
 ### Data Sources
 
 ```python
-from mermaid_render.templates import JSONDataSource, CSVDataSource, DatabaseDataSource
+from diagramaid.templates import JSONDataSource, CSVDataSource, DatabaseDataSource
 
 # Load data from JSON
 json_source = JSONDataSource("data/architecture.json")
@@ -565,7 +565,7 @@ Build diagrams visually with real-time preview and collaboration features.
 ### Starting the Interactive Server
 
 ```python
-from mermaid_render.interactive import DiagramBuilder, start_server
+from diagramaid.interactive import DiagramBuilder, start_server
 
 # Create builder and start server
 builder = DiagramBuilder()
@@ -577,7 +577,7 @@ start_server(builder, host="localhost", port=8080)
 ### Programmatic Usage
 
 ```python
-from mermaid_render.interactive import (
+from diagramaid.interactive import (
     DiagramBuilder,
     create_interactive_session,
     export_diagram_code
@@ -599,16 +599,16 @@ print(code)
 
 ## MCP Server Integration
 
-Expose mermaid-render capabilities through the Model Context Protocol for AI assistant integration.
+Expose diagramaid capabilities through the Model Context Protocol for AI assistant integration.
 
 ### Running the MCP Server
 
 ```bash
 # Start MCP server
-mermaid-render-mcp
+diagramaid-mcp
 
 # Or programmatically
-python -m mermaid_render.mcp
+python -m diagramaid.mcp
 ```
 
 ### MCP Configuration
@@ -618,8 +618,8 @@ Add to your Claude Desktop or other MCP client configuration:
 ```json
 {
   "mcpServers": {
-    "mermaid-render": {
-      "command": "mermaid-render-mcp",
+    "diagramaid": {
+      "command": "diagramaid-mcp",
       "args": []
     }
   }
@@ -668,7 +668,7 @@ export MERMAID_CACHE_ENABLED=true
 ### Configuration File
 
 ```python
-from mermaid_render.config import ConfigManager
+from diagramaid.config import ConfigManager
 
 config = ConfigManager(config_file="mermaid_config.json")
 config.set("default_theme", "forest")
@@ -680,7 +680,7 @@ renderer = MermaidRenderer(config=config)
 ### Runtime Configuration
 
 ```python
-from mermaid_render import MermaidConfig, MermaidRenderer
+from diagramaid import MermaidConfig, MermaidRenderer
 
 config = MermaidConfig(
     timeout=45,
@@ -694,7 +694,7 @@ renderer = MermaidRenderer(config=config)
 
 ## Architecture
 
-The Mermaid Render library is designed with a modular, plugin-based architecture that promotes code reusability, maintainability, and extensibility.
+The DiagramAid library is designed with a modular, plugin-based architecture that promotes code reusability, maintainability, and extensibility.
 
 ### Core Modules
 
@@ -737,7 +737,7 @@ The library uses a plugin-based architecture for rendering, allowing you to:
 ### Custom Renderers
 
 ```python
-from mermaid_render.renderers import SVGRenderer, PNGRenderer
+from diagramaid.renderers import SVGRenderer, PNGRenderer
 
 # Use specific renderers
 svg_renderer = SVGRenderer(server_url="http://localhost:8080")
@@ -750,7 +750,7 @@ png_data = png_renderer.render(diagram_code, width=1600, height=1200)
 ### Error Handling
 
 ```python
-from mermaid_render.exceptions import (
+from diagramaid.exceptions import (
     ValidationError,
     RenderingError,
     UnsupportedFormatError
@@ -781,7 +781,7 @@ except UnsupportedFormatError as e:
 For PDF export support:
 
 ```bash
-pip install mermaid-render[pdf]  # Installs cairosvg, reportlab
+pip install diagramaid[pdf]  # Installs cairosvg, reportlab
 # OR
 pip install cairosvg reportlab  # Direct installation
 ```
@@ -789,7 +789,7 @@ pip install cairosvg reportlab  # Direct installation
 For Redis caching:
 
 ```bash
-pip install mermaid-render[cache]  # Installs redis, diskcache
+pip install diagramaid[cache]  # Installs redis, diskcache
 # OR
 pip install redis diskcache  # Direct installation
 ```
@@ -797,7 +797,7 @@ pip install redis diskcache  # Direct installation
 For AI-powered features:
 
 ```bash
-pip install mermaid-render[ai]  # Installs openai, anthropic, tiktoken
+pip install diagramaid[ai]  # Installs openai, anthropic, tiktoken
 # OR
 pip install openai anthropic tiktoken  # Direct installation
 ```
@@ -805,13 +805,13 @@ pip install openai anthropic tiktoken  # Direct installation
 For interactive web builder:
 
 ```bash
-pip install mermaid-render[interactive]  # Installs fastapi, uvicorn, websockets
+pip install diagramaid[interactive]  # Installs fastapi, uvicorn, websockets
 ```
 
 For additional rendering backends:
 
 ```bash
-pip install mermaid-render[renderers]  # Installs playwright, graphviz
+pip install diagramaid[renderers]  # Installs playwright, graphviz
 ```
 
 ## Development
@@ -819,8 +819,8 @@ pip install mermaid-render[renderers]  # Installs playwright, graphviz
 ### Setup
 
 ```bash
-git clone https://github.com/AstroAir/mermaid-render.git
-cd mermaid-render
+git clone https://github.com/AstroAir/diagramaid.git
+cd diagramaid
 pip install -e ".[dev]"
 
 # Or use make for complete setup
@@ -837,7 +837,7 @@ make test
 pytest
 
 # Run with coverage report
-pytest --cov=mermaid_render --cov-report=html
+pytest --cov=diagramaid --cov-report=html
 
 # Run specific test categories
 pytest -m unit          # Unit tests only
@@ -856,18 +856,18 @@ pytest -k "test_flowchart_basic"
 # Format code
 make format
 # Or directly
-black mermaid_render tests
-ruff format mermaid_render tests
+black diagramaid tests
+ruff format diagramaid tests
 
 # Lint code
 make lint
 # Or directly
-ruff check mermaid_render tests
+ruff check diagramaid tests
 
 # Type checking
 make type-check
 # Or directly
-mypy mermaid_render
+mypy diagramaid
 
 # Run all quality checks
 make check-all
@@ -879,20 +879,20 @@ make check-all
 
 #### Installation Problems
 
-**Issue**: `pip install mermaid-render` fails with dependency conflicts
+**Issue**: `pip install diagramaid` fails with dependency conflicts
 
 ```bash
 # Solution: Use a virtual environment
 python -m venv mermaid_env
 source mermaid_env/bin/activate  # On Windows: mermaid_env\Scripts\activate
-pip install mermaid-render
+pip install diagramaid
 ```
 
 **Issue**: PDF export not working
 
 ```bash
 # Solution: Install PDF dependencies
-pip install mermaid-render[pdf]
+pip install diagramaid[pdf]
 # Or manually install cairosvg
 pip install cairosvg
 ```
@@ -903,7 +903,7 @@ pip install cairosvg
 
 ```python
 # Solution: Increase timeout or use local rendering
-from mermaid_render import MermaidConfig, MermaidRenderer
+from diagramaid import MermaidConfig, MermaidRenderer
 
 config = MermaidConfig(timeout=60)  # Increase timeout
 renderer = MermaidRenderer(config=config)
@@ -913,7 +913,7 @@ renderer = MermaidRenderer(config=config)
 
 ```python
 # Solution: Use validation to debug
-from mermaid_render.utils import validate_mermaid_syntax
+from diagramaid.utils import validate_mermaid_syntax
 
 result = validate_mermaid_syntax(your_diagram_code)
 if not result.is_valid:
@@ -928,7 +928,7 @@ if not result.is_valid:
 
 ```python
 # Solution: Enable caching
-from mermaid_render import MermaidConfig
+from diagramaid import MermaidConfig
 
 config = MermaidConfig(cache_enabled=True)
 renderer = MermaidRenderer(config=config)
@@ -950,7 +950,7 @@ os.environ["ANTHROPIC_API_KEY"] = "your-api-key"
 
 ```bash
 # Solution: Ensure fastmcp is installed
-pip install mermaid-render[all]
+pip install diagramaid[all]
 # Or install fastmcp directly
 pip install fastmcp
 ```
@@ -975,9 +975,9 @@ pip install graphviz
 
 ### Getting Help
 
-- 📖 **Documentation**: [Full API Documentation](https://mermaid-render.readthedocs.io)
-- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/AstroAir/mermaid-render/issues)
-- 💬 **Questions**: [GitHub Discussions](https://github.com/AstroAir/mermaid-render/discussions)
+- 📖 **Documentation**: [Full API Documentation](https://diagramaid.readthedocs.io)
+- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/AstroAir/diagramaid/issues)
+- 💬 **Questions**: [GitHub Discussions](https://github.com/AstroAir/diagramaid/discussions)
 - 📧 **Email**: [astro_air@126.com](mailto:astro_air@126.com)
 
 ## Contributing
@@ -1027,14 +1027,14 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - [Mermaid.js](https://mermaid.js.org/) - The amazing diagramming library
 - [mermaid-py](https://github.com/ouhammmourachid/mermaid-py) - Python interface to Mermaid
-- [mermaid.ink](https://mermaid.ink/) - Online Mermaid rendering service
+- [mermaid.ink](https://mermaid.ink/) - Online DiagramAiding service
 - [FastMCP](https://github.com/jlowin/fastmcp) - Model Context Protocol framework
 
 ## Support
 
-- 📖 [Documentation](https://mermaid-render.readthedocs.io)
-- 🐛 [Issue Tracker](https://github.com/AstroAir/mermaid-render/issues)
-- 💬 [Discussions](https://github.com/AstroAir/mermaid-render/discussions)
+- 📖 [Documentation](https://diagramaid.readthedocs.io)
+- 🐛 [Issue Tracker](https://github.com/AstroAir/diagramaid/issues)
+- 💬 [Discussions](https://github.com/AstroAir/diagramaid/discussions)
 - 📧 [Email Support](mailto:astro_air@126.com)
 
 ---

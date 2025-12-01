@@ -8,7 +8,7 @@ documentation, API documentation, business process modeling, and database design
 
 from pathlib import Path
 
-from mermaid_render import (
+from diagramaid import (
     ERDiagram,
     FlowchartDiagram,
     MermaidRenderer,

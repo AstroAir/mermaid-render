@@ -7,7 +7,7 @@ Tests the BroadcastService class.
 import pytest
 from unittest.mock import AsyncMock, Mock
 
-from mermaid_render.interactive.websocket.broadcast_service import BroadcastService
+from diagramaid.interactive.websocket.broadcast_service import BroadcastService
 
 
 @pytest.mark.unit

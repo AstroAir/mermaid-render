@@ -8,8 +8,8 @@ import json
 
 import pytest
 
-from mermaid_render.interactive.builder.serialization import DiagramSerializer
-from mermaid_render.interactive.models import (
+from diagramaid.interactive.builder.serialization import DiagramSerializer
+from diagramaid.interactive.models import (
     DiagramConnection,
     DiagramElement,
     DiagramType,

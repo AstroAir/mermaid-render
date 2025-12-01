@@ -1,11 +1,11 @@
 {
-  "name": "mermaid-render",
+  "name": "diagramaid",
   "version": "1.0.0",
   "description": "MCP server for Mermaid diagram generation, validation, and manipulation with AI-powered features",
   "author": "Max Qian <astro_air@126.com>",
   "license": "MIT",
-  "repository": "https://github.com/AstroAir/mermaid-render",
-  "homepage": "https://github.com/AstroAir/mermaid-render",
+  "repository": "https://github.com/AstroAir/diagramaid",
+  "homepage": "https://github.com/AstroAir/diagramaid",
   "keywords": [
     "mermaid",
     "diagrams",
@@ -23,15 +23,15 @@
   },
   "transport": {
     "stdio": {
-      "command": "mermaid-render-mcp",
+      "command": "diagramaid-mcp",
       "args": []
     },
     "sse": {
-      "command": "mermaid-render-mcp",
+      "command": "diagramaid-mcp",
       "args": ["--transport", "sse", "--port", "8000"]
     },
     "websocket": {
-      "command": "mermaid-render-mcp",
+      "command": "diagramaid-mcp",
       "args": ["--transport", "websocket", "--port", "9000"]
     }
   },

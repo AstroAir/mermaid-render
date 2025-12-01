@@ -8,8 +8,8 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from mermaid_render.core import MermaidConfig, MermaidRenderer, MermaidTheme
-from mermaid_render.exceptions import (
+from diagramaid.core import MermaidConfig, MermaidRenderer, MermaidTheme
+from diagramaid.exceptions import (
     ConfigurationError,
     RenderingError,
     UnsupportedFormatError,
@@ -187,24 +187,24 @@ class TestMermaidRenderer:
             renderer.set_theme("invalid_type")
 
     def test_unsupported_format(
-        self, mermaid_renderer: Any, sample_mermaid_code: Any
+        self, diagramaider: Any, sample_mermaid_code: Any
     ) -> None:
         """Test rendering with unsupported format."""
         with pytest.raises(UnsupportedFormatError, match="Unsupported format"):
-            mermaid_renderer.render(sample_mermaid_code, format="gif")
+            diagramaider.render(sample_mermaid_code, format="gif")
 
     def test_render_svg_success(
-        self, mermaid_renderer: Any, sample_mermaid_code: Any
+        self, diagramaider: Any, sample_mermaid_code: Any
     ) -> None:
         """Test successful SVG rendering."""
-        result = mermaid_renderer.render(sample_mermaid_code, format="svg")
+        result = diagramaider.render(sample_mermaid_code, format="svg")
 
         # Verify that we get valid SVG content
         assert "<svg" in result
         assert "xmlns" in result
         assert result.strip().endswith("</svg>")
 
-    @patch("mermaid_render.renderers.svg_renderer.md.Mermaid")
+    @patch("diagramaid.renderers.svg_renderer.md.Mermaid")
     def test_render_with_validation_disabled(
         self, mock_mermaid: Any, invalid_mermaid_code: Any
     ) -> None:
@@ -231,21 +231,21 @@ class TestMermaidRenderer:
             renderer.render(invalid_mermaid_code, format="svg")
 
     def test_render_diagram_object(
-        self, mermaid_renderer: Any, sample_flowchart: Any
+        self, diagramaider: Any, sample_flowchart: Any
     ) -> None:
         """Test rendering diagram object."""
-        result = mermaid_renderer.render(sample_flowchart, format="svg")
+        result = diagramaider.render(sample_flowchart, format="svg")
 
         # Verify that we get valid SVG content
         assert "<svg" in result
         assert result.strip().endswith("</svg>")
 
     def test_save_to_file(
-        self, mermaid_renderer: Any, sample_mermaid_code: Any, temp_dir: Any
+        self, diagramaider: Any, sample_mermaid_code: Any, temp_dir: Any
     ) -> None:
         """Test saving diagram to file."""
         output_path = temp_dir / "test.svg"
-        mermaid_renderer.save(sample_mermaid_code, output_path)
+        diagramaider.save(sample_mermaid_code, output_path)
 
         assert output_path.exists()
         content = output_path.read_text()
@@ -254,42 +254,42 @@ class TestMermaidRenderer:
         assert content.strip().endswith("</svg>")
 
     def test_save_format_inference(
-        self, mermaid_renderer: Any, sample_mermaid_code: Any, temp_dir: Any
+        self, diagramaider: Any, sample_mermaid_code: Any, temp_dir: Any
     ) -> None:
         """Test format inference from file extension."""
-        with patch("mermaid_render.core.md.Mermaid") as mock_mermaid:
+        with patch("diagramaid.core.md.Mermaid") as mock_mermaid:
             mock_instance = Mock()
             mock_instance.__str__ = Mock(return_value="<svg>test</svg>")
             mock_mermaid.return_value = mock_instance
 
             # Test SVG extension
             svg_path = temp_dir / "test.svg"
-            mermaid_renderer.save(sample_mermaid_code, svg_path)
+            diagramaider.save(sample_mermaid_code, svg_path)
             assert svg_path.exists()
 
     def test_save_directory_creation(
-        self, mermaid_renderer: Any, sample_mermaid_code: Any, temp_dir: Any
+        self, diagramaider: Any, sample_mermaid_code: Any, temp_dir: Any
     ) -> None:
         """Test automatic directory creation when saving."""
-        with patch("mermaid_render.core.md.Mermaid") as mock_mermaid:
+        with patch("diagramaid.core.md.Mermaid") as mock_mermaid:
             mock_instance = Mock()
             mock_instance.__str__ = Mock(return_value="<svg>test</svg>")
             mock_mermaid.return_value = mock_instance
 
             # Create nested path that doesn't exist
             nested_path = temp_dir / "subdir" / "nested" / "test.svg"
-            mermaid_renderer.save(sample_mermaid_code, nested_path)
+            diagramaider.save(sample_mermaid_code, nested_path)
 
             assert nested_path.exists()
             assert nested_path.parent.exists()
 
     def test_save_default_format_fallback(
-        self, mermaid_renderer: Any, sample_mermaid_code: Any, temp_dir: Any
+        self, diagramaider: Any, sample_mermaid_code: Any, temp_dir: Any
     ) -> None:
         """Test default format fallback when no extension provided."""
         # Save without extension
         output_path = temp_dir / "test_no_extension"
-        mermaid_renderer.save(sample_mermaid_code, output_path)
+        diagramaider.save(sample_mermaid_code, output_path)
 
         assert output_path.exists()
         content = output_path.read_text()
@@ -298,39 +298,39 @@ class TestMermaidRenderer:
         assert content.strip().endswith("</svg>")
 
     def test_save_binary_content_handling(
-        self, mermaid_renderer: Any, sample_mermaid_code: Any, temp_dir: Any
+        self, diagramaider: Any, sample_mermaid_code: Any, temp_dir: Any
     ) -> None:
         """Test binary content handling in save method."""
-        with patch("mermaid_render.core.md.Mermaid") as mock_mermaid:
+        with patch("diagramaid.core.md.Mermaid") as mock_mermaid:
             mock_instance = Mock()
             mock_instance.__str__ = Mock(return_value="<svg>test</svg>")
             mock_mermaid.return_value = mock_instance
 
             # Mock render to return string for binary format
             with patch.object(
-                mermaid_renderer, "render", return_value="binary_content"
+                diagramaider, "render", return_value="binary_content"
             ):
                 output_path = temp_dir / "test.png"
-                mermaid_renderer.save(sample_mermaid_code, output_path, format="png")
+                diagramaider.save(sample_mermaid_code, output_path, format="png")
 
                 assert output_path.exists()
                 content = output_path.read_bytes()
                 assert content == b"binary_content"
 
     def test_save_binary_content_bytes(
-        self, mermaid_renderer: Any, sample_mermaid_code: Any, temp_dir: Any
+        self, diagramaider: Any, sample_mermaid_code: Any, temp_dir: Any
     ) -> None:
         """Test binary content handling when content is already bytes."""
-        with patch("mermaid_render.core.md.Mermaid") as mock_mermaid:
+        with patch("diagramaid.core.md.Mermaid") as mock_mermaid:
             mock_instance = Mock()
             mock_instance.__str__ = Mock(return_value="<svg>test</svg>")
             mock_mermaid.return_value = mock_instance
 
             # Mock render to return bytes for binary format
             binary_content = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR"
-            with patch.object(mermaid_renderer, "render", return_value=binary_content):
+            with patch.object(diagramaider, "render", return_value=binary_content):
                 output_path = temp_dir / "test.png"
-                mermaid_renderer.save(sample_mermaid_code, output_path, format="png")
+                diagramaider.save(sample_mermaid_code, output_path, format="png")
 
                 assert output_path.exists()
                 content = output_path.read_bytes()
@@ -342,7 +342,7 @@ class TestMermaidRenderer:
         # Use legacy mode for direct mocking
         renderer = MermaidRenderer(theme=theme, use_plugin_system=False)
 
-        with patch("mermaid_render.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
+        with patch("diagramaid.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
             mock_instance = Mock()
             mock_instance.__str__ = Mock(return_value="<svg>themed</svg>")
             mock_mermaid.return_value = mock_instance
@@ -351,25 +351,25 @@ class TestMermaidRenderer:
 
             assert "<svg" in result
 
-    def test_render_raw_unsupported_format(self, mermaid_renderer: Any) -> None:
+    def test_render_raw_unsupported_format(self, diagramaider: Any) -> None:
         """Test render_raw with unsupported format."""
         # Test with an actually unsupported format
         with pytest.raises((RenderingError, UnsupportedFormatError)):
-            mermaid_renderer.render_raw("flowchart TD\n    A --> B", format="webp")
+            diagramaider.render_raw("flowchart TD\n    A --> B", format="webp")
 
-    def test_render_raw_exception_handling(self, mermaid_renderer: Any) -> None:
+    def test_render_raw_exception_handling(self, diagramaider: Any) -> None:
         """Test render_raw exception handling."""
         # Test with an unsupported format to trigger an exception
         # The UnsupportedFormatError gets wrapped in a RenderingError
         with pytest.raises(RenderingError, match="Failed to render diagram"):
-            mermaid_renderer.render_raw(
+            diagramaider.render_raw(
                 "flowchart TD\n    A --> B", format="invalid_format"
             )
 
-    def test_render_diagram_validation_failure(self, mermaid_renderer: Any) -> None:
+    def test_render_diagram_validation_failure(self, diagramaider: Any) -> None:
         """Test rendering with diagram validation failure."""
         # Use a real diagram and mock its validate method to return False
-        from mermaid_render.models import FlowchartDiagram
+        from diagramaid.models import FlowchartDiagram
 
         diagram = FlowchartDiagram()
         diagram.add_node("A", "Start")
@@ -379,7 +379,7 @@ class TestMermaidRenderer:
         # Mock the validate method to return False
         with patch.object(diagram, "validate", return_value=False):
             with pytest.raises(ValidationError, match="Invalid diagram syntax"):
-                mermaid_renderer.render(diagram)
+                diagramaider.render(diagram)
 
 
 class TestMermaidDiagram:
@@ -421,7 +421,7 @@ class TestMermaidDiagram:
 
     def test_validate_invalid_diagram(self) -> None:
         """Test validation with invalid diagram."""
-        from mermaid_render.models import FlowchartDiagram
+        from diagramaid.models import FlowchartDiagram
 
         # Create an invalid diagram by mocking to_mermaid to return invalid syntax
         invalid_diagram = FlowchartDiagram()

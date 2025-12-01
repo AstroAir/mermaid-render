@@ -7,24 +7,24 @@ Get up and running with Mermaid Render in just a few minutes!
 ### Basic Installation
 
 ```bash
-pip install mermaid-render
+pip install diagramaid
 ```
 
 ### With Optional Features
 
 ```bash
 # Install with all features
-pip install mermaid-render[cache,interactive,ai,collaboration,docs]
+pip install diagramaid[cache,interactive,ai,collaboration,docs]
 
 # Or install specific features
-pip install mermaid-render[cache,interactive]
+pip install diagramaid[cache,interactive]
 ```
 
 ### Development Installation
 
 ```bash
-git clone https://github.com/mermaid-render/mermaid-render.git
-cd mermaid-render
+git clone https://github.com/diagramaid/diagramaid.git
+cd diagramaid
 pip install -e ".[dev]"
 ```
 
@@ -33,7 +33,7 @@ pip install -e ".[dev]"
 Let's create a simple flowchart:
 
 ```python
-from mermaid_render import MermaidRenderer, FlowchartDiagram
+from diagramaid import MermaidRenderer, FlowchartDiagram
 
 # Create a flowchart
 flowchart = FlowchartDiagram()
@@ -58,7 +58,7 @@ print("Diagram created successfully!")
 For simple use cases, use the `quick_render` function:
 
 ```python
-from mermaid_render import quick_render
+from diagramaid import quick_render
 
 # Render raw Mermaid syntax
 diagram_code = """
@@ -82,7 +82,7 @@ quick_render(diagram_code, output_path="decision_flow.png", format="png")
 ### Sequence Diagram
 
 ```python
-from mermaid_render import SequenceDiagram
+from diagramaid import SequenceDiagram
 
 sequence = SequenceDiagram(title="User Login")
 sequence.add_participant("user", "User")
@@ -101,8 +101,8 @@ renderer.save(sequence, "login_sequence.svg")
 ### Class Diagram
 
 ```python
-from mermaid_render import ClassDiagram
-from mermaid_render.models.class_diagram import ClassMethod, ClassAttribute
+from diagramaid import ClassDiagram
+from diagramaid.models.class_diagram import ClassMethod, ClassAttribute
 
 class_diagram = ClassDiagram()
 
@@ -127,7 +127,7 @@ renderer.save(class_diagram, "animal_hierarchy.svg")
 ### Basic Configuration
 
 ```python
-from mermaid_render import MermaidRenderer, MermaidConfig
+from diagramaid import MermaidRenderer, MermaidConfig
 
 # Create custom configuration
 config = MermaidConfig(
@@ -150,7 +150,7 @@ export MERMAID_CACHE_ENABLED=true
 ### Configuration File
 
 ```python
-from mermaid_render.config import ConfigManager
+from diagramaid.config import ConfigManager
 
 config_manager = ConfigManager(config_file="mermaid_config.json")
 config_manager.set("default_theme", "neutral")
@@ -164,7 +164,7 @@ renderer = MermaidRenderer(config=config_manager.get_config())
 ### Built-in Themes
 
 ```python
-from mermaid_render import MermaidRenderer
+from diagramaid import MermaidRenderer
 
 # Available themes: default, dark, forest, neutral
 renderer = MermaidRenderer(theme="dark")
@@ -174,7 +174,7 @@ result = renderer.render(diagram, format="svg")
 ### Custom Themes
 
 ```python
-from mermaid_render import MermaidTheme, MermaidRenderer
+from diagramaid import MermaidTheme, MermaidRenderer
 
 # Create custom theme
 custom_theme = MermaidTheme(
@@ -193,7 +193,7 @@ renderer.set_theme(custom_theme)
 Always validate your diagrams:
 
 ```python
-from mermaid_render.utils import validate_mermaid_syntax
+from diagramaid.utils import validate_mermaid_syntax
 
 diagram_code = """
 flowchart TD
@@ -213,7 +213,7 @@ else:
 ## Error Handling
 
 ```python
-from mermaid_render.exceptions import ValidationError, RenderingError
+from diagramaid.exceptions import ValidationError, RenderingError
 
 try:
     result = renderer.render(diagram, format="svg")
@@ -245,7 +245,7 @@ pdf_data = renderer.render(diagram, format="pdf")
 ### Export Multiple Formats
 
 ```python
-from mermaid_render.utils import export_multiple_formats
+from diagramaid.utils import export_multiple_formats
 
 # Export to multiple formats at once
 export_multiple_formats(
@@ -258,7 +258,7 @@ export_multiple_formats(
 ### Batch Export
 
 ```python
-from mermaid_render.utils import batch_export
+from diagramaid.utils import batch_export
 
 diagrams = {
     "flowchart": my_flowchart,
@@ -286,7 +286,7 @@ Now that you've created your first diagrams, explore more advanced features:
 
 ```python
 from flask import Flask, request, jsonify
-from mermaid_render import quick_render
+from diagramaid import quick_render
 
 app = Flask(__name__)
 
@@ -333,7 +333,7 @@ def generate_architecture_docs(components):
 - 📖 [Full Documentation](../index.md)
 - 🔧 [API Reference](../api/index.md)
 - 💡 [Examples](../examples/index.md)
-- 🐛 [Report Issues](https://github.com/mermaid-render/mermaid-render/issues)
-- 💬 [Discussions](https://github.com/mermaid-render/mermaid-render/discussions)
+- 🐛 [Report Issues](https://github.com/diagramaid/diagramaid/issues)
+- 💬 [Discussions](https://github.com/diagramaid/diagramaid/discussions)
 
 Happy diagramming! 🎉

@@ -7,8 +7,8 @@ Tests the SessionManager and DiagramSession classes.
 import pytest
 from unittest.mock import Mock
 
-from mermaid_render.interactive.builder import DiagramBuilder
-from mermaid_render.interactive.websocket.session_manager import (
+from diagramaid.interactive.builder import DiagramBuilder
+from diagramaid.interactive.websocket.session_manager import (
     DiagramSession,
     SessionManager,
 )

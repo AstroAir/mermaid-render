@@ -6,7 +6,7 @@ Tests for base utilities and FastMCP availability.
 
 import pytest
 
-from mermaid_render.mcp.prompts.base import _FASTMCP_AVAILABLE
+from diagramaid.mcp.prompts.base import _FASTMCP_AVAILABLE
 
 
 @pytest.mark.unit
@@ -19,7 +19,7 @@ class TestFastMCPAvailability:
 
     def test_module_imports(self):
         """Test module can be imported."""
-        from mermaid_render.mcp.prompts import base
+        from diagramaid.mcp.prompts import base
 
         assert hasattr(base, "_FASTMCP_AVAILABLE")
         assert hasattr(base, "logger")

@@ -7,7 +7,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from mermaid_render import (
+from diagramaid import (
     FlowchartDiagram,
     MermaidRenderer,
     SequenceDiagram,
@@ -19,7 +19,7 @@ from mermaid_render import (
 class TestEndToEndWorkflow:
     """Test complete end-to-end workflows."""
 
-    @patch("mermaid_render.renderers.svg_renderer.md.Mermaid")
+    @patch("diagramaid.renderers.svg_renderer.md.Mermaid")
     def test_flowchart_creation_and_rendering(
         self, mock_mermaid: Any, temp_dir: Any
     ) -> None:
@@ -64,7 +64,7 @@ class TestEndToEndWorkflow:
             == '<svg xmlns="http://www.w3.org/2000/svg">flowchart content</svg>'
         )
 
-    @patch("mermaid_render.renderers.svg_renderer.md.Mermaid")
+    @patch("diagramaid.renderers.svg_renderer.md.Mermaid")
     def test_sequence_diagram_workflow(self, mock_mermaid: Any, temp_dir: Any) -> None:
         """Test complete sequence diagram workflow."""
         # Mock the mermaid-py library
@@ -97,7 +97,7 @@ class TestEndToEndWorkflow:
 
         assert output_path.exists()
 
-    @patch("mermaid_render.renderers.svg_renderer.md.Mermaid")
+    @patch("diagramaid.renderers.svg_renderer.md.Mermaid")
     def test_quick_render_function(self, mock_mermaid: Any, temp_dir: Any) -> None:
         """Test quick_render convenience function."""
         # Mock the mermaid-py library
@@ -129,7 +129,7 @@ flowchart TD
             '<svg xmlns="http://www.w3.org/2000/svg">'
         ) and content.endswith("</svg>")
 
-    @patch("mermaid_render.renderers.svg_renderer.md.Mermaid")
+    @patch("diagramaid.renderers.svg_renderer.md.Mermaid")
     def test_export_to_file_function(self, mock_mermaid: Any, temp_dir: Any) -> None:
         """Test export_to_file convenience function."""
         # Mock the mermaid-py library
@@ -155,7 +155,7 @@ flowchart TD
 
     def test_diagram_validation_workflow(self) -> None:
         """Test diagram validation workflow."""
-        from mermaid_render.utils import validate_mermaid_syntax
+        from diagramaid.utils import validate_mermaid_syntax
 
         # Valid diagram
         valid_code = """
@@ -178,7 +178,7 @@ flowchart TD
 
     def test_theme_management_workflow(self, temp_dir: Any) -> None:
         """Test theme management workflow."""
-        from mermaid_render.config import ThemeManager
+        from diagramaid.config import ThemeManager
 
         # Create theme manager
         theme_manager = ThemeManager(custom_themes_dir=temp_dir / "themes")
@@ -207,7 +207,7 @@ flowchart TD
 
     def test_configuration_workflow(self) -> None:
         """Test configuration management workflow."""
-        from mermaid_render.config import ConfigManager
+        from diagramaid.config import ConfigManager
 
         # Create config manager
         config_manager = ConfigManager(load_env=False)
@@ -228,10 +228,10 @@ flowchart TD
         # Test validation
         config_manager.validate_config()  # Should not raise
 
-    @patch("mermaid_render.renderers.svg_renderer.md.Mermaid")
+    @patch("diagramaid.renderers.svg_renderer.md.Mermaid")
     def test_multiple_format_export(self, mock_mermaid: Any, temp_dir: Any) -> None:
         """Test exporting to multiple formats."""
-        from mermaid_render.utils import export_multiple_formats
+        from diagramaid.utils import export_multiple_formats
 
         # Mock different format responses
         mock_instance = Mock()
@@ -255,7 +255,7 @@ flowchart TD
 
     def test_error_handling_workflow(self) -> None:
         """Test error handling in various scenarios."""
-        from mermaid_render.exceptions import DiagramError
+        from diagramaid.exceptions import DiagramError
 
         # Test diagram creation errors
         with pytest.raises(DiagramError):
@@ -263,14 +263,14 @@ flowchart TD
             flowchart.add_edge("A", "B")  # Nodes don't exist
 
         # Test validation errors
-        from mermaid_render.utils import validate_mermaid_syntax
+        from diagramaid.utils import validate_mermaid_syntax
 
         result = validate_mermaid_syntax("invalid diagram code")
         assert not result.is_valid
 
         # Test theme errors
-        from mermaid_render.config import ThemeManager
-        from mermaid_render.exceptions import ThemeError
+        from diagramaid.config import ThemeManager
+        from diagramaid.exceptions import ThemeError
 
         theme_manager = ThemeManager()
         with pytest.raises(ThemeError):
@@ -278,7 +278,7 @@ flowchart TD
 
     def test_utility_functions_workflow(self) -> None:
         """Test utility functions workflow."""
-        from mermaid_render.utils import (
+        from diagramaid.utils import (
             detect_diagram_type,
             get_available_themes,
             get_supported_formats,

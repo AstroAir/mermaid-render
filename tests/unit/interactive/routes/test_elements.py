@@ -6,8 +6,8 @@ Tests the elements API router.
 
 import pytest
 
-from mermaid_render.interactive.routes.elements import create_elements_router
-from mermaid_render.interactive.websocket import WebSocketHandler
+from diagramaid.interactive.routes.elements import create_elements_router
+from diagramaid.interactive.websocket import WebSocketHandler
 
 
 @pytest.mark.unit

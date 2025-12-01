@@ -6,7 +6,7 @@ Tests the ElementType and DiagramType enums.
 
 import pytest
 
-from mermaid_render.interactive.models.enums import DiagramType, ElementType
+from diagramaid.interactive.models.enums import DiagramType, ElementType
 
 
 @pytest.mark.unit

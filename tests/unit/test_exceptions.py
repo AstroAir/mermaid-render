@@ -2,7 +2,7 @@
 Unit tests for exception classes.
 """
 
-from mermaid_render.exceptions import (
+from diagramaid.exceptions import (
     CacheError,
     ConfigurationError,
     DataSourceError,

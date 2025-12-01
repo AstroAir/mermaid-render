@@ -109,7 +109,7 @@ class DevTools:
                     "uv",
                     "run",
                     "pytest",
-                    "--cov=mermaid_render",
+                    "--cov=diagramaid",
                     "--cov-report=html",
                     "--cov-report=term-missing",
                     "--cov-report=xml",
@@ -122,7 +122,7 @@ class DevTools:
                     self.python_exe,
                     "-m",
                     "pytest",
-                    "--cov=mermaid_render",
+                    "--cov=diagramaid",
                     "--cov-report=html",
                     "--cov-report=term-missing",
                     "--cov-report=xml",
@@ -139,14 +139,14 @@ class DevTools:
 
         # Run ruff
         ruff_exit, _, _ = self.run_command(
-            [self.python_exe, "-m", "ruff", "check", "mermaid_render/", "tests/"],
+            [self.python_exe, "-m", "ruff", "check", "diagramaid/", "tests/"],
             check=False,
         )
         exit_code |= ruff_exit
 
         # Run black check
         black_exit, _, _ = self.run_command(
-            [self.python_exe, "-m", "black", "--check", "mermaid_render/", "tests/"],
+            [self.python_exe, "-m", "black", "--check", "diagramaid/", "tests/"],
             check=False,
         )
         exit_code |= black_exit
@@ -165,14 +165,14 @@ class DevTools:
                 "ruff",
                 "check",
                 "--fix",
-                "mermaid_render/",
+                "diagramaid/",
                 "tests/",
             ]
         )
 
         # Run black
         black_exit, _, _ = self.run_command(
-            [self.python_exe, "-m", "black", "mermaid_render/", "tests/"]
+            [self.python_exe, "-m", "black", "diagramaid/", "tests/"]
         )
 
         if ruff_exit == 0 and black_exit == 0:
@@ -186,7 +186,7 @@ class DevTools:
         """Run type checking with mypy."""
         print("🔬 Running type checks...")
         exit_code, _, _ = self.run_command(
-            [self.python_exe, "-m", "mypy", "mermaid_render/"], check=False
+            [self.python_exe, "-m", "mypy", "diagramaid/"], check=False
         )
         return exit_code
 
@@ -202,7 +202,7 @@ class DevTools:
                 "-m",
                 "bandit",
                 "-r",
-                "mermaid_render/",
+                "diagramaid/",
                 "-f",
                 "json",
                 "-o",
@@ -353,15 +353,15 @@ class DevTools:
 
         if operation == "build":
             exit_code, _, _ = self.run_command(
-                ["docker", "build", "-t", "mermaid-render", "."]
+                ["docker", "build", "-t", "diagramaid", "."]
             )
         elif operation == "run":
             exit_code, _, _ = self.run_command(
-                ["docker", "run", "--rm", "-it", "mermaid-render"]
+                ["docker", "run", "--rm", "-it", "diagramaid"]
             )
         elif operation == "test":
             exit_code, _, _ = self.run_command(
-                ["docker", "run", "--rm", "mermaid-render", "python", "-m", "pytest"]
+                ["docker", "run", "--rm", "diagramaid", "python", "-m", "pytest"]
             )
         else:
             print(f"❌ Unknown Docker operation: {operation}")

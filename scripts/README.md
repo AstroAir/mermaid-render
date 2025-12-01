@@ -241,7 +241,7 @@ python scripts/version_manager.py changelog
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd mermaid-render
+cd diagramaid
 
 # Set up development environment
 python scripts/setup-dev.py --verbose

@@ -13,8 +13,8 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from mermaid_render.cli import main
-from mermaid_render.exceptions import RenderingError, ValidationError
+from diagramaid.cli import main
+from diagramaid.exceptions import RenderingError, ValidationError
 
 
 class TestCLIArgumentParsing:
@@ -22,17 +22,17 @@ class TestCLIArgumentParsing:
 
     def test_version_argument(self, capsys: Any) -> None:
         """Test --version argument displays version."""
-        with patch.object(sys, "argv", ["mermaid-render", "--version"]):
+        with patch.object(sys, "argv", ["diagramaid", "--version"]):
             with pytest.raises(SystemExit) as exc_info:
                 main()
             assert exc_info.value.code == 0
 
         captured = capsys.readouterr()
-        assert "mermaid-render" in captured.out
+        assert "diagramaid" in captured.out
 
     def test_help_argument(self, capsys: Any) -> None:
         """Test --help argument displays help."""
-        with patch.object(sys, "argv", ["mermaid-render", "--help"]):
+        with patch.object(sys, "argv", ["diagramaid", "--help"]):
             with pytest.raises(SystemExit) as exc_info:
                 main()
             assert exc_info.value.code == 0
@@ -42,7 +42,7 @@ class TestCLIArgumentParsing:
 
     def test_required_input_argument(self, capsys: Any) -> None:
         """Test that input argument is required."""
-        with patch.object(sys, "argv", ["mermaid-render"]):
+        with patch.object(sys, "argv", ["diagramaid"]):
             with pytest.raises(SystemExit) as exc_info:
                 main()
             assert exc_info.value.code == 2  # argparse error code
@@ -53,15 +53,15 @@ class TestCLIArgumentParsing:
 
         for format_type in valid_formats:
             with patch.object(
-                sys, "argv", ["mermaid-render", "test.mmd", "-f", format_type]
+                sys, "argv", ["diagramaid", "test.mmd", "-f", format_type]
             ):
-                with patch("mermaid_render.cli.Path.exists", return_value=True):
+                with patch("diagramaid.cli.Path.exists", return_value=True):
                     with patch(
-                        "mermaid_render.cli.Path.read_text",
+                        "diagramaid.cli.Path.read_text",
                         return_value="flowchart TD\n    A --> B",
                     ):
                         with patch(
-                            "mermaid_render.cli.quick_render",
+                            "diagramaid.cli.quick_render",
                             return_value="<svg></svg>",
                         ):
                             result = main()
@@ -73,7 +73,7 @@ class TestCLIArgumentParsing:
 
     def test_invalid_format_choice(self, capsys: Any) -> None:
         """Test invalid format choice raises error."""
-        with patch.object(sys, "argv", ["mermaid-render", "test.mmd", "-f", "invalid"]):
+        with patch.object(sys, "argv", ["diagramaid", "test.mmd", "-f", "invalid"]):
             with pytest.raises(SystemExit) as exc_info:
                 main()
             assert exc_info.value.code == 2  # argparse error code
@@ -89,9 +89,9 @@ class TestCLIFileOperations:
         test_content = "flowchart TD\n    A --> B"
         test_file.write_text(test_content)
 
-        with patch.object(sys, "argv", ["mermaid-render", str(test_file)]):
+        with patch.object(sys, "argv", ["diagramaid", str(test_file)]):
             with patch(
-                "mermaid_render.cli.quick_render", return_value="<svg></svg>"
+                "diagramaid.cli.quick_render", return_value="<svg></svg>"
             ) as mock_render:
                 result = main()
 
@@ -102,7 +102,7 @@ class TestCLIFileOperations:
 
     def test_file_not_found(self, capsys: Any) -> None:
         """Test handling of non-existent input file."""
-        with patch.object(sys, "argv", ["mermaid-render", "nonexistent.mmd"]):
+        with patch.object(sys, "argv", ["diagramaid", "nonexistent.mmd"]):
             result = main()
 
             assert result == 1
@@ -115,7 +115,7 @@ class TestCLIFileOperations:
         test_file = temp_dir / "empty.mmd"
         test_file.write_text("")
 
-        with patch.object(sys, "argv", ["mermaid-render", str(test_file)]):
+        with patch.object(sys, "argv", ["diagramaid", str(test_file)]):
             result = main()
 
             assert result == 1
@@ -128,7 +128,7 @@ class TestCLIFileOperations:
         test_file = temp_dir / "whitespace.mmd"
         test_file.write_text("   \n\t  \n  ")
 
-        with patch.object(sys, "argv", ["mermaid-render", str(test_file)]):
+        with patch.object(sys, "argv", ["diagramaid", str(test_file)]):
             result = main()
 
             assert result == 1
@@ -142,10 +142,10 @@ class TestCLIFileOperations:
         output_file = temp_dir / "output.svg"
 
         with patch.object(
-            sys, "argv", ["mermaid-render", str(test_file), "-o", str(output_file)]
+            sys, "argv", ["diagramaid", str(test_file), "-o", str(output_file)]
         ):
             with patch(
-                "mermaid_render.cli.quick_render", return_value="<svg></svg>"
+                "diagramaid.cli.quick_render", return_value="<svg></svg>"
             ) as mock_render:
                 result = main()
 
@@ -162,10 +162,10 @@ class TestCLIStdinHandling:
         """Test successful stdin input reading."""
         test_content = "flowchart TD\n    A --> B"
 
-        with patch.object(sys, "argv", ["mermaid-render", "-"]):
+        with patch.object(sys, "argv", ["diagramaid", "-"]):
             with patch("sys.stdin.read", return_value=test_content):
                 with patch(
-                    "mermaid_render.cli.quick_render", return_value="<svg></svg>"
+                    "diagramaid.cli.quick_render", return_value="<svg></svg>"
                 ) as mock_render:
                     result = main()
 
@@ -176,7 +176,7 @@ class TestCLIStdinHandling:
 
     def test_stdin_empty_input(self, capsys: Any) -> None:
         """Test handling of empty stdin input."""
-        with patch.object(sys, "argv", ["mermaid-render", "-"]):
+        with patch.object(sys, "argv", ["diagramaid", "-"]):
             with patch("sys.stdin.read", return_value=""):
                 result = main()
 
@@ -189,10 +189,10 @@ class TestCLIStdinHandling:
         test_content = "flowchart TD\n    A --> B"
         output_file = temp_dir / "output.svg"
 
-        with patch.object(sys, "argv", ["mermaid-render", "-", "-o", str(output_file)]):
+        with patch.object(sys, "argv", ["diagramaid", "-", "-o", str(output_file)]):
             with patch("sys.stdin.read", return_value=test_content):
                 with patch(
-                    "mermaid_render.cli.quick_render", return_value="<svg></svg>"
+                    "diagramaid.cli.quick_render", return_value="<svg></svg>"
                 ) as mock_render:
                     result = main()
 
@@ -211,9 +211,9 @@ class TestCLIValidationMode:
         test_file.write_text("flowchart TD\n    A --> B")
 
         with patch.object(
-            sys, "argv", ["mermaid-render", str(test_file), "--validate-only"]
+            sys, "argv", ["diagramaid", str(test_file), "--validate-only"]
         ):
-            with patch("mermaid_render.utils.validate_mermaid_syntax") as mock_validate:
+            with patch("diagramaid.utils.validate_mermaid_syntax") as mock_validate:
                 mock_result = Mock()
                 mock_result.is_valid = True
                 mock_validate.return_value = mock_result
@@ -230,9 +230,9 @@ class TestCLIValidationMode:
         test_file.write_text("invalid mermaid syntax")
 
         with patch.object(
-            sys, "argv", ["mermaid-render", str(test_file), "--validate-only"]
+            sys, "argv", ["diagramaid", str(test_file), "--validate-only"]
         ):
-            with patch("mermaid_render.utils.validate_mermaid_syntax") as mock_validate:
+            with patch("diagramaid.utils.validate_mermaid_syntax") as mock_validate:
                 mock_result = Mock()
                 mock_result.is_valid = False
                 mock_result.errors = ["Syntax error on line 1", "Invalid diagram type"]
@@ -254,9 +254,9 @@ class TestCLIValidationMode:
         with patch.object(
             sys,
             "argv",
-            ["mermaid-render", str(test_file), "--validate-only", "--quiet"],
+            ["diagramaid", str(test_file), "--validate-only", "--quiet"],
         ):
-            with patch("mermaid_render.utils.validate_mermaid_syntax") as mock_validate:
+            with patch("diagramaid.utils.validate_mermaid_syntax") as mock_validate:
                 mock_result = Mock()
                 mock_result.is_valid = True
                 mock_validate.return_value = mock_result
@@ -276,9 +276,9 @@ class TestCLIErrorScenarios:
         test_file = temp_dir / "test.mmd"
         test_file.write_text("flowchart TD\n    A --> B")
 
-        with patch.object(sys, "argv", ["mermaid-render", str(test_file)]):
+        with patch.object(sys, "argv", ["diagramaid", str(test_file)]):
             with patch(
-                "mermaid_render.cli.quick_render",
+                "diagramaid.cli.quick_render",
                 side_effect=RenderingError("Rendering failed"),
             ):
                 result = main()
@@ -292,9 +292,9 @@ class TestCLIErrorScenarios:
         test_file = temp_dir / "test.mmd"
         test_file.write_text("flowchart TD\n    A --> B")
 
-        with patch.object(sys, "argv", ["mermaid-render", str(test_file)]):
+        with patch.object(sys, "argv", ["diagramaid", str(test_file)]):
             with patch(
-                "mermaid_render.cli.quick_render",
+                "diagramaid.cli.quick_render",
                 side_effect=ValidationError("Invalid syntax"),
             ):
                 result = main()
@@ -311,7 +311,7 @@ class TestCLIErrorScenarios:
         test_file.write_text("flowchart TD\n    A --> B")
 
         # Test PNG format without output
-        with patch.object(sys, "argv", ["mermaid-render", str(test_file), "-f", "png"]):
+        with patch.object(sys, "argv", ["diagramaid", str(test_file), "-f", "png"]):
             result = main()
 
             assert result == 1
@@ -319,7 +319,7 @@ class TestCLIErrorScenarios:
             assert "Output file required for png format" in captured.err
 
         # Test PDF format without output
-        with patch.object(sys, "argv", ["mermaid-render", str(test_file), "-f", "pdf"]):
+        with patch.object(sys, "argv", ["diagramaid", str(test_file), "-f", "pdf"]):
             result = main()
 
             assert result == 1
@@ -331,9 +331,9 @@ class TestCLIErrorScenarios:
         test_file = temp_dir / "test.mmd"
         test_file.write_text("flowchart TD\n    A --> B")
 
-        with patch.object(sys, "argv", ["mermaid-render", str(test_file)]):
+        with patch.object(sys, "argv", ["diagramaid", str(test_file)]):
             with patch(
-                "mermaid_render.cli.quick_render",
+                "diagramaid.cli.quick_render",
                 side_effect=Exception("Unexpected error"),
             ):
                 result = main()
@@ -352,8 +352,8 @@ class TestCLIOutputFormatting:
         test_file.write_text("flowchart TD\n    A --> B")
         svg_content = '<svg xmlns="http://www.w3.org/2000/svg">test</svg>'
 
-        with patch.object(sys, "argv", ["mermaid-render", str(test_file)]):
-            with patch("mermaid_render.cli.quick_render", return_value=svg_content):
+        with patch.object(sys, "argv", ["diagramaid", str(test_file)]):
+            with patch("diagramaid.cli.quick_render", return_value=svg_content):
                 result = main()
 
                 assert result == 0
@@ -367,9 +367,9 @@ class TestCLIOutputFormatting:
         output_file = temp_dir / "output.svg"
 
         with patch.object(
-            sys, "argv", ["mermaid-render", str(test_file), "-o", str(output_file)]
+            sys, "argv", ["diagramaid", str(test_file), "-o", str(output_file)]
         ):
-            with patch("mermaid_render.cli.quick_render", return_value="<svg></svg>"):
+            with patch("diagramaid.cli.quick_render", return_value="<svg></svg>"):
                 result = main()
 
                 assert result == 0
@@ -385,9 +385,9 @@ class TestCLIOutputFormatting:
         with patch.object(
             sys,
             "argv",
-            ["mermaid-render", str(test_file), "-o", str(output_file), "--quiet"],
+            ["diagramaid", str(test_file), "-o", str(output_file), "--quiet"],
         ):
-            with patch("mermaid_render.cli.quick_render", return_value="<svg></svg>"):
+            with patch("diagramaid.cli.quick_render", return_value="<svg></svg>"):
                 result = main()
 
                 assert result == 0
@@ -400,10 +400,10 @@ class TestCLIOutputFormatting:
         test_file.write_text("flowchart TD\n    A --> B")
 
         with patch.object(
-            sys, "argv", ["mermaid-render", str(test_file), "-t", "dark"]
+            sys, "argv", ["diagramaid", str(test_file), "-t", "dark"]
         ):
             with patch(
-                "mermaid_render.cli.quick_render", return_value="<svg></svg>"
+                "diagramaid.cli.quick_render", return_value="<svg></svg>"
             ) as mock_render:
                 result = main()
 

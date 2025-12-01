@@ -7,8 +7,8 @@ Tests the ConnectionManager class for managing diagram connections.
 import pytest
 from unittest.mock import Mock, patch
 
-from mermaid_render.interactive.builder.connection_manager import ConnectionManager
-from mermaid_render.interactive.models import DiagramConnection
+from diagramaid.interactive.builder.connection_manager import ConnectionManager
+from diagramaid.interactive.models import DiagramConnection
 
 
 @pytest.mark.unit

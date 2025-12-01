@@ -13,7 +13,7 @@ Mermaid Render supports two approaches:
 
 ```python
 # Object-oriented approach
-from mermaid_render import FlowchartDiagram
+from diagramaid import FlowchartDiagram
 
 flowchart = FlowchartDiagram()
 flowchart.add_node("A", "Start")
@@ -37,7 +37,7 @@ All diagrams go through the same rendering pipeline:
 4. **Output**: Save to file or return as string/bytes
 
 ```python
-from mermaid_render import MermaidRenderer, FlowchartDiagram
+from diagramaid import MermaidRenderer, FlowchartDiagram
 
 # 1. Creation
 diagram = FlowchartDiagram()
@@ -59,7 +59,7 @@ renderer.save(diagram, "output.png", format="png")
 Each diagram type has its own class:
 
 ```python
-from mermaid_render import (
+from diagramaid import (
     FlowchartDiagram,
     SequenceDiagram,
     ClassDiagram,
@@ -78,7 +78,7 @@ state = StateDiagram(title="State Machine")
 Use the fluent API to build diagrams step by step:
 
 ```python
-from mermaid_render import FlowchartDiagram
+from diagramaid import FlowchartDiagram
 
 # Create and build a flowchart
 flowchart = FlowchartDiagram(direction="TD")
@@ -124,7 +124,7 @@ print(mermaid_code)
 The `MermaidRenderer` is your main interface for converting diagrams to output formats:
 
 ```python
-from mermaid_render import MermaidRenderer, MermaidConfig
+from diagramaid import MermaidRenderer, MermaidConfig
 
 # Basic renderer
 renderer = MermaidRenderer()
@@ -155,7 +155,7 @@ renderer.save(diagram, "diagram.pdf", format="pdf")
 For simple use cases, use the convenience functions:
 
 ```python
-from mermaid_render import quick_render, render_to_file
+from diagramaid import quick_render, render_to_file
 
 # Quick render to string
 svg_content = quick_render(diagram_code, format="svg", theme="dark")
@@ -171,7 +171,7 @@ render_to_file(diagram_code, "output.png", format="png", theme="forest")
 Configure default behavior:
 
 ```python
-from mermaid_render import MermaidConfig
+from diagramaid import MermaidConfig
 
 config = MermaidConfig(
     timeout=30,                    # Request timeout in seconds
@@ -187,7 +187,7 @@ config = MermaidConfig(
 Apply themes to your diagrams:
 
 ```python
-from mermaid_render import MermaidRenderer
+from diagramaid import MermaidRenderer
 
 renderer = MermaidRenderer()
 
@@ -206,7 +206,7 @@ renderer = MermaidRenderer(theme="forest")
 Create custom themes:
 
 ```python
-from mermaid_render import MermaidTheme
+from diagramaid import MermaidTheme
 
 custom_theme = MermaidTheme(
     name="corporate",
@@ -226,7 +226,7 @@ renderer = MermaidRenderer(theme=custom_theme)
 Mermaid Render validates diagrams automatically:
 
 ```python
-from mermaid_render.utils import validate_mermaid_syntax
+from diagramaid.utils import validate_mermaid_syntax
 
 # Validate raw Mermaid syntax
 result = validate_mermaid_syntax(diagram_code)
@@ -248,7 +248,7 @@ else:
 Handle different types of errors:
 
 ```python
-from mermaid_render.exceptions import (
+from diagramaid.exceptions import (
     ValidationError,
     RenderingError,
     UnsupportedFormatError,
@@ -323,7 +323,7 @@ Use consistent themes across your application:
 
 ```python
 # Set up a theme manager
-from mermaid_render.config import ThemeManager
+from diagramaid.config import ThemeManager
 
 theme_manager = ThemeManager()
 theme_manager.set_default_theme("corporate")
@@ -354,7 +354,7 @@ for error in result.errors:
 
 ```bash
 # Install PDF dependencies
-pip install mermaid-render[pdf]
+pip install diagramaid[pdf]
 ```
 
 ### Performance Tips

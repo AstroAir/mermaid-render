@@ -43,8 +43,8 @@ By participating in this project, you agree to abide by our Code of Conduct. We 
 ```bash
 # Fork the repository on GitHub
 # Then clone your fork
-git clone https://github.com/YOUR_USERNAME/mermaid-render.git
-cd mermaid-render
+git clone https://github.com/YOUR_USERNAME/diagramaid.git
+cd diagramaid
 ```
 
 ### 2. Set Up Development Environment
@@ -79,16 +79,16 @@ We use several tools to maintain code quality:
 
 ```bash
 # Format code
-black mermaid_render tests
+black diagramaid tests
 
 # Sort imports
-isort mermaid_render tests
+isort diagramaid tests
 
 # Lint code
-ruff check mermaid_render tests
+ruff check diagramaid tests
 
 # Type checking
-mypy mermaid_render
+mypy diagramaid
 
 # Run all checks
 make check-all
@@ -101,7 +101,7 @@ make check-all
 pytest
 
 # Run with coverage
-pytest --cov=mermaid_render --cov-report=html
+pytest --cov=diagramaid --cov-report=html
 
 # Run specific test file
 pytest tests/test_core.py
@@ -192,8 +192,8 @@ docs(api): improve FlowchartDiagram examples
 ### Project Structure
 
 ```
-mermaid_render/
-├── mermaid_render/          # Main package
+diagramaid/
+├── diagramaid/          # Main package
 │   ├── core.py             # Core classes
 │   ├── models/             # Diagram models
 │   ├── renderers/          # Rendering backends
@@ -210,7 +210,7 @@ mermaid_render/
 1. **Create Model Class**
 
    ```python
-   # mermaid_render/models/new_diagram.py
+   # diagramaid/models/new_diagram.py
    from .base import BaseDiagram
 
    class NewDiagram(BaseDiagram):
@@ -266,7 +266,7 @@ mermaid_render/
 
 ```python
 import pytest
-from mermaid_render import FlowchartDiagram
+from diagramaid import FlowchartDiagram
 
 class TestFlowchartDiagram:
     def test_creation(self):
@@ -404,8 +404,8 @@ Every contribution, no matter how small, helps make Mermaid Render better for ev
 Ready to contribute? Here's what to do next:
 
 1. **[Set up your development environment](setup.md)**
-2. **Browse [open issues](https://github.com/mermaid-render/mermaid-render/issues)**
-3. **Join our [Discord community](https://discord.gg/mermaid-render)**
+2. **Browse [open issues](https://github.com/diagramaid/diagramaid/issues)**
+3. **Join our [Discord community](https://discord.gg/diagramaid)**
 4. **Read the [testing guide](testing.md)**
 
 Welcome to the Mermaid Render community! 🎉

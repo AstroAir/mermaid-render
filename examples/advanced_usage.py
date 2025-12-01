@@ -9,7 +9,7 @@ configuration management, batch processing, and error handling.
 from pathlib import Path
 from typing import Any
 
-from mermaid_render import (
+from diagramaid import (
     ClassDiagram,
     FlowchartDiagram,
     MermaidConfig,
@@ -18,9 +18,9 @@ from mermaid_render import (
     MermaidTheme,
     SequenceDiagram,
 )
-from mermaid_render.config import ConfigManager, ThemeManager
-from mermaid_render.models.class_diagram import ClassMethod
-from mermaid_render.utils import batch_export, export_multiple_formats
+from diagramaid.config import ConfigManager, ThemeManager
+from diagramaid.models.class_diagram import ClassMethod
+from diagramaid.utils import batch_export, export_multiple_formats
 
 
 def create_output_dir() -> Path:
@@ -209,7 +209,7 @@ def error_handling_example() -> None:
     """Demonstrate error handling patterns."""
     print("Error handling example...")
 
-    from mermaid_render.exceptions import (
+    from diagramaid.exceptions import (
         DiagramError,
         ThemeError,
         UnsupportedFormatError,
@@ -224,7 +224,7 @@ def error_handling_example() -> None:
 
     # Theme errors
     try:
-        from mermaid_render.config import ThemeManager
+        from diagramaid.config import ThemeManager
 
         theme_manager = ThemeManager()
         theme_manager.get_theme("nonexistent_theme")
@@ -233,7 +233,7 @@ def error_handling_example() -> None:
 
     # Validation errors
     try:
-        from mermaid_render.utils import validate_mermaid_syntax
+        from diagramaid.utils import validate_mermaid_syntax
 
         result = validate_mermaid_syntax("invalid diagram")
         if not result.is_valid:

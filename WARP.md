@@ -4,7 +4,7 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
 
 ## Project Overview
 
-Mermaid Render is a comprehensive, production-ready Python library for generating Mermaid diagrams with clean APIs, validation, and multiple output formats. The project uses a plugin-based architecture that supports multiple rendering backends with automatic fallback capabilities.
+DiagramAid is a comprehensive, production-ready Python library for generating Mermaid diagrams with clean APIs, validation, and multiple output formats. The project uses a plugin-based architecture that supports multiple rendering backends with automatic fallback capabilities.
 
 ## Development Commands
 
@@ -45,7 +45,7 @@ make test-performance   # Performance tests
 
 # Verbose testing
 pytest -v
-pytest --cov=mermaid_render --cov-report=html
+pytest --cov=diagramaid --cov-report=html
 ```
 
 ### Code Quality
@@ -53,15 +53,15 @@ pytest --cov=mermaid_render --cov-report=html
 ```bash
 # Format code
 make format
-black mermaid_render tests examples
+black diagramaid tests examples
 
 # Lint code
 make lint
-ruff check mermaid_render tests
+ruff check diagramaid tests
 
 # Type checking
 make type-check
-mypy mermaid_render
+mypy diagramaid
 
 # Run all quality checks
 make check-all
@@ -91,7 +91,7 @@ python demo.py
 # Security checks
 make security
 safety check
-bandit -r mermaid_render/
+bandit -r diagramaid/
 
 # Update dependencies
 make deps-update
@@ -110,7 +110,7 @@ make env-info
 
 #### Plugin-Based Renderer System
 
-The library features a sophisticated plugin-based architecture located in `mermaid_render/renderers/`:
+The library features a sophisticated plugin-based architecture located in `diagramaid/renderers/`:
 
 - **SVG Renderer** (`svg_renderer.py`) - Default web-based renderer using mermaid.ink
 - **PNG Renderer** (`png_renderer.py`) - Web-based PNG renderer
@@ -197,7 +197,7 @@ When developing new renderers:
 ### Command Line Interface
 
 ```bash
-mermaid-render input.mmd -o output.svg -f svg -t dark
+diagramaid input.mmd -o output.svg -f svg -t dark
 ```
 
 ### Python API Entry Points
@@ -205,13 +205,13 @@ mermaid-render input.mmd -o output.svg -f svg -t dark
 - `quick_render()` - Simple rendering function
 - `MermaidRenderer` - Standard renderer with basic plugin support
 - `EnhancedMermaidRenderer` - Full plugin system with advanced features
-- Diagram classes in `mermaid_render.models`
+- Diagram classes in `diagramaid.models`
 
 ### Library Integration Points
 
-- CLI: `mermaid_render.cli:main`
-- Convenience functions: `mermaid_render.convenience`
-- Plugin system: `mermaid_render.plugin_renderer`
+- CLI: `diagramaid.cli:main`
+- Convenience functions: `diagramaid.convenience`
+- Plugin system: `diagramaid.plugin_renderer`
 
 ## Common Development Tasks
 
@@ -249,4 +249,4 @@ mermaid-render input.mmd -o output.svg -f svg -t dark
 - `validators/` - Multi-level validation system
 - `config/` - Configuration and theme management
 
-The modular architecture allows features to be installed independently via optional dependencies (`pip install mermaid-render[cache,ai,interactive]`).
+The modular architecture allows features to be installed independently via optional dependencies (`pip install diagramaid[cache,ai,interactive]`).

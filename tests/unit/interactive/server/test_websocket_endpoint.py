@@ -7,8 +7,8 @@ Tests the WebSocket endpoint setup.
 import pytest
 from unittest.mock import Mock
 
-from mermaid_render.interactive.server.websocket_endpoint import setup_websocket_endpoint
-from mermaid_render.interactive.websocket import WebSocketHandler
+from diagramaid.interactive.server.websocket_endpoint import setup_websocket_endpoint
+from diagramaid.interactive.websocket import WebSocketHandler
 
 
 @pytest.mark.unit

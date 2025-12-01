@@ -16,7 +16,7 @@ The AI system provides:
 ### OpenAI Integration
 
 ```python
-from mermaid_render.ai import OpenAIProvider, DiagramGenerator
+from diagramaid.ai import OpenAIProvider, DiagramGenerator
 
 # Configure OpenAI provider
 provider = OpenAIProvider(api_key="your-api-key")
@@ -31,7 +31,7 @@ print(diagram.render())
 ### Anthropic Claude Integration
 
 ```python
-from mermaid_render.ai import AnthropicProvider, DiagramGenerator
+from diagramaid.ai import AnthropicProvider, DiagramGenerator
 
 # Configure Anthropic provider
 provider = AnthropicProvider(api_key="your-api-key")
@@ -47,7 +47,7 @@ diagram = generator.generate_sequence_diagram(description)
 ### Text to Diagram Conversion
 
 ```python
-from mermaid_render.ai import NLProcessor
+from diagramaid.ai import NLProcessor
 
 processor = NLProcessor()
 
@@ -80,7 +80,7 @@ for suggestion in suggestions:
 ### Layout Optimization
 
 ```python
-from mermaid_render.ai import DiagramOptimizer
+from diagramaid.ai import DiagramOptimizer
 
 optimizer = DiagramOptimizer()
 
@@ -110,7 +110,7 @@ print(enhanced.improved_diagram)
 ### Real-time Suggestions
 
 ```python
-from mermaid_render.ai import SuggestionEngine
+from diagramaid.ai import SuggestionEngine
 
 engine = SuggestionEngine()
 
@@ -139,7 +139,7 @@ print(f"Recommendations: {analysis.recommendations}")
 ### AI Provider Settings
 
 ```python
-from mermaid_render.config import AIConfig
+from diagramaid.config import AIConfig
 
 config = AIConfig(
     provider="openai",
@@ -164,7 +164,7 @@ config.enable_suggestions = False
 ### Custom Prompts
 
 ```python
-from mermaid_render.ai import PromptTemplate
+from diagramaid.ai import PromptTemplate
 
 # Create custom prompt template
 template = PromptTemplate(
@@ -192,7 +192,7 @@ diagrams = generator.batch_generate(descriptions, diagram_type="flowchart")
 ## Error Handling
 
 ```python
-from mermaid_render.ai.exceptions import AIProviderError, QuotaExceededError
+from diagramaid.ai.exceptions import AIProviderError, QuotaExceededError
 
 try:
     diagram = generator.generate_flowchart(description)
@@ -210,7 +210,7 @@ except AIProviderError as e:
 
 ```python
 import asyncio
-from mermaid_render.ai import AsyncDiagramGenerator
+from diagramaid.ai import AsyncDiagramGenerator
 
 async def generate_multiple():
     generator = AsyncDiagramGenerator(provider)

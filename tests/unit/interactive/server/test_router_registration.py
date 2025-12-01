@@ -7,8 +7,8 @@ Tests the router registration functions.
 import pytest
 from unittest.mock import Mock
 
-from mermaid_render.interactive.server.router_registration import register_api_routers
-from mermaid_render.interactive.websocket import WebSocketHandler
+from diagramaid.interactive.server.router_registration import register_api_routers
+from diagramaid.interactive.websocket import WebSocketHandler
 
 
 @pytest.mark.unit

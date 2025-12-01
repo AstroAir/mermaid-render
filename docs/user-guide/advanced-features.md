@@ -18,8 +18,8 @@ Advanced features include:
 ### Multi-Backend Rendering
 
 ```python
-from mermaid_render import PluginMermaidRenderer
-from mermaid_render.backends import PlaywrightBackend, NodeJSBackend
+from diagramaid import PluginMermaidRenderer
+from diagramaid.backends import PlaywrightBackend, NodeJSBackend
 
 # Configure multiple backends
 renderer = PluginMermaidRenderer(
@@ -36,7 +36,7 @@ print(f"Rendered using: {result.backend_used}")
 ### Rendering Optimization
 
 ```python
-from mermaid_render.optimization import RenderingOptimizer
+from diagramaid.optimization import RenderingOptimizer
 
 optimizer = RenderingOptimizer(
     enable_caching=True,
@@ -51,7 +51,7 @@ renderer = PluginMermaidRenderer(optimizer=optimizer)
 ### Custom Rendering Pipeline
 
 ```python
-from mermaid_render.pipeline import RenderingPipeline, Stage
+from diagramaid.pipeline import RenderingPipeline, Stage
 
 # Create custom rendering pipeline
 pipeline = RenderingPipeline([
@@ -70,7 +70,7 @@ renderer = PluginMermaidRenderer(pipeline=pipeline)
 ### Creating Custom Plugins
 
 ```python
-from mermaid_render.plugins import Plugin, PluginManager
+from diagramaid.plugins import Plugin, PluginManager
 
 class CustomThemePlugin(Plugin):
     def __init__(self):
@@ -115,7 +115,7 @@ renderer = PluginMermaidRenderer(plugin_manager=plugin_manager)
 ### Built-in Plugins
 
 ```python
-from mermaid_render.plugins import (
+from diagramaid.plugins import (
     PerformancePlugin,
     SecurityPlugin,
     AccessibilityPlugin,
@@ -139,7 +139,7 @@ for plugin in plugins:
 ### High-Performance Batch Rendering
 
 ```python
-from mermaid_render.batch import BatchProcessor
+from diagramaid.batch import BatchProcessor
 
 processor = BatchProcessor(
     max_workers=8,
@@ -169,7 +169,7 @@ for filename, result in results.items():
 
 ```python
 import asyncio
-from mermaid_render.async_renderer import AsyncMermaidRenderer
+from diagramaid.async_renderer import AsyncMermaidRenderer
 
 async def render_multiple_async():
     renderer = AsyncMermaidRenderer()
@@ -191,7 +191,7 @@ results = asyncio.run(render_multiple_async())
 ### Stream Processing
 
 ```python
-from mermaid_render.streaming import DiagramStream
+from diagramaid.streaming import DiagramStream
 
 # Process diagrams as they arrive
 stream = DiagramStream()
@@ -210,7 +210,7 @@ await stream.start()
 ### Dynamic Theme Generation
 
 ```python
-from mermaid_render.theming import DynamicThemeGenerator
+from diagramaid.theming import DynamicThemeGenerator
 
 generator = DynamicThemeGenerator()
 
@@ -229,7 +229,7 @@ brand_theme = generator.generate_from_colors(
 ### Conditional Theming
 
 ```python
-from mermaid_render.theming import ConditionalTheme
+from diagramaid.theming import ConditionalTheme
 
 # Apply different themes based on conditions
 conditional_theme = ConditionalTheme([
@@ -252,7 +252,7 @@ renderer = PluginMermaidRenderer(theme=conditional_theme)
 ### Theme Inheritance and Composition
 
 ```python
-from mermaid_render.theming import ThemeComposer
+from diagramaid.theming import ThemeComposer
 
 composer = ThemeComposer()
 
@@ -270,7 +270,7 @@ composed_theme = composer.compose([
 ### Real-time Metrics
 
 ```python
-from mermaid_render.monitoring import PerformanceMonitor
+from diagramaid.monitoring import PerformanceMonitor
 
 monitor = PerformanceMonitor()
 renderer = PluginMermaidRenderer(monitor=monitor)
@@ -288,7 +288,7 @@ print(f"Cache hit rate: {metrics.cache_hit_rate}%")
 ### Performance Profiling
 
 ```python
-from mermaid_render.profiling import RenderingProfiler
+from diagramaid.profiling import RenderingProfiler
 
 profiler = RenderingProfiler()
 
@@ -308,7 +308,7 @@ for bottleneck in bottlenecks:
 ### Performance Optimization Suggestions
 
 ```python
-from mermaid_render.optimization import PerformanceAnalyzer
+from diagramaid.optimization import PerformanceAnalyzer
 
 analyzer = PerformanceAnalyzer()
 suggestions = analyzer.analyze_performance(diagram, render_result)
@@ -324,7 +324,7 @@ for suggestion in suggestions:
 ### Custom Backends
 
 ```python
-from mermaid_render.backends import BaseBackend
+from diagramaid.backends import BaseBackend
 
 class CustomBackend(BaseBackend):
     def __init__(self):
@@ -356,7 +356,7 @@ renderer.register_backend(CustomBackend())
 ### API Extensions
 
 ```python
-from mermaid_render.api import APIExtension
+from diagramaid.api import APIExtension
 
 class DiagramAnalyticsExtension(APIExtension):
     def __init__(self):
@@ -382,7 +382,7 @@ api_manager.add_extension(DiagramAnalyticsExtension())
 ### Webhook Integration
 
 ```python
-from mermaid_render.webhooks import WebhookManager
+from diagramaid.webhooks import WebhookManager
 
 webhook_manager = WebhookManager()
 
@@ -407,7 +407,7 @@ renderer = PluginMermaidRenderer(webhook_manager=webhook_manager)
 ### Multi-Level Caching
 
 ```python
-from mermaid_render.cache import MultiLevelCache, MemoryCache, RedisCache
+from diagramaid.cache import MultiLevelCache, MemoryCache, RedisCache
 
 # Create multi-level cache
 cache = MultiLevelCache([
@@ -422,7 +422,7 @@ renderer = PluginMermaidRenderer(cache=cache)
 ### Smart Cache Invalidation
 
 ```python
-from mermaid_render.cache import SmartCacheManager
+from diagramaid.cache import SmartCacheManager
 
 cache_manager = SmartCacheManager(
     invalidation_strategy="content_hash",
@@ -439,7 +439,7 @@ renderer = PluginMermaidRenderer(cache_manager=cache_manager)
 ### Advanced Input Validation
 
 ```python
-from mermaid_render.security import AdvancedValidator
+from diagramaid.security import AdvancedValidator
 
 validator = AdvancedValidator(
     max_complexity=100,
@@ -458,7 +458,7 @@ renderer = PluginMermaidRenderer(validator=validator)
 ### Sandboxed Rendering
 
 ```python
-from mermaid_render.security import SandboxedRenderer
+from diagramaid.security import SandboxedRenderer
 
 # Render in isolated environment
 sandboxed_renderer = SandboxedRenderer(
@@ -474,7 +474,7 @@ sandboxed_renderer = SandboxedRenderer(
 ### Advanced Error Recovery
 
 ```python
-from mermaid_render.recovery import ErrorRecoveryManager
+from diagramaid.recovery import ErrorRecoveryManager
 
 recovery_manager = ErrorRecoveryManager(
     auto_retry=True,
@@ -492,7 +492,7 @@ renderer = PluginMermaidRenderer(recovery_manager=recovery_manager)
 ### Graceful Degradation
 
 ```python
-from mermaid_render.degradation import GracefulDegradation
+from diagramaid.degradation import GracefulDegradation
 
 degradation = GracefulDegradation([
     {"condition": "timeout", "action": "reduce_quality"},
@@ -506,7 +506,7 @@ degradation = GracefulDegradation([
 ### Advanced Configuration
 
 ```python
-from mermaid_render.config import AdvancedConfig
+from diagramaid.config import AdvancedConfig
 
 config = AdvancedConfig(
     # Environment-specific settings

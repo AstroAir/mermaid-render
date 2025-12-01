@@ -107,14 +107,14 @@ class DockerManager:
         
         cmd.extend([
             "--target", target,
-            "-t", f"mermaid-render:{target}",
+            "-t", f"diagramaid:{target}",
             "."
         ])
         
         exit_code, _, _ = self.run_command(cmd)
         
         if exit_code == 0:
-            self.log(f"Successfully built image: mermaid-render:{target}", "SUCCESS")
+            self.log(f"Successfully built image: diagramaid:{target}", "SUCCESS")
         else:
             self.log("Failed to build Docker image", "ERROR")
         
@@ -123,7 +123,7 @@ class DockerManager:
     def run_container(self, target: str = "development", 
                      interactive: bool = True, ports: Optional[List[str]] = None) -> int:
         """Run a Docker container."""
-        self.log(f"Running container: mermaid-render:{target}")
+        self.log(f"Running container: diagramaid:{target}")
         
         cmd = ["docker", "run", "--rm"]
         
@@ -143,7 +143,7 @@ class DockerManager:
         if target == "development":
             cmd.extend(["-v", f"{self.project_root}:/app"])
         
-        cmd.append(f"mermaid-render:{target}")
+        cmd.append(f"diagramaid:{target}")
         
         exit_code, _, _ = self.run_command(cmd)
         return exit_code
@@ -159,7 +159,7 @@ class DockerManager:
         
         cmd = [
             "docker", "run", "--rm",
-            "mermaid-render:testing"
+            "diagramaid:testing"
         ]
         
         exit_code, _, _ = self.run_command(cmd)
@@ -173,12 +173,12 @@ class DockerManager:
     
     def open_shell(self, target: str = "development") -> int:
         """Open a shell in the container."""
-        self.log(f"Opening shell in container: mermaid-render:{target}")
+        self.log(f"Opening shell in container: diagramaid:{target}")
         
         cmd = [
             "docker", "run", "--rm", "-it",
             "-v", f"{self.project_root}:/app",
-            f"mermaid-render:{target}",
+            f"diagramaid:{target}",
             "/bin/bash"
         ]
         
@@ -261,15 +261,15 @@ class DockerManager:
         # Tag for registry if provided
         if registry:
             tag_cmd = [
-                "docker", "tag", "mermaid-render:production",
-                f"{registry}/mermaid-render:latest"
+                "docker", "tag", "diagramaid:production",
+                f"{registry}/diagramaid:latest"
             ]
             exit_code, _, _ = self.run_command(tag_cmd)
             if exit_code != 0:
                 return exit_code
             
             # Push to registry
-            push_cmd = ["docker", "push", f"{registry}/mermaid-render:latest"]
+            push_cmd = ["docker", "push", f"{registry}/diagramaid:latest"]
             exit_code, _, _ = self.run_command(push_cmd)
             if exit_code != 0:
                 return exit_code

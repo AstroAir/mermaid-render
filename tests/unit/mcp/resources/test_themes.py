@@ -8,7 +8,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from mermaid_render.mcp.resources.themes import (
+from diagramaid.mcp.resources.themes import (
     get_theme_details,
     get_themes_resource,
 )
@@ -140,7 +140,7 @@ class TestGetThemeDetails:
     @pytest.mark.asyncio
     async def test_nonexistent_theme_raises(self):
         """Test nonexistent theme raises error."""
-        from mermaid_render.mcp.resources.base import ResourceError
+        from diagramaid.mcp.resources.base import ResourceError
 
         ctx = MagicMock()
         with pytest.raises(ResourceError):

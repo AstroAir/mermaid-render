@@ -1,5 +1,5 @@
 [project]
-name = "mermaid-render"
+name = "diagramaid"
 dynamic = ["version"]
 description = "A comprehensive, production-ready Python library for generating Mermaid diagrams with clean APIs, validation, and multiple output formats"
 readme = "README.md"
@@ -152,7 +152,7 @@ renderers = [
     "graphviz>=0.20.0",  # Graphviz renderer for alternative diagram rendering
 ]
 all = [
-    "mermaid-render[cache,interactive,ai,docs,pdf,performance,renderers]"
+    "diagramaid[cache,interactive,ai,docs,pdf,performance,renderers]"
 ]
 # Build and packaging dependencies
 build = [
@@ -200,22 +200,22 @@ monitoring = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/mermaid-render/mermaid-render"
-Documentation = "https://mermaid-render.readthedocs.io"
-Repository = "https://github.com/mermaid-render/mermaid-render"
-Issues = "https://github.com/mermaid-render/mermaid-render/issues"
-Discussions = "https://github.com/mermaid-render/mermaid-render/discussions"
-Changelog = "https://github.com/mermaid-render/mermaid-render/blob/main/CHANGELOG.md"
-"Bug Reports" = "https://github.com/mermaid-render/mermaid-render/issues/new?template=bug_report.yml"
-"Feature Requests" = "https://github.com/mermaid-render/mermaid-render/issues/new?template=feature_request.yml"
-"Security" = "https://github.com/mermaid-render/mermaid-render/security/policy"
-"Funding" = "https://github.com/sponsors/mermaid-render"
+Homepage = "https://github.com/AstroAir/diagramaid"
+Documentation = "https://diagramaid.readthedocs.io"
+Repository = "https://github.com/AstroAir/diagramaid"
+Issues = "https://github.com/AstroAir/diagramaid/issues"
+Discussions = "https://github.com/AstroAir/diagramaid/discussions"
+Changelog = "https://github.com/AstroAir/diagramaid/blob/main/CHANGELOG.md"
+"Bug Reports" = "https://github.com/AstroAir/diagramaid/issues/new?template=bug_report.yml"
+"Feature Requests" = "https://github.com/AstroAir/diagramaid/issues/new?template=feature_request.yml"
+"Security" = "https://github.com/AstroAir/diagramaid/security/policy"
+"Funding" = "https://github.com/sponsors/AstroAir"
 
 [project.scripts]
-mermaid-render = "mermaid_render.cli:main"
-mermaid-render-mcp = "mermaid_render.mcp_server:main"
+diagramaid = "diagramaid.cli:main"
+diagramaid-mcp = "diagramaid.mcp_server:main"
 
-[project.entry-points."mermaid_render.plugins"]
+[project.entry-points."diagramaid.plugins"]
 # Plugin entry points for extensibility
 
 [build-system]
@@ -227,7 +227,7 @@ source = "vcs"
 fallback-version = "0.0.0"
 
 [tool.hatch.build.targets.wheel]
-packages = ["mermaid_render"]
+packages = ["diagramaid"]
 exclude = [
     "/.github",
     "/docs",
@@ -247,7 +247,7 @@ exclude = [
 
 [tool.hatch.build.targets.sdist]
 include = [
-    "/mermaid_render",
+    "/diagramaid",
     "/README.md",
     "/LICENSE",
     "/CHANGELOG.md",
@@ -272,7 +272,7 @@ exclude = [
 ]
 
 [tool.hatch.build.hooks.vcs]
-version-file = "mermaid_render/_version.py"
+version-file = "diagramaid/_version.py"
 
 [tool.hatch.metadata]
 allow-direct-references = true
@@ -382,7 +382,7 @@ show_absolute_path = false
 exclude = [
     "^site/",
     "^docs/gen_ref_pages\\.py$",
-    "^mermaid_render/interactive/tests/",
+    "^diagramaid/interactive/tests/",
     "^build/",
     "^dist/",
     "^\\.venv/",
@@ -434,7 +434,7 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = ["mermaid_render"]
+source = ["diagramaid"]
 omit = ["*/tests/*", "*/test_*"]
 
 [tool.coverage.report]
@@ -474,7 +474,7 @@ full-report = true
 # Semantic release configuration
 [tool.semantic_release]
 version_toml = ["pyproject.toml:project.version"]
-version_variables = ["mermaid_render/__init__.py:__version__"]
+version_variables = ["diagramaid/__init__.py:__version__"]
 build_command = "python -m build"
 dist_path = "dist/"
 upload_to_pypi = true
@@ -517,7 +517,7 @@ version = "1.0.0"
 tag_format = "v$version"
 version_files = [
     "pyproject.toml:version",
-    "mermaid_render/__init__.py:__version__"
+    "diagramaid/__init__.py:__version__"
 ]
 
 
@@ -529,11 +529,11 @@ include-package-data = true
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["mermaid_render*"]
+include = ["diagramaid*"]
 exclude = ["tests*", "docs*", "examples*"]
 
 [tool.setuptools.package-data]
-mermaid_render = ["py.typed", "*.json", "*.yaml", "*.yml"]
+diagramaid = ["py.typed", "*.json", "*.yaml", "*.yml"]
 
 [dependency-groups]
 dev = [

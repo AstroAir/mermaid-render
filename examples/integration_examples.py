@@ -23,7 +23,7 @@ def flask_integration_example(output_dir: Path) -> None:
     # Create a Flask app example (as a string since we're demonstrating)
     flask_app_code = '''
 from flask import Flask, request, jsonify, render_template_string
-from mermaid_render import quick_render, ValidationError, RenderingError
+from diagramaid import quick_render, ValidationError, RenderingError
 import base64
 
 app = Flask(__name__)
@@ -266,7 +266,7 @@ from pydantic import BaseModel
 from typing import Optional
 import uvicorn
 
-from mermaid_render import quick_render, ValidationError, RenderingError
+from diagramaid import quick_render, ValidationError, RenderingError
 
 app = FastAPI(title="Mermaid Render API", version="1.0.0")
 
@@ -397,7 +397,7 @@ async def render_diagram_file(request: DiagramRequest):
 @app.get("/health")
 async def health_check():
     """Health check endpoint."""
-    return {"status": "healthy", "service": "mermaid-render"}
+    return {"status": "healthy", "service": "diagramaid"}
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
@@ -433,7 +433,7 @@ import json
 from pathlib import Path
 from typing import List, Optional
 
-from mermaid_render import (
+from diagramaid import (
     MermaidRenderer,
     quick_render,
     export_to_file,

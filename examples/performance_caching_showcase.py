@@ -10,7 +10,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-from mermaid_render import (
+from diagramaid import (
     FlowchartDiagram,
     MermaidRenderer,
     SequenceDiagram,
@@ -18,7 +18,7 @@ from mermaid_render import (
 
 # Cache system (optional imports with fallbacks)
 try:
-    # from mermaid_render.cache import (
+    # from diagramaid.cache import (
     #     CacheManager,
     #     MemoryBackend,
     #     FileBackend,
@@ -34,7 +34,7 @@ try:
 except ImportError:
     CACHE_AVAILABLE = False
     print(
-        "⚠️  Cache system not available. Install with: pip install mermaid-render[cache]"
+        "⚠️  Cache system not available. Install with: pip install diagramaid[cache]"
     )
 
 
@@ -395,7 +395,7 @@ def main() -> None:
 
     if not CACHE_AVAILABLE:
         print("⚠️  Cache system requires additional dependencies.")
-        print("Install with: pip install mermaid-render[cache]\n")
+        print("Install with: pip install diagramaid[cache]\n")
 
     # Create output directory
     output_dir = create_output_dir()

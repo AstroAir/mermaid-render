@@ -22,7 +22,7 @@ Mermaid Render supports all major Mermaid diagram types with comprehensive Pytho
 Perfect for visualizing processes, decision trees, and workflows.
 
 ```python
-from mermaid_render import FlowchartDiagram, MermaidRenderer
+from diagramaid import FlowchartDiagram, MermaidRenderer
 
 # Create a business process flow
 process = FlowchartDiagram(title="Order Processing", direction="TD")
@@ -62,7 +62,7 @@ renderer.save(process, "order_process.svg")
 Ideal for documenting API interactions, system communications, and time-based processes.
 
 ```python
-from mermaid_render import SequenceDiagram
+from diagramaid import SequenceDiagram
 
 # Create an authentication flow
 auth_flow = SequenceDiagram(title="OAuth 2.0 Flow", autonumber=True)
@@ -99,8 +99,8 @@ renderer.save(auth_flow, "oauth_flow.png", format="png")
 Essential for documenting system architecture and object-oriented designs.
 
 ```python
-from mermaid_render import ClassDiagram
-from mermaid_render.models.class_diagram import ClassMethod, ClassAttribute
+from diagramaid import ClassDiagram
+from diagramaid.models.class_diagram import ClassMethod, ClassAttribute
 
 # Create a system architecture diagram
 system = ClassDiagram(title="E-commerce System")
@@ -138,7 +138,7 @@ renderer.save(system, "system_architecture.pdf", format="pdf")
 Perfect for modeling state machines, user interface states, and business process states.
 
 ```python
-from mermaid_render import StateDiagram
+from diagramaid import StateDiagram
 
 # Model user session states
 session = StateDiagram(title="User Session Lifecycle")

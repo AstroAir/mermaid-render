@@ -31,7 +31,7 @@ All diagram models follow consistent design patterns:
 ## Usage Example
 
 ```python
-from mermaid_render.models import FlowchartDiagram, SequenceDiagram
+from diagramaid.models import FlowchartDiagram, SequenceDiagram
 
 # Create a flowchart
 flowchart = FlowchartDiagram()

@@ -40,14 +40,14 @@ repos:
           - types-requests
           - types-setuptools
         args: [--ignore-missing-imports, --install-types, --non-interactive]
-        files: ^mermaid_render/
+        files: ^diagramaid/
 
   # Security checks
   - repo: https://github.com/PyCQA/bandit
     rev: 1.8.0
     hooks:
       - id: bandit
-        args: ["-c", "pyproject.toml", "-r", "mermaid_render"]
+        args: ["-c", "pyproject.toml", "-r", "diagramaid"]
         pass_filenames: false
 
   # Documentation checks
@@ -55,7 +55,7 @@ repos:
     rev: 6.3.0
     hooks:
       - id: pydocstyle
-        files: ^mermaid_render/
+        files: ^diagramaid/
         args:
           [
             "--convention=google",

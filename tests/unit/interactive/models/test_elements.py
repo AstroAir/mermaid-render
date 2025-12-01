@@ -6,9 +6,9 @@ Tests the DiagramElement and DiagramConnection classes.
 
 import pytest
 
-from mermaid_render.interactive.models.elements import DiagramConnection, DiagramElement
-from mermaid_render.interactive.models.enums import ElementType
-from mermaid_render.interactive.models.geometry import Position, Size
+from diagramaid.interactive.models.elements import DiagramConnection, DiagramElement
+from diagramaid.interactive.models.enums import ElementType
+from diagramaid.interactive.models.geometry import Position, Size
 
 
 @pytest.mark.unit

@@ -3,7 +3,7 @@ Unit tests for validation functionality.
 """
 
 
-from mermaid_render.validators import MermaidValidator, ValidationResult
+from diagramaid.validators import MermaidValidator, ValidationResult
 
 
 class TestValidationResult:

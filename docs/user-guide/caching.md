@@ -17,8 +17,8 @@ The caching system provides:
 ### Basic Caching
 
 ```python
-from mermaid_render import MermaidRenderer
-from mermaid_render.cache import MemoryCache
+from diagramaid import MermaidRenderer
+from diagramaid.cache import MemoryCache
 
 # Enable memory caching
 cache = MemoryCache(max_size=1000)
@@ -39,7 +39,7 @@ result = renderer.render(diagram)  # Fast - from cache
 Best for single-process applications with limited memory usage.
 
 ```python
-from mermaid_render.cache import MemoryCache
+from diagramaid.cache import MemoryCache
 
 cache = MemoryCache(
     max_size=1000,           # Maximum number of items
@@ -53,7 +53,7 @@ cache = MemoryCache(
 Persistent caching using the file system.
 
 ```python
-from mermaid_render.cache import FileSystemCache
+from diagramaid.cache import FileSystemCache
 
 cache = FileSystemCache(
     cache_dir="./cache",     # Cache directory
@@ -68,7 +68,7 @@ cache = FileSystemCache(
 Distributed caching with Redis backend.
 
 ```python
-from mermaid_render.cache import RedisCache
+from diagramaid.cache import RedisCache
 
 cache = RedisCache(
     host="localhost",
@@ -85,7 +85,7 @@ cache = RedisCache(
 SQL database caching for enterprise applications.
 
 ```python
-from mermaid_render.cache import DatabaseCache
+from diagramaid.cache import DatabaseCache
 
 cache = DatabaseCache(
     connection_string="postgresql://user:pass@localhost/db",
@@ -99,7 +99,7 @@ cache = DatabaseCache(
 ### Global Configuration
 
 ```python
-from mermaid_render.config import CacheConfig
+from diagramaid.config import CacheConfig
 
 config = CacheConfig(
     backend="redis",
@@ -163,7 +163,7 @@ print(f"Cache key: {key}")
 ### Cache Statistics
 
 ```python
-from mermaid_render.cache import CacheMonitor
+from diagramaid.cache import CacheMonitor
 
 monitor = CacheMonitor(cache)
 
@@ -212,7 +212,7 @@ cache.clear()
 ### Cache Warming
 
 ```python
-from mermaid_render.cache import CacheWarmer
+from diagramaid.cache import CacheWarmer
 
 warmer = CacheWarmer(renderer)
 
@@ -264,7 +264,7 @@ cache = HierarchicalCache([l1_cache, l2_cache])
 ### Async Caching
 
 ```python
-from mermaid_render.cache import AsyncRedisCache
+from diagramaid.cache import AsyncRedisCache
 
 async def render_with_cache():
     cache = AsyncRedisCache(host="localhost")

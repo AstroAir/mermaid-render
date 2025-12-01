@@ -7,7 +7,7 @@ Tests the preview API router.
 import pytest
 from unittest.mock import Mock
 
-from mermaid_render.interactive.routes.preview import create_preview_router
+from diagramaid.interactive.routes.preview import create_preview_router
 
 
 @pytest.mark.unit

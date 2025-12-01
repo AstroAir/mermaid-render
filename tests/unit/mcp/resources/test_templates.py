@@ -8,7 +8,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from mermaid_render.mcp.resources.templates import (
+from diagramaid.mcp.resources.templates import (
     get_template_details,
     get_templates_resource,
 )
@@ -75,7 +75,7 @@ class TestGetTemplateDetails:
     @pytest.mark.asyncio
     async def test_nonexistent_template_raises(self):
         """Test nonexistent template raises error."""
-        from mermaid_render.mcp.resources.base import ResourceError
+        from diagramaid.mcp.resources.base import ResourceError
 
         ctx = MagicMock()
         with pytest.raises(ResourceError):

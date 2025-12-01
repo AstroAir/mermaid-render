@@ -8,14 +8,14 @@ from unittest.mock import Mock, patch
 import pytest
 import requests
 
-from mermaid_render.exceptions import (
+from diagramaid.exceptions import (
     NetworkError,
     RenderingError,
     UnsupportedFormatError,
 )
-from mermaid_render.renderers.pdf_renderer import PDFRenderer
-from mermaid_render.renderers.png_renderer import PNGRenderer
-from mermaid_render.renderers.svg_renderer import SVGRenderer
+from diagramaid.renderers.pdf_renderer import PDFRenderer
+from diagramaid.renderers.png_renderer import PNGRenderer
+from diagramaid.renderers.svg_renderer import SVGRenderer
 
 
 class TestSVGRenderer:
@@ -46,8 +46,8 @@ class TestSVGRenderer:
         renderer = SVGRenderer(server_url="https://example.com/")
         assert renderer.server_url == "https://example.com"
 
-    @patch("mermaid_render.renderers.svg_renderer.md.Mermaid")
-    @patch("mermaid_render.renderers.svg_renderer._MERMAID_AVAILABLE", True)
+    @patch("diagramaid.renderers.svg_renderer.md.Mermaid")
+    @patch("diagramaid.renderers.svg_renderer._MERMAID_AVAILABLE", True)
     def test_render_local_success(self, mock_mermaid: Any) -> None:
         """Test successful local SVG rendering."""
         mock_instance = Mock()
@@ -61,8 +61,8 @@ class TestSVGRenderer:
         assert result == '<svg xmlns="http://www.w3.org/2000/svg">test content</svg>'
         mock_mermaid.assert_called_once_with("flowchart TD\n    A --> B")
 
-    @patch("mermaid_render.renderers.svg_renderer.md.Mermaid")
-    @patch("mermaid_render.renderers.svg_renderer._MERMAID_AVAILABLE", True)
+    @patch("diagramaid.renderers.svg_renderer.md.Mermaid")
+    @patch("diagramaid.renderers.svg_renderer._MERMAID_AVAILABLE", True)
     def test_render_local_html_extraction(self, mock_mermaid: Any) -> None:
         """Test SVG extraction from HTML content."""
         html_content = """
@@ -85,8 +85,8 @@ class TestSVGRenderer:
         expected_svg = '<svg xmlns="http://www.w3.org/2000/svg" width="100px" height="100px">\n            <rect width="100px" height="100px" fill="blue"/>\n        </svg>'
         assert expected_svg in result
 
-    @patch("mermaid_render.renderers.svg_renderer.md.Mermaid")
-    @patch("mermaid_render.renderers.svg_renderer._MERMAID_AVAILABLE", True)
+    @patch("diagramaid.renderers.svg_renderer.md.Mermaid")
+    @patch("diagramaid.renderers.svg_renderer._MERMAID_AVAILABLE", True)
     def test_render_local_no_svg_in_html(self, mock_mermaid: Any) -> None:
         """Test handling when no SVG is found in HTML."""
         html_content = "<html><body>No SVG here</body></html>"
@@ -99,8 +99,8 @@ class TestSVGRenderer:
 
         assert result == html_content
 
-    @patch("mermaid_render.renderers.svg_renderer.md.Mermaid")
-    @patch("mermaid_render.renderers.svg_renderer._MERMAID_AVAILABLE", True)
+    @patch("diagramaid.renderers.svg_renderer.md.Mermaid")
+    @patch("diagramaid.renderers.svg_renderer._MERMAID_AVAILABLE", True)
     def test_render_local_failure_fallback_to_remote(self, mock_mermaid: Any) -> None:
         """Test fallback to remote rendering when local fails."""
         mock_mermaid.side_effect = Exception("Local rendering failed")
@@ -264,7 +264,7 @@ class TestPNGRenderer:
         assert renderer.default_width == 1200
         assert renderer.default_height == 900
 
-    @patch("mermaid_render.renderers.png_renderer.requests.get")
+    @patch("diagramaid.renderers.png_renderer.requests.get")
     def test_render_success(self, mock_get: Any) -> None:
         """Test successful PNG rendering."""
         # Mock PNG data (simplified PNG header)
@@ -280,7 +280,7 @@ class TestPNGRenderer:
         assert result == png_data
         mock_get.assert_called_once()
 
-    @patch("mermaid_render.renderers.png_renderer.requests.get")
+    @patch("diagramaid.renderers.png_renderer.requests.get")
     def test_render_with_dimensions(self, mock_get: Any) -> None:
         """Test PNG rendering with custom dimensions."""
         png_data = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR"
@@ -300,7 +300,7 @@ class TestPNGRenderer:
         assert params["width"] == "1200"
         assert params["height"] == "900"
 
-    @patch("mermaid_render.renderers.png_renderer.requests.get")
+    @patch("diagramaid.renderers.png_renderer.requests.get")
     def test_render_with_theme(self, mock_get: Any) -> None:
         """Test PNG rendering with theme."""
         png_data = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR"
@@ -314,7 +314,7 @@ class TestPNGRenderer:
 
         assert result == png_data
 
-    @patch("mermaid_render.renderers.png_renderer.requests.get")
+    @patch("diagramaid.renderers.png_renderer.requests.get")
     def test_render_invalid_png(self, mock_get: Any) -> None:
         """Test handling of invalid PNG data."""
         mock_response = Mock()
@@ -327,7 +327,7 @@ class TestPNGRenderer:
         with pytest.raises(RenderingError, match="Response is not valid PNG data"):
             renderer.render("flowchart TD\n    A --> B")
 
-    @patch("mermaid_render.renderers.png_renderer.requests.get")
+    @patch("diagramaid.renderers.png_renderer.requests.get")
     def test_render_timeout(self, mock_get: Any) -> None:
         """Test PNG rendering timeout."""
         mock_get.side_effect = requests.exceptions.Timeout("Request timeout")
@@ -337,7 +337,7 @@ class TestPNGRenderer:
         with pytest.raises(NetworkError, match="Request timeout"):
             renderer.render("flowchart TD\n    A --> B")
 
-    @patch("mermaid_render.renderers.png_renderer.requests.get")
+    @patch("diagramaid.renderers.png_renderer.requests.get")
     def test_render_network_error(self, mock_get: Any) -> None:
         """Test PNG rendering network error."""
         mock_get.side_effect = requests.exceptions.RequestException("Network error")
@@ -632,7 +632,7 @@ class TestRendererEdgeCases:
 
     def test_png_renderer_url_params(self) -> None:
         """Test PNG renderer URL parameter construction."""
-        with patch("mermaid_render.renderers.png_renderer.requests.get") as mock_get:
+        with patch("diagramaid.renderers.png_renderer.requests.get") as mock_get:
             png_data = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR"
             mock_response = Mock()
             mock_response.content = png_data
@@ -716,7 +716,7 @@ class TestRendererEdgeCases:
         for i in range(100):
             large_diagram += f"    A{i} --> A{i+1}\n"
 
-        with patch("mermaid_render.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
+        with patch("diagramaid.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
             mock_instance = Mock()
             mock_instance.__str__ = Mock(return_value="<svg>large diagram</svg>")
             mock_mermaid.return_value = mock_instance
@@ -768,7 +768,7 @@ class TestRendererEdgeCases:
         # Just check that we got some SVG content
         assert len(result) > 10
 
-    @patch("mermaid_render.renderers.png_renderer.requests.get")
+    @patch("diagramaid.renderers.png_renderer.requests.get")
     def test_png_renderer_empty_response(self, mock_get: Any) -> None:
         """Test PNG renderer handling empty response."""
         mock_response = Mock()

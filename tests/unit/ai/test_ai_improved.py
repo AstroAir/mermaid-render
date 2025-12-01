@@ -7,7 +7,7 @@ import pytest
 from unittest.mock import Mock, patch, MagicMock
 import requests
 
-from mermaid_render.ai import (
+from diagramaid.ai import (
     # Improved providers
     OpenRouterProvider,
     CustomProvider,
@@ -234,7 +234,7 @@ class TestProviderFactory:
 
     def test_create_openai_provider(self) -> None:
         """Test creating OpenAI provider through factory."""
-        from mermaid_render.ai.providers import ProviderConfig
+        from diagramaid.ai.providers import ProviderConfig
 
         config = ProviderConfig(
             api_key="test-key",
@@ -248,7 +248,7 @@ class TestProviderFactory:
 
     def test_create_anthropic_provider(self) -> None:
         """Test creating Anthropic provider through factory."""
-        from mermaid_render.ai.providers import ProviderConfig
+        from diagramaid.ai.providers import ProviderConfig
 
         config = ProviderConfig(
             api_key="test-key",
@@ -262,7 +262,7 @@ class TestProviderFactory:
 
     def test_create_openrouter_provider(self) -> None:
         """Test creating OpenRouter provider through factory."""
-        from mermaid_render.ai.providers import ProviderConfig
+        from diagramaid.ai.providers import ProviderConfig
 
         config = ProviderConfig(
             api_key="test-key",
@@ -277,7 +277,7 @@ class TestProviderFactory:
 
     def test_create_custom_provider(self) -> None:
         """Test creating custom provider through factory."""
-        from mermaid_render.ai.providers import CustomProviderConfig
+        from diagramaid.ai.providers import CustomProviderConfig
 
         config = CustomProviderConfig(
             name="test-api",

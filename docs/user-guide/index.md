@@ -105,7 +105,7 @@ Explore powerful advanced capabilities:
 Throughout this guide, you'll find practical examples like:
 
 ```python
-from mermaid_render import FlowchartDiagram, MermaidRenderer
+from diagramaid import FlowchartDiagram, MermaidRenderer
 
 # Create a professional workflow diagram
 workflow = FlowchartDiagram(title="Document Review Process")

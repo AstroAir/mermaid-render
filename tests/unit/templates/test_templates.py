@@ -10,8 +10,8 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from mermaid_render.exceptions import DataSourceError, TemplateError
-from mermaid_render.templates import (
+from diagramaid.exceptions import DataSourceError, TemplateError
+from diagramaid.templates import (
     ArchitectureGenerator,
     ClassDiagramGenerator,
     FlowchartGenerator,
@@ -19,12 +19,12 @@ from mermaid_render.templates import (
     Template,
     TemplateManager,
 )
-from mermaid_render.templates.data_sources import (
+from diagramaid.templates.data_sources import (
     APIDataSource,
     CSVDataSource,
     JSONDataSource,
 )
-from mermaid_render.templates.schema import TemplateSchema, validate_template
+from diagramaid.templates.schema import TemplateSchema, validate_template
 
 
 class TestTemplateManager:
@@ -240,7 +240,7 @@ class TestDataSources:
         finally:
             Path(temp_path).unlink()
 
-    @patch("mermaid_render.templates.data_sources.requests.request")
+    @patch("diagramaid.templates.data_sources.requests.request")
     def test_api_data_source(self, mock_get: Any) -> None:
         """Test API data source."""
         mock_response = Mock()
@@ -425,7 +425,7 @@ class TestTemplateSchema:
 
     def test_template_schema_creation(self) -> None:
         """Test TemplateSchema creation and validation."""
-        from mermaid_render.templates.schema import ParameterSchema, ParameterType
+        from diagramaid.templates.schema import ParameterSchema, ParameterType
 
         # Create parameter schemas
         title_param = ParameterSchema(

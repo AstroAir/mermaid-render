@@ -17,7 +17,7 @@ The template system provides:
 ### Basic Template Usage
 
 ```python
-from mermaid_render.templates import TemplateManager
+from diagramaid.templates import TemplateManager
 
 # Create template manager
 template_manager = TemplateManager()
@@ -126,7 +126,7 @@ classDiagram
 ### JSON Data
 
 ```python
-from mermaid_render.templates import JSONDataSource
+from diagramaid.templates import JSONDataSource
 
 # Load data from JSON file
 json_source = JSONDataSource("data/process.json")
@@ -138,7 +138,7 @@ diagram = template_manager.render("process_flow", data)
 ### CSV Data
 
 ```python
-from mermaid_render.templates import CSVDataSource
+from diagramaid.templates import CSVDataSource
 
 # Load data from CSV
 csv_source = CSVDataSource(
@@ -157,7 +157,7 @@ data = csv_source.load()
 ### Database Integration
 
 ```python
-from mermaid_render.templates import DatabaseDataSource
+from diagramaid.templates import DatabaseDataSource
 
 # Connect to database
 db_source = DatabaseDataSource(
@@ -175,7 +175,7 @@ data = db_source.load()
 ### API Data Sources
 
 ```python
-from mermaid_render.templates import APIDataSource
+from diagramaid.templates import APIDataSource
 
 # Fetch data from REST API
 api_source = APIDataSource(
@@ -250,7 +250,7 @@ flowchart TD
 ### Template Registry
 
 ```python
-from mermaid_render.templates import TemplateRegistry
+from diagramaid.templates import TemplateRegistry
 
 # Create registry
 registry = TemplateRegistry()
@@ -326,7 +326,7 @@ flowchart TD
 ### Real-time Data Updates
 
 ```python
-from mermaid_render.templates import DynamicTemplate
+from diagramaid.templates import DynamicTemplate
 
 # Create dynamic template that updates with data changes
 dynamic_template = DynamicTemplate(
@@ -372,7 +372,7 @@ diagram = template_manager.render(
 ### Template Validation
 
 ```python
-from mermaid_render.templates import TemplateValidator
+from diagramaid.templates import TemplateValidator
 
 validator = TemplateValidator()
 
@@ -386,7 +386,7 @@ if not validation_result.is_valid:
 ### Template Optimization
 
 ```python
-from mermaid_render.templates import TemplateOptimizer
+from diagramaid.templates import TemplateOptimizer
 
 optimizer = TemplateOptimizer()
 
@@ -412,7 +412,7 @@ template_manager.enable_caching(
 
 ```python
 from flask import Flask, render_template_string
-from mermaid_render.templates import FlaskIntegration
+from diagramaid.templates import FlaskIntegration
 
 app = Flask(__name__)
 mermaid_integration = FlaskIntegration(app, template_manager)
@@ -427,7 +427,7 @@ def show_diagram(template_name):
 
 ```python
 # Generate diagrams in CI/CD pipeline
-from mermaid_render.templates import CIIntegration
+from diagramaid.templates import CIIntegration
 
 ci_integration = CIIntegration(template_manager)
 
@@ -445,7 +445,7 @@ with open("docs/architecture.svg", "w") as f:
 ### Template Settings
 
 ```python
-from mermaid_render.config import TemplateConfig
+from diagramaid.config import TemplateConfig
 
 config = TemplateConfig(
     template_directory="./templates",

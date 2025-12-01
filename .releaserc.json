@@ -164,7 +164,7 @@
         "assets": [
           "CHANGELOG.md",
           "pyproject.toml",
-          "mermaid_render/__init__.py"
+          "diagramaid/__init__.py"
         ],
         "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
       }
@@ -187,13 +187,13 @@
         "releasedLabels": [
           "released"
         ],
-        "successComment": "🎉 This ${issue.pull_request ? 'PR is included' : 'issue has been resolved'} in version ${nextRelease.version} 🎉\n\nThe release is available on:\n- [PyPI](https://pypi.org/project/mermaid-render/${nextRelease.version})\n- [GitHub Releases](${releases.filter(release => release.name === nextRelease.gitTag)[0].html_url})\n\nYour **[semantic-release](https://github.com/semantic-release/semantic-release)** bot 📦🚀"
+        "successComment": "🎉 This ${issue.pull_request ? 'PR is included' : 'issue has been resolved'} in version ${nextRelease.version} 🎉\n\nThe release is available on:\n- [PyPI](https://pypi.org/project/diagramaid/${nextRelease.version})\n- [GitHub Releases](${releases.filter(release => release.name === nextRelease.gitTag)[0].html_url})\n\nYour **[semantic-release](https://github.com/semantic-release/semantic-release)** bot 📦🚀"
       }
     ]
   ],
   "preset": "conventionalcommits",
   "tagFormat": "v${version}",
-  "repositoryUrl": "https://github.com/mermaid-render/mermaid-render.git",
+  "repositoryUrl": "https://github.com/diagramaid/diagramaid.git",
   "debug": false,
   "ci": true,
   "dryRun": false

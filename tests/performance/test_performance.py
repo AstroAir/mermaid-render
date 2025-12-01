@@ -10,7 +10,7 @@ from unittest.mock import Mock, patch
 
 import requests
 
-from mermaid_render.renderers.svg_renderer import SVGRenderer
+from diagramaid.renderers.svg_renderer import SVGRenderer
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../.."))
 

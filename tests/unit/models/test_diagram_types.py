@@ -3,7 +3,7 @@ Comprehensive tests for all diagram types and their edge cases.
 """
 
 import pytest
-from mermaid_render import (
+from diagramaid import (
     FlowchartDiagram,
     SequenceDiagram,
     ClassDiagram,
@@ -15,9 +15,9 @@ from mermaid_render import (
     GitGraphDiagram,
     MindmapDiagram,
 )
-from mermaid_render.models.class_diagram import ClassAttribute, ClassMethod
-from mermaid_render.models.sequence import SequenceMessage
-from mermaid_render.exceptions import DiagramError
+from diagramaid.models.class_diagram import ClassAttribute, ClassMethod
+from diagramaid.models.sequence import SequenceMessage
+from diagramaid.exceptions import DiagramError
 
 
 class TestFlowchartDiagramComprehensive:

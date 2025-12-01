@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - 2024-08-01
 
 ### Added
-- Initial release of Mermaid Render library
+- Initial release of DiagramAid library
 - Core rendering functionality for Mermaid diagrams
 - Support for multiple diagram types:
   - Flowchart diagrams with various node shapes and connections
@@ -123,7 +123,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Version 1.0.0 Highlights
 
-This is the initial stable release of Mermaid Render, providing a comprehensive Python library for generating Mermaid diagrams. The library offers:
+This is the initial stable release of DiagramAid, providing a comprehensive Python library for generating Mermaid diagrams. The library offers:
 
 **🎯 Production Ready**: Thoroughly tested with comprehensive error handling and validation.
 
@@ -143,7 +143,7 @@ This is the initial stable release of Mermaid Render, providing a comprehensive 
 
 This is the initial release, so no migration is needed. For new users:
 
-1. Install with `pip install mermaid-render`
+1. Install with `pip install diagramaid`
 2. Follow the Quick Start guide in the README
 3. Explore examples in the `examples/` directory
 4. Run the demo with `python demo.py`
@@ -178,7 +178,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to contribute to this 
 
 ## Support
 
-- 📖 [Documentation](https://mermaid-render.readthedocs.io)
-- 🐛 [Issue Tracker](https://github.com/mermaid-render/mermaid-render/issues)
-- 💬 [Discussions](https://github.com/mermaid-render/mermaid-render/discussions)
-- 📧 [Email Support](mailto:support@mermaid-render.dev)
+- 📖 [Documentation](https://diagramaid.readthedocs.io)
+- 🐛 [Issue Tracker](https://github.com/diagramaid/diagramaid/issues)
+- 💬 [Discussions](https://github.com/diagramaid/diagramaid/discussions)
+- 📧 [Email Support](mailto:support@diagramaid.dev)

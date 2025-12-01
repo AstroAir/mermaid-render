@@ -6,7 +6,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from mermaid_render import (
+from diagramaid import (
     ClassDiagram,
     FlowchartDiagram,
     GanttDiagram,
@@ -14,7 +14,7 @@ from mermaid_render import (
     PieChartDiagram,
     SequenceDiagram,
 )
-from mermaid_render.exceptions import (
+from diagramaid.exceptions import (
     DiagramError,
 )
 
@@ -33,7 +33,7 @@ class TestEdgeCaseHandling:
 
         # Should be renderable without errors (use legacy mode for direct mocking)
         renderer = MermaidRenderer(use_plugin_system=False)
-        with patch("mermaid_render.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
+        with patch("diagramaid.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
             mock_obj = Mock()
             mock_obj.__str__ = Mock(return_value="<svg>empty diagram</svg>")
             mock_mermaid.return_value = mock_obj
@@ -54,7 +54,7 @@ class TestEdgeCaseHandling:
 
         # Should render without issues (use legacy mode for direct mocking)
         renderer = MermaidRenderer(use_plugin_system=False)
-        with patch("mermaid_render.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
+        with patch("diagramaid.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
             mock_obj = Mock()
             mock_obj.__str__ = Mock(return_value="<svg>single node</svg>")
             mock_mermaid.return_value = mock_obj
@@ -281,7 +281,7 @@ class TestClassDiagramRegressions:
 
     def test_class_with_only_attributes(self) -> None:
         """Test classes with only attributes."""
-        from mermaid_render.models.class_diagram import ClassAttribute
+        from diagramaid.models.class_diagram import ClassAttribute
 
         diagram = ClassDiagram()
         data_class = diagram.add_class("DataOnly")
@@ -294,7 +294,7 @@ class TestClassDiagramRegressions:
 
     def test_class_with_only_methods(self) -> None:
         """Test classes with only methods."""
-        from mermaid_render.models.class_diagram import ClassMethod
+        from diagramaid.models.class_diagram import ClassMethod
 
         diagram = ClassDiagram()
         behavior_class = diagram.add_class("BehaviorOnly")
@@ -401,7 +401,7 @@ class TestRenderingRegressions:
         diagram = FlowchartDiagram()
         renderer = MermaidRenderer(use_plugin_system=False)
 
-        with patch("mermaid_render.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
+        with patch("diagramaid.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
             mock_obj = Mock()
             mock_obj.__str__ = Mock(
                 return_value='<svg xmlns="http://www.w3.org/2000/svg">empty</svg>'
@@ -421,7 +421,7 @@ class TestRenderingRegressions:
 
         renderer = MermaidRenderer(use_plugin_system=False)
 
-        with patch("mermaid_render.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
+        with patch("diagramaid.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
             mock_obj = Mock()
             mock_obj.__str__ = Mock(return_value="<svg>themed</svg>")
             mock_mermaid.return_value = mock_obj
@@ -442,7 +442,7 @@ class TestRenderingRegressions:
 
         renderer = MermaidRenderer(use_plugin_system=False)
 
-        with patch("mermaid_render.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
+        with patch("diagramaid.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
             mock_obj = Mock()
             mock_obj.__str__ = Mock(return_value="<svg>large diagram</svg>")
             mock_mermaid.return_value = mock_obj
@@ -462,7 +462,7 @@ class TestConfigurationRegressions:
         diagram = FlowchartDiagram()
         diagram.add_node("test", "Test")
 
-        with patch("mermaid_render.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
+        with patch("diagramaid.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
             mock_obj = Mock()
             mock_obj.__str__ = Mock(return_value="<svg>default config</svg>")
             mock_mermaid.return_value = mock_obj
@@ -480,7 +480,7 @@ class TestConfigurationRegressions:
         diagram = FlowchartDiagram()
         diagram.add_node("test", "Test")
 
-        with patch("mermaid_render.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
+        with patch("diagramaid.renderers.svg_renderer.md.Mermaid") as mock_mermaid:
             mock_obj = Mock()
             mock_obj.__str__ = Mock(
                 return_value='<svg xmlns="http://www.w3.org/2000/svg">multi instance</svg>'

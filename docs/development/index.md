@@ -7,8 +7,8 @@ Welcome to the Mermaid Render development guide! This section covers everything 
 1. **Fork and Clone**
 
    ```bash
-   git clone https://github.com/YOUR_USERNAME/mermaid-render.git
-   cd mermaid-render
+   git clone https://github.com/YOUR_USERNAME/diagramaid.git
+   cd diagramaid
    ```
 
 2. **Set Up Development Environment**
@@ -81,7 +81,7 @@ How releases are managed:
 ### Core Components
 
 ```
-mermaid_render/
+diagramaid/
 ├── core.py              # Main rendering engine and base classes
 ├── models/              # Diagram model implementations
 ├── renderers/           # Backend rendering engines (SVG, PNG, PDF)
@@ -132,16 +132,16 @@ pip install -e ".[dev]"
 pytest
 
 # Run tests with coverage
-pytest --cov=mermaid_render --cov-report=html
+pytest --cov=diagramaid --cov-report=html
 
 # Format code
-black mermaid_render tests
+black diagramaid tests
 
 # Lint code
-ruff check mermaid_render tests
+ruff check diagramaid tests
 
 # Type checking
-mypy mermaid_render
+mypy diagramaid
 
 # Run all quality checks
 make check-all

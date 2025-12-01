@@ -11,9 +11,9 @@ from unittest.mock import Mock
 
 import pytest
 
-from mermaid_render import MermaidRenderer, PluginMermaidRenderer
-from mermaid_render.core import MermaidConfig, MermaidTheme
-from mermaid_render.renderers import RenderResult
+from diagramaid import MermaidRenderer, PluginMermaidRenderer
+from diagramaid.core import MermaidConfig, MermaidTheme
+from diagramaid.renderers import RenderResult
 
 
 @pytest.fixture(autouse=True)
@@ -46,10 +46,10 @@ def mock_renderer_environment(monkeypatch):
         return fake_registry
 
     monkeypatch.setattr(
-        "mermaid_render.plugin_renderer.get_global_registry", get_fake_registry
+        "diagramaid.plugin_renderer.get_global_registry", get_fake_registry
     )
     monkeypatch.setattr(
-        "mermaid_render.renderers.registry.get_global_registry", get_fake_registry
+        "diagramaid.renderers.registry.get_global_registry", get_fake_registry
     )
 
     class FakeRendererManager:
@@ -80,13 +80,13 @@ def mock_renderer_environment(monkeypatch):
             pass
 
     monkeypatch.setattr(
-        "mermaid_render.plugin_renderer.RendererManager", FakeRendererManager
+        "diagramaid.plugin_renderer.RendererManager", FakeRendererManager
     )
     monkeypatch.setattr(
-        "mermaid_render.renderers.RendererManager", FakeRendererManager
+        "diagramaid.renderers.RendererManager", FakeRendererManager
     )
     monkeypatch.setattr(
-        "mermaid_render.renderers.manager.RendererManager", FakeRendererManager
+        "diagramaid.renderers.manager.RendererManager", FakeRendererManager
     )
 
 

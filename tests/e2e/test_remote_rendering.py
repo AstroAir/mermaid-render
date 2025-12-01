@@ -6,7 +6,7 @@ Test script for the improved remote SVG rendering.
 
 import requests
 from unittest.mock import patch, Mock
-from mermaid_render.renderers.svg_renderer import SVGRenderer
+from diagramaid.renderers.svg_renderer import SVGRenderer
 import sys
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))
@@ -25,7 +25,7 @@ def test_session_creation() -> None:
     # Check headers
     headers = renderer._session.headers
     assert 'User-Agent' in headers
-    assert 'mermaid-render' in headers['User-Agent']
+    assert 'diagramaid' in headers['User-Agent']
 
     print("✓ Session created with proper configuration")
 

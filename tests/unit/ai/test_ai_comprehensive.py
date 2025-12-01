@@ -7,7 +7,7 @@ from typing import Any
 from unittest.mock import Mock, patch, MagicMock
 import json
 
-from mermaid_render.ai import (
+from diagramaid.ai import (
     AIProvider,
     OpenAIProvider,
     AnthropicProvider,
@@ -18,8 +18,8 @@ from mermaid_render.ai import (
     NLProcessor,
     ProviderConfig,
 )
-from mermaid_render.ai.providers import AuthenticationError
-from mermaid_render.exceptions import MermaidRenderError, ConfigurationError
+from diagramaid.ai.providers import AuthenticationError
+from diagramaid.exceptions import MermaidRenderError, ConfigurationError
 
 
 class TestAIProviders:
@@ -286,7 +286,7 @@ class TestSuggestionEngine:
         assert isinstance(suggestions, list)
         
         # Check that we got styling suggestions
-        from mermaid_render.ai.suggestions import SuggestionType
+        from diagramaid.ai.suggestions import SuggestionType
         for suggestion in suggestions:
             assert suggestion.suggestion_type == SuggestionType.STYLE
 
@@ -302,7 +302,7 @@ class TestSuggestionEngine:
         assert isinstance(suggestions, list)
         
         # Check that we got layout suggestions
-        from mermaid_render.ai.suggestions import SuggestionType
+        from diagramaid.ai.suggestions import SuggestionType
         for suggestion in suggestions:
             assert suggestion.suggestion_type == SuggestionType.LAYOUT
 
@@ -360,7 +360,7 @@ class TestNaturalLanguageProcessor:
             "reasoning": "Text describes time-based interactions between actors"
         })
 
-        with patch('mermaid_render.ai.nl_processor.NLProcessor') as mock_nlp_class:
+        with patch('diagramaid.ai.nl_processor.NLProcessor') as mock_nlp_class:
             nlp = Mock()
             nlp.determine_diagram_type.return_value = json.loads(mock_provider.generate_diagram.return_value)
             mock_nlp_class.return_value = nlp

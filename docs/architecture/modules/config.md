@@ -20,7 +20,7 @@ This module provides comprehensive configuration management for the Mermaid Rend
 ## Usage Example
 
 ```python
-from mermaid_render.config import ConfigManager, ThemeManager
+from diagramaid.config import ConfigManager, ThemeManager
 
 # Advanced configuration management
 config_manager = ConfigManager()
@@ -64,7 +64,7 @@ cache:
 
 Configuration can be overridden using environment variables:
 
-- `MERMAID_RENDER_TIMEOUT` - Rendering timeout
-- `MERMAID_RENDER_THEME` - Default theme
-- `MERMAID_RENDER_AI_PROVIDER` - AI provider
-- `MERMAID_RENDER_CACHE_ENABLED` - Enable/disable caching
+- `diagramaid_TIMEOUT` - Rendering timeout
+- `diagramaid_THEME` - Default theme
+- `diagramaid_AI_PROVIDER` - AI provider
+- `diagramaid_CACHE_ENABLED` - Enable/disable caching

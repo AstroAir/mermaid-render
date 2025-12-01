@@ -10,7 +10,7 @@ from pathlib import Path
 import pytest
 from unittest.mock import Mock
 
-from mermaid_render.interactive.server.page_routes import setup_page_routes
+from diagramaid.interactive.server.page_routes import setup_page_routes
 
 
 @pytest.mark.unit

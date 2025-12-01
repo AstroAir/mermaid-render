@@ -6,7 +6,7 @@ Tests the InteractiveTemplate and TemplateLibrary classes.
 
 import pytest
 
-from mermaid_render.interactive.templates import InteractiveTemplate, TemplateLibrary
+from diagramaid.interactive.templates import InteractiveTemplate, TemplateLibrary
 
 
 def create_test_template(

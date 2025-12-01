@@ -37,14 +37,14 @@ def test_import(module_name: str) -> tuple[bool, str]:
 def validate_core_imports() -> list[tuple[bool, str]]:
     """Validate core package imports."""
     core_modules = [
-        "mermaid_render",
-        "mermaid_render.core",
-        "mermaid_render.exceptions",
-        "mermaid_render.models",
-        "mermaid_render.utils",
-        "mermaid_render.validators",
-        "mermaid_render.config",
-        "mermaid_render.renderers",
+        "diagramaid",
+        "diagramaid.core",
+        "diagramaid.exceptions",
+        "diagramaid.models",
+        "diagramaid.utils",
+        "diagramaid.validators",
+        "diagramaid.config",
+        "diagramaid.renderers",
     ]
 
     results = []
@@ -57,11 +57,11 @@ def validate_core_imports() -> list[tuple[bool, str]]:
 def validate_optional_imports() -> list[tuple[bool, str]]:
     """Validate optional feature imports."""
     optional_modules = [
-        "mermaid_render.ai",
-        "mermaid_render.cache",
-        "mermaid_render.collaboration",
-        "mermaid_render.interactive",
-        "mermaid_render.templates",
+        "diagramaid.ai",
+        "diagramaid.cache",
+        "diagramaid.collaboration",
+        "diagramaid.interactive",
+        "diagramaid.templates",
     ]
 
     results = []
@@ -79,16 +79,16 @@ def validate_optional_imports() -> list[tuple[bool, str]]:
 def validate_diagram_models() -> list[tuple[bool, str]]:
     """Validate diagram model imports."""
     diagram_models = [
-        "mermaid_render.models.flowchart",
-        "mermaid_render.models.sequence",
-        "mermaid_render.models.class_diagram",
-        "mermaid_render.models.state",
-        "mermaid_render.models.er_diagram",
-        "mermaid_render.models.user_journey",
-        "mermaid_render.models.gantt",
-        "mermaid_render.models.pie_chart",
-        "mermaid_render.models.git_graph",
-        "mermaid_render.models.mindmap",
+        "diagramaid.models.flowchart",
+        "diagramaid.models.sequence",
+        "diagramaid.models.class_diagram",
+        "diagramaid.models.state",
+        "diagramaid.models.er_diagram",
+        "diagramaid.models.user_journey",
+        "diagramaid.models.gantt",
+        "diagramaid.models.pie_chart",
+        "diagramaid.models.git_graph",
+        "diagramaid.models.mindmap",
     ]
 
     results = []
@@ -101,7 +101,7 @@ def validate_diagram_models() -> list[tuple[bool, str]]:
 def validate_public_api() -> list[tuple[bool, str]]:
     """Validate that public API classes can be imported."""
     try:
-        import mermaid_render
+        import diagramaid
 
         # Test core classes
         core_classes = [
@@ -115,7 +115,7 @@ def validate_public_api() -> list[tuple[bool, str]]:
 
         results = []
         for class_name in core_classes:
-            if hasattr(mermaid_render, class_name):
+            if hasattr(diagramaid, class_name):
                 results.append((True, f"✅ {class_name} available in public API"))
             else:
                 results.append((False, f"❌ {class_name} missing from public API"))
@@ -129,7 +129,7 @@ def validate_public_api() -> list[tuple[bool, str]]:
 def validate_quick_render() -> tuple[bool, str]:
     """Test the quick_render function."""
     try:
-        from mermaid_render import quick_render
+        from diagramaid import quick_render
 
         # Test with simple diagram
         test_diagram = """
@@ -155,11 +155,11 @@ def validate_quick_render() -> tuple[bool, str]:
 def validate_version_info() -> tuple[bool, str]:
     """Validate version and metadata."""
     try:
-        import mermaid_render
+        import diagramaid
 
-        version = getattr(mermaid_render, "__version__", None)
-        author = getattr(mermaid_render, "__author__", None)
-        license_info = getattr(mermaid_render, "__license__", None)
+        version = getattr(diagramaid, "__version__", None)
+        author = getattr(diagramaid, "__author__", None)
+        license_info = getattr(diagramaid, "__license__", None)
 
         if version and author and license_info:
             return True, f"✅ Metadata: v{version} by {author} ({license_info})"
@@ -173,10 +173,10 @@ def validate_version_info() -> tuple[bool, str]:
 def validate_package_structure() -> list[tuple[bool, str]]:
     """Validate package directory structure."""
     required_files = [
-        "mermaid_render/__init__.py",
-        "mermaid_render/core.py",
-        "mermaid_render/exceptions.py",
-        "mermaid_render/py.typed",
+        "diagramaid/__init__.py",
+        "diagramaid/core.py",
+        "diagramaid/exceptions.py",
+        "diagramaid/py.typed",
         "pyproject.toml",
         "README.md",
         "LICENSE",

@@ -27,7 +27,7 @@ This module provides AI-powered features for the Mermaid Render library, includi
 ## Usage Example
 
 ```python
-from mermaid_render.ai import DiagramGenerator, DiagramAnalyzer
+from diagramaid.ai import DiagramGenerator, DiagramAnalyzer
 
 # Generate diagram from text
 generator = DiagramGenerator()
@@ -44,7 +44,7 @@ print(f"Quality score: {analysis.quality.overall_score}")
 This module requires the `ai` optional dependency group:
 
 ```bash
-pip install mermaid-render[ai]
+pip install diagramaid[ai]
 ```
 
 ## Configuration
@@ -52,7 +52,7 @@ pip install mermaid-render[ai]
 AI features can be configured through the main configuration system:
 
 ```python
-from mermaid_render import MermaidConfig
+from diagramaid import MermaidConfig
 
 config = MermaidConfig()
 config.set_ai_provider("openai")

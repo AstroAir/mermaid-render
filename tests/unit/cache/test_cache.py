@@ -5,7 +5,7 @@ Comprehensive tests for cache system.
 import tempfile
 from pathlib import Path
 
-from mermaid_render.cache import (
+from diagramaid.cache import (
     FileBackend,
     MemoryBackend,
     create_cache_manager,

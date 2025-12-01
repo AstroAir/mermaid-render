@@ -4,7 +4,7 @@
 
 ### Code Section: SVGRenderer Initialization Pattern
 
-**File:** `mermaid_render/renderers/svg_renderer.py`
+**File:** `diagramaid/renderers/svg_renderer.py`
 **Lines:** 37-91
 **Purpose:** Initialize SVG renderer with configuration, session, caching, and performance metrics
 
@@ -32,7 +32,7 @@ def __init__(
     if cache_dir:
         self.cache_dir = Path(cache_dir)
     else:
-        self.cache_dir = Path.home() / ".mermaid_render_cache"
+        self.cache_dir = Path.home() / ".diagramaid_cache"
 
     if self.cache_enabled:
         self.cache_dir.mkdir(parents=True, exist_ok=True)
@@ -60,7 +60,7 @@ def __init__(
 
 ### Code Section: PNGRenderer Initialization Pattern
 
-**File:** `mermaid_render/renderers/png_renderer.py`
+**File:** `diagramaid/renderers/png_renderer.py`
 **Lines:** 24-43
 **Purpose:** Initialize PNG renderer with basic configuration
 
@@ -86,7 +86,7 @@ def __init__(
 
 ### Code Section: PDFRenderer Initialization Pattern
 
-**File:** `mermaid_render/renderers/pdf_renderer.py`
+**File:** `diagramaid/renderers/pdf_renderer.py`
 **Lines:** 22-38
 **Purpose:** Initialize PDF renderer with SVGRenderer dependency
 
@@ -109,7 +109,7 @@ def __init__(
 
 ### Code Section: SVGRenderer HTTP Session Creation
 
-**File:** `mermaid_render/renderers/svg_renderer.py`
+**File:** `diagramaid/renderers/svg_renderer.py`
 **Lines:** 92-111
 **Purpose:** Create HTTP session with default headers
 
@@ -120,7 +120,7 @@ def _create_session(self) -> requests.Session:
     # Set default headers
     session.headers.update(
         {
-            "User-Agent": "mermaid-render/1.0.0",
+            "User-Agent": "diagramaid/1.0.0",
             "Accept": "image/svg+xml,text/plain,*/*",
             "Accept-Encoding": "gzip, deflate",
             "Connection": "keep-alive",
@@ -137,7 +137,7 @@ def _create_session(self) -> requests.Session:
 
 ### Code Section: PNGRenderer Direct HTTP Request
 
-**File:** `mermaid_render/renderers/png_renderer.py`
+**File:** `diagramaid/renderers/png_renderer.py`
 **Lines:** 99-101
 **Purpose:** Make HTTP request without session reuse
 
@@ -154,7 +154,7 @@ response.raise_for_status()
 
 ### Code Section: SVGRenderer Cache Key Generation
 
-**File:** `mermaid_render/renderers/svg_renderer.py`
+**File:** `diagramaid/renderers/svg_renderer.py`
 **Lines:** 113-126
 **Purpose:** Generate cache key from parameters
 
@@ -181,7 +181,7 @@ def _generate_cache_key(
 
 ### Code Section: CacheKey Class Implementation
 
-**File:** `mermaid_render/cache/cache_manager.py`
+**File:** `diagramaid/cache/cache_manager.py`
 **Lines:** 88-174
 **Purpose:** Generate cache keys with type safety and structure
 
@@ -222,7 +222,7 @@ class CacheKey:
 
 ### Code Section: SVGRenderer Theme Support
 
-**File:** `mermaid_render/renderers/svg_renderer.py`
+**File:** `diagramaid/renderers/svg_renderer.py`
 **Lines:** 1318-1385
 **Purpose:** Theme information and validation
 
@@ -256,7 +256,7 @@ def validate_theme(self, theme: str) -> bool:
 
 ### Code Section: PNGRenderer Theme Support
 
-**File:** `mermaid_render/renderers/png_renderer.py`
+**File:** `diagramaid/renderers/png_renderer.py`
 **Lines:** 143-149
 **Purpose:** Theme list with simpler implementation
 
@@ -275,7 +275,7 @@ def validate_theme(self, theme: str) -> bool:
 
 ### Code Section: PDFRenderer Theme Delegation
 
-**File:** `mermaid_render/renderers/pdf_renderer.py`
+**File:** `diagramaid/renderers/pdf_renderer.py`
 **Lines:** 232-239
 **Purpose:** Delegate theme operations to SVGRenderer
 
@@ -295,7 +295,7 @@ def validate_theme(self, theme: str) -> bool:
 
 ### Code Section: SVGRenderer Error Handling
 
-**File:** `mermaid_render/renderers/svg_renderer.py`
+**File:** `diagramaid/renderers/svg_renderer.py`
 **Lines:** 812-830
 **Purpose:** Handle network and encoding errors
 
@@ -328,7 +328,7 @@ except (UnicodeEncodeError, UnicodeDecodeError) as e:
 
 ### Code Section: PNGRenderer Error Handling
 
-**File:** `mermaid_render/renderers/png_renderer.py`
+**File:** `diagramaid/renderers/png_renderer.py`
 **Lines:** 109-116
 **Purpose:** Handle network errors
 

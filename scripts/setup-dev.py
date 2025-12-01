@@ -286,19 +286,19 @@ class DevSetup:
 # Copy this file to .env and customize as needed
 
 # Development settings
-MERMAID_RENDER_ENV=development
-MERMAID_RENDER_LOG_LEVEL=DEBUG
+diagramaid_ENV=development
+diagramaid_LOG_LEVEL=DEBUG
 
 # Cache settings
-MERMAID_RENDER_CACHE_BACKEND=memory
-MERMAID_RENDER_CACHE_TTL=3600
+diagramaid_CACHE_BACKEND=memory
+diagramaid_CACHE_TTL=3600
 
 # Performance settings
-MERMAID_RENDER_TIMEOUT=30
-MERMAID_RENDER_MAX_WORKERS=4
+diagramaid_TIMEOUT=30
+diagramaid_MAX_WORKERS=4
 
 # Security settings
-MERMAID_RENDER_VALIDATE_INPUT=true
+diagramaid_VALIDATE_INPUT=true
 """
             try:
                 env_file.write_text(basic_env)
@@ -399,7 +399,7 @@ MERMAID_RENDER_VALIDATE_INPUT=true
         
         # Test package import
         exit_code, _, stderr = self.run_command([
-            python_exe, "-c", "import mermaid_render; print('✅ Package import successful')"
+            python_exe, "-c", "import diagramaid; print('✅ Package import successful')"
         ], check=False)
         
         if exit_code == 0:

@@ -376,7 +376,7 @@ To add support for new output formats using the plugin architecture:
 4. Define capabilities and health checks
 
 ```python
-from mermaid_render.renderers import BaseRenderer, RendererCapability, RendererInfo
+from diagramaid.renderers import BaseRenderer, RendererCapability, RendererInfo
 
 class CustomRenderer(BaseRenderer):
     @classmethod
@@ -397,7 +397,7 @@ class CustomRenderer(BaseRenderer):
         return True
 
 # Register with global registry
-from mermaid_render.renderers import register_renderer
+from diagramaid.renderers import register_renderer
 register_renderer(CustomRenderer)
 ```
 

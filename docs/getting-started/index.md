@@ -44,7 +44,7 @@ If you run into any issues:
 
 1. Check the [troubleshooting section](basic-usage.md#troubleshooting) in Basic Usage
 2. Browse the [Examples](../examples/) for similar use cases
-3. Search the [GitHub Issues](https://github.com/mermaid-render/mermaid-render/issues)
-4. Ask questions in [GitHub Discussions](https://github.com/mermaid-render/mermaid-render/discussions)
+3. Search the [GitHub Issues](https://github.com/diagramaid/diagramaid/issues)
+4. Ask questions in [GitHub Discussions](https://github.com/diagramaid/diagramaid/discussions)
 
 Let's get started! 🚀

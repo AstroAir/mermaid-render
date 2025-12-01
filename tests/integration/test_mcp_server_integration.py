@@ -18,7 +18,7 @@ from unittest.mock import patch
 
 try:
     from fastmcp import Client
-    from mermaid_render.mcp.server import create_mcp_server
+    from diagramaid.mcp.server import create_mcp_server
     _FASTMCP_AVAILABLE = True
 except ImportError:
     _FASTMCP_AVAILABLE = False
@@ -42,9 +42,9 @@ class MCPServerTestSuite:
         try:
             # Create MCP server
             self.server = create_mcp_server(
-                name="test-mermaid-render",
+                name="test-diagramaid",
                 version="1.0.0-test",
-                description="Test MCP server for mermaid-render"
+                description="Test MCP server for diagramaid"
             )
             
             # Create client with in-memory transport (ideal for testing)

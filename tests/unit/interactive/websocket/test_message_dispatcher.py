@@ -7,8 +7,8 @@ Tests the MessageDispatcher class.
 import pytest
 from unittest.mock import AsyncMock, Mock
 
-from mermaid_render.interactive.websocket.broadcast_service import BroadcastService
-from mermaid_render.interactive.websocket.message_dispatcher import MessageDispatcher
+from diagramaid.interactive.websocket.broadcast_service import BroadcastService
+from diagramaid.interactive.websocket.message_dispatcher import MessageDispatcher
 
 
 @pytest.mark.unit

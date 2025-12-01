@@ -9,7 +9,7 @@ This guide provides a comprehensive overview of the Mermaid Render API.
 The main class for rendering Mermaid diagrams to various output formats.
 
 ```python
-from mermaid_render import MermaidRenderer
+from diagramaid import MermaidRenderer
 
 renderer = MermaidRenderer(
     theme="default",           # Theme name or MermaidTheme object
@@ -72,7 +72,7 @@ Renders multiple diagrams efficiently.
 Quickly render Mermaid code to string.
 
 ```python
-from mermaid_render import quick_render
+from diagramaid import quick_render
 
 svg = quick_render("""
 flowchart TD
@@ -85,7 +85,7 @@ flowchart TD
 Quickly render and save Mermaid code to file.
 
 ```python
-from mermaid_render import render_to_file
+from diagramaid import render_to_file
 
 render_to_file(mermaid_code, "diagram.png", format="png", theme="forest")
 ```
@@ -97,7 +97,7 @@ render_to_file(mermaid_code, "diagram.png", format="png", theme="forest")
 Create flowchart diagrams programmatically.
 
 ```python
-from mermaid_render import FlowchartDiagram
+from diagramaid import FlowchartDiagram
 
 flowchart = FlowchartDiagram(direction="TD", title="My Flowchart")
 flowchart.add_node("start", "Start", shape="rounded")
@@ -117,7 +117,7 @@ flowchart.add_edge("start", "process", "Begin")
 Create sequence diagrams for interaction flows.
 
 ```python
-from mermaid_render import SequenceDiagram
+from diagramaid import SequenceDiagram
 
 sequence = SequenceDiagram(title="User Login")
 sequence.add_participant("user", "User")
@@ -141,8 +141,8 @@ sequence.add_note("app", "Validate credentials", position="right")
 Create UML class diagrams.
 
 ```python
-from mermaid_render import ClassDiagram
-from mermaid_render.models.class_diagram import ClassMethod, ClassAttribute
+from diagramaid import ClassDiagram
+from diagramaid.models.class_diagram import ClassMethod, ClassAttribute
 
 class_diagram = ClassDiagram()
 animal = class_diagram.add_class("Animal", is_abstract=True)
@@ -174,7 +174,7 @@ animal.add_method(ClassMethod("move", "public", "void", is_abstract=True))
 Global configuration for rendering behavior.
 
 ```python
-from mermaid_render.config import MermaidConfig
+from diagramaid.config import MermaidConfig
 
 config = MermaidConfig(
     theme="default",
@@ -193,7 +193,7 @@ config = MermaidConfig(
 Manage built-in and custom themes.
 
 ```python
-from mermaid_render.config import ThemeManager
+from diagramaid.config import ThemeManager
 
 theme_manager = ThemeManager()
 
@@ -217,7 +217,7 @@ custom_theme = theme_manager.create_theme(
 ### Syntax Validation
 
 ```python
-from mermaid_render.utils import validate_mermaid_syntax
+from diagramaid.utils import validate_mermaid_syntax
 
 try:
     is_valid, errors = validate_mermaid_syntax(mermaid_code)
@@ -240,7 +240,7 @@ except ValidationError as e:
 ### Caching
 
 ```python
-from mermaid_render.cache import CacheManager
+from diagramaid.cache import CacheManager
 
 cache_manager = CacheManager(backend="memory")  # or "redis", "file"
 renderer = MermaidRenderer(cache_manager=cache_manager)
@@ -249,7 +249,7 @@ renderer = MermaidRenderer(cache_manager=cache_manager)
 ### AI-Powered Features
 
 ```python
-from mermaid_render.ai import DiagramGenerator, NLProcessor
+from diagramaid.ai import DiagramGenerator, NLProcessor
 
 # Generate diagrams from natural language
 generator = DiagramGenerator()
@@ -263,7 +263,7 @@ mermaid_code = processor.text_to_mermaid("User logs in, system validates, return
 ### Interactive Features
 
 ```python
-from mermaid_render.interactive import InteractiveServer
+from diagramaid.interactive import InteractiveServer
 
 # Start interactive web interface
 server = InteractiveServer(port=8080)
@@ -283,7 +283,7 @@ results = renderer.render_batch(diagrams, format="svg", theme="dark")
 
 ```python
 import asyncio
-from mermaid_render import AsyncMermaidRenderer
+from diagramaid import AsyncMermaidRenderer
 
 async def render_async():
     renderer = AsyncMermaidRenderer()

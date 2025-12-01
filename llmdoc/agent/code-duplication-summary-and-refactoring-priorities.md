@@ -5,8 +5,8 @@
 ### Code Section: Multiple Caching Implementations
 
 **Locations:**
-- `mermaid_render/renderers/svg_renderer.py` (lines 69-76, 113-220)
-- `mermaid_render/cache/cache_manager.py` (complete file)
+- `diagramaid/renderers/svg_renderer.py` (lines 69-76, 113-220)
+- `diagramaid/cache/cache_manager.py` (complete file)
 
 **Purpose:** Both implement caching with TTL, cache key generation, and file operations
 
@@ -18,8 +18,8 @@
 ### Code Section: Configuration Management Duplication
 
 **Locations:**
-- `mermaid_render/core.py` MermaidConfig class (lines 32-174)
-- `mermaid_render/config/config_manager.py` ConfigManager class (lines 16-376)
+- `diagramaid/core.py` MermaidConfig class (lines 32-174)
+- `diagramaid/config/config_manager.py` ConfigManager class (lines 16-376)
 
 **Purpose:** Both manage application configuration
 
@@ -31,9 +31,9 @@
 ### Code Section: Validation Logic Duplication
 
 **Locations:**
-- `mermaid_render/validators/validator.py` MermaidValidator class
-- `mermaid_render/renderers/svg_renderer.py` validate_mermaid_syntax method (lines 2143-2217)
-- `mermaid_render/utils/validation.py` wrapper functions
+- `diagramaid/validators/validator.py` MermaidValidator class
+- `diagramaid/renderers/svg_renderer.py` validate_mermaid_syntax method (lines 2143-2217)
+- `diagramaid/utils/validation.py` wrapper functions
 
 **Purpose:** Validate Mermaid diagram syntax
 
@@ -45,9 +45,9 @@
 ### Code Section: Theme Information Duplication
 
 **Locations:**
-- `mermaid_render/renderers/svg_renderer.py` get_supported_themes (lines 1318-1385)
-- `mermaid_render/renderers/png_renderer.py` get_supported_themes (lines 143-145)
-- `mermaid_render/core.py` MermaidTheme class (lines 176-301)
+- `diagramaid/renderers/svg_renderer.py` get_supported_themes (lines 1318-1385)
+- `diagramaid/renderers/png_renderer.py` get_supported_themes (lines 143-145)
+- `diagramaid/core.py` MermaidTheme class (lines 176-301)
 
 **Purpose:** Define and manage diagram themes
 
@@ -60,8 +60,8 @@
 ### Code Section: HTTP Request Pattern Duplication
 
 **Locations:**
-- `mermaid_render/renderers/svg_renderer.py` _render_remote (lines 735-837)
-- `mermaid_render/renderers/png_renderer.py` render (lines 45-116)
+- `diagramaid/renderers/svg_renderer.py` _render_remote (lines 735-837)
+- `diagramaid/renderers/png_renderer.py` render (lines 45-116)
 
 **Purpose:** Make HTTP requests to mermaid.ink service
 

@@ -9,10 +9,10 @@ implementations to ensure they work correctly within the plugin architecture.
 
 from unittest.mock import Mock, patch
 
-from mermaid_render.renderers.base import RendererCapability
-from mermaid_render.renderers.graphviz_renderer import GraphvizRenderer
-from mermaid_render.renderers.nodejs_renderer import NodeJSRenderer
-from mermaid_render.renderers.playwright_renderer import PlaywrightRenderer
+from diagramaid.renderers.base import RendererCapability
+from diagramaid.renderers.graphviz_renderer import GraphvizRenderer
+from diagramaid.renderers.nodejs_renderer import NodeJSRenderer
+from diagramaid.renderers.playwright_renderer import PlaywrightRenderer
 
 
 class TestPlaywrightRenderer:

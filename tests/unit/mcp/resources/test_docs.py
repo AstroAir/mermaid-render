@@ -8,7 +8,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from mermaid_render.mcp.resources.docs import (
+from diagramaid.mcp.resources.docs import (
     get_diagram_examples,
     get_diagram_types_docs,
 )
@@ -164,7 +164,7 @@ class TestGetDiagramExamples:
     @pytest.mark.asyncio
     async def test_nonexistent_type_raises(self):
         """Test nonexistent diagram type raises error."""
-        from mermaid_render.mcp.resources.base import ResourceError
+        from diagramaid.mcp.resources.base import ResourceError
 
         ctx = MagicMock()
         with pytest.raises(ResourceError):

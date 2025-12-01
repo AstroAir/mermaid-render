@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Comprehensive test runner for the mermaid-render project.
+Comprehensive test runner for the diagramaid project.
 
 This script runs all tests with detailed reporting and coverage analysis.
 """
@@ -118,7 +118,7 @@ def main() -> bool:
     coverage_cmd = [
         sys.executable, "-m", "pytest",
         "tests/",
-        "--cov=mermaid_render",
+        "--cov=diagramaid",
         "--cov-report=term-missing",
         "--cov-report=html:htmlcov",
         "--tb=no",

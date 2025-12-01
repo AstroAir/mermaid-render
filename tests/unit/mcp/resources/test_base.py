@@ -6,7 +6,7 @@ Tests for base utilities and ResourceError.
 
 import pytest
 
-from mermaid_render.mcp.resources.base import (
+from diagramaid.mcp.resources.base import (
     _FASTMCP_AVAILABLE,
     ResourceError,
 )
@@ -41,7 +41,7 @@ class TestFastMCPAvailability:
 
     def test_module_imports(self):
         """Test module can be imported."""
-        from mermaid_render.mcp.resources import base
+        from diagramaid.mcp.resources import base
 
         assert hasattr(base, "_FASTMCP_AVAILABLE")
         assert hasattr(base, "ResourceError")

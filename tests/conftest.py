@@ -10,7 +10,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from mermaid_render import (
+from diagramaid import (
     ConfigManager,
     FlowchartDiagram,
     MermaidConfig,
@@ -63,7 +63,7 @@ def mermaid_config(sample_config: Any) -> MermaidConfig:
 
 
 @pytest.fixture
-def mermaid_renderer(mermaid_config: Any) -> MermaidRenderer:
+def diagramaider(mermaid_config: Any) -> MermaidRenderer:
     """Create a MermaidRenderer instance for testing."""
     # Disable plugin system for unit tests to allow direct mocking
     # Also disable caching to prevent test interference
@@ -91,22 +91,22 @@ def mock_mermaid_environment(monkeypatch: pytest.MonkeyPatch) -> None:
 
     # Patch core and SVG renderer modules
     monkeypatch.setattr(
-        "mermaid_render.renderers.svg_renderer.md",
+        "diagramaid.renderers.svg_renderer.md",
         fake_mermaid,
         raising=False,
     )
     monkeypatch.setattr(
-        "mermaid_render.renderers.svg_renderer._MERMAID_AVAILABLE",
+        "diagramaid.renderers.svg_renderer._MERMAID_AVAILABLE",
         True,
         raising=False,
     )
     monkeypatch.setattr(
-        "mermaid_render.core.md",
+        "diagramaid.core.md",
         fake_mermaid,
         raising=False,
     )
     monkeypatch.setattr(
-        "mermaid_render.core._MERMAID_AVAILABLE",
+        "diagramaid.core._MERMAID_AVAILABLE",
         True,
         raising=False,
     )
@@ -120,8 +120,8 @@ def mock_core_renderer_manager(monkeypatch: pytest.MonkeyPatch) -> None:
     Tests with their own mocking strategy (e.g., regression tests, plugin architecture tests)
     should not use this fixture.
     """
-    from mermaid_render.exceptions import UnsupportedFormatError
-    from mermaid_render.renderers.base import RenderResult
+    from diagramaid.exceptions import UnsupportedFormatError
+    from diagramaid.renderers.base import RenderResult
 
     class FakeRendererManager:
         def __init__(self, *args: Any, **kwargs: Any) -> None:  # noqa: D401
@@ -167,9 +167,9 @@ def mock_core_renderer_manager(monkeypatch: pytest.MonkeyPatch) -> None:
         def cleanup(self) -> None:
             self._active_renderers.clear()
 
-    monkeypatch.setattr("mermaid_render.renderers.RendererManager", FakeRendererManager)
+    monkeypatch.setattr("diagramaid.renderers.RendererManager", FakeRendererManager)
     monkeypatch.setattr(
-        "mermaid_render.renderers.manager.RendererManager", FakeRendererManager
+        "diagramaid.renderers.manager.RendererManager", FakeRendererManager
     )
 
 

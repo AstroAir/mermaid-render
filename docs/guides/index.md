@@ -216,6 +216,6 @@ If you can't find what you're looking for in these guides:
 
 1. Check the [API Reference](../api/index.md)
 2. Look at the [Examples](../examples/index.md)
-3. Search the [GitHub Issues](https://github.com/mermaid-render/mermaid-render/issues)
-4. Ask in [GitHub Discussions](https://github.com/mermaid-render/mermaid-render/discussions)
-5. Email us at [support@mermaid-render.dev](mailto:support@mermaid-render.dev)
+3. Search the [GitHub Issues](https://github.com/diagramaid/diagramaid/issues)
+4. Ask in [GitHub Discussions](https://github.com/diagramaid/diagramaid/discussions)
+5. Email us at [support@diagramaid.dev](mailto:support@diagramaid.dev)

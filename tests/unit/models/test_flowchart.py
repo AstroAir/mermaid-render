@@ -9,13 +9,13 @@ import pytest
 from typing import Dict, List, Optional
 from unittest.mock import Mock, patch
 
-from mermaid_render.models.flowchart import (
+from diagramaid.models.flowchart import (
     FlowchartNode,
     FlowchartEdge,
     FlowchartSubgraph,
     FlowchartDiagram,
 )
-from mermaid_render.exceptions import DiagramError
+from diagramaid.exceptions import DiagramError
 
 
 class TestFlowchartNode:

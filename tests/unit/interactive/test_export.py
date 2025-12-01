@@ -6,7 +6,7 @@ Tests the ExportManager and ExportFormat classes.
 
 import pytest
 
-from mermaid_render.interactive.export import ExportFormat, ExportManager
+from diagramaid.interactive.export import ExportFormat, ExportManager
 
 
 @pytest.mark.unit

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Comprehensive unit test runner for mermaid-render project.
+Comprehensive unit test runner for diagramaid project.
 
 This script runs all unit tests with proper organization and reporting,
 including the new comprehensive test suites for all modules.
@@ -33,7 +33,7 @@ def run_test_suite(test_path: str, verbose: bool = False, coverage: bool = False
         cmd.append("-q")
     
     if coverage:
-        cmd.extend(["--cov=mermaid_render", "--cov-report=term-missing"])
+        cmd.extend(["--cov=diagramaid", "--cov-report=term-missing"])
     
     cmd.append(test_path)
     
@@ -228,7 +228,7 @@ def print_summary(results: List[Dict[str, Union[bool, int, str]]]) -> None:
 def main():
     """Main test runner function."""
     parser = argparse.ArgumentParser(
-        description="Run comprehensive unit tests for mermaid-render"
+        description="Run comprehensive unit tests for diagramaid"
     )
     parser.add_argument(
         "-v", "--verbose",

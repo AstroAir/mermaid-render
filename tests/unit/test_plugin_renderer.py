@@ -10,10 +10,10 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from mermaid_render.core import MermaidConfig, MermaidTheme
-from mermaid_render.exceptions import ConfigurationError, RenderingError
-from mermaid_render.models import FlowchartDiagram
-from mermaid_render.plugin_renderer import PluginMermaidRenderer
+from diagramaid.core import MermaidConfig, MermaidTheme
+from diagramaid.exceptions import ConfigurationError, RenderingError
+from diagramaid.models import FlowchartDiagram
+from diagramaid.plugin_renderer import PluginMermaidRenderer
 
 
 class TestPluginMermaidRenderer:
@@ -67,7 +67,7 @@ class TestPluginMermaidRenderer:
         with pytest.raises(ConfigurationError):
             renderer.set_theme("123")  # Invalid theme type as string
 
-    @patch("mermaid_render.plugin_renderer.RendererManager")
+    @patch("diagramaid.plugin_renderer.RendererManager")
     def test_render_with_plugin_system(self, mock_manager_class: Any) -> None:
         """Test rendering using the plugin system."""
         # Mock the renderer manager
@@ -84,7 +84,7 @@ class TestPluginMermaidRenderer:
         assert result == "<svg>test</svg>"
         mock_manager.render.assert_called_once()
 
-    @patch("mermaid_render.plugin_renderer.RendererManager")
+    @patch("diagramaid.plugin_renderer.RendererManager")
     def test_render_failure(self, mock_manager_class: Any) -> None:
         """Test rendering failure handling."""
         # Mock the renderer manager to return failure
@@ -100,7 +100,7 @@ class TestPluginMermaidRenderer:
         with pytest.raises(RenderingError, match="Test error"):
             renderer.render("graph TD\n    A --> B", format="svg")
 
-    @patch("mermaid_render.plugin_renderer.RendererManager")
+    @patch("diagramaid.plugin_renderer.RendererManager")
     def test_render_with_diagram_object(self, mock_manager_class: Any) -> None:
         """Test rendering with MermaidDiagram object."""
         # Mock the renderer manager
@@ -125,7 +125,7 @@ class TestPluginMermaidRenderer:
         assert "mermaid_code" in kwargs
         assert "flowchart" in kwargs["mermaid_code"]
 
-    @patch("mermaid_render.plugin_renderer.RendererManager")
+    @patch("diagramaid.plugin_renderer.RendererManager")
     @patch("pathlib.Path.mkdir")
     @patch("builtins.open")
     @patch("pathlib.Path.stat")
@@ -153,8 +153,8 @@ class TestPluginMermaidRenderer:
         assert result["size_bytes"] == 100
         mock_file.write.assert_called_once_with("<svg>test</svg>")
 
-    @patch("mermaid_render.plugin_renderer.get_global_registry")
-    @patch("mermaid_render.plugin_renderer.RendererManager")
+    @patch("diagramaid.plugin_renderer.get_global_registry")
+    @patch("diagramaid.plugin_renderer.RendererManager")
     def test_get_available_renderers(self, mock_manager_class: Any, mock_registry_fn: Any) -> None:
         """Test getting available renderers."""
         mock_registry = Mock()
@@ -166,7 +166,7 @@ class TestPluginMermaidRenderer:
 
         assert renderers == ["svg", "png", "playwright"]
 
-    @patch("mermaid_render.plugin_renderer.RendererManager")
+    @patch("diagramaid.plugin_renderer.RendererManager")
     def test_test_renderer(self, mock_manager_class: Any) -> None:
         """Test testing a specific renderer."""
         # Mock the renderer manager
@@ -187,8 +187,8 @@ class TestPluginMermaidRenderer:
         assert test_result["render_time"] == 0.5
         assert test_result["content_size"] > 0
 
-    @patch("mermaid_render.plugin_renderer.get_global_registry")
-    @patch("mermaid_render.plugin_renderer.RendererManager")
+    @patch("diagramaid.plugin_renderer.get_global_registry")
+    @patch("diagramaid.plugin_renderer.RendererManager")
     def test_benchmark_renderers(self, mock_manager_class: Any, mock_registry_fn: Any) -> None:
         """Test benchmarking all renderers."""
         mock_registry = Mock()
@@ -219,14 +219,14 @@ class TestPluginMermaidRenderer:
 class TestBackwardCompatibility:
     """Test backward compatibility with existing MermaidRenderer."""
 
-    @patch("mermaid_render.core.SVGRenderer")
-    @patch("mermaid_render.core.PNGRenderer")
-    @patch("mermaid_render.core.PDFRenderer")
+    @patch("diagramaid.core.SVGRenderer")
+    @patch("diagramaid.core.PNGRenderer")
+    @patch("diagramaid.core.PDFRenderer")
     def test_legacy_mode_still_works(
         self, mock_pdf: Any, mock_png: Any, mock_svg: Any
     ) -> None:
         """Test that legacy mode still works without plugin system."""
-        from mermaid_render.core import MermaidRenderer
+        from diagramaid.core import MermaidRenderer
 
         # Mock legacy renderers
         mock_svg.return_value.render.return_value = "<svg>legacy</svg>"
@@ -245,7 +245,7 @@ class TestBackwardCompatibility:
 
     def test_plugin_mode_integration(self) -> None:
         """Test that plugin mode can be enabled."""
-        from mermaid_render.core import MermaidRenderer
+        from diagramaid.core import MermaidRenderer
 
         # Create renderer with plugin system enabled
         renderer = MermaidRenderer(use_plugin_system=True)

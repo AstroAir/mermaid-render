@@ -9,7 +9,7 @@ import pytest
 from typing import Any, Optional, Union
 from unittest.mock import Mock, patch
 
-from mermaid_render.renderers.base import (
+from diagramaid.renderers.base import (
     BaseRenderer,
     RendererCapability,
     RendererInfo,
@@ -17,9 +17,9 @@ from mermaid_render.renderers.base import (
     RenderResult,
     RendererError,
 )
-from mermaid_render.renderers.registry import RendererRegistry
-from mermaid_render.renderers.manager import RendererManager
-from mermaid_render.exceptions import RenderingError, UnsupportedFormatError
+from diagramaid.renderers.registry import RendererRegistry
+from diagramaid.renderers.manager import RendererManager
+from diagramaid.exceptions import RenderingError, UnsupportedFormatError
 
 
 class MockRenderer(BaseRenderer):

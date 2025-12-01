@@ -100,12 +100,12 @@ class BenchmarkRunner:
         
         def import_package():
             # Clear module cache to ensure fresh import
-            modules_to_clear = [m for m in sys.modules.keys() if m.startswith('mermaid_render')]
+            modules_to_clear = [m for m in sys.modules.keys() if m.startswith('diagramaid')]
             for module in modules_to_clear:
                 del sys.modules[module]
             
-            import mermaid_render
-            return mermaid_render
+            import diagramaid
+            return diagramaid
         
         timing_results = self.time_function(import_package, iterations=5)
         memory_results = self.memory_profile(import_package)
@@ -121,13 +121,13 @@ class BenchmarkRunner:
         self.log("Benchmarking basic operations...")
         
         try:
-            import mermaid_render
+            import diagramaid
             
             def create_renderer():
-                return mermaid_render.MermaidRenderer()
+                return diagramaid.MermaidRenderer()
             
             def create_config():
-                return mermaid_render.MermaidConfig()
+                return diagramaid.MermaidConfig()
             
             results = {}
             
@@ -146,7 +146,7 @@ class BenchmarkRunner:
             
         except ImportError as e:
             return {
-                "error": f"Failed to import mermaid_render: {e}",
+                "error": f"Failed to import diagramaid: {e}",
                 "test_name": "basic_operations"
             }
     
@@ -185,14 +185,14 @@ class BenchmarkRunner:
         results = {}
         
         try:
-            import mermaid_render
+            import diagramaid
             
             for diagram_name, diagram_code in test_diagrams.items():
                 self.log(f"Testing {diagram_name}...")
                 
                 def render_diagram():
                     try:
-                        return mermaid_render.quick_render(diagram_code, format="svg")
+                        return diagramaid.quick_render(diagram_code, format="svg")
                     except Exception:
                         # Return mock result if actual rendering fails
                         return f"<svg>Mock render of {diagram_name}</svg>"
@@ -212,7 +212,7 @@ class BenchmarkRunner:
             
         except ImportError as e:
             return {
-                "error": f"Failed to import mermaid_render: {e}",
+                "error": f"Failed to import diagramaid: {e}",
                 "test_name": "diagram_rendering"
             }
     
@@ -221,7 +221,7 @@ class BenchmarkRunner:
         self.log("Benchmarking caching performance...")
         
         try:
-            import mermaid_render
+            import diagramaid
             
             test_diagram = """
                 flowchart TD
@@ -231,11 +231,11 @@ class BenchmarkRunner:
             
             def render_with_cache():
                 # Simulate cache behavior
-                return mermaid_render.quick_render(test_diagram, format="svg")
+                return diagramaid.quick_render(test_diagram, format="svg")
             
             def render_without_cache():
                 # Simulate no cache behavior
-                return mermaid_render.quick_render(test_diagram, format="svg")
+                return diagramaid.quick_render(test_diagram, format="svg")
             
             # Benchmark with and without cache
             cache_results = self.time_function(render_with_cache, iterations=5)
@@ -256,7 +256,7 @@ class BenchmarkRunner:
             
         except ImportError as e:
             return {
-                "error": f"Failed to import mermaid_render: {e}",
+                "error": f"Failed to import diagramaid: {e}",
                 "test_name": "caching_performance"
             }
     

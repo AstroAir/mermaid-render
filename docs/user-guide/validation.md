@@ -17,7 +17,7 @@ The validation system provides:
 ### Quick Validation
 
 ```python
-from mermaid_render import validate_diagram
+from diagramaid import validate_diagram
 
 # Simple validation
 diagram = "flowchart TD\n    A --> B"
@@ -34,7 +34,7 @@ else:
 ### Validation with Renderer
 
 ```python
-from mermaid_render import MermaidRenderer
+from diagramaid import MermaidRenderer
 
 renderer = MermaidRenderer(validate_input=True)
 
@@ -51,7 +51,7 @@ except ValidationError as e:
 ### Syntax Validation
 
 ```python
-from mermaid_render.validators import SyntaxValidator
+from diagramaid.validators import SyntaxValidator
 
 validator = SyntaxValidator()
 
@@ -69,7 +69,7 @@ for error in result.errors:
 ### Semantic Validation
 
 ```python
-from mermaid_render.validators import SemanticValidator
+from diagramaid.validators import SemanticValidator
 
 validator = SemanticValidator()
 
@@ -88,7 +88,7 @@ for warning in result.warnings:
 ### Structure Validation
 
 ```python
-from mermaid_render.validators import StructureValidator
+from diagramaid.validators import StructureValidator
 
 validator = StructureValidator(
     max_nodes=100,
@@ -106,7 +106,7 @@ result = validator.validate(diagram)
 ### Built-in Rules
 
 ```python
-from mermaid_render.validators import ValidationRules
+from diagramaid.validators import ValidationRules
 
 # Enable specific validation rules
 rules = ValidationRules(
@@ -123,7 +123,7 @@ validator = DiagramValidator(rules=rules)
 ### Custom Validation Rules
 
 ```python
-from mermaid_render.validators import CustomRule
+from diagramaid.validators import CustomRule
 
 class NoOrphanNodesRule(CustomRule):
     def __init__(self):
@@ -163,7 +163,7 @@ validator.add_rule(NoOrphanNodesRule())
 ### Error Types
 
 ```python
-from mermaid_render.validators import ValidationError
+from diagramaid.validators import ValidationError
 
 # Different error severities
 errors = [
@@ -186,7 +186,7 @@ errors = [
 ### Error Reporting
 
 ```python
-from mermaid_render.validators import ErrorReporter
+from diagramaid.validators import ErrorReporter
 
 reporter = ErrorReporter(format="detailed")
 
@@ -216,7 +216,7 @@ for error in result.errors:
 ### Automatic Fixes
 
 ```python
-from mermaid_render.validators import AutoCorrector
+from diagramaid.validators import AutoCorrector
 
 corrector = AutoCorrector(
     fix_syntax_errors=True,
@@ -254,7 +254,7 @@ for suggestion in suggestions:
 ### Flowchart Validation
 
 ```python
-from mermaid_render.validators import FlowchartValidator
+from diagramaid.validators import FlowchartValidator
 
 validator = FlowchartValidator(
     require_start_node=True,
@@ -269,7 +269,7 @@ result = validator.validate(flowchart_diagram)
 ### Sequence Diagram Validation
 
 ```python
-from mermaid_render.validators import SequenceValidator
+from diagramaid.validators import SequenceValidator
 
 validator = SequenceValidator(
     check_participant_consistency=True,
@@ -283,7 +283,7 @@ result = validator.validate(sequence_diagram)
 ### Class Diagram Validation
 
 ```python
-from mermaid_render.validators import ClassValidator
+from diagramaid.validators import ClassValidator
 
 validator = ClassValidator(
     check_inheritance_cycles=True,
@@ -299,7 +299,7 @@ result = validator.validate(class_diagram)
 ### Performance Checks
 
 ```python
-from mermaid_render.validators import PerformanceValidator
+from diagramaid.validators import PerformanceValidator
 
 validator = PerformanceValidator(
     max_render_time=30,  # seconds
@@ -317,7 +317,7 @@ for warning in result.performance_warnings:
 ### Complexity Analysis
 
 ```python
-from mermaid_render.validators import ComplexityAnalyzer
+from diagramaid.validators import ComplexityAnalyzer
 
 analyzer = ComplexityAnalyzer()
 complexity = analyzer.analyze(diagram)
@@ -336,7 +336,7 @@ if complexity.score > 80:
 ### Accessibility Checks
 
 ```python
-from mermaid_render.validators import AccessibilityValidator
+from diagramaid.validators import AccessibilityValidator
 
 validator = AccessibilityValidator(
     check_color_contrast=True,
@@ -358,7 +358,7 @@ for issue in result.accessibility_issues:
 ### Multiple Diagram Validation
 
 ```python
-from mermaid_render.validators import BatchValidator
+from diagramaid.validators import BatchValidator
 
 validator = BatchValidator()
 
@@ -383,7 +383,7 @@ print(f"Diagrams with warnings: {summary.warnings}")
 
 ```python
 # Validation for continuous integration
-from mermaid_render.validators import CIValidator
+from diagramaid.validators import CIValidator
 
 ci_validator = CIValidator(
     fail_on_errors=True,
@@ -402,7 +402,7 @@ sys.exit(exit_code)
 ### Validation Configuration
 
 ```python
-from mermaid_render.config import ValidationConfig
+from diagramaid.config import ValidationConfig
 
 config = ValidationConfig(
     # Enable/disable validation types

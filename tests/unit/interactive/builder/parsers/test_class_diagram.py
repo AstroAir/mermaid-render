@@ -6,7 +6,7 @@ Tests the ClassDiagramParser class.
 
 import pytest
 
-from mermaid_render.interactive.builder.parsers.class_diagram import ClassDiagramParser
+from diagramaid.interactive.builder.parsers.class_diagram import ClassDiagramParser
 
 
 @pytest.mark.unit

@@ -6,7 +6,7 @@ Tests the ERDiagramParser class.
 
 import pytest
 
-from mermaid_render.interactive.builder.parsers.er_diagram import ERDiagramParser
+from diagramaid.interactive.builder.parsers.er_diagram import ERDiagramParser
 
 
 @pytest.mark.unit

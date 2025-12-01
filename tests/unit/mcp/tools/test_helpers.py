@@ -6,7 +6,7 @@ Tests for helper functions used across tools.
 
 import pytest
 
-from mermaid_render.mcp.tools.helpers import (
+from diagramaid.mcp.tools.helpers import (
     _calculate_complexity_score,
     _calculate_quality_score,
     _detect_diagram_type,

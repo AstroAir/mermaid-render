@@ -4,7 +4,7 @@
 
 ### Code Section: Validation Utility Wrapper
 
-**File:** `mermaid_render/utils/validation.py`
+**File:** `diagramaid/utils/validation.py`
 **Lines:** 1-132
 **Purpose:** Provide convenience functions wrapping MermaidValidator
 
@@ -40,7 +40,7 @@ def validate_node_id(node_id: str) -> bool:
 
 ### Code Section: SVGRenderer Inline Validation
 
-**File:** `mermaid_render/renderers/svg_renderer.py`
+**File:** `diagramaid/renderers/svg_renderer.py`
 **Lines:** 2143-2217
 **Purpose:** Validate Mermaid syntax with inline implementation
 
@@ -85,7 +85,7 @@ def validate_mermaid_syntax(self, mermaid_code: str) -> Dict[str, Any]:
 
 ### Code Section: MermaidValidator Full Implementation
 
-**File:** `mermaid_render/validators/validator.py`
+**File:** `diagramaid/validators/validator.py`
 **Lines:** 117-467
 **Purpose:** Comprehensive Mermaid syntax validation
 
@@ -122,7 +122,7 @@ class MermaidValidator:
 
 ### Code Section: MermaidConfig in core.py
 
-**File:** `mermaid_render/core.py`
+**File:** `diagramaid/core.py`
 **Lines:** 32-174
 **Purpose:** Basic configuration management
 
@@ -137,7 +137,7 @@ class MermaidConfig:
             "default_format": "svg",
             "validate_syntax": True,
             "cache_enabled": True,
-            "cache_dir": Path.home() / ".mermaid_render_cache",
+            "cache_dir": Path.home() / ".diagramaid_cache",
             "use_plugin_system": True,
             "fallback_enabled": True,
             "max_fallback_attempts": 3,
@@ -162,7 +162,7 @@ class MermaidConfig:
 
 ### Code Section: ConfigManager Full Implementation
 
-**File:** `mermaid_render/config/config_manager.py`
+**File:** `diagramaid/config/config_manager.py`
 **Lines:** 16-376
 **Purpose:** Comprehensive configuration management
 
@@ -177,7 +177,7 @@ class ConfigManager:
         "default_format": "svg",
         "validate_syntax": True,
         "cache_enabled": True,
-        "cache_dir": "~/.mermaid_render_cache",
+        "cache_dir": "~/.diagramaid_cache",
         "max_cache_size": 100,
         "cache_ttl": 3600,
         # ... more config
@@ -220,7 +220,7 @@ class ConfigManager:
 
 ### Code Section: MermaidConfig Default Values
 
-**File:** `mermaid_render/core.py`
+**File:** `diagramaid/core.py`
 **Lines:** 96-108
 **Purpose:** Define default configuration values
 
@@ -233,7 +233,7 @@ self._config: Dict[str, Any] = {
     "default_format": "svg",
     "validate_syntax": True,
     "cache_enabled": True,
-    "cache_dir": Path.home() / ".mermaid_render_cache",
+    "cache_dir": Path.home() / ".diagramaid_cache",
     "use_plugin_system": True,
     "fallback_enabled": True,
     "max_fallback_attempts": 3,
@@ -247,7 +247,7 @@ self._config: Dict[str, Any] = {
 
 ### Code Section: ConfigManager Default Values
 
-**File:** `mermaid_render/config/config_manager.py`
+**File:** `diagramaid/config/config_manager.py`
 **Lines:** 28-46
 **Purpose:** Define default configuration values
 
@@ -260,7 +260,7 @@ DEFAULT_CONFIG = {
     "default_format": "svg",
     "validate_syntax": True,
     "cache_enabled": True,
-    "cache_dir": "~/.mermaid_render_cache",
+    "cache_dir": "~/.diagramaid_cache",
     "max_cache_size": 100,
     "cache_ttl": 3600,
     "default_width": 800,
@@ -269,7 +269,7 @@ DEFAULT_CONFIG = {
     "max_height": 4000,
     "use_local_rendering": True,
     "log_level": "INFO",
-    "custom_themes_dir": "~/.mermaid_render_themes",
+    "custom_themes_dir": "~/.diagramaid_themes",
 }
 ```
 
@@ -281,7 +281,7 @@ DEFAULT_CONFIG = {
 
 ### Code Section: ConfigManager Validation
 
-**File:** `mermaid_render/config/config_manager.py`
+**File:** `diagramaid/config/config_manager.py`
 **Lines:** 238-287
 **Purpose:** Validate configuration values
 
@@ -312,7 +312,7 @@ def validate_config(self) -> None:
 
 ### Code Section: SVGRenderer Diagram Type Constants
 
-**File:** `mermaid_render/renderers/svg_renderer.py`
+**File:** `diagramaid/renderers/svg_renderer.py`
 **Lines:** 2170-2184
 **Purpose:** List valid diagram types
 
@@ -341,7 +341,7 @@ valid_diagram_types = [
 
 ### Code Section: MermaidValidator Diagram Type Patterns
 
-**File:** `mermaid_render/validators/validator.py`
+**File:** `diagramaid/validators/validator.py`
 **Lines:** 126-138
 **Purpose:** Define diagram type patterns
 

@@ -6,7 +6,7 @@ Tests the WebSocketHandler class.
 
 import pytest
 
-from mermaid_render.interactive.websocket.websocket_handler import WebSocketHandler
+from diagramaid.interactive.websocket.websocket_handler import WebSocketHandler
 
 
 @pytest.mark.unit
